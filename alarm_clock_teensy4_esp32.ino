@@ -102,18 +102,11 @@ bool refreshTime = false;
 volatile bool secondsIncremented = false;
 bool alarmOn = true;
 
-// a counter to track RTC day
-// we'll use this to update the whole display on change of day
-byte day = 0;
-bool updateWholeDisplay = false;
-
 // function declerations
 void firstTimeDs3231SetFn();
 void prepareTimeDayDateArrays();
 void serialPrintRtcDateTime();
-void displayUpdate();
-void displayUpdateSeconds();
-void displayUpdateTimeRow();
+void displayUpdateFast();
 void processSerialInput();
 void checkTimeAndSetBrightness();
 void serial_input_flush();
@@ -130,9 +123,9 @@ void setBrightness(int brightness) {
 #if defined(MCU_IS_ESP32)
   dacWrite(TFT_BL, brightness);
 #else
-  analogWrite(TFT_BL, 123);
+  analogWrite(TFT_BL, brightness);
 #endif
-  Serial.print(F("ST7735S Brightness set to "));
+  Serial.print(F("Display Brightness set to "));
   Serial.println(brightness);
 }
 
@@ -184,10 +177,7 @@ const char day_Dec[] PROGMEM = "Dec";
 // Then set up a table to refer to your strings.
 const char *const months_table[] PROGMEM = { day_Jan, day_Feb, day_Mar, day_Apr, day_May, day_Jun, day_Jul, day_Aug, day_Sep, day_Oct, day_Nov, day_Dec };
 
-char timeArrayHourMin[timeHHMMArraySize] = "";
-char timeArraySec[timeSSArraySize] = "";
-char dateArray[dateArraySize] = "";
-const char amArray[] = "AM", pmArray[] = "PM", alarmOff[] = "Alarm Off";
+const char amLabel[] = "AM", pmLabel[] = "PM", offLabel[] = "Off", alarmLabel[] = "Alarm";
 const char charSpace = ' ', charZero = '0';
 
 // color definitions
@@ -215,7 +205,7 @@ void setup() {
 #endif
   Serial.begin(9600);
   delay(100);
-  while(!Serial) {};
+  // while(!Serial) {};
   Serial.println(F("\nSerial OK"));
 
   /* INITIALIZE DISPLAYS */
@@ -236,7 +226,7 @@ void setup() {
   tft.fillScreen(ST77XX_BLACK);
   tft.setTextWrap(false);
 
-  Serial.println(F("ST7735S Display Initialized"));
+  Serial.println(F("ST7735 Display Initialized"));
 
   // seconds blink LED
   pinMode(LED_PIN, OUTPUT);
@@ -308,15 +298,15 @@ void setup() {
   if (rtc.lostPower()) {
     Serial.println(F("POWER FAILED. Clearing flag..."));
     rtc.lostPowerClear();
-    while (rtc.lostPower()) {
-      Serial.println(F("POWER FAILED. Clearing flag..."));
-      rtc.lostPowerClear();
-      delay(500);
-    }
-    Serial.println(F("Lost Power Status Flag Cleared."));
-  } else {
-    Serial.println(F("POWER OK"));
   }
+  else
+    Serial.println(F("POWER OK"));
+
+  // Check whether OSC is set to use VBAT or not
+  if (rtc.getEOSCFlag())
+    Serial.println(F("Oscillator will NOT use VBAT when VCC cuts off. Time will not increment without VCC!"));
+  else
+    Serial.println(F("Oscillator will use VBAT if VCC cuts off."));
 
   // we won't use RTC for alarm
   rtc.alarmDisable(URTCLIB_ALARM_1);
@@ -324,9 +314,6 @@ void setup() {
 
   // make second equal to rtc second (-1 just to make first rtc refresh come later than when it should, as there is no time sync initially)
   second = rtc.second() - 1;
-
-  // note rtc day
-  day = rtc.day();
 
   // prepare date and time arrays and serial print RTC Date Time
   prepareTimeDayDateArrays();
@@ -367,15 +354,14 @@ void loop() {
 
     // get time update
     if (refreshTime) {
-      Serial.print(F("__RTC Refresh!__ "));
+      Serial.println(F("__RTC Refresh__ "));
       rtc.refresh();
       refreshTime = false;
 
       // make second equal to rtc seconds -> should be 0
       second = rtc.second();
 
-      if (rtc.day() != day)
-        updateWholeDisplay = true;
+      serialTimeStampPrefix();
 
       // Check if time is up to date
       if (rtc.lostPower()) {
@@ -394,6 +380,8 @@ void loop() {
 
       // set display brightness based on time
       checkTimeAndSetBrightness();
+
+      serialTimeStampPrefix();
     }
 
     // update TFT display for changes
@@ -442,26 +430,19 @@ void checkTimeAndSetBrightness() {
   }
 }
 
-const int16_t time_row_x0 = 0, time_row_y0 = 40;
-const int16_t date_row_y0 = 75;
-const int16_t alarm_row_y0 = 110;
-const int16_t display_str_gap = 5;
+// USER DEFINED LOCATIONS OF VARIOUS DISPLAY TEXT STRINGS
+const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 40;
+const int16_t DATE_ROW_Y0 = 75;
+const int16_t ALARM_ROW_Y0 = 110;
+const int16_t DISPLAY_TEXT_GAP = 5;
 
-// location of seconds array on tft display
-int16_t tft_sec_x1, tft_sec_y1;
-uint16_t tft_sec_w, tft_sec_h;
-uint8_t tft_time_row_text_size = 1;
-
+// location of various display text strings
 int16_t tft_HHMM_x1, tft_HHMM_y1;
-uint16_t tft_HHMM_w, tft_HHMM_h;
-
+uint16_t tft_HHMM_w;
 int16_t tft_AmPm_x0, tft_AmPm_y0;
 int16_t tft_SS_x0;
-
 int16_t date_row_x0 = 0;
 int16_t alarm_row_x0 = 0;
-
-uint16_t tft_date_h;
 
 void displayUpdateFast() {
   // HH:MM string and AM/PM string
@@ -473,7 +454,7 @@ void displayUpdateFast() {
     tft.setFont(&FreeSansBold24pt7b);
 
     // home the cursor to currently displayed text location
-    tft.setCursor(time_row_x0, time_row_y0);
+    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
@@ -482,15 +463,16 @@ void displayUpdateFast() {
     tft.print(displayedData.timeHHMM);
 
     // home the cursor
-    tft.setCursor(time_row_x0, time_row_y0);
-    // Serial.print("time_row_x0 "); Serial.print(time_row_x0); Serial.print(" y0 "); Serial.print(time_row_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+    // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
     // record location of new HH:MM string on tft display (with background color as this causes a blink)
+    uint16_t tft_HHMM_h;
     tft.getTextBounds(newDisplayData.timeHHMM, tft.getCursorX(), tft.getCursorY(), &tft_HHMM_x1, &tft_HHMM_y1, &tft_HHMM_w, &tft_HHMM_h);
     // Serial.print("HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print(" y1 "); Serial.print(tft_HHMM_y1); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
 
     // home the cursor
-    tft.setCursor(time_row_x0, time_row_y0);
+    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
     // change the text color to foreground color
     tft.setTextColor(Display_Time_Color);
@@ -516,16 +498,16 @@ void displayUpdateFast() {
 
       // redraw the old value to erase
       if(displayedData._pmNotAm)
-        tft.print(pmArray);
+        tft.print(pmLabel);
       else
-        tft.print(amArray);
+        tft.print(amLabel);
     }
 
     // draw new AM/PM
     if(newDisplayData._12hourMode) {
       // set test location of Am/Pm
-      tft_AmPm_x0 = tft_HHMM_x1 + tft_HHMM_w + 2 * display_str_gap;
-      tft_AmPm_y0 = (time_row_y0 + tft_HHMM_y1) / 2;
+      tft_AmPm_x0 = tft_HHMM_x1 + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
+      tft_AmPm_y0 = (TIME_ROW_Y0 + tft_HHMM_y1) / 2;
 
       // home the cursor
       tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
@@ -537,7 +519,7 @@ void displayUpdateFast() {
       // record location of new AM/PM string on tft display (with background color as this causes a blink)
       int16_t tft_AmPm_x1, tft_AmPm_y1;
       uint16_t tft_AmPm_w, tft_AmPm_h;
-      tft.getTextBounds((newDisplayData._pmNotAm ? pmArray : amArray), tft.getCursorX(), tft.getCursorY(), &tft_AmPm_x1, &tft_AmPm_y1, &tft_AmPm_w, &tft_AmPm_h);
+      tft.getTextBounds((newDisplayData._pmNotAm ? pmLabel : amLabel), tft.getCursorX(), tft.getCursorY(), &tft_AmPm_x1, &tft_AmPm_y1, &tft_AmPm_w, &tft_AmPm_h);
       // Serial.print("AmPm_x1 "); Serial.print(tft_AmPm_x1); Serial.print(" y1 "); Serial.print(tft_AmPm_y1); Serial.print(" w "); Serial.print(tft_AmPm_w); Serial.print(" h "); Serial.println(tft_AmPm_h); 
 
       // calculate tft_AmPm_y0 to align top with HH:MM
@@ -552,9 +534,9 @@ void displayUpdateFast() {
 
       // draw the new time value
       if(newDisplayData._pmNotAm)
-        tft.print(pmArray);
+        tft.print(pmLabel);
       else
-        tft.print(amArray);
+        tft.print(amLabel);
     }
 
     // and remember the new value
@@ -571,7 +553,7 @@ void displayUpdateFast() {
     tft.setTextColor(Display_Backround_Color);
 
     // home the cursor
-    tft.setCursor(tft_SS_x0, time_row_y0);
+    tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
 
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
@@ -580,10 +562,10 @@ void displayUpdateFast() {
     tft.print(displayedData.timeSS);
 
     // fill new home values
-    tft_SS_x0 = tft_HHMM_x1 + tft_HHMM_w + display_str_gap;
+    tft_SS_x0 = tft_HHMM_x1 + tft_HHMM_w + DISPLAY_TEXT_GAP;
 
     // home the cursor
-    tft.setCursor(tft_SS_x0, time_row_y0);
+    tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
 
     // change the text color to foreground color
     tft.setTextColor(Display_Time_Color);
@@ -601,7 +583,7 @@ void displayUpdateFast() {
     tft.setFont(&FreeSansBold12pt7b);
 
     // yes! home the cursor
-    tft.setCursor(date_row_x0, date_row_y0);
+    tft.setCursor(date_row_x0, DATE_ROW_Y0);
 
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
@@ -610,7 +592,7 @@ void displayUpdateFast() {
     tft.print(displayedData.dateStr);
 
     // home the cursor
-    tft.setCursor(date_row_x0, date_row_y0);
+    tft.setCursor(date_row_x0, DATE_ROW_Y0);
 
     // record date_row_w to calculate center aligned date_row_x0 value
     int16_t date_row_y1;
@@ -620,7 +602,7 @@ void displayUpdateFast() {
     date_row_x0 = (tft.width() - date_row_w) / 2;
 
     // home the cursor
-    tft.setCursor(date_row_x0, date_row_y0);
+    tft.setCursor(date_row_x0, DATE_ROW_Y0);
 
     // change the text color to foreground color
     tft.setTextColor(Display_Date_Color);
@@ -638,7 +620,7 @@ void displayUpdateFast() {
     tft.setFont(&FreeSansBold12pt7b);
 
     // yes! home the cursor
-    tft.setCursor(alarm_row_x0, alarm_row_y0);
+    tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
 
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
@@ -647,7 +629,7 @@ void displayUpdateFast() {
     tft.print(displayedData.alarmStr);
 
     // home the cursor
-    tft.setCursor(alarm_row_x0, alarm_row_y0);
+    tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
 
     // record alarm_row_w to calculate center aligned alarm_row_x0 value
     int16_t alarm_row_y1;
@@ -657,7 +639,7 @@ void displayUpdateFast() {
     alarm_row_x0 = (tft.width() - alarm_row_w) / 2;
 
     // home the cursor
-    tft.setCursor(alarm_row_x0, alarm_row_y0);
+    tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
 
     // change the text color to foreground color
     tft.setTextColor(Display_Alarm_Color);
@@ -668,14 +650,12 @@ void displayUpdateFast() {
     // and remember the new value
     strcpy(displayedData.alarmStr, newDisplayData.alarmStr);
   }
-
-  updateWholeDisplay = false;
 }
 
 void drawrects() {
   // clear area
-  int16_t y_Rect = time_row_y0 + tft_date_h + 25;
-  int16_t h_Rect = tft.height() - time_row_y0;
+  int16_t y_Rect = TIME_ROW_Y0 + 25;
+  int16_t h_Rect = tft.height() - TIME_ROW_Y0;
   tft.fillRect(0, y_Rect, tft.width(), h_Rect, ST77XX_BLACK);
   int16_t y_Rect_mid = y_Rect + h_Rect / 2;
   //for (int16_t x = 0; x < tft.width(); x += 6) {
@@ -785,7 +765,7 @@ void prepareTimeDayDateArrays() {
   if(alarmOn)
     snprintf(newDisplayData.alarmStr, alarmArraySize, " 7:00 AM");
   else
-    snprintf(newDisplayData.alarmStr, alarmArraySize, "%s", alarmOff);
+    snprintf(newDisplayData.alarmStr, alarmArraySize, "%s %s", alarmLabel, offLabel);
 }
 
 void serialPrintRtcDateTime() {
@@ -796,9 +776,9 @@ void serialPrintRtcDateTime() {
   if (newDisplayData._12hourMode) {
     Serial.print(charSpace);
     if (newDisplayData._pmNotAm)
-      Serial.print(pmArray);
+      Serial.print(pmLabel);
     else
-      Serial.print(amArray);
+      Serial.print(amLabel);
   }
   Serial.print(charSpace);
   Serial.print(newDisplayData.dateStr);
