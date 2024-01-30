@@ -142,6 +142,7 @@ struct displayData {
   bool _pmNotAm;
   char dateStr[dateArraySize] = "";
   char alarmStr[alarmArraySize] = "";
+  bool _alarmOn;
 } newDisplayData, displayedData;
 
 #if !defined(__AVR__) && !defined(PROGMEM)
@@ -195,6 +196,33 @@ uint16_t        Display_Time_Color         = Display_Color_Yellow;
 uint16_t        Display_Date_Color         = Display_Color_Green;
 uint16_t        Display_Alarm_Color        = Display_Color_Cyan;
 uint16_t        Display_Backround_Color    = Display_Color_Black;
+
+const unsigned char bell_bitmap[] PROGMEM = {
+	// 'bell_40x30, 40x30px
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 
+	0x01, 0xff, 0x00, 0x00, 0x00, 0x07, 0xff, 0xc0, 0x00, 0x00, 0x0f, 0xff, 0xe0, 0x00, 0x00, 0x1f, 
+	0xff, 0xe0, 0x00, 0x00, 0x1f, 0xff, 0xf0, 0x18, 0x38, 0x1f, 0xff, 0xf8, 0x3c, 0x7e, 0x3f, 0xff, 
+	0xf8, 0xfc, 0x3f, 0x3f, 0xff, 0xf9, 0xf0, 0x1f, 0xbf, 0xff, 0xfb, 0xe0, 0x03, 0xbf, 0xff, 0xfd, 
+	0x80, 0x00, 0x3f, 0xff, 0xfc, 0x00, 0x00, 0x3f, 0xff, 0xfc, 0x00, 0x70, 0x3f, 0xff, 0xfc, 0x1c, 
+	0xff, 0x3f, 0xff, 0xfc, 0xfe, 0xff, 0x7f, 0xff, 0xfd, 0xfe, 0x0f, 0x7f, 0xff, 0xfd, 0xe0, 0x00, 
+	0x7f, 0xff, 0xfe, 0x00, 0x00, 0xff, 0xff, 0xff, 0x00, 0x0d, 0xff, 0xff, 0xff, 0x60, 0x3f, 0xff, 
+	0xff, 0xff, 0xf8, 0x7f, 0xff, 0xff, 0xff, 0xfe, 0xf9, 0xff, 0xff, 0xff, 0x3e, 0x60, 0x00, 0x00, 
+	0x00, 0x0e, 0x00, 0x03, 0xff, 0x80, 0x00, 0x00, 0x01, 0xff, 0x00, 0x00, 0x00, 0x00, 0xfe, 0x00, 
+	0x00, 0x00, 0x00, 0x7c, 0x00, 0x00
+};
+const uint8_t bell_w = 40, bell_h = 30;
+
+const unsigned char bell_fallen_bitmap [] PROGMEM = {
+	// 'bell_off, 31x28px
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00, 0x01, 0xfc, 0x00, 
+	0x00, 0x03, 0xfc, 0x00, 0x00, 0x0f, 0xfc, 0x00, 0x00, 0x7f, 0xfc, 0x00, 0x03, 0xff, 0xfd, 0xc0, 
+	0x07, 0xff, 0xfd, 0xe0, 0x0f, 0xff, 0xfd, 0xf0, 0x1f, 0xff, 0xfd, 0xf8, 0x3f, 0xff, 0xfd, 0xf8, 
+	0x3f, 0xff, 0xfc, 0xfc, 0x7f, 0xff, 0xfe, 0xfc, 0x7f, 0xff, 0xfe, 0xfc, 0x7f, 0xff, 0xfe, 0x78, 
+	0x7f, 0xff, 0xff, 0x78, 0x7f, 0xff, 0xff, 0x38, 0x7f, 0xff, 0xff, 0x90, 0x7f, 0xff, 0xff, 0xc0, 
+	0x3f, 0xff, 0xff, 0xc0, 0x3f, 0xff, 0xff, 0xe0, 0x3f, 0xff, 0xff, 0xe0, 0x1f, 0xff, 0xff, 0xe0, 
+	0x0f, 0xff, 0xff, 0xf0, 0x07, 0xff, 0xff, 0xe0, 0x01, 0xff, 0x83, 0xc0, 0x00, 0x00, 0x00, 0x00
+};
+const uint8_t bell_fallen_w = 31, bell_fallen_h = 28;
 
 void setup() {
 #if defined(MCU_IS_ESP32)
@@ -375,14 +403,14 @@ void loop() {
         Serial.println(F("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!"));
       }
 
-      // prepare date and time arrays
-      prepareTimeDayDateArrays();
-
       // set display brightness based on time
       checkTimeAndSetBrightness();
 
       serialTimeStampPrefix();
     }
+
+    // prepare date and time arrays
+    prepareTimeDayDateArrays();
 
     // update TFT display for changes
     displayUpdateFast();
@@ -443,6 +471,7 @@ int16_t tft_AmPm_x0, tft_AmPm_y0;
 int16_t tft_SS_x0;
 int16_t date_row_x0 = 0;
 int16_t alarm_row_x0 = 0;
+int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
 
 void displayUpdateFast() {
   // HH:MM string and AM/PM string
@@ -615,7 +644,7 @@ void displayUpdateFast() {
   }
 
   // alarm string center aligned
-  if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0) {
+  if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0 || newDisplayData._alarmOn != displayedData._alarmOn) {
     // set font
     tft.setFont(&FreeSansBold12pt7b);
 
@@ -628,15 +657,45 @@ void displayUpdateFast() {
     // redraw the old value to erase
     tft.print(displayedData.alarmStr);
 
+    int16_t alarm_icon_w, alarm_icon_h;
+    if(displayedData._alarmOn) {
+      alarm_icon_w = bell_w;
+      alarm_icon_h = bell_h;
+    }
+    else {
+      alarm_icon_w = bell_fallen_w;
+      alarm_icon_h = bell_fallen_h;
+    }
+
+    // erase bell
+    tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (displayedData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Backround_Color);
+
+    //  Redraw new alarm data
+
+    if(newDisplayData._alarmOn) {
+      alarm_icon_w = bell_w;
+      alarm_icon_h = bell_h;
+    }
+    else {
+      alarm_icon_w = bell_fallen_w;
+      alarm_icon_h = bell_fallen_h;
+    }
+
     // home the cursor
-    tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
+    tft.setCursor(alarm_icon_x0, ALARM_ROW_Y0);
 
     // record alarm_row_w to calculate center aligned alarm_row_x0 value
     int16_t alarm_row_y1;
     uint16_t alarm_row_w, alarm_row_h;
     // record location of new alarmStr on tft display (with background color as this causes a blink)
     tft.getTextBounds(newDisplayData.alarmStr, tft.getCursorX(), tft.getCursorY(), &alarm_row_x0, &alarm_row_y1, &alarm_row_w, &alarm_row_h);
-    alarm_row_x0 = (tft.width() - alarm_row_w) / 2;
+    uint16_t graphic_width = alarm_icon_w + alarm_row_w;
+    // three equal length gaps on left center and right of graphic
+    uint16_t equal_gaps = (tft.width() - graphic_width) / 3;
+    alarm_row_x0 = equal_gaps + alarm_icon_w + equal_gaps;
+    alarm_icon_x0 = equal_gaps;
+    // align bell center with text center
+    alarm_icon_y0 = ALARM_ROW_Y0 - alarm_row_h / 2 - alarm_icon_h / 2;
 
     // home the cursor
     tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
@@ -647,8 +706,12 @@ void displayUpdateFast() {
     // draw the new alarmStr value
     tft.print(newDisplayData.alarmStr);
 
+    // draw bell
+    tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (newDisplayData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Alarm_Color);
+
     // and remember the new value
     strcpy(displayedData.alarmStr, newDisplayData.alarmStr);
+    displayedData._alarmOn = newDisplayData._alarmOn;
   }
 }
 
@@ -766,6 +829,7 @@ void prepareTimeDayDateArrays() {
     snprintf(newDisplayData.alarmStr, alarmArraySize, " 7:00 AM");
   else
     snprintf(newDisplayData.alarmStr, alarmArraySize, "%s %s", alarmLabel, offLabel);
+  newDisplayData._alarmOn = alarmOn;
 }
 
 void serialPrintRtcDateTime() {
