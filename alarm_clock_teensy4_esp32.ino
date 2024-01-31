@@ -98,7 +98,7 @@ uRTCLib rtc;
 // All other parameters of RTC will not change at any other time
 // at 60 seconds, we'll update the time row
 byte second = 0;
-bool refreshTime = false;
+bool refreshTime = false, redrawDisplay = false;
 volatile bool secondsIncremented = false;
 bool alarmOn = true;
 
@@ -197,6 +197,7 @@ uint16_t        Display_Date_Color         = Display_Color_Green;
 uint16_t        Display_Alarm_Color        = Display_Color_Cyan;
 uint16_t        Display_Backround_Color    = Display_Color_Black;
 
+// convert image into binary monochrome using https://javl.github.io/image2cpp/
 const unsigned char bell_bitmap[] PROGMEM = {
 	// 'bell_40x30, 40x30px
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 
@@ -474,8 +475,10 @@ int16_t alarm_row_x0 = 0;
 int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
 
 void displayUpdateFast() {
+  bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
+
   // HH:MM string and AM/PM string
-  if (strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0) {
+  if (strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
     // HH:MM
 
@@ -488,12 +491,15 @@ void displayUpdateFast() {
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
 
-    // redraw the old value to erase
-    tft.print(displayedData.timeHHMM);
+    // clear old time if it was there
+    if(!isThisTheFirstTime) {
+      // redraw the old value to erase
+      tft.print(displayedData.timeHHMM);
 
-    // home the cursor
-    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-    // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+      // home the cursor
+      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+      // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+    }
 
     // record location of new HH:MM string on tft display (with background color as this causes a blink)
     uint16_t tft_HHMM_h;
@@ -518,7 +524,7 @@ void displayUpdateFast() {
     tft.setFont(&FreeSans9pt7b);
 
     // clear old AM/PM
-    if(displayedData._12hourMode) {
+    if(displayedData._12hourMode && !isThisTheFirstTime) {
       // home the cursor
       tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
 
@@ -574,7 +580,7 @@ void displayUpdateFast() {
   }
 
   // :SS string
-  if (strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0) {
+  if (strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
     // set font
     tft.setFont(&FreeSans12pt7b);
 
@@ -588,7 +594,8 @@ void displayUpdateFast() {
     tft.setTextColor(Display_Backround_Color);
 
     // redraw the old value to erase
-    tft.print(displayedData.timeSS);
+    if(!isThisTheFirstTime)
+      tft.print(displayedData.timeSS);
 
     // fill new home values
     tft_SS_x0 = tft_HHMM_x1 + tft_HHMM_w + DISPLAY_TEXT_GAP;
@@ -607,7 +614,7 @@ void displayUpdateFast() {
   }
   
   // date string center aligned
-  if (strcmp(newDisplayData.dateStr, displayedData.dateStr) != 0) {
+  if (strcmp(newDisplayData.dateStr, displayedData.dateStr) != 0 || redrawDisplay) {
     // set font
     tft.setFont(&FreeSansBold12pt7b);
 
@@ -618,7 +625,8 @@ void displayUpdateFast() {
     tft.setTextColor(Display_Backround_Color);
 
     // redraw the old value to erase
-    tft.print(displayedData.dateStr);
+    if(!isThisTheFirstTime)
+      tft.print(displayedData.dateStr);
 
     // home the cursor
     tft.setCursor(date_row_x0, DATE_ROW_Y0);
@@ -644,7 +652,7 @@ void displayUpdateFast() {
   }
 
   // alarm string center aligned
-  if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0 || newDisplayData._alarmOn != displayedData._alarmOn) {
+  if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0 || newDisplayData._alarmOn != displayedData._alarmOn || redrawDisplay) {
     // set font
     tft.setFont(&FreeSansBold12pt7b);
 
@@ -655,7 +663,8 @@ void displayUpdateFast() {
     tft.setTextColor(Display_Backround_Color);
 
     // redraw the old value to erase
-    tft.print(displayedData.alarmStr);
+    if(!isThisTheFirstTime)
+      tft.print(displayedData.alarmStr);
 
     int16_t alarm_icon_w, alarm_icon_h;
     if(displayedData._alarmOn) {
@@ -668,7 +677,8 @@ void displayUpdateFast() {
     }
 
     // erase bell
-    tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (displayedData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Backround_Color);
+    if(!isThisTheFirstTime)
+      tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (displayedData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Backround_Color);
 
     //  Redraw new alarm data
 
@@ -713,6 +723,8 @@ void displayUpdateFast() {
     strcpy(displayedData.alarmStr, newDisplayData.alarmStr);
     displayedData._alarmOn = newDisplayData._alarmOn;
   }
+
+  redrawDisplay = false;
 }
 
 void drawrects() {
@@ -779,6 +791,36 @@ void processSerialInput() {
         bool ret = rtc.enableBattery();
         if (ret) Serial.println(F("Enable Battery Success"));
         else Serial.println(F("Could not Enable Battery!"));
+      }
+      break;
+    case 'g': // good morning
+      {
+        tft.fillScreen(ST77XX_BLACK);
+        // set font
+        tft.setFont(&FreeSansBold12pt7b);
+
+        // change the text color to the background color
+        tft.setTextColor(Display_Color_Green);
+
+        // yes! home the cursor
+        tft.setCursor(40, 20);
+        // redraw the old value to erase
+        tft.print(F("GOOD"));
+        // yes! home the cursor
+        tft.setCursor(10, 40);
+        // redraw the old value to erase
+        tft.print(F("MORNING!!"));
+
+        int16_t x0 = 40, y0 = 40;
+        uint16_t edge = 80;
+        
+        unsigned int startTime = millis();
+        while(millis() - startTime < 5000)
+          drawSun(x0, y0, edge);
+
+        tft.fillScreen(ST77XX_BLACK);
+        refreshTime = true;
+        redrawDisplay = true;
       }
       break;
     case 'h':
@@ -931,198 +973,132 @@ void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
 #endif
 
 
+/* draw Sun
+ * 
+ * params: top left corner 'x0' and 'y0', square edge length of graphic 'edge'
+ */ 
+void drawSun(int16_t x0, int16_t y0, uint16_t edge) {
 
+  // set dimensions of sun and rays
 
+  // sun center
+  int16_t cx = x0 + edge / 2, cy = y0 + edge / 2;
+  // sun radius
+  int16_t sr = edge * 0.23;
+  // length of rays
+  int16_t rl = edge * 0.09;
+  // rays inner radius
+  int16_t rr = sr + edge * 0.08;
+  // width of rays
+  int16_t rw = 5;
+  // number of rays
+  uint8_t rn = 12;
 
+  // color
+  uint16_t color = ST77XX_YELLOW;
+  uint16_t background = ST77XX_BLACK;
 
+  int16_t variation_prev = 0;
 
+  // sun
+  tft.fillCircle(cx, cy, sr, color);
 
+  // eyes
+  int16_t eye_offset_x = sr / 2, eye_offset_y = sr / 3, eye_r = max(sr / 8, 3);
+  tft.fillCircle(cx - eye_offset_x, cy - eye_offset_y, eye_r, background);
+  tft.fillCircle(cx + eye_offset_x, cy - eye_offset_y, eye_r, background);
 
-
-
-
-
-void loopTFT() {
-  // // large block of text
-  // tft.fillScreen(ST77XX_BLACK);
-  // testdrawtext("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur adipiscing ante sed nibh tincidunt feugiat. Maecenas enim massa, fringilla sed malesuada et, malesuada sit amet turpis. Sed porttitor neque ut ante pretium vitae malesuada nunc bibendum. Nullam aliquet ultrices massa eu hendrerit. Ut sed nisi lorem. In vestibulum purus a tortor imperdiet posuere. ", ST77XX_WHITE);
-  // Serial.print("testdrawtext ");
-  // takeUserInput();
-  // delay(500);
-
-  // // a single pixel
-  // tft.drawPixel(tft.width()/2, tft.height()/2, ST77XX_GREEN);
-  // Serial.print("drawPixel ");
-  // takeUserInput();
-  // delay(500);
-
-  // // line draw test
-  // testlines(ST77XX_YELLOW);
-  // Serial.print("testlines ");
-  // takeUserInput();
-  // delay(500);
-
-  // // optimized lines
-  // testfastlines(ST77XX_RED, ST77XX_BLUE);
-  // Serial.print("testfastlines ");
-  // takeUserInput();
-  // delay(500);
-
-  // testdrawrects(ST77XX_GREEN);
-  // Serial.print("testdrawrects ");
-  // takeUserInput();
-  // delay(500);
-
-  // testfillrects(ST77XX_YELLOW, ST77XX_MAGENTA);
-  // Serial.print("testfillrects ");
-  // takeUserInput();
-  // delay(500);
-
-  // tft.fillScreen(ST77XX_BLACK);
-  // testfillcircles(10, ST77XX_BLUE);
-  // testdrawcircles(10, ST77XX_WHITE);
-  // takeUserInput();
-  // delay(500);
-
-  // testroundrects();
-  // takeUserInput();
-  // delay(500);
-
-  // testtriangles();
-  // takeUserInput();
-  // delay(500);
-
-  // tft.invertDisplay(true);
-  // delay(500);
-  // tft.invertDisplay(false);
-  // delay(500);
-}
-
-void testlines(uint16_t color) {
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = 0; x < tft.width(); x += 6) {
-    tft.drawLine(0, 0, x, tft.height() - 1, color);
-    delay(0);
-  }
-  for (int16_t y = 0; y < tft.height(); y += 6) {
-    tft.drawLine(0, 0, tft.width() - 1, y, color);
-    delay(0);
+  // smile
+  int16_t smile_angle_deg = 37;
+  int16_t smile_cy = cy - sr / 2;
+  int16_t smile_r = sr * 1.1, smile_w = max(sr / 15, 3);
+  for(uint8_t i = 0; i <= smile_angle_deg; i=i+2) {
+    float smile_angle_rad = DEG_TO_RAD * i;
+    int16_t smile_tapered_w = max(smile_w - i / 13, 1);
+    // Serial.print(i); Serial.print(" "); Serial.print(smile_w); Serial.print(" "); Serial.println(smile_tapered_w);
+    int16_t smile_offset_x = smile_r * sin(smile_angle_rad), smile_offset_y = smile_r * cos(smile_angle_rad);
+    tft.fillCircle(cx - smile_offset_x, smile_cy + smile_offset_y, smile_tapered_w, background);
+    tft.fillCircle(cx + smile_offset_x, smile_cy + smile_offset_y, smile_tapered_w, background);
   }
 
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = 0; x < tft.width(); x += 6) {
-    tft.drawLine(tft.width() - 1, 0, x, tft.height() - 1, color);
-    delay(0);
-  }
-  for (int16_t y = 0; y < tft.height(); y += 6) {
-    tft.drawLine(tft.width() - 1, 0, 0, y, color);
-    delay(0);
-  }
+  // rays
+  for(int16_t i = 0; i < 120; i++) {
+    // variation goes from 0 to 5 to 0
+    int16_t i_base10_fwd = i % 10;
+    int16_t i_base10_bwd = ((i / 10) + 1) * 10 - i;
+    int16_t variation = min(i_base10_fwd, i_base10_bwd);
+    // Serial.println(variation);
+    int16_t r_variable = rr + variation;
+    // draw rays
+    drawRays(cx, cy, r_variable, rl, rw, rn, i, color);
+    // increase sun size
+    // tft.drawCircle(cx, cy, sr + variation, color);
+    drawDenseCircle(cx, cy, sr + variation, color);
+    // show for sometime
+    delay(30);
 
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = 0; x < tft.width(); x += 6) {
-    tft.drawLine(0, tft.height() - 1, x, 0, color);
-    delay(0);
-  }
-  for (int16_t y = 0; y < tft.height(); y += 6) {
-    tft.drawLine(0, tft.height() - 1, tft.width() - 1, y, color);
-    delay(0);
-  }
-
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = 0; x < tft.width(); x += 6) {
-    tft.drawLine(tft.width() - 1, tft.height() - 1, x, 0, color);
-    delay(0);
-  }
-  for (int16_t y = 0; y < tft.height(); y += 6) {
-    tft.drawLine(tft.width() - 1, tft.height() - 1, 0, y, color);
-    delay(0);
-  }
-}
-
-void testdrawtext(char *text, uint16_t color) {
-  tft.setCursor(0, 0);
-  tft.setTextColor(color);
-  tft.setTextWrap(true);
-  tft.print(text);
-}
-
-void testfastlines(uint16_t color1, uint16_t color2) {
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t y = 0; y < tft.height(); y += 5) {
-    tft.drawFastHLine(0, y, tft.width(), color1);
-  }
-  for (int16_t x = 0; x < tft.width(); x += 5) {
-    tft.drawFastVLine(x, 0, tft.height(), color2);
-  }
-}
-
-void testdrawrects(uint16_t color) {
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = 0; x < tft.width(); x += 6) {
-    tft.drawRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color);
-  }
-}
-
-void testfillrects(uint16_t color1, uint16_t color2) {
-  tft.fillScreen(ST77XX_BLACK);
-  for (int16_t x = tft.width() - 1; x > 6; x -= 6) {
-    tft.fillRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color1);
-    tft.drawRect(tft.width() / 2 - x / 2, tft.height() / 2 - x / 2, x, x, color2);
-  }
-}
-
-void testfillcircles(uint8_t radius, uint16_t color) {
-  for (int16_t x = radius; x < tft.width(); x += radius * 2) {
-    for (int16_t y = radius; y < tft.height(); y += radius * 2) {
-      tft.fillCircle(x, y, radius, color);
+    // undraw rays
+    drawRays(cx, cy, r_variable, rl, rw, rn, i, background);
+    // reduce sun size
+    if(variation < variation_prev){
+      // tft.drawCircle(cx, cy, sr + variation_prev, background);
+      drawDenseCircle(cx, cy, sr + variation_prev + 1, background);
     }
+    // delay(1000);
+    variation_prev = variation;
   }
 }
 
-void testdrawcircles(uint8_t radius, uint16_t color) {
-  for (int16_t x = 0; x < tft.width() + radius; x += radius * 2) {
-    for (int16_t y = 0; y < tft.height() + radius; y += radius * 2) {
-      tft.drawCircle(x, y, radius, color);
-    }
+/* draw rays
+ * 
+ * params: center cx, cy; inner radius of rays rr, length of rays rl, width of rays rw, number of rays rn, start angle degStart, color
+ */ 
+void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color) {
+  // rays
+  for(uint8_t i = 0; i < rn; i++) {
+    // find coordinates of two triangles for each ray and use fillTriangle function to draw rays
+    float theta = 2 * PI * i / rn + degStart * DEG_TO_RAD;
+    double rcos = rr * cos(theta), rlcos = (rr + rl) * cos(theta), rsin = rr * sin(theta), rlsin = (rr + rl) * sin(theta);
+    double w2sin = rw / 2 * sin(theta), w2cos = rw / 2 * cos(theta);
+    int16_t x1 = cx + rcos - w2sin;
+    int16_t x2 = cx + rcos + w2sin;
+    int16_t x3 = cx + rlcos + w2sin;
+    int16_t x4 = cx + rlcos - w2sin;
+    int16_t y1 = cy + rsin + w2cos;
+    int16_t y2 = cy + rsin - w2cos;
+    int16_t y3 = cy + rlsin - w2cos;
+    int16_t y4 = cy + rlsin + w2cos;
+    tft.fillTriangle(x1, y1, x2, y2, x3, y3, color);
+    tft.fillTriangle(x1, y1, x3, y3, x4, y4, color);
   }
 }
 
-void testtriangles() {
-  tft.fillScreen(ST77XX_BLACK);
-  uint16_t color = 0xF800;
-  int t;
-  int w = tft.width() / 2;
-  int x = tft.height() - 1;
-  int y = 0;
-  int z = tft.width();
-  for (t = 0; t <= 15; t++) {
-    tft.drawTriangle(w, y, y, x, z, x, color);
-    x -= 4;
-    y += 4;
-    z -= 4;
-    color += 100;
+/* drawDenseCircle
+ * densely pack a circle's circumference
+ */
+void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color) {
+  // calculate angular resolution required
+  // r*dTheta = 0.5
+  double dTheta = 0.5 / static_cast<double>(r);
+  // number of runs to cover quarter circle
+  uint32_t n = PI / 2 / dTheta;
+  // Serial.print("dTheta "); Serial.print(dTheta, 5); Serial.print(" n "); Serial.println(n);
+
+  for(uint32_t i = 0; i < n; i++) {
+    float theta = i * dTheta; // Serial.print(" theta "); Serial.println(theta);
+    int16_t rcos = r * cos(theta);
+    int16_t rsin = r * sin(theta);
+    tft.drawPixel(cx + rcos, cy + rsin, color);
+    tft.drawPixel(cx - rcos, cy + rsin, color);
+    tft.drawPixel(cx + rcos, cy - rsin, color);
+    tft.drawPixel(cx - rcos, cy - rsin, color);
   }
 }
 
-void testroundrects() {
-  tft.fillScreen(ST77XX_BLACK);
-  uint16_t color = 100;
-  int i;
-  int t;
-  for (t = 0; t <= 4; t += 1) {
-    int x = 0;
-    int y = 0;
-    int w = tft.width() - 2;
-    int h = tft.height() - 2;
-    for (i = 0; i <= 16; i += 1) {
-      tft.drawRoundRect(x, y, w, h, 5, color);
-      x += 2;
-      y += 3;
-      w -= 4;
-      h -= 6;
-      color += 1100;
-    }
-    color += 100;
-  }
-}
+
+
+
+
+
+
+
