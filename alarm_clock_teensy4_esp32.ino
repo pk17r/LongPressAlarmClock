@@ -17,9 +17,15 @@
 // #define MCU_IS_ESP32
 #define MCU_IS_TEENSY
 
+// SELECT DISPLAY
+#define DISPLAY_IS_ST7789V
+// #define DISPLAY_IS_ST7735
+// #define DISPLAY_IS_ILI9341
+
 #include <Adafruit_GFX.h>     // Core graphics library
 // #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
-#include "Adafruit_ILI9341.h"
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+// #include "Adafruit_ILI9341.h"
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
@@ -41,10 +47,15 @@
 #define TFT_DC 8
 #define TFT_BL 7  //  controls TFT Display backlight as output of PWM pin
 #endif
+
+#if defined(DISPLAY_IS_ST7735)
 // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
 // Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-// Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
+#elif defined(DISPLAY_IS_ST7789V)
+Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
+#elif defined(DISPLAY_IS_ILI9341)
+// Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
+#endif
 const int nightTimeBrightness = 1;
 const int eveningTimeBrightness = 10;
 const int dayTimeBrightness = 20;
@@ -74,8 +85,8 @@ const int LED_PIN = 32;
 #elif defined(MCU_IS_TEENSY)
 // Sqw Alarm Interrupt Pin
 const byte interruptSqwPin = 17;
-const int BUTTON_PIN = 4;
-const int LED_PIN = 5;
+const int BUTTON_PIN = 2;
+const int LED_PIN = 14;
 #endif
 
 // Push Button
@@ -332,18 +343,26 @@ void setup() {
 
   /* INITIALIZE DISPLAYS */
 
-  tft.begin();
   // tft display backlight control PWM output pin
   pinMode(TFT_BL, OUTPUT);
 
-  // Use this initializer if using a 1.8" TFT screen:
-  // tft.initR(INITR_BLACKTAB);  // Init ST7735S chip, black tab
+  #if defined(DISPLAY_IS_ST7789V)
+  // OR use this initializer (uncomment) if using a 2.0" 320x240 TFT:
+  tft.init(240, 320);           // Init ST7789 320x240
+  tft.invertDisplay(false);
+  #elif defined(DISPLAY_IS_ST7735)
+  // Use this initializer if using a 1.8" ST7735 TFT screen:
+  // tft.initR(INITR_BLACKTAB);  // Init ST7735 chip, black tab
+  #elif defined(DISPLAY_IS_ILI9341)
+  // Use this initializer if using a 1.8" ILI9341 TFT screen:
+  // tft.begin();
+  #endif
 
-  // set col and row offset of display
+  // set col and row offset of display for ST7735S
   // tft.setColRowStart(2, 1);
 
   // make display landscape orientation
-  tft.setRotation(tft.getRotation() + 1);
+  tft.setRotation(tft.getRotation() + 3);
   // clear screen
   tft.fillScreen(Display_Color_Black);
   tft.setTextWrap(false);
@@ -355,7 +374,7 @@ void setup() {
   
   // initialize push button
   pushBtn.setButtonPin(BUTTON_PIN);
-  pushBtn.setButtonActiveLow(false);
+  // pushBtn.setButtonActiveLow(false);
 
   // // TM1637 Display set brightness 0 to 7
   // tm1637Display.setBrightness(3);
@@ -457,6 +476,9 @@ void serialTimeStampPrefix() {
 }
 
 void loop() {
+  if(pushBtn.checkButtonStatus() != 0)
+    setBrightness(maxBrightness);
+
   // process time actions every second
   if (secondsIncremented) {
     secondsIncremented = false;
