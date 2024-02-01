@@ -57,8 +57,8 @@ Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST
 // Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
 #endif
 const int nightTimeBrightness = 1;
-const int eveningTimeBrightness = 10;
-const int dayTimeBrightness = 20;
+// const int eveningTimeBrightness = 10;
+const int dayTimeBrightness = 150;
 const int maxBrightness = 255;
 
 // TM1637Display Global Variable Space
@@ -103,18 +103,22 @@ uRTCLib rtc;
 // All other parameters of RTC will not change at any other time
 // at 60 seconds, we'll update the time row
 byte second = 0;
-bool refreshTime = false, redrawDisplay = false;
+bool refreshTime = false, redrawDisplay = false, screensaver = false;
 volatile bool secondsIncremented = false;
 bool alarmOn = true;
+uint8_t inactivitySeconds = 0;
+const uint8_t INACTIVITY_SECONDS_LIM = 120;
 
 // function declerations
 void firstTimeDs3231SetFn();
 void prepareTimeDayDateArrays();
 void serialPrintRtcDateTime();
-void displayUpdateFast();
+void displayHHMM(bool moveAround);
+void displayUpdate();
 void processSerialInput();
 void checkTimeAndSetBrightness();
 void serial_input_flush();
+void screensaverControl(bool turnOn);
 #if defined(MCU_IS_ESP32)
 void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
 void putEsp32ToLightSleep();
@@ -460,7 +464,7 @@ void setup() {
   prepareTimeDayDateArrays();
 
   // update TFT display
-  displayUpdateFast();
+  displayUpdate();
   checkTimeAndSetBrightness();
 
   // set sqw pin to trigger every second
@@ -476,8 +480,10 @@ void serialTimeStampPrefix() {
 }
 
 void loop() {
-  if(pushBtn.checkButtonStatus() != 0)
+  if(pushBtn.checkButtonStatus() != 0) {
     setBrightness(maxBrightness);
+    screensaverControl(false);
+  }
 
   // process time actions every second
   if (secondsIncremented) {
@@ -520,17 +526,29 @@ void loop() {
         Serial.println(F("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!"));
       }
 
-      // set display brightness based on time
-      checkTimeAndSetBrightness();
-
       serialTimeStampPrefix();
     }
 
     // prepare date and time arrays
     prepareTimeDayDateArrays();
 
+    // check for inactivity
+    if(inactivitySeconds <= INACTIVITY_SECONDS_LIM) {
+      inactivitySeconds++;
+      if(inactivitySeconds >= INACTIVITY_SECONDS_LIM) {
+        // set display brightness based on time
+        checkTimeAndSetBrightness();
+        // turn screen saver On
+        if(!screensaver)
+          screensaverControl(true);
+      }
+    }
+
     // update TFT display for changes
-    displayUpdateFast();
+    if(!screensaver)
+      displayUpdate();
+    else
+      displayHHMM(true);
 
     // serial print RTC Date Time
     serialPrintRtcDateTime();
@@ -565,15 +583,15 @@ void checkTimeAndSetBrightness() {
   } else if (rtc.hourModeAndAmPm() == 2) {  // 12hr PM
     if (rtc.hour() > 10 && rtc.hour() != 12)
       setBrightness(nightTimeBrightness);
-    else if(rtc.hour() > 6)
-      setBrightness(eveningTimeBrightness);
+    // else if(rtc.hour() > 6)
+    //   setBrightness(eveningTimeBrightness);
     else
       setBrightness(dayTimeBrightness);
   } else if (rtc.hourModeAndAmPm() == 0) {  // 24hr
     if (rtc.hour() > 21 || rtc.hour() < 7)
       setBrightness(nightTimeBrightness);
-    else if(rtc.hour() > 18)
-      setBrightness(eveningTimeBrightness);
+    // else if(rtc.hour() > 18)
+    //   setBrightness(eveningTimeBrightness);
     else
       setBrightness(dayTimeBrightness);
   }
@@ -586,59 +604,143 @@ const int16_t ALARM_ROW_Y0 = 210;
 const int16_t DISPLAY_TEXT_GAP = 10;
 
 // location of various display text strings
-int16_t tft_HHMM_x1, tft_HHMM_y1;
-uint16_t tft_HHMM_w;
+int16_t gap_right_x, gap_up_y;
+int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = TIME_ROW_Y0;
+uint16_t tft_HHMM_w, tft_HHMM_h;
 int16_t tft_AmPm_x0, tft_AmPm_y0;
 int16_t tft_SS_x0;
 int16_t date_row_x0 = 0;
 int16_t alarm_row_x0 = 0;
 int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
 
-void displayUpdateFast() {
+bool goDown = true, goRight = true;
+void screensaverControl(bool turnOn) {
+  // clear screen
+  tft.fillScreen(Display_Color_Black);
+  screensaver = turnOn;
+  redrawDisplay = true;
+  inactivitySeconds = 0;
+  Serial.print("screensaver "); Serial.println(screensaver);
+}
+
+void displayHHMM(bool moveAround) {
+  bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
+
+  // HH:MM
+
+  // set font
+  tft.setFont(&FreeSansBold24pt7b);
+  tft.setTextSize(2);
+
+  // change the text color to the background color
+  tft.setTextColor(Display_Backround_Color);
+
+  // clear old time if it was there
+  if(!isThisTheFirstTime) {
+    // home the cursor to currently displayed text location
+    if(!moveAround || isThisTheFirstTime)
+      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+    else
+      tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
+
+    // redraw the old value to erase
+    tft.print(displayedData.timeHHMM);
+  }
+
+  // record location of new HH:MM string on tft display (with background color as this causes a blink)
+  tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+  // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
+
+  if(moveAround) {
+    const int16_t adder = 2;
+    if(tft_HHMM_x0 <= adder)  goRight = true;
+    else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width() - adder)  goRight = false;
+    if(tft_HHMM_y0 + gap_up_y <= adder)  goDown = true;
+    else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= tft.height() - adder)  goDown = false;
+    // Serial.print("Bx0-adder "); Serial.println(tft_HHMM_x0 - adder);
+    // Serial.print("tft_HHMM_x0 + gap_right_x + tft_HHMM_w - tft.width() + adder "); Serial.println(tft_HHMM_x0 + gap_right_x + tft_HHMM_w - tft.width() + adder);
+    // Serial.print("tft_HHMM_y0 + gap_up_y - adder "); Serial.println(tft_HHMM_y0 + gap_up_y - adder);
+    // Serial.print("tft_HHMM_y0 + gap_up_y + tft_HHMM_h - tft.height() + adder "); Serial.println(tft_HHMM_y0 + gap_up_y + tft_HHMM_h - tft.height() + adder);
+    // Serial.print(" goRight "); Serial.print(goRight); Serial.print(" goDown "); Serial.println(goDown);
+    tft_HHMM_x0 += (goRight ? adder : -adder);
+    tft_HHMM_y0 += (goDown ? adder : -adder);
+    // tft.drawRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
+    // delay(2000);
+  }
+
+  // home the cursor
+  if(!moveAround || isThisTheFirstTime)
+    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+  else
+    tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
+
+  // change the text color to foreground color
+  tft.setTextColor(Display_Time_Color);
+
+  // draw the new time value
+  tft.print(newDisplayData.timeHHMM);
+  tft.setTextSize(1);
+
+  // and remember the new value
+  strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
+}
+
+void displayUpdate() {
   bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
 
   // HH:MM string and AM/PM string
   if (strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
-    // HH:MM
+    if(1)
+      displayHHMM(false);
+    else {
+/*
+      // HH:MM
+      // tft.fillRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
+      // delay(500);
 
-    // set font
-    tft.setFont(&FreeSansBold24pt7b);
-    tft.setTextSize(2);
+      // set font
+      tft.setFont(&FreeSansBold24pt7b);
+      tft.setTextSize(2);
 
-    // home the cursor to currently displayed text location
-    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+      // home the cursor to currently displayed text location
+      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
-    // change the text color to the background color
-    tft.setTextColor(Display_Backround_Color);
+      // change the text color to the background color
+      tft.setTextColor(Display_Backround_Color);
 
-    // clear old time if it was there
-    if(!isThisTheFirstTime) {
-      // redraw the old value to erase
-      tft.print(displayedData.timeHHMM);
+      // clear old time if it was there
+      if(!isThisTheFirstTime) {
+        // redraw the old value to erase
+        tft.print(displayedData.timeHHMM);
+
+        // home the cursor
+        tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+        // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+      }
+
+      // record location of new HH:MM string on tft display (with background color as this causes a blink)
+      tft.getTextBounds(newDisplayData.timeHHMM, tft.getCursorX(), tft.getCursorY(), &tft_HHMM_x1, &tft_HHMM_y1, &tft_HHMM_w, &tft_HHMM_h);
+      // Serial.print("HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print(" y1 "); Serial.print(tft_HHMM_y1); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
+
+      tft.drawRect(tft_HHMM_x1, TIME_ROW_Y0 - tft_HHMM_h + 4, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);
+      tft.drawRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_Red);
+      Serial.println("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" tft_HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print("    tft_HHMM_x1 - 8    "); Serial.println(tft_HHMM_x1 - 8);
+      Serial.print("TIME_ROW_Y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft_HHMM_y1 "); Serial.print(tft_HHMM_y1); Serial.print("   TIME_ROW_Y0 - tft_HHMM_h + 4    "); Serial.println(TIME_ROW_Y0 - tft_HHMM_h + 4);
 
       // home the cursor
       tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-      // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+
+      // change the text color to foreground color
+      tft.setTextColor(Display_Time_Color);
+
+      // draw the new time value
+      tft.print(newDisplayData.timeHHMM);
+      tft.setTextSize(1);
+
+      // and remember the new value
+      strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);*/
     }
-
-    // record location of new HH:MM string on tft display (with background color as this causes a blink)
-    uint16_t tft_HHMM_h;
-    tft.getTextBounds(newDisplayData.timeHHMM, tft.getCursorX(), tft.getCursorY(), &tft_HHMM_x1, &tft_HHMM_y1, &tft_HHMM_w, &tft_HHMM_h);
-    // Serial.print("HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print(" y1 "); Serial.print(tft_HHMM_y1); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
-
-    // home the cursor
-    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-
-    // change the text color to foreground color
-    tft.setTextColor(Display_Time_Color);
-
-    // draw the new time value
-    tft.print(newDisplayData.timeHHMM);
-    tft.setTextSize(1);
-
-    // and remember the new value
-    strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
 
     // AM/PM
 
@@ -663,8 +765,8 @@ void displayUpdateFast() {
     // draw new AM/PM
     if(newDisplayData._12hourMode) {
       // set test location of Am/Pm
-      tft_AmPm_x0 = tft_HHMM_x1 + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
-      tft_AmPm_y0 = (TIME_ROW_Y0 + tft_HHMM_y1) / 2;
+      tft_AmPm_x0 = TIME_ROW_X0 + gap_right_x + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
+      tft_AmPm_y0 = TIME_ROW_Y0 + gap_up_y / 2;
 
       // home the cursor
       tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
@@ -680,7 +782,7 @@ void displayUpdateFast() {
       // Serial.print("AmPm_x1 "); Serial.print(tft_AmPm_x1); Serial.print(" y1 "); Serial.print(tft_AmPm_y1); Serial.print(" w "); Serial.print(tft_AmPm_w); Serial.print(" h "); Serial.println(tft_AmPm_h); 
 
       // calculate tft_AmPm_y0 to align top with HH:MM
-      tft_AmPm_y0 -= tft_AmPm_y1 - tft_HHMM_y1;
+      tft_AmPm_y0 -= tft_AmPm_y1 - tft_HHMM_y0 - gap_up_y;
       // Serial.print("tft_AmPm_y0 "); Serial.println(tft_AmPm_y0);
 
       // home the cursor
@@ -720,7 +822,7 @@ void displayUpdateFast() {
       tft.print(displayedData.timeSS);
 
     // fill new home values
-    tft_SS_x0 = tft_HHMM_x1 + tft_HHMM_w + DISPLAY_TEXT_GAP;
+    tft_SS_x0 = TIME_ROW_X0 + gap_right_x + tft_HHMM_w + DISPLAY_TEXT_GAP;
 
     // home the cursor
     tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
@@ -956,6 +1058,12 @@ void processSerialInput() {
         rtc.set_12hour_mode((bool)clockModeInp);
         // print RTC Date Time and Alarm
         refreshTime = true;
+      }
+      break;
+    case 's':
+      {
+        Serial.println(F("**** Screensaver ****"));
+        screensaverControl(!screensaver);
       }
       break;
     default:
