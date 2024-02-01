@@ -691,56 +691,8 @@ void displayUpdate() {
   // HH:MM string and AM/PM string
   if (strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
-    if(1)
-      displayHHMM(false);
-    else {
-/*
-      // HH:MM
-      // tft.fillRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
-      // delay(500);
-
-      // set font
-      tft.setFont(&FreeSansBold24pt7b);
-      tft.setTextSize(2);
-
-      // home the cursor to currently displayed text location
-      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-
-      // change the text color to the background color
-      tft.setTextColor(Display_Backround_Color);
-
-      // clear old time if it was there
-      if(!isThisTheFirstTime) {
-        // redraw the old value to erase
-        tft.print(displayedData.timeHHMM);
-
-        // home the cursor
-        tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-        // Serial.print("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
-      }
-
-      // record location of new HH:MM string on tft display (with background color as this causes a blink)
-      tft.getTextBounds(newDisplayData.timeHHMM, tft.getCursorX(), tft.getCursorY(), &tft_HHMM_x1, &tft_HHMM_y1, &tft_HHMM_w, &tft_HHMM_h);
-      // Serial.print("HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print(" y1 "); Serial.print(tft_HHMM_y1); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
-
-      tft.drawRect(tft_HHMM_x1, TIME_ROW_Y0 - tft_HHMM_h + 4, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);
-      tft.drawRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_Red);
-      Serial.println("TIME_ROW_X0 "); Serial.print(TIME_ROW_X0); Serial.print(" tft_HHMM_x1 "); Serial.print(tft_HHMM_x1); Serial.print("    tft_HHMM_x1 - 8    "); Serial.println(tft_HHMM_x1 - 8);
-      Serial.print("TIME_ROW_Y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" tft_HHMM_y1 "); Serial.print(tft_HHMM_y1); Serial.print("   TIME_ROW_Y0 - tft_HHMM_h + 4    "); Serial.println(TIME_ROW_Y0 - tft_HHMM_h + 4);
-
-      // home the cursor
-      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-
-      // change the text color to foreground color
-      tft.setTextColor(Display_Time_Color);
-
-      // draw the new time value
-      tft.print(newDisplayData.timeHHMM);
-      tft.setTextSize(1);
-
-      // and remember the new value
-      strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);*/
-    }
+    // HH:MM
+    displayHHMM(false);
 
     // AM/PM
 
