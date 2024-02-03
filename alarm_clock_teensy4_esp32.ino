@@ -26,6 +26,7 @@
 // #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 // #include "Adafruit_ILI9341.h"
+#include <Fonts/Chewy_Regular_98.h>
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
@@ -629,8 +630,8 @@ void displayHHMM(bool moveAround) {
   // HH:MM
 
   // set font
-  tft.setFont(&FreeSansBold24pt7b);
-  tft.setTextSize(2);
+  tft.setFont(&Chewy_Regular_98);
+  tft.setTextSize(1);
 
   // change the text color to the background color
   tft.setTextColor(Display_Backround_Color);
@@ -679,7 +680,7 @@ void displayHHMM(bool moveAround) {
 
   // draw the new time value
   tft.print(newDisplayData.timeHHMM);
-  tft.setTextSize(1);
+  //tft.setTextSize(1);
 
   // and remember the new value
   strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
@@ -734,7 +735,7 @@ void displayUpdate() {
       // Serial.print("AmPm_x1 "); Serial.print(tft_AmPm_x1); Serial.print(" y1 "); Serial.print(tft_AmPm_y1); Serial.print(" w "); Serial.print(tft_AmPm_w); Serial.print(" h "); Serial.println(tft_AmPm_h); 
 
       // calculate tft_AmPm_y0 to align top with HH:MM
-      tft_AmPm_y0 -= tft_AmPm_y1 - tft_HHMM_y0 - gap_up_y;
+      tft_AmPm_y0 -= tft_AmPm_y1 - TIME_ROW_Y0 - gap_up_y;
       // Serial.print("tft_AmPm_y0 "); Serial.println(tft_AmPm_y0);
 
       // home the cursor
