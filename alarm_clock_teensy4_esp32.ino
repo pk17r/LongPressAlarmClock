@@ -26,7 +26,8 @@
 // #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
 #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 // #include "Adafruit_ILI9341.h"
-#include <Fonts/Chewy_Regular_98.h>
+#include <Fonts/ComingSoon_Regular70pt7b.h>
+#include <Fonts/FreeSansBold48pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
@@ -606,7 +607,7 @@ const int16_t DISPLAY_TEXT_GAP = 10;
 
 // location of various display text strings
 int16_t gap_right_x, gap_up_y;
-int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = TIME_ROW_Y0;
+int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = 2 * TIME_ROW_Y0;   // default starting location of screensaver
 uint16_t tft_HHMM_w, tft_HHMM_h;
 int16_t tft_AmPm_x0, tft_AmPm_y0;
 int16_t tft_SS_x0;
@@ -630,8 +631,11 @@ void displayHHMM(bool moveAround) {
   // HH:MM
 
   // set font
-  tft.setFont(&Chewy_Regular_98);
-  tft.setTextSize(1);
+  // tft.setTextSize(1);
+  if(screensaver)
+    tft.setFont(&ComingSoon_Regular70pt7b);
+  else
+    tft.setFont(&FreeSansBold48pt7b);
 
   // change the text color to the background color
   tft.setTextColor(Display_Backround_Color);
@@ -665,7 +669,7 @@ void displayHHMM(bool moveAround) {
     // Serial.print(" goRight "); Serial.print(goRight); Serial.print(" goDown "); Serial.println(goDown);
     tft_HHMM_x0 += (goRight ? adder : -adder);
     tft_HHMM_y0 += (goDown ? adder : -adder);
-    // tft.drawRect(tft_HHMM_x1, tft_HHMM_y1, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
+    // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
     // delay(2000);
   }
 
@@ -680,7 +684,7 @@ void displayHHMM(bool moveAround) {
 
   // draw the new time value
   tft.print(newDisplayData.timeHHMM);
-  //tft.setTextSize(1);
+  // tft.setTextSize(1);
 
   // and remember the new value
   strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
