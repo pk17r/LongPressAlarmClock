@@ -21,11 +21,9 @@
 #define DISPLAY_IS_ST7789V
 // #define DISPLAY_IS_ST7735
 // #define DISPLAY_IS_ILI9341
+// #define DISPLAY_IS_ILI9488
 
 #include <Adafruit_GFX.h>     // Core graphics library
-// #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
-// #include "Adafruit_ILI9341.h"
 #include <Fonts/ComingSoon_Regular70pt7b.h>
 #include <Fonts/FreeSansBold48pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
@@ -51,12 +49,19 @@
 #endif
 
 #if defined(DISPLAY_IS_ST7735)
+#include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
 // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
-// Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 #elif defined(DISPLAY_IS_ST7789V)
+#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
 Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
 #elif defined(DISPLAY_IS_ILI9341)
-// Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
+#include "Adafruit_ILI9341.h"
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
+#elif defined(DISPLAY_IS_ILI9488)
+#include "ILI9488_t3.h"
+// Use hardware SPI (#13, #12, #11) and the above for CS/DC
+ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
 #endif
 const int nightTimeBrightness = 1;
 // const int eveningTimeBrightness = 10;
@@ -68,10 +73,6 @@ const int maxBrightness = 255;
 #include "uRTCLib.h"
 // #include <TM1637Display.h>
 
-#if defined(MCU_IS_ESP32)
-#include "WiFi.h"
-#endif
-
 // Module connection pins (Digital Pins)
 // #define TM1637_CLK 16
 // #define TM1637_DIO 17
@@ -79,6 +80,8 @@ const int maxBrightness = 255;
 // TM1637Display tm1637Display(TM1637_CLK, TM1637_DIO);
 
 #if defined(MCU_IS_ESP32)
+#include "WiFi.h"
+
 // Sqw Alarm Interrupt Pin
 const byte interruptSqwPin = 4;
 const int BUTTON_PIN = 35;
@@ -196,11 +199,55 @@ const char charSpace = ' ', charZero = '0';
 const uint16_t  Display_Color_Black        = 0x0000;
 const uint16_t  Display_Color_Blue         = 0x001F;
 const uint16_t  Display_Color_Red          = 0xF800;
+const uint16_t  Display_Color_Orange       = 0xfca0;
 const uint16_t  Display_Color_Green        = 0x07E0;
 const uint16_t  Display_Color_Cyan         = 0x07FF;
 const uint16_t  Display_Color_Magenta      = 0xF81F;
 const uint16_t  Display_Color_Yellow       = 0xFFE0;
 const uint16_t  Display_Color_White        = 0xFFFF;
+
+#define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
+#define RGB565_Light_sky_blue                                              		0x867E         // Light Sky Blue                          	#87CEFA			https://en.wikipedia.org/wiki/Shades_of_azure#Light_sky_blue
+#define RGB565_Blue_violet                                                 		0x897B         // Blue-violet                             	#8A2BE2			https://en.wikipedia.org/wiki/Indigo#Deep_indigo_(web_color_blue-violet)
+#define RGB565_Ice_blue                                                    		0x9FFF         // Ice Blue                                	#99FFFF			https://en.wikipedia.org/wiki/Shades_of_blue#Ice_blue
+#define RGB565_Light_periwinkle                                            		0xC65B         // Light periwinkle                        	#C5CBE1			https://en.wikipedia.org/wiki/Periwinkle_(color)#Light_periwinkle
+#define RGB565_Spanish_sky_blue                                            		0x07FF         // Spanish sky blue                        	#00FFFF			https://en.wikipedia.org/wiki/Sky_blue#Spanish_sky_blue
+#define RGB565_Vivid_sky_blue                                              		0x065F         // Vivid sky blue                          	#00CCFF			https://en.wikipedia.org/wiki/Sky_blue#Vivid_sky_blue
+#define RGB565_Beige                                                       		0xF7BB         // Beige                                   	#F5F5DC			https://en.wikipedia.org/wiki/Shades_of_brown#Beige
+#define RGB565_Buff                                                        		0xDD0D         // Buff                                    	#DAA06D			https://en.wikipedia.org/wiki/Shades_of_brown#Buff
+#define RGB565_Sandy_brown                                                 		0xF52C         // Sandy Brown                             	#F4A460			https://en.wikipedia.org/wiki/Shades_of_brown#Sandy_brown
+#define RGB565_Cyan                                                        		0x07FF         // Cyan                                    	#00FFFF			https://en.wikipedia.org/wiki/Shades_of_cyan#Cyan
+#define RGB565_Turquoise                                                   		0x46F9         // Turquoise                               	#40E0D0			https://en.wikipedia.org/wiki/Shades_of_cyan#Turquoise
+#define RGB565_Puce                                                        		0xCC53         // Puce                                    	#CC8899			https://en.wikipedia.org/wiki/Shades_of_gray#Puce
+#define RGB565_Bright_green                                                		0x67E0         // Bright green                            	#66FF00			https://en.wikipedia.org/wiki/Shades_of_green#Bright_green
+#define RGB565_Caribbean_green                                             		0x0653         // Caribbean green                         	#00CC99			https://en.wikipedia.org/wiki/Spring_green#Caribbean_green
+#define RGB565_Electric_green                                              		0x07E0         // Electric green                          	#00FF00			https://en.wikipedia.org/wiki/Electric_green
+#define RGB565_Green_yellow                                                		0xAFE6         // Green-yellow                            	#ADFF2F			https://en.wikipedia.org/wiki/Shades_of_green#Yellow-green
+#define RGB565_Magenta                                                     		0xF81F         // Magenta                                 	#FF00FF			https://en.wikipedia.org/wiki/Shades_of_magenta#Magenta
+#define RGB565_Shocking_pink                                               		0xF897         // Shocking Pink                           	#FC0FC0			https://en.wikipedia.org/wiki/Shades_of_magenta#Shocking_pink
+#define RGB565_Apricot                                                     		0xFE76         // Apricot                                 	#FBCEB1			https://en.wikipedia.org/wiki/Shades_of_orange#Apricot
+#define RGB565_Atomic_tangerine                                            		0xFCCC         // Atomic tangerine                        	#FF9966			https://en.wikipedia.org/wiki/Shades_of_orange#Atomic_tangerine
+#define RGB565_Dark_orange                                                 		0xFC60         // Dark orange                             	#FF8C00			https://en.wikipedia.org/wiki/Shades_of_orange#Dark_orange
+#define RGB565_Orange                                                      		0xFBE0         // Orange                                  	#FF7F00			https://en.wikipedia.org/wiki/Shades_of_orange#Orange
+#define RGB565_Tart_orange                                                 		0xFA69         // Tart Orange                             	#FB4D46			https://en.wikipedia.org/wiki/List_of_Crayola_crayon_colors#Heads_n_Tails
+#define RGB565_Light_deep_pink                                             		0xFAF9         // Light Deep Pink                         	#FF5CCD			https://en.wikipedia.org/wiki/Shades_of_pink#Light_deep_pink
+#define RGB565_Pink_flamingo                                               		0xFBBF         // Pink flamingo                           	#FC74FD			https://en.wikipedia.org/wiki/Manatee_(color)
+#define RGB565_Electric_purple                                             		0xB81F         // Electric Purple                         	#BF00FF			https://en.wikipedia.org/wiki/Shades_of_purple#Electric_purple
+#define RGB565_Purple_x11                                                  		0x991D         // Purple (X11)                            	#A020F0			https://en.wikipedia.org/wiki/Shades_of_purple#Purple_(X11_color)_(veronica)
+#define RGB565_Candy_apple_red                                             		0xF840         // Candy apple red                         	#FF0800			https://en.wikipedia.org/wiki/Candy_apple_red
+#define RGB565_Red_rgb                                                     		0xF800         // Red (RGB)                               	#FF0000			https://en.wikipedia.org/wiki/Shades_of_red#Red_rgb
+#define RGB565_Tomato                                                      		0xFB09         // Tomato                                  	#FF6347			https://en.wikipedia.org/wiki/Shades_of_red#Tomato
+#define RGB565_Champagne                                                   		0xF739         // Champagne                               	#F7E7CE			https://en.wikipedia.org/wiki/Shades_of_white#Champagne
+#define RGB565_Cream                                                       		0xFFF9         // Cream                                   	#FFFDD0			https://en.wikipedia.org/wiki/Shades_of_white#Cream
+#define RGB565_Ivory                                                       		0xFFFD         // Ivory                                   	#FFFFF0			https://en.wikipedia.org/wiki/Shades_of_white#Ivory
+#define RGB565_Chartreuse_traditional                                      		0xDFE0         // Chartreuse (traditional)                	#DFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Chartreuse_traditional
+#define RGB565_Golden_yellow                                               		0xFEE0         // Golden yellow                           	#FFDF00			https://en.wikipedia.org/wiki/Gold_(color)#Golden_yellow
+#define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
+#define RGB565_Aqua                                                        		0x07FF         // Aqua                                    	#00FFFF			https://en.wikipedia.org/wiki/Aqua_(color)
+#define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
+
+const uint8_t COLOR_WHEEL_SIZE = 39;
+const uint16_t colorWheelBright[COLOR_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x9FFF, 0xC65B, 0x07FF, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xF739, 0xFFF9, 0xFFFD, 0xDFE0, 0xFEE0, 0xFFE0, 0x07FF, 0xBFE0};
 
 // The colors we actually want to use
 uint16_t        Display_Time_Color         = Display_Color_Yellow;
@@ -356,12 +403,27 @@ void setup() {
   // OR use this initializer (uncomment) if using a 2.0" 320x240 TFT:
   tft.init(240, 320);           // Init ST7789 320x240
   tft.invertDisplay(false);
+  // make display landscape orientation
+  tft.setRotation(tft.getRotation() + 3);
   #elif defined(DISPLAY_IS_ST7735)
   // Use this initializer if using a 1.8" ST7735 TFT screen:
-  // tft.initR(INITR_BLACKTAB);  // Init ST7735 chip, black tab
+  tft.initR(INITR_BLACKTAB);  // Init ST7735 chip, black tab
   #elif defined(DISPLAY_IS_ILI9341)
   // Use this initializer if using a 1.8" ILI9341 TFT screen:
-  // tft.begin();
+  tft.begin();
+  #elif defined(DISPLAY_IS_ILI9488)
+  tft.begin();
+  tft.setRotation(tft.getRotation() + 2);
+  int16_t x, y;
+  tft.getOrigin(&x, &y);
+  Serial.print("x="); Serial.print(x); Serial.print(" y="); Serial.println(y);
+  x = 0, y = 0;
+  tft.setOrigin(x, y);
+  tft.setClipRect();
+  tft.setFontAdafruit();
+  tft.invertDisplay(true);
+  // make display landscape orientation
+  Serial.print("h="); Serial.print(tft.height()); Serial.print(" w="); Serial.println(tft.width());
   #endif
 
   // set col and row offset of display for ST7735S
@@ -372,8 +434,6 @@ void setup() {
   // may end up with a black screen some times, or all the time.
   // tft.setSPISpeed(8000000);
 
-  // make display landscape orientation
-  tft.setRotation(tft.getRotation() + 3);
   // clear screen
   tft.fillScreen(Display_Color_Black);
   tft.setTextWrap(false);
@@ -604,11 +664,19 @@ void checkTimeAndSetBrightness() {
   }
 }
 
+#if defined(DISPLAY_IS_ILI9488)
+// USER DEFINED LOCATIONS OF VARIOUS DISPLAY TEXT STRINGS
+const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 10;
+const int16_t DATE_ROW_Y0 = 65;
+const int16_t ALARM_ROW_Y0 = 140;
+const int16_t DISPLAY_TEXT_GAP = 10;
+#else
 // USER DEFINED LOCATIONS OF VARIOUS DISPLAY TEXT STRINGS
 const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80;
 const int16_t DATE_ROW_Y0 = 135;
 const int16_t ALARM_ROW_Y0 = 210;
 const int16_t DISPLAY_TEXT_GAP = 10;
+#endif
 
 // location of various display text strings
 int16_t gap_right_x, gap_up_y;
@@ -677,7 +745,6 @@ void displayHHMM(bool moveAround) {
     tft_HHMM_x0 += (goRight ? adder : -adder);
     tft_HHMM_y0 += (goDown ? adder : -adder);
     // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
-    // delay(2000);
   }
 
   // home the cursor
@@ -685,19 +752,22 @@ void displayHHMM(bool moveAround) {
     tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
   else
     tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
+  // tft.drawRect(TIME_ROW_X0 + gap_right_x, TIME_ROW_Y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
+  // Serial.print("x0 "); Serial.print(TIME_ROW_X0 + gap_right_x); Serial.print(" y0 "); Serial.print(TIME_ROW_Y0 + gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
 
   // change the text color to foreground color
   if(!screensaver)
     tft.setTextColor(Display_Time_Color);
   else {
-    uint16_t random_color = random(1,65536);
+    int random_color = random(0,COLOR_WHEEL_SIZE - 1);
     // Serial.print("random_color "); Serial.println(random_color, HEX);
-    tft.setTextColor(random_color);
+    tft.setTextColor(colorWheelBright[random_color]);
   }
 
   // draw the new time value
   tft.print(newDisplayData.timeHHMM);
   // tft.setTextSize(1);
+  // delay(2000);
 
   // and remember the new value
   strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
