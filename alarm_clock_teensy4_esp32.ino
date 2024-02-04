@@ -367,6 +367,11 @@ void setup() {
   // set col and row offset of display for ST7735S
   // tft.setColRowStart(2, 1);
 
+  // SPI speed defaults to SPI_DEFAULT_FREQ defined in the library, you can override it here
+  // Note that speed allowable depends on chip and quality of wiring, if you go too fast, you
+  // may end up with a black screen some times, or all the time.
+  // tft.setSPISpeed(8000000);
+
   // make display landscape orientation
   tft.setRotation(tft.getRotation() + 3);
   // clear screen
@@ -682,7 +687,13 @@ void displayHHMM(bool moveAround) {
     tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
 
   // change the text color to foreground color
-  tft.setTextColor(Display_Time_Color);
+  if(!screensaver)
+    tft.setTextColor(Display_Time_Color);
+  else {
+    uint16_t random_color = random(1,65536);
+    // Serial.print("random_color "); Serial.println(random_color, HEX);
+    tft.setTextColor(random_color);
+  }
 
   // draw the new time value
   tft.print(newDisplayData.timeHHMM);
@@ -1031,12 +1042,12 @@ void processSerialInput() {
 }
 
 void prepareTimeDayDateArrays() {
-  // HH:MM:
+  // HH:MM
   if(!screensaver && rtc.hour() < 10)
     snprintf(newDisplayData.timeHHMM, timeHHMMArraySize, " %d:%02d", rtc.hour(), rtc.minute());
   else
     snprintf(newDisplayData.timeHHMM, timeHHMMArraySize, "%d:%02d", rtc.hour(), rtc.minute());
-  // SS
+  // :SS
   snprintf(newDisplayData.timeSS, timeSSArraySize, ":%02d", second);
   if(rtc.hourModeAndAmPm() == 0)
     newDisplayData._12hourMode = false;
