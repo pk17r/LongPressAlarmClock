@@ -650,6 +650,8 @@ void displayHHMM(bool moveAround) {
 
     // redraw the old value to erase
     tft.print(displayedData.timeHHMM);
+    // if(moveAround)
+    //   tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
   }
 
   // record location of new HH:MM string on tft display (with background color as this causes a blink)
@@ -657,7 +659,7 @@ void displayHHMM(bool moveAround) {
   // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
 
   if(moveAround) {
-    const int16_t adder = 2;
+    const int16_t adder = 10;
     if(tft_HHMM_x0 <= adder)  goRight = true;
     else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width() - adder)  goRight = false;
     if(tft_HHMM_y0 + gap_up_y <= adder)  goDown = true;
@@ -1030,7 +1032,7 @@ void processSerialInput() {
 
 void prepareTimeDayDateArrays() {
   // HH:MM:
-  if(rtc.hour() < 10)
+  if(!screensaver && rtc.hour() < 10)
     snprintf(newDisplayData.timeHHMM, timeHHMMArraySize, " %d:%02d", rtc.hour(), rtc.minute());
   else
     snprintf(newDisplayData.timeHHMM, timeHHMMArraySize, "%d:%02d", rtc.hour(), rtc.minute());
