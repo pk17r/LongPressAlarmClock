@@ -27,30 +27,12 @@ public:
 // FUNCTIONS
 
   // constructor
-  rgb_display_class() {
-    newDisplayData.timeHHMM = new char[HHMM_ARR_SIZE];
-    newDisplayData.timeSS = new char[SS_ARR_SIZE];
-    newDisplayData.dateStr = new char[DATE_ARR_SIZE];
-    newDisplayData.alarmStr = new char[ALARM_ARR_SIZE];
-    displayedData.timeHHMM = new char[HHMM_ARR_SIZE];
-    displayedData.timeSS = new char[SS_ARR_SIZE];
-    displayedData.dateStr = new char[DATE_ARR_SIZE];
-    displayedData.alarmStr = new char[ALARM_ARR_SIZE];
-  };
+  rgb_display_class();
   // destructor
-  ~rgb_display_class() {
-    delete newDisplayData.timeHHMM;
-    delete newDisplayData.timeSS;
-    delete newDisplayData.dateStr;
-    delete newDisplayData.alarmStr;
-    delete displayedData.timeHHMM;
-    delete displayedData.timeSS;
-    delete displayedData.dateStr;
-    delete displayedData.alarmStr;
-  }
+  ~rgb_display_class();
 
   // screens
-  void displayHHMM(bool moveAround);
+  void displayHHMM();
   void displayUpdate();
   void drawSun(int16_t x0, int16_t y0, uint16_t edge);
   void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
@@ -93,7 +75,11 @@ public:
 
   #endif
 
-  bool redrawDisplay = true, screensaver = false;
+  // redraw full display flag
+  bool redrawDisplay = false;
+
+  // screensaver
+  bool screensaver = false, screensaverMoveDown = true, screensaverMoveRight = true;
 
   // location of various display text strings
   int16_t gap_right_x, gap_up_y;
@@ -104,9 +90,6 @@ public:
   int16_t date_row_x0 = 0;
   int16_t alarm_row_x0 = 0;
   int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
-
-  // screensaver
-  bool screensaver_vDirSouth = true, screensaver_hDirEast = true;
 
   // Display Visible Data Struct
   const int HHMM_ARR_SIZE = 6, SS_ARR_SIZE = 4, DATE_ARR_SIZE = 11, ALARM_ARR_SIZE = 10;

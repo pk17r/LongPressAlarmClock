@@ -3,6 +3,38 @@
 #include "uRTCLib.h"
 #include <Arduino.h>
 
+// constructor
+rgb_display_class::rgb_display_class() {
+  newDisplayData.timeHHMM = new char[HHMM_ARR_SIZE];
+  newDisplayData.timeSS = new char[SS_ARR_SIZE];
+  newDisplayData.dateStr = new char[DATE_ARR_SIZE];
+  newDisplayData.alarmStr = new char[ALARM_ARR_SIZE];
+  displayedData.timeHHMM = new char[HHMM_ARR_SIZE];
+  displayedData.timeSS = new char[SS_ARR_SIZE];
+  displayedData.dateStr = new char[DATE_ARR_SIZE];
+  displayedData.alarmStr = new char[ALARM_ARR_SIZE];
+  newDisplayData.timeHHMM[0] = '\0';
+  newDisplayData.timeSS[0] = '\0';
+  newDisplayData.dateStr[0] = '\0';
+  newDisplayData.alarmStr[0] = '\0';
+  displayedData.timeHHMM[0] = '\0';
+  displayedData.timeSS[0] = '\0';
+  displayedData.dateStr[0] = '\0';
+  displayedData.alarmStr[0] = '\0';
+};
+
+// destructor
+rgb_display_class::~rgb_display_class() {
+  delete newDisplayData.timeHHMM;
+  delete newDisplayData.timeSS;
+  delete newDisplayData.dateStr;
+  delete newDisplayData.alarmStr;
+  delete displayedData.timeHHMM;
+  delete displayedData.timeSS;
+  delete displayedData.dateStr;
+  delete displayedData.alarmStr;
+}
+
 void rgb_display_class::setup() {
   
   /* INITIALIZE DISPLAYS */
@@ -99,6 +131,10 @@ void rgb_display_class::checkTimeAndSetBrightness() {
 void rgb_display_class::screensaverControl(bool turnOn) {
   // clear screen
   tft.fillScreen(Display_Color_Black);
+  displayedData.timeHHMM[0] = '\0';
+  displayedData.timeSS[0] = '\0';
+  displayedData.dateStr[0] = '\0';
+  displayedData.alarmStr[0] = '\0';
   screensaver = turnOn;
   redrawDisplay = true;
   extern bool inactivitySeconds;

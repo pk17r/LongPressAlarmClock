@@ -108,14 +108,12 @@ void setup() {
 
   // update TFT display
   display.displayUpdate();
-  display.redrawDisplay = true;
 
   // set display brightness based on time of day
   display.checkTimeAndSetBrightness();
 
   // set sqw pin to trigger every second
   rtc.sqwgSetMode(URTCLIB_SQWG_1H);
-
 }
 
 // arduino loop function
@@ -166,6 +164,11 @@ void loop() {
       }
 
       serialTimeStampPrefix();
+
+      // if user has been inactive, then set brightness based on time of day
+      // set display brightness based on time
+      if(inactivitySeconds >= INACTIVITY_SECONDS_LIM)
+        display.checkTimeAndSetBrightness();
     }
 
     // prepare date and time arrays
@@ -187,7 +190,7 @@ void loop() {
     if(!display.screensaver)
       display.displayUpdate();
     else
-      display.displayHHMM(true);
+      display.displayHHMM();
 
     // serial print RTC Date Time
     display.serialPrintRtcDateTime();
