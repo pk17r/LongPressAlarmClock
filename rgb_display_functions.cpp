@@ -131,10 +131,10 @@ void rgb_display_class::checkTimeAndSetBrightness() {
 void rgb_display_class::screensaverControl(bool turnOn) {
   // clear screen
   tft.fillScreen(Display_Color_Black);
-  displayedData.timeHHMM[0] = '\0';
-  displayedData.timeSS[0] = '\0';
-  displayedData.dateStr[0] = '\0';
-  displayedData.alarmStr[0] = '\0';
+  // displayedData.timeHHMM[0] = '\0';
+  // displayedData.timeSS[0] = '\0';
+  // displayedData.dateStr[0] = '\0';
+  // displayedData.alarmStr[0] = '\0';
   // set initial values of x0 and y0
   tft_HHMM_x0 = 0;
   tft_HHMM_y0 = tft.height() / 2;
@@ -142,6 +142,7 @@ void rgb_display_class::screensaverControl(bool turnOn) {
   redrawDisplay = true;
   extern bool inactivitySeconds;
   inactivitySeconds = 0;
+  prepareTimeDayDateArrays();
   Serial.print("screensaverOn "); Serial.println(screensaverOn);
 }
 

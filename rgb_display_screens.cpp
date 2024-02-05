@@ -11,7 +11,7 @@ void rgb_display_class::screensaver() {
   canvas.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
   // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h);
   // move around
-  const int16_t adder = 10;
+  const int16_t adder = 1;
   tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
   tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
   // set direction
@@ -24,9 +24,7 @@ void rgb_display_class::screensaver() {
   // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
   canvas.setCursor(tft_HHMM_x0, tft_HHMM_y0);
   // canvas.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
-  uint16_t random_color = colorPickerWheelBright[random(0,COLOR_PICKER_WHEEL_SIZE - 1)];
-  // Serial.print("random_color "); Serial.println(random_color, HEX);
-  canvas.setTextColor(random_color);
+  canvas.setTextColor(colorPickerWheelBright[currentRandomColorIndex]);
   canvas.print(newDisplayData.timeHHMM);
   // In code later:
   tft.drawRGBBitmap(0, 0, canvas.getBuffer(), tft.width(), tft.height()); // Copy to screen

@@ -189,8 +189,11 @@ void loop() {
     // update TFT display for changes
     if(!display.screensaverOn)
       display.displayTimeUpdate();
-    else
+    else {
+      display.currentRandomColorIndex = random(0, display.COLOR_PICKER_WHEEL_SIZE - 1);
+      // Serial.print("currentRandomColorIndex "); Serial.println(display.currentRandomColorIndex);
       display.screensaver();
+    }
 
     // serial print RTC Date Time
     display.serialPrintRtcDateTime();
@@ -203,6 +206,8 @@ void loop() {
       putEsp32ToLightSleep();
 #endif
   }
+  else if(display.screensaverOn)
+    display.screensaver();
   
   // accept user inputs
   if (Serial.available() != 0)
