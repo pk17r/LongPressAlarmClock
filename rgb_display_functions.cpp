@@ -135,17 +135,20 @@ void rgb_display_class::screensaverControl(bool turnOn) {
   displayedData.timeSS[0] = '\0';
   displayedData.dateStr[0] = '\0';
   displayedData.alarmStr[0] = '\0';
-  screensaver = turnOn;
+  // set initial values of x0 and y0
+  tft_HHMM_x0 = 0;
+  tft_HHMM_y0 = tft.height() / 2;
+  screensaverOn = turnOn;
   redrawDisplay = true;
   extern bool inactivitySeconds;
   inactivitySeconds = 0;
-  Serial.print("screensaver "); Serial.println(screensaver);
+  Serial.print("screensaverOn "); Serial.println(screensaverOn);
 }
 
 void rgb_display_class::prepareTimeDayDateArrays() {
   // HH:MM
   extern uRTCLib rtc;
-  if(!screensaver && rtc.hour() < 10)
+  if(!screensaverOn && rtc.hour() < 10)
     snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, " %d:%02d", rtc.hour(), rtc.minute());
   else
     snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", rtc.hour(), rtc.minute());

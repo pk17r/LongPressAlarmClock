@@ -32,8 +32,8 @@ public:
   ~rgb_display_class();
 
   // screens
-  void displayHHMM();
-  void displayUpdate();
+  void displayTimeUpdate();
+  void screensaver();
   void drawSun(int16_t x0, int16_t y0, uint16_t edge);
   void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
@@ -79,7 +79,7 @@ public:
   bool redrawDisplay = false;
 
   // screensaver
-  bool screensaver = false, screensaverMoveDown = true, screensaverMoveRight = true;
+  bool screensaverOn = false, screensaverMoveDown = true, screensaverMoveRight = true;
 
   // location of various display text strings
   int16_t gap_right_x, gap_up_y;

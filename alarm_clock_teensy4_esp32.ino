@@ -107,7 +107,7 @@ void setup() {
   display.serialPrintRtcDateTime();
 
   // update TFT display
-  display.displayUpdate();
+  display.displayTimeUpdate();
 
   // set display brightness based on time of day
   display.checkTimeAndSetBrightness();
@@ -181,16 +181,16 @@ void loop() {
         // set display brightness based on time
         display.checkTimeAndSetBrightness();
         // turn screen saver On
-        if(!display.screensaver)
+        if(!display.screensaverOn)
           display.screensaverControl(true);
       }
     }
 
     // update TFT display for changes
-    if(!display.screensaver)
-      display.displayUpdate();
+    if(!display.screensaverOn)
+      display.displayTimeUpdate();
     else
-      display.displayHHMM();
+      display.screensaver();
 
     // serial print RTC Date Time
     display.serialPrintRtcDateTime();
@@ -451,7 +451,7 @@ void processSerialInput() {
     case 's':
       {
         Serial.println(F("**** Screensaver ****"));
-        display.screensaverControl(!display.screensaver);
+        display.screensaverControl(!display.screensaverOn);
       }
       break;
     default:
