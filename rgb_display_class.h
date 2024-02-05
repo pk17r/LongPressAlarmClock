@@ -133,21 +133,21 @@ public:
 
   // day arrays
   #define MONTH_ARR_SIZE 4
-  const char day_Jan[MONTH_ARR_SIZE] = "Jan";
-  const char day_Feb[MONTH_ARR_SIZE] = "Feb";
-  const char day_Mar[MONTH_ARR_SIZE] = "Mar";
-  const char day_Apr[MONTH_ARR_SIZE] = "Apr";
-  const char day_May[MONTH_ARR_SIZE] = "May";
-  const char day_Jun[MONTH_ARR_SIZE] = "Jun";
-  const char day_Jul[MONTH_ARR_SIZE] = "Jul";
-  const char day_Aug[MONTH_ARR_SIZE] = "Aug";
-  const char day_Sep[MONTH_ARR_SIZE] = "Sep";
-  const char day_Oct[MONTH_ARR_SIZE] = "Oct";
-  const char day_Nov[MONTH_ARR_SIZE] = "Nov";
-  const char day_Dec[MONTH_ARR_SIZE] = "Dec";
+  const char month_Jan[MONTH_ARR_SIZE] = "Jan";
+  const char month_Feb[MONTH_ARR_SIZE] = "Feb";
+  const char month_Mar[MONTH_ARR_SIZE] = "Mar";
+  const char month_Apr[MONTH_ARR_SIZE] = "Apr";
+  const char month_May[MONTH_ARR_SIZE] = "May";
+  const char month_Jun[MONTH_ARR_SIZE] = "Jun";
+  const char month_Jul[MONTH_ARR_SIZE] = "Jul";
+  const char month_Aug[MONTH_ARR_SIZE] = "Aug";
+  const char month_Sep[MONTH_ARR_SIZE] = "Sep";
+  const char month_Oct[MONTH_ARR_SIZE] = "Oct";
+  const char month_Nov[MONTH_ARR_SIZE] = "Nov";
+  const char month_Dec[MONTH_ARR_SIZE] = "Dec";
 
   // Then set up a table to refer to your strings.
-  const char *const months_table[12] = { day_Jan, day_Feb, day_Mar, day_Apr, day_May, day_Jun, day_Jul, day_Aug, day_Sep, day_Oct, day_Nov, day_Dec };
+  const char *const months_table[12] = { month_Jan, month_Feb, month_Mar, month_Apr, month_May, month_Jun, month_Jul, month_Aug, month_Sep, month_Oct, month_Nov, month_Dec };
 
   const char amLabel[3] = "AM", pmLabel[3] = "PM", offLabel[4] = "Off", alarmLabel[6] = "Alarm";
   const char charSpace = ' ', charZero = '0';
@@ -163,12 +163,11 @@ public:
   const uint16_t  Display_Color_Yellow       = 0xFFE0;
   const uint16_t  Display_Color_White        = 0xFFFF;
 
+  // https://github.com/newdigate/rgb565_colors
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
   #define RGB565_Light_sky_blue                                              		0x867E         // Light Sky Blue                          	#87CEFA			https://en.wikipedia.org/wiki/Shades_of_azure#Light_sky_blue
   #define RGB565_Blue_violet                                                 		0x897B         // Blue-violet                             	#8A2BE2			https://en.wikipedia.org/wiki/Indigo#Deep_indigo_(web_color_blue-violet)
-  #define RGB565_Ice_blue                                                    		0x9FFF         // Ice Blue                                	#99FFFF			https://en.wikipedia.org/wiki/Shades_of_blue#Ice_blue
   #define RGB565_Light_periwinkle                                            		0xC65B         // Light periwinkle                        	#C5CBE1			https://en.wikipedia.org/wiki/Periwinkle_(color)#Light_periwinkle
-  #define RGB565_Spanish_sky_blue                                            		0x07FF         // Spanish sky blue                        	#00FFFF			https://en.wikipedia.org/wiki/Sky_blue#Spanish_sky_blue
   #define RGB565_Vivid_sky_blue                                              		0x065F         // Vivid sky blue                          	#00CCFF			https://en.wikipedia.org/wiki/Sky_blue#Vivid_sky_blue
   #define RGB565_Beige                                                       		0xF7BB         // Beige                                   	#F5F5DC			https://en.wikipedia.org/wiki/Shades_of_brown#Beige
   #define RGB565_Buff                                                        		0xDD0D         // Buff                                    	#DAA06D			https://en.wikipedia.org/wiki/Shades_of_brown#Buff
@@ -200,12 +199,11 @@ public:
   #define RGB565_Chartreuse_traditional                                      		0xDFE0         // Chartreuse (traditional)                	#DFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Chartreuse_traditional
   #define RGB565_Golden_yellow                                               		0xFEE0         // Golden yellow                           	#FFDF00			https://en.wikipedia.org/wiki/Gold_(color)#Golden_yellow
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
-  #define RGB565_Aqua                                                        		0x07FF         // Aqua                                    	#00FFFF			https://en.wikipedia.org/wiki/Aqua_(color)
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
 
-  constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 39;
-  const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x9FFF, 0xC65B, 0x07FF, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xF739, 0xFFF9, 0xFFFD, 0xDFE0, 0xFEE0, 0xFFE0, 0x07FF, 0xBFE0};
-
+  constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 36;
+  const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0xC65B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xF739, 0xFFF9, 0xFFFD, 0xDFE0, 0xFEE0, 0xFFE0, 0xBFE0};
+  int color_i = 0;
   // The colors we actually want to use
   const uint16_t        Display_Time_Color         = Display_Color_Yellow;
   const uint16_t        Display_Date_Color         = Display_Color_Green;

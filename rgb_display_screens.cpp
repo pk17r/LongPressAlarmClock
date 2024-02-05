@@ -67,9 +67,9 @@ void rgb_display_class::displayHHMM() {
   if(!screensaver)
     tft.setTextColor(Display_Time_Color);
   else {
-    int random_color = random(0,COLOR_PICKER_WHEEL_SIZE - 1);
+    uint16_t random_color = colorPickerWheelBright[random(0,COLOR_PICKER_WHEEL_SIZE - 1)];
     // Serial.print("random_color "); Serial.println(random_color, HEX);
-    tft.setTextColor(colorPickerWheelBright[random_color]);
+    tft.setTextColor(random_color);
   }
 
   // draw the new time value
