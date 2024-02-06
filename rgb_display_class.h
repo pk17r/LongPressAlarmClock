@@ -80,6 +80,7 @@ public:
 
   // screensaver
   bool screensaverOn = false, screensaverMoveDown = true, screensaverMoveRight = true;
+  int currentRandomColorIndex = 0;
 
   // location of various display text strings
   int16_t gap_right_x, gap_up_y;
@@ -203,7 +204,6 @@ public:
 
   constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 36;
   const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0xC65B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xF739, 0xFFF9, 0xFFFD, 0xDFE0, 0xFEE0, 0xFFE0, 0xBFE0};
-  int currentRandomColorIndex = 0;
 
   // The colors we actually want to use
   const uint16_t        Display_Time_Color         = Display_Color_Yellow;

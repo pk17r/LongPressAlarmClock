@@ -15,10 +15,10 @@ void rgb_display_class::screensaver() {
   tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
   tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
   // set direction
-  if(tft_HHMM_x0 <= adder)  screensaverMoveRight = true;
-  else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width() - adder)  screensaverMoveRight = false;
-  if(tft_HHMM_y0 + gap_up_y <= adder)  screensaverMoveDown = true;
-  else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= tft.height() - adder)  screensaverMoveDown = false;
+  if(tft_HHMM_x0 <= 0)  screensaverMoveRight = true;
+  else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width())  screensaverMoveRight = false;
+  if(tft_HHMM_y0 + gap_up_y <= 0)  screensaverMoveDown = true;
+  else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= tft.height())  screensaverMoveDown = false;
   // Serial.print("x0 "); Serial.print(tft_HHMM_x0); Serial.print(" y0 "); Serial.println(tft_HHMM_y0);
   // Serial.print("screensaverMoveRight "); Serial.print(screensaverMoveRight); Serial.print(" screensaverMoveDown "); Serial.println(screensaverMoveDown);
   // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
