@@ -1,5 +1,6 @@
 #include "pin_defs.h"
 #include "rgb_display_class.h"
+#include "alarm_clock_main.h"
 #include <Arduino.h>
 
 void rgb_display_class::screensaver() {
@@ -15,10 +16,22 @@ void rgb_display_class::screensaver() {
   tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
   tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
   // set direction
-  if(tft_HHMM_x0 <= 0)  screensaverMoveRight = true;
-  else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width())  screensaverMoveRight = false;
-  if(tft_HHMM_y0 + gap_up_y <= 0)  screensaverMoveDown = true;
-  else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= tft.height())  screensaverMoveDown = false;
+  if(tft_HHMM_x0 <= 0) {
+    screensaverMoveRight = true;
+    pickNewRandomColor();
+  }
+  else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= tft.width()) {
+    screensaverMoveRight = false;
+    pickNewRandomColor();
+  }
+  if(tft_HHMM_y0 + gap_up_y <= 0)  {
+    screensaverMoveDown = true;
+    pickNewRandomColor();
+  }
+  else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= tft.height())  {
+    screensaverMoveDown = false;
+    pickNewRandomColor();
+  }
   // Serial.print("x0 "); Serial.print(tft_HHMM_x0); Serial.print(" y0 "); Serial.println(tft_HHMM_y0);
   // Serial.print("screensaverMoveRight "); Serial.print(screensaverMoveRight); Serial.print(" screensaverMoveDown "); Serial.println(screensaverMoveDown);
   // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
@@ -28,6 +41,14 @@ void rgb_display_class::screensaver() {
   canvas.print(newDisplayData.timeHHMM);
   // In code later:
   tft.drawRGBBitmap(0, 0, canvas.getBuffer(), tft.width(), tft.height()); // Copy to screen
+}
+
+void rgb_display_class::pickNewRandomColor() {
+  int newIndex = currentRandomColorIndex;
+  while(newIndex == currentRandomColorIndex)
+    newIndex = random(0, COLOR_PICKER_WHEEL_SIZE - 1);
+  currentRandomColorIndex = newIndex;
+  // Serial.println(currentRandomColorIndex);
 }
 
 void rgb_display_class::displayTimeUpdate() {
@@ -315,8 +336,7 @@ void rgb_display_class::goodMorningScreen() {
     drawSun(x0, y0, edge);
 
   tft.fillScreen(Display_Color_Black);
-  extern bool refreshRtcTime;
-  refreshRtcTime = true;
+  main->refreshRtcTime = true;
   redrawDisplay = true;
 }
 

@@ -1,29 +1,39 @@
 #ifndef RGB_DISPLAY_CLASS_H
 #define RGB_DISPLAY_CLASS_H
 
-// #ifdef __AVR__
-// #include <avr/pgmspace.h>
-// #elif defined(ESP8266) || defined(ESP32)
-// #include <pgmspace.h>
-// // #endif
-// #if !defined(__AVR__) && !defined(PROGMEM)
-// #define PROGMEM
-// #endif
-
 #include "pin_defs.h"
+#include "alarm_clock_main.h"
 #include <Arduino.h>
 #include <Adafruit_GFX.h>     // Core graphics library
-#include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#if defined(DISPLAY_IS_ST7789V)
+  #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#elif defined(DISPLAY_IS_ST7735)
+  #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
+#elif defined(DISPLAY_IS_ILI9341)
+  #include "Adafruit_ILI9341.h"
+#elif defined(DISPLAY_IS_ILI9488)
+  #include "ILI9488_t3.h"   // Teensy Hardware DMA accelerated library
+#endif
 #include <Fonts/ComingSoon_Regular70pt7b.h>
 #include <Fonts/FreeSansBold48pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
 #include <SPI.h>
+// #if defined(TOUCHSCREEN_IS_XPT2046)
+  // #include <XPT2046_Touchscreen.h>
+// #endif
+
+
+// forward decleration
+class alarm_clock_main;
 
 class rgb_display_class {
 
 public:
+  // pointers to main class object
+  alarm_clock_main* main;
+
 // FUNCTIONS
 
   // constructor
@@ -40,40 +50,58 @@ public:
   void goodMorningScreen();
 
   // functions
-  void setup();
+  void setup(alarm_clock_main* main_ptr);
   void setBrightness(int brightness);
   void checkTimeAndSetBrightness();
   void screensaverControl(bool turnOn);
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
+  void pickNewRandomColor();
+// #if defined(TOUCHSCREEN_IS_XPT2046)
+//   void setTouchscreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h);
+//   TouchPoint getCalibratedTouch();
+// #endif
 
 // VARIABLES
 
   // display object
-  #if defined(DISPLAY_IS_ST7735)
-
-    #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
-    // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
-    Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-
-  #elif defined(DISPLAY_IS_ST7789V)
-
-    #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+  #if defined(DISPLAY_IS_ST7789V)
     // Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
     Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
-
+  #elif defined(DISPLAY_IS_ST7735)
+    // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
+    Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
   #elif defined(DISPLAY_IS_ILI9341)
-
-    #include "Adafruit_ILI9341.h"
     Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
-
   #elif defined(DISPLAY_IS_ILI9488)
-
-    #include "ILI9488_t3.h"
     // Use hardware SPI (#13, #12, #11) and the above for CS/DC
     ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
-
   #endif
+
+  // #if defined(TOUCHSCREEN_IS_XPT2046)
+
+    // XPT2046_Touchscreen touchscreen(TS_CS_PIN, TS_IRQ_PIN);  // Param 2 - Touch IRQ Pin - interrupt enabled polling
+
+    // // touch point calibrated output
+    // struct TouchPoint {
+    //     uint16_t x;
+    //     uint16_t y;
+    //     uint16_t xRaw;
+    //     uint16_t yRaw;
+    //     uint16_t zRaw;
+    // } touchPt;
+
+    // // touch screen calibration
+    // struct TouchCalibration {
+    //     uint16_t xMin;
+    //     uint16_t xMax;
+    //     uint16_t yMin;
+    //     uint16_t yMax;
+    //     uint16_t screenWidth;
+    //     uint16_t screenHeight;
+    // } touchscreenCal;
+
+  // #endif
 
   // redraw full display flag
   bool redrawDisplay = false;
@@ -168,7 +196,6 @@ public:
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
   #define RGB565_Light_sky_blue                                              		0x867E         // Light Sky Blue                          	#87CEFA			https://en.wikipedia.org/wiki/Shades_of_azure#Light_sky_blue
   #define RGB565_Blue_violet                                                 		0x897B         // Blue-violet                             	#8A2BE2			https://en.wikipedia.org/wiki/Indigo#Deep_indigo_(web_color_blue-violet)
-  #define RGB565_Light_periwinkle                                            		0xC65B         // Light periwinkle                        	#C5CBE1			https://en.wikipedia.org/wiki/Periwinkle_(color)#Light_periwinkle
   #define RGB565_Vivid_sky_blue                                              		0x065F         // Vivid sky blue                          	#00CCFF			https://en.wikipedia.org/wiki/Sky_blue#Vivid_sky_blue
   #define RGB565_Beige                                                       		0xF7BB         // Beige                                   	#F5F5DC			https://en.wikipedia.org/wiki/Shades_of_brown#Beige
   #define RGB565_Buff                                                        		0xDD0D         // Buff                                    	#DAA06D			https://en.wikipedia.org/wiki/Shades_of_brown#Buff
@@ -194,16 +221,14 @@ public:
   #define RGB565_Candy_apple_red                                             		0xF840         // Candy apple red                         	#FF0800			https://en.wikipedia.org/wiki/Candy_apple_red
   #define RGB565_Red_rgb                                                     		0xF800         // Red (RGB)                               	#FF0000			https://en.wikipedia.org/wiki/Shades_of_red#Red_rgb
   #define RGB565_Tomato                                                      		0xFB09         // Tomato                                  	#FF6347			https://en.wikipedia.org/wiki/Shades_of_red#Tomato
-  #define RGB565_Champagne                                                   		0xF739         // Champagne                               	#F7E7CE			https://en.wikipedia.org/wiki/Shades_of_white#Champagne
-  #define RGB565_Cream                                                       		0xFFF9         // Cream                                   	#FFFDD0			https://en.wikipedia.org/wiki/Shades_of_white#Cream
   #define RGB565_Ivory                                                       		0xFFFD         // Ivory                                   	#FFFFF0			https://en.wikipedia.org/wiki/Shades_of_white#Ivory
-  #define RGB565_Chartreuse_traditional                                      		0xDFE0         // Chartreuse (traditional)                	#DFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Chartreuse_traditional
+  #define RGB565_Chartreuse_web                                              		0x7FE0         // Chartreuse web                          	#7FFF00			https://en.wikipedia.org/wiki/Chartreuse_(color)
   #define RGB565_Golden_yellow                                               		0xFEE0         // Golden yellow                           	#FFDF00			https://en.wikipedia.org/wiki/Gold_(color)#Golden_yellow
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
 
-  constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 36;
-  const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0xC65B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xF739, 0xFFF9, 0xFFFD, 0xDFE0, 0xFEE0, 0xFFE0, 0xBFE0};
+  constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 33;
+  const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
 
   // The colors we actually want to use
   const uint16_t        Display_Time_Color         = Display_Color_Yellow;
@@ -343,4 +368,4 @@ public:
 
 };
 
-#endif
+#endif    // RGB_DISPLAY_CLASS_H

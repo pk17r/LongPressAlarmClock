@@ -11,6 +11,9 @@
 // #define DISPLAY_IS_ILI9341
 // #define DISPLAY_IS_ILI9488
 
+// SELECT IF TOUCHSCREEN IS PRESENT
+#define TOUCHSCREEN_IS_XPT2046
+
 // define pins
 #if defined(MCU_IS_ESP32)
 
@@ -20,6 +23,11 @@
   #define TFT_RST 27  // Or set to -1 and connect to Arduino RESET pin
   #define TFT_DC 26
   #define TFT_BL 25  //  controls TFT Display backlight as output of PWM pin
+
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CS_PIN 5
+    #define TS_IRQ_PIN 14
+  #endif
 
   // Sqw Alarm Interrupt Pin
   #define SQW_INT_PIN 4
@@ -36,6 +44,11 @@
   #define TFT_RST 9  // Or set to -1 and connect to Arduino RESET pin
   #define TFT_DC 8
   #define TFT_BL 7  //  controls TFT Display backlight as output of PWM pin
+
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CS_PIN 5
+    #define TS_IRQ_PIN 14
+  #endif
 
   // Sqw Alarm Interrupt Pin
   #define SQW_INT_PIN 17
