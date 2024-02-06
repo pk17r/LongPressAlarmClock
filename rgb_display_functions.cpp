@@ -95,16 +95,6 @@ void rgb_display_class::setup(alarm_clock_main* main_ptr) {
   randomSeed(seed);
 
   Serial.println(F("Display Initialized"));
-
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-  //   // Initialize the touchscreen
-  //   ts.begin(SPI);
-  //   ts.setRotation(1);
-  //   // setTouchscreenCalibration(220, 3800, 280, 3830, 320, 240);
-
-  //   Serial.println(F("Touchscreen Initialized"));
-  // #endif
-
 }
 
 // set display brightness function
@@ -154,11 +144,6 @@ void rgb_display_class::setSeconds(uint8_t &second) {
 void rgb_display_class::screensaverControl(bool turnOn) {
   // clear screen
   tft.fillScreen(Display_Color_Black);
-  // displayedData.timeHHMM[0] = '\0';
-  // displayedData.timeSS[0] = '\0';
-  // displayedData.dateStr[0] = '\0';
-  // displayedData.alarmStr[0] = '\0';
-  // set initial values of x0 and y0
   tft_HHMM_x0 = 0;
   tft_HHMM_y0 = tft.height() / 2;
   redrawDisplay = true;
@@ -187,7 +172,7 @@ void rgb_display_class::prepareTimeDayDateArrays() {
   // Mon dd Day
   snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s %d %s", months_table[main->rtc.month() - 1], main->rtc.day(), days_table[main->rtc.dayOfWeek() - 1]);
   if(main->alarmOn)
-    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, " 7:00 AM");
+    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", main->alarmHr, main->alarmMin, (main->alarmIsAm ? amLabel : pmLabel));
   else
     snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%s %s", alarmLabel, offLabel);
   newDisplayData._alarmOn = main->alarmOn;

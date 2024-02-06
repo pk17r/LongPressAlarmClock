@@ -76,7 +76,7 @@ void alarm_clock_main::loop() {
 
   if (ts.isTouched()) {
     Serial.print("x = "); Serial.print((ts.getTouchedPixel())->x); Serial.print(", y = "); Serial.println((ts.getTouchedPixel())->y);
-    if((ts.getTouchedPixel())->y >= alarmAreaY)
+    if((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)
       if(currentPage != alarmSetPage)
         setPage(alarmSetPage);
   }

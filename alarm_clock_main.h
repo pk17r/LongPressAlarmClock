@@ -78,8 +78,6 @@ public:
   // flag to refresh RTC time from RTC HW
   bool refreshRtcTime = false;
 
-  // flag to set alarm On or Off
-  bool alarmOn = true;
 
   // counter to note user inactivity seconds
   uint8_t inactivitySeconds = 0;
@@ -88,7 +86,12 @@ public:
   // seconds flag triggered by interrupt
   static inline volatile bool secondsIncremented;
 
-  int16_t alarmAreaY = 160;
+  // flag to set alarm On or Off
+  bool alarmOn = true;
+  int16_t alarmScreenAreaMainPageY = 160;
+  uint8_t alarmHr = 7;
+  uint8_t alarmMin = 0;
+  bool alarmIsAm = true;
 };
 
 
