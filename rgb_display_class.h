@@ -25,8 +25,9 @@
 // #endif
 
 
-// forward decleration
+// forward decleration of other classes
 class alarm_clock_main;
+
 
 class rgb_display_class {
 

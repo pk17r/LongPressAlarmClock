@@ -2,10 +2,11 @@
 #include <Arduino.h>
 #include "alarm_clock_main.h"
 
+
+// interrupt ISR
 void alarm_clock_main::sqwPinInterruptFn() {
   alarm_clock_main::secondsIncremented = true;
 }
-
 
 
 // arduino setup function
@@ -22,7 +23,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   Serial.println(F("\nSerial OK"));
 
   // setup alarm clock program
-  
+
   this->display = disp_ptr;
 
   // initialize rtc time

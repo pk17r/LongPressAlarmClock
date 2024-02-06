@@ -14,17 +14,6 @@
 alarm_clock_main programObj;
 rgb_display_class displayObj;
 
-// // flag triggered by interrupt
-// volatile bool secondsIncremented = false;
-
-// // initialize static variable
-// // bool secondsIncremented = false;
-
-// // interrupt ISR
-// void sqwPinInterruptFn() {
-//   secondsIncremented = true;
-// }
-
 void setup() {
   programObj.setup(&displayObj);
 }
