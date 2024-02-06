@@ -88,6 +88,7 @@ public:
   // seconds flag triggered by interrupt
   static inline volatile bool secondsIncremented;
 
+  int16_t alarmAreaY = 160;
 };
 
 

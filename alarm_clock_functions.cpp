@@ -76,6 +76,9 @@ void alarm_clock_main::loop() {
 
   if (ts.isTouched()) {
     Serial.print("x = "); Serial.print((ts.getTouchedPixel())->x); Serial.print(", y = "); Serial.println((ts.getTouchedPixel())->y);
+    if((ts.getTouchedPixel())->y >= alarmAreaY)
+      if(currentPage != alarmSetPage)
+        setPage(alarmSetPage);
   }
 
   // process time actions every second
@@ -159,7 +162,7 @@ void alarm_clock_main::loop() {
 #endif
   }
   else if(currentPage == screensaverPage)
-    display->screensaver();
+    display->screensaver();   // continous motion clock
   
   // accept user inputs
   if (Serial.available() != 0)
@@ -177,7 +180,8 @@ void alarm_clock_main::setPage(ScreenPage page) {
       currentPage = screensaverPage;
       break;
     case alarmSetPage:
-
+      currentPage = alarmSetPage;
+      display->setAlarmScreen();
       break;
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');

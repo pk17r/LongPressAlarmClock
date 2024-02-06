@@ -3,6 +3,12 @@
 #include "alarm_clock_main.h"
 #include <Arduino.h>
 
+void rgb_display_class::setAlarmScreen() {
+  tft.fillScreen(Display_Backround_Color);
+  tft.setCursor(0, 80);
+  tft.print("Set Alarm Screen");
+}
+
 void rgb_display_class::screensaver() {
   // In global declarations:
   GFXcanvas16 canvas(tft.width(), tft.height()); // 128x32 pixel canvas

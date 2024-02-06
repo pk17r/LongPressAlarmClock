@@ -44,6 +44,7 @@ public:
   void displayTimeUpdate();
   void screensaver();
   void goodMorningScreen();
+  void setAlarmScreen();
 
   // functions
   void setup(alarm_clock_main* main_ptr);
