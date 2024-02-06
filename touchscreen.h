@@ -6,9 +6,9 @@
 
 // struct declerations
 struct TouchPoint {
-  int16_t x;
-  int16_t y;
-  bool isTouched;
+  int16_t x = -1;
+  int16_t y = -1;
+  bool isTouched = false;
 };
 
 struct TouchCalibration {
@@ -22,12 +22,18 @@ struct TouchCalibration {
 
 class touchscreen {
 
-public:
+private:
 
 // OBJECTS
 
   // store last touchpoint
-  TouchPoint touchPt;
+  TouchPoint lastTouchPt;
+
+  // store last time touchscreen was polled
+  unsigned long lastPolledMillis = 0;
+
+  // minimum time gap in milliseconds before polling touchscreen
+  const unsigned short POLLING_GAP_MS = 100;
 
   // store touchscreen calibration
   TouchCalibration touchscreenCal;
@@ -36,11 +42,15 @@ public:
   XPT2046_Touchscreen touchscreenObj;//(TS_CS_PIN, TS_IRQ_PIN);
 
 // FUNCTIONS
+
+public:
+
+  // constructor
   touchscreen() : touchscreenObj(TS_CS_PIN, TS_IRQ_PIN) {};
   void setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h);
   bool isTouched();
   // function to get x, y and isTouched flag
-  TouchPoint getTouchedPixel();
+  TouchPoint* getTouchedPixel();
 
 };
 

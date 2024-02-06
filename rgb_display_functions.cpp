@@ -116,6 +116,7 @@ void rgb_display_class::setBrightness(int brightness) {
 #endif
   Serial.print(F("Display Brightness set to "));
   Serial.println(brightness);
+  current_brightness = brightness;
 }
 
 void rgb_display_class::checkTimeAndSetBrightness() {

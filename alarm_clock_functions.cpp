@@ -67,14 +67,16 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 
 // arduino loop function
 void alarm_clock_main::loop() {
-  if(pushBtn.checkButtonStatus() != 0) {
-    display->setBrightness(display->MAX_BRIGHTNESS);
-    display->screensaverControl(false);
+  if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
+    if(display->current_brightness != display->MAX_BRIGHTNESS)
+      display->setBrightness(display->MAX_BRIGHTNESS);
+    if(display->screensaverOn)
+      display->screensaverControl(false);
+    inactivitySeconds = 0;
   }
 
   if (ts.isTouched()) {
-    TouchPoint tp = ts.getTouchedPixel();
-    Serial.print("x = "); Serial.print(tp.x); Serial.print(", y = "); Serial.println(tp.x);
+    Serial.print("x = "); Serial.print((ts.getTouchedPixel())->x); Serial.print(", y = "); Serial.println((ts.getTouchedPixel())->y);
   }
 
   // process time actions every second

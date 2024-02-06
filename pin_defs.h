@@ -25,6 +25,7 @@
   #define TFT_BL 25  //  controls TFT Display backlight as output of PWM pin
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CIPO 12    // don't connect CIPO (MISO) to TFT
     #define TS_CS_PIN 5
     #define TS_IRQ_PIN 14
   #endif
@@ -38,7 +39,6 @@
 #elif defined(MCU_IS_TEENSY)
 
   #define TFT_COPI 11
-  #define TFT_CIPO 12
   #define TFT_CLK 13
   #define TFT_CS 10
   #define TFT_RST 9  // Or set to -1 and connect to Arduino RESET pin
@@ -46,6 +46,7 @@
   #define TFT_BL 7  //  controls TFT Display backlight as output of PWM pin
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CIPO 12    // don't connect CIPO (MISO) to TFT
     #define TS_CS_PIN 5
     #define TS_IRQ_PIN 14
   #endif

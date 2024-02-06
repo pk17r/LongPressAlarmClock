@@ -58,10 +58,6 @@ public:
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
   void pickNewRandomColor();
-// #if defined(TOUCHSCREEN_IS_XPT2046)
-//   void setTouchscreenCalibration(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h);
-//   TouchPoint getCalibratedTouch();
-// #endif
 
 // VARIABLES
 
@@ -136,6 +132,7 @@ public:
 
 // CONSTANTS
 
+  int current_brightness = 0;
   // display brightness constants
   const int NIGHT_BRIGHTNESS = 1;
   // const int EVENING_BRIGHTNESS = 10;
