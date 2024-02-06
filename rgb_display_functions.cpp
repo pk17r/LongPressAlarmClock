@@ -119,6 +119,11 @@ void rgb_display_class::setBrightness(int brightness) {
   current_brightness = brightness;
 }
 
+void rgb_display_class::setMaxBrightness() {
+  if(current_brightness != MAX_BRIGHTNESS)
+    setBrightness(MAX_BRIGHTNESS);
+}
+
 void rgb_display_class::checkTimeAndSetBrightness() {
   if (main->rtc.hourModeAndAmPm() == 1) {  // 12hr AM
     if (main->rtc.hour() < 7 || main->rtc.hour() == 12)
@@ -142,6 +147,10 @@ void rgb_display_class::checkTimeAndSetBrightness() {
   }
 }
 
+void rgb_display_class::setSeconds(uint8_t &second) {
+  snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", second);
+}
+
 void rgb_display_class::screensaverControl(bool turnOn) {
   // clear screen
   tft.fillScreen(Display_Color_Black);
@@ -152,16 +161,14 @@ void rgb_display_class::screensaverControl(bool turnOn) {
   // set initial values of x0 and y0
   tft_HHMM_x0 = 0;
   tft_HHMM_y0 = tft.height() / 2;
-  screensaverOn = turnOn;
   redrawDisplay = true;
   main->inactivitySeconds = 0;
   prepareTimeDayDateArrays();
-  Serial.print("screensaverOn "); Serial.println(screensaverOn);
 }
 
 void rgb_display_class::prepareTimeDayDateArrays() {
   // HH:MM
-  if(!screensaverOn && main->rtc.hour() < 10)
+  if(main->currentPage == main->mainPage && main->rtc.hour() < 10)
     snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, " %d:%02d", main->rtc.hour(), main->rtc.minute());
   else
     snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", main->rtc.hour(), main->rtc.minute());

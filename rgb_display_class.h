@@ -32,8 +32,6 @@ class alarm_clock_main;
 class rgb_display_class {
 
 public:
-  // pointers to main class object
-  alarm_clock_main* main;
 
 // FUNCTIONS
 
@@ -45,19 +43,17 @@ public:
   // screens
   void displayTimeUpdate();
   void screensaver();
-  void drawSun(int16_t x0, int16_t y0, uint16_t edge);
-  void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
-  void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void goodMorningScreen();
 
   // functions
   void setup(alarm_clock_main* main_ptr);
   void setBrightness(int brightness);
+  void setMaxBrightness();
   void checkTimeAndSetBrightness();
   void screensaverControl(bool turnOn);
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
-  void pickNewRandomColor();
+  void setSeconds(uint8_t &second);
 
 // VARIABLES
 
@@ -75,36 +71,28 @@ public:
     ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
   #endif
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-
-    // XPT2046_Touchscreen touchscreen(TS_CS_PIN, TS_IRQ_PIN);  // Param 2 - Touch IRQ Pin - interrupt enabled polling
-
-    // // touch point calibrated output
-    // struct TouchPoint {
-    //     uint16_t x;
-    //     uint16_t y;
-    //     uint16_t xRaw;
-    //     uint16_t yRaw;
-    //     uint16_t zRaw;
-    // } touchPt;
-
-    // // touch screen calibration
-    // struct TouchCalibration {
-    //     uint16_t xMin;
-    //     uint16_t xMax;
-    //     uint16_t yMin;
-    //     uint16_t yMax;
-    //     uint16_t screenWidth;
-    //     uint16_t screenHeight;
-    // } touchscreenCal;
-
-  // #endif
-
   // redraw full display flag
   bool redrawDisplay = false;
 
+private:
+
+// PRIVATE FUNCTIONS
+
+  void drawSun(int16_t x0, int16_t y0, uint16_t edge);
+  void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
+  void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
+  void pickNewRandomColor();  // for screensaver
+
+// PRIVATE VARIABLES
+
+  // pointers to main class object
+  alarm_clock_main* main;
+
+  // current screen brightness
+  int current_brightness = 0;
+
   // screensaver
-  bool screensaverOn = false, screensaverMoveDown = true, screensaverMoveRight = true;
+  bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
 
   // location of various display text strings
@@ -132,7 +120,6 @@ public:
 
 // CONSTANTS
 
-  int current_brightness = 0;
   // display brightness constants
   const int NIGHT_BRIGHTNESS = 1;
   // const int EVENING_BRIGHTNESS = 10;
@@ -177,7 +164,7 @@ public:
   const char *const months_table[12] = { month_Jan, month_Feb, month_Mar, month_Apr, month_May, month_Jun, month_Jul, month_Aug, month_Sep, month_Oct, month_Nov, month_Dec };
 
   const char amLabel[3] = "AM", pmLabel[3] = "PM", offLabel[4] = "Off", alarmLabel[6] = "Alarm";
-  const char charSpace = ' ', charZero = '0';
+  const char charSpace = ' ';
 
   // color definitions
   const uint16_t  Display_Color_Black        = 0x0000;

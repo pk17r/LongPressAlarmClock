@@ -20,6 +20,14 @@ class alarm_clock_main {
 
 public:
 
+  // current page on display
+  enum ScreenPage {
+    mainPage,
+    screensaverPage,
+    alarmSetPage,
+    alarmTriggeredPage,
+     } currentPage;
+
 // FUNCTIONS
 
   // constructor / destructor
@@ -36,6 +44,7 @@ public:
   void updateSecond();
   void serial_input_flush();
   void processSerialInput();
+  void setPage(ScreenPage page);
   #if defined(MCU_IS_ESP32)
   void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   void putEsp32ToLightSleep();
@@ -64,7 +73,7 @@ public:
   // we'll refresh RTC time everytime second reaches 60
   // All other parameters of RTC will not change at any other time
   // at 60 seconds, we'll update the time row
-  byte second = 0;
+  uint8_t second = 0;
 
   // flag to refresh RTC time from RTC HW
   bool refreshRtcTime = false;

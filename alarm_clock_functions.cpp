@@ -68,10 +68,9 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 // arduino loop function
 void alarm_clock_main::loop() {
   if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
-    if(display->current_brightness != display->MAX_BRIGHTNESS)
-      display->setBrightness(display->MAX_BRIGHTNESS);
-    if(display->screensaverOn)
-      display->screensaverControl(false);
+    display->setMaxBrightness();
+    if(currentPage == screensaverPage)
+      setPage(mainPage);
     inactivitySeconds = 0;
   }
 
@@ -88,7 +87,7 @@ void alarm_clock_main::loop() {
       refreshRtcTime = true;
 
     // prepare updated seconds array
-    snprintf(display->newDisplayData.timeSS, display->SS_ARR_SIZE, ":%02d", second);
+    display->setSeconds(second);
 
     serialTimeStampPrefix();
 
@@ -137,15 +136,15 @@ void alarm_clock_main::loop() {
         // set display brightness based on time
         display->checkTimeAndSetBrightness();
         // turn screen saver On
-        if(!display->screensaverOn)
-          display->screensaverControl(true);
+        if(currentPage != screensaverPage)
+          setPage(screensaverPage);
       }
     }
 
     // update TFT display for changes
-    if(!display->screensaverOn)
+    if(currentPage == mainPage)
       display->displayTimeUpdate();
-    else
+    else if(currentPage == screensaverPage)
       display->screensaver();
 
     // serial print RTC Date Time
@@ -159,12 +158,30 @@ void alarm_clock_main::loop() {
       putEsp32ToLightSleep();
 #endif
   }
-  else if(display->screensaverOn)
+  else if(currentPage == screensaverPage)
     display->screensaver();
   
   // accept user inputs
   if (Serial.available() != 0)
     processSerialInput();
+}
+
+void alarm_clock_main::setPage(ScreenPage page) {
+  switch(page) {
+    case mainPage:
+      display->screensaverControl(false);
+      currentPage = mainPage;
+      break;
+    case screensaverPage:
+      display->screensaverControl(true);
+      currentPage = screensaverPage;
+      break;
+    case alarmSetPage:
+
+      break;
+    default:
+      Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
+  }
 }
 
 
@@ -243,15 +260,6 @@ void alarm_clock_main::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reas
   }
 }
 #endif
-
-
-
-
-
-
-
-
-
 
 void alarm_clock_main::rtc_clock_initialize() {
 
@@ -409,7 +417,7 @@ void alarm_clock_main::processSerialInput() {
     case 's':
       {
         Serial.println(F("**** Screensaver ****"));
-        display->screensaverControl(!display->screensaverOn);
+        setPage(screensaverPage);
       }
       break;
     default:
