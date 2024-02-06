@@ -8,8 +8,9 @@
 #include <PushButtonTaps.h>
 #include "rgb_display_class.h"
 #include "uRTCLib.h"
-// #include <XPT2046_Touchscreen.h>
-
+#if defined(TOUCHSCREEN_IS_XPT2046)
+  #include "touchscreen.h"
+#endif
 
 // forward decleration of other classes
 class rgb_display_class;
@@ -26,7 +27,7 @@ public:
   ~alarm_clock_main() {};
 
   // function declerations
-  void setup(rgb_display_class* disp_ptr);
+  void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
   void loop();
   void rtc_clock_initialize();
   // interrupt ISR
@@ -45,7 +46,10 @@ public:
   // Push Button
   PushButtonTaps pushBtn;
 
-  // XPT2046_Touchscreen touchscreen(TS_CS_PIN, TS_IRQ_PIN);  // Param 2 - Touch IRQ Pin - interrupt enabled polling
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    // touch screen
+    touchscreen ts;
+  #endif
 
   // RTC clock object for DC3231 rtc
   uRTCLib rtc;

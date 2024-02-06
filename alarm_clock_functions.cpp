@@ -9,7 +9,7 @@ void alarm_clock_main::sqwPinInterruptFn() {
 }
 
 
-// arduino setup function
+// program setup function
 void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 #if defined(MCU_IS_ESP32)
   WiFi.mode(WIFI_OFF);
@@ -24,6 +24,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 
   // setup alarm clock program
 
+  // store display object pointer
   this->display = disp_ptr;
 
   // initialize rtc time
@@ -38,6 +39,11 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   // initialize push button
   pushBtn.setButtonPin(BUTTON_PIN);
   // pushBtn.setButtonActiveLow(false);
+
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    // touchscreen setup and calibration
+    ts.setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
+  #endif
 
   // seconds interrupt pin
   pinMode(SQW_INT_PIN, INPUT_PULLUP);
@@ -64,6 +70,11 @@ void alarm_clock_main::loop() {
   if(pushBtn.checkButtonStatus() != 0) {
     display->setBrightness(display->MAX_BRIGHTNESS);
     display->screensaverControl(false);
+  }
+
+  if (ts.isTouched()) {
+    TouchPoint tp = ts.getTouchedPixel();
+    Serial.print("x = "); Serial.print(tp.x); Serial.print(", y = "); Serial.println(tp.x);
   }
 
   // process time actions every second
