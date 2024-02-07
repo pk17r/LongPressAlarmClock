@@ -2,7 +2,10 @@
 #define ALARM_CLOCK_MAIN_H
 
 #if defined(MCU_IS_ESP32)
-#include "WiFi.h"
+  #include "WiFi.h"
+#endif
+#if defined(MCU_IS_TEENSY)
+  #include <EEPROM.h>
 #endif
 #include "pin_defs.h"
 #include <PushButtonTaps.h>
@@ -32,8 +35,7 @@ public:
 // FUNCTIONS
 
   // constructor / destructor
-  alarm_clock_main() {};
-  ~alarm_clock_main() {};
+  alarm_clock_main();
 
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
@@ -46,6 +48,7 @@ public:
   void serial_input_flush();
   void processSerialInput();
   void setPage(ScreenPage page);
+  void saveAlarm();
   #if defined(MCU_IS_ESP32)
   void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   void putEsp32ToLightSleep();
@@ -98,6 +101,12 @@ public:
   uint8_t var2;
   bool var3AmPm;
   bool var4OnOff;
+
+// PRIVATE CONSTANTS
+  /** the address in the EEPROM **/
+  #if defined(MCU_IS_TEENSY)
+    const unsigned int ALAMR_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
+  #endif
 
 };
 

@@ -193,6 +193,8 @@ void rgb_display_class::serialPrintRtcDateTime() {
   Serial.print(charSpace);
   Serial.print(newDisplayData.dateStr);
   Serial.print(charSpace);
+  Serial.print(main->rtc.year() + 2000);
+  Serial.print(charSpace);
   Serial.print(newDisplayData.alarmStr);
   Serial.flush();
 }

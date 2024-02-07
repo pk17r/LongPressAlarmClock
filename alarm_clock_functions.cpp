@@ -2,6 +2,43 @@
 #include <Arduino.h>
 #include "alarm_clock_main.h"
 
+// constructor
+alarm_clock_main::alarm_clock_main() {
+  #if defined(MCU_IS_TEENSY)
+    // start reading from the first byte (address 0) of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    byte value;
+    // read a byte from the current address of the EEPROM
+    value = EEPROM.read(address);
+    if(value == 1) {
+      // alarm data is stored in EEPROM
+      // retrieve it
+      address++;
+      alarmHr = EEPROM.read(address); address++;
+      alarmMin = EEPROM.read(address); address++;
+      alarmIsAm = EEPROM.read(address); address++;
+      alarmOn = EEPROM.read(address);
+    }
+    else {
+      // write alarm on EEPROM
+      saveAlarm();
+    }
+  #endif
+}
+
+void alarm_clock_main::saveAlarm() {
+  #if defined(MCU_IS_TEENSY)
+    // start writing from the first byte of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    // write alarm on EEPROM
+    EEPROM.update(address, 1); address++;
+    EEPROM.update(address, alarmHr); address++;
+    EEPROM.update(address, alarmMin); address++;
+    EEPROM.update(address, alarmIsAm); address++;
+    EEPROM.update(address, alarmOn);
+    Serial.println("Alarm written to EEPROM");
+  #endif
+}
 
 // interrupt ISR
 void alarm_clock_main::sqwPinInterruptFn() {

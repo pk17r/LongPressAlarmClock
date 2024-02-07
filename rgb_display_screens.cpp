@@ -250,6 +250,7 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
         main->alarmMin = main->var2;
         main->alarmIsAm = main->var3AmPm;
         main->alarmOn = main->var4OnOff;
+        main->saveAlarm();
       }
       else  // show a little graphic of Cancel button Press
         drawButton(setCancel_x, offCancel_y, button_w, button_h, "X", borderColor, Display_Color_Red, offFill, true);
