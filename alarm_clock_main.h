@@ -26,6 +26,7 @@ public:
     screensaverPage,
     alarmSetPage,
     alarmTriggeredPage,
+    timeSetPage,
      } currentPage;
 
 // FUNCTIONS
@@ -92,11 +93,11 @@ public:
   uint8_t alarmHr = 7;
   uint8_t alarmMin = 0;
   bool alarmIsAm = true;
-  // Alarm Set Screen variables
-  uint8_t alarmHrSetPage;
-  uint8_t alarmMinSetPage;
-  bool alarmIsAmSetPage;
-  bool alarmOnSetPage;
+  // Set Screen variables
+  uint8_t var1;
+  uint8_t var2;
+  bool var3AmPm;
+  bool var4OnOff;
 
 };
 

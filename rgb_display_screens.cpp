@@ -44,13 +44,13 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
 
     // print alarm time
     tft.setCursor(hr_x, time_y);
-    tft.print(main->alarmHrSetPage);
+    tft.print(main->var1);
     tft.setCursor(min_x, time_y);
-    if(main->alarmMinSetPage < 10)
+    if(main->var2 < 10)
       tft.print('0');
-    tft.print(main->alarmMinSetPage);
+    tft.print(main->var2);
     tft.setCursor(amPm_x, time_y);
-    if(main->alarmIsAmSetPage)
+    if(main->var3AmPm)
       tft.print(amLabel);
     else
       tft.print(pmLabel);
@@ -67,9 +67,9 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
     drawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
 
     // ON button
-    drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+    drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->var4OnOff);
     // OFF button
-    drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+    drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->var4OnOff);
     // Set button
     drawButton(setCancel_x, onSet_y, button_w, button_h, "Set", borderColor, Display_Color_Orange, offFill, true);
     // Cancel button
@@ -147,13 +147,13 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(Display_Backround_Color);
       if(userButtonClick <= 2)
-        tft.print(main->alarmHrSetPage);
+        tft.print(main->var1);
       else if(userButtonClick <= 4) {
-        if(main->alarmMinSetPage < 10) tft.print('0');
-        tft.print(main->alarmMinSetPage);
+        if(main->var2 < 10) tft.print('0');
+        tft.print(main->var2);
       }
       else {
-        if(main->alarmIsAmSetPage)
+        if(main->var3AmPm)
           tft.print(amLabel);
         else
           tft.print(pmLabel);
@@ -161,45 +161,45 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
       // update value
       if(userButtonClick <= 2) {
         if(isUp) {  // increase hour
-          if(main->alarmHrSetPage < 12)
-            main->alarmHrSetPage++;
+          if(main->var1 < 12)
+            main->var1++;
           else
-            main->alarmHrSetPage = 1;
+            main->var1 = 1;
         }
         else {  // decrease hour
-          if(main->alarmHrSetPage > 1)
-            main->alarmHrSetPage--;
+          if(main->var1 > 1)
+            main->var1--;
           else
-            main->alarmHrSetPage = 12;
+            main->var1 = 12;
         }
       }
       else if(userButtonClick <= 4) {
         if(isUp) {  // increase min
-          if(main->alarmMinSetPage  < 59)
-            main->alarmMinSetPage++;
+          if(main->var2  < 59)
+            main->var2++;
           else
-            main->alarmMinSetPage = 0;
+            main->var2 = 0;
         }
         else {  // decrease min
-          if(main->alarmMinSetPage  > 0)
-            main->alarmMinSetPage--;
+          if(main->var2  > 0)
+            main->var2--;
           else
-            main->alarmMinSetPage = 59;
+            main->var2 = 59;
         }
       }
       else  // turn alarm On or Off
-        main->alarmIsAmSetPage = !main->alarmIsAmSetPage;
+        main->var3AmPm = !main->var3AmPm;
       // print updated value
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(Display_Color_Green);
       if(userButtonClick <= 2)
-        tft.print(main->alarmHrSetPage);
+        tft.print(main->var1);
       else if(userButtonClick <= 4) {
-        if(main->alarmMinSetPage < 10) tft.print('0');
-        tft.print(main->alarmMinSetPage);
+        if(main->var2 < 10) tft.print('0');
+        tft.print(main->var2);
       }
       else {
-        if(main->alarmIsAmSetPage)
+        if(main->var3AmPm)
           tft.print(amLabel);
         else
           tft.print(pmLabel);
@@ -214,30 +214,30 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
     }
     else if(userButtonClick == 7 || userButtonClick == 8) {
       // On or Off button pressed
-      if((userButtonClick == 7 && !main->alarmOnSetPage) || (userButtonClick == 8 && main->alarmOnSetPage)) {
+      if((userButtonClick == 7 && !main->var4OnOff) || (userButtonClick == 8 && main->var4OnOff)) {
         // toggle alarm
-        main->alarmOnSetPage = !main->alarmOnSetPage;
+        main->var4OnOff = !main->var4OnOff;
         // draw new ON button with push effect
-        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->alarmOnSetPage);
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->var4OnOff);
         // draw new OFF button
-        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->var4OnOff);
         delay(100);
         // draw new ON button
-        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->var4OnOff);
       }
-      else if(userButtonClick == 7 && main->alarmOnSetPage) {
+      else if(userButtonClick == 7 && main->var4OnOff) {
         // alarm is On but user pressed On button
         // show a little graphic of input taken
-        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->alarmOnSetPage);
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->var4OnOff);
         delay(100);
-        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->var4OnOff);
       }
-      else if(userButtonClick == 8 && !main->alarmOnSetPage) {
+      else if(userButtonClick == 8 && !main->var4OnOff) {
         // alarm is Off but user pressed Off button
         // show a little graphic of input taken
-        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, Display_Alarm_Color, offFill, !main->alarmOnSetPage);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, Display_Alarm_Color, offFill, !main->var4OnOff);
         delay(100);
-        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->var4OnOff);
       }
     }
     else if(userButtonClick == 9 || userButtonClick == 10) {
@@ -246,10 +246,10 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
         // show a little graphic of Set Button Press
         drawButton(setCancel_x, onSet_y, button_w, button_h, "Set", borderColor, Display_Color_Red, offFill, true);
         // set alarm page values to system
-        main->alarmHr = main->alarmHrSetPage;
-        main->alarmMin = main->alarmMinSetPage;
-        main->alarmIsAm = main->alarmIsAmSetPage;
-        main->alarmOn = main->alarmOnSetPage;
+        main->alarmHr = main->var1;
+        main->alarmMin = main->var2;
+        main->alarmIsAm = main->var3AmPm;
+        main->alarmOn = main->var4OnOff;
       }
       else  // show a little graphic of Cancel button Press
         drawButton(setCancel_x, offCancel_y, button_w, button_h, "X", borderColor, Display_Color_Red, offFill, true);

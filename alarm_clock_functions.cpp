@@ -186,10 +186,10 @@ void alarm_clock_main::setPage(ScreenPage page) {
     case alarmSetPage:
       currentPage = alarmSetPage; // set page
       // set variables for alarm set screen
-      alarmHrSetPage = alarmHr;
-      alarmMinSetPage = alarmMin;
-      alarmIsAmSetPage = alarmIsAm;
-      alarmOnSetPage = alarmOn;
+      var1 = alarmHr;
+      var2 = alarmMin;
+      var3AmPm = alarmIsAm;
+      var4OnOff = alarmOn;
       display->setAlarmScreen(true, 0, 0);
       break;
     default:
