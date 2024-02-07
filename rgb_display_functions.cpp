@@ -144,7 +144,7 @@ void rgb_display_class::setSeconds(uint8_t &second) {
 void rgb_display_class::screensaverControl(bool turnOn) {
   // clear screen
   tft.fillScreen(Display_Color_Black);
-  tft_HHMM_x0 = 0;
+  tft_HHMM_x0 = 20;
   tft_HHMM_y0 = tft.height() / 2;
   redrawDisplay = true;
   main->inactivitySeconds = 0;

@@ -316,7 +316,7 @@ void rgb_display_class::screensaver() {
   tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
   tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
   // set direction
-  if(tft_HHMM_x0 <= 0) {
+  if(tft_HHMM_x0 + gap_right_x <= 0) {
     screensaverMoveRight = true;
     pickNewRandomColor();
   }
@@ -341,6 +341,7 @@ void rgb_display_class::screensaver() {
   canvas.print(newDisplayData.timeHHMM);
   // In code later:
   tft.drawRGBBitmap(0, 0, canvas.getBuffer(), tft.width(), tft.height()); // Copy to screen
+  // delay(2000);
 }
 
 void rgb_display_class::pickNewRandomColor() {
