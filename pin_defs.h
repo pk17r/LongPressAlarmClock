@@ -2,8 +2,8 @@
 #define PIN_DEFS_H
 
 // SELECT MCU
-// #define MCU_IS_ESP32
-#define MCU_IS_TEENSY
+#define MCU_IS_ESP32
+// #define MCU_IS_TEENSY
 
 // SELECT DISPLAY
 #define DISPLAY_IS_ST7789V
@@ -25,9 +25,9 @@
   #define TFT_BL 25  //  controls TFT Display backlight as output of PWM pin
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
-    #define TS_CIPO 12    // don't connect CIPO (MISO) to TFT
-    #define TS_CS_PIN 5
-    #define TS_IRQ_PIN 14
+    #define TS_CIPO 19    // don't connect CIPO (MISO) to TFT
+    #define TS_CS_PIN 33
+    #define TS_IRQ_PIN 34
   #endif
 
   // Sqw Alarm Interrupt Pin

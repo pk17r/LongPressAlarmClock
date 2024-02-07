@@ -99,11 +99,11 @@ void rgb_display_class::setup(alarm_clock_main* main_ptr) {
 
 // set display brightness function
 void rgb_display_class::setBrightness(int brightness) {
-#if defined(MCU_IS_ESP32)
-  dacWrite(TFT_BL, brightness);
-#else
+// #if defined(MCU_IS_ESP32)
+//   dacWrite(TFT_BL, brightness);
+// #else
   analogWrite(TFT_BL, brightness);
-#endif
+// #endif
   Serial.print(F("Display Brightness set to "));
   Serial.println(brightness);
   current_brightness = brightness;

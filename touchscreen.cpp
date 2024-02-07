@@ -10,11 +10,11 @@ bool touchscreen::isTouched() {
   // when irq touch is triggered, it takes a few hundred milliseconds to turn off
   // during this time we will poll touch screen pressure using SPI to know if touchscreen is pressed or not
   if(millis() - lastPolledMillis <= POLLING_GAP_MS) {
-    return lastTouchPt.isTouched;
+    return lastTouchPixel.isTouched;
   }
   else {
     getTouchedPixel();
-    return lastTouchPt.isTouched;
+    return lastTouchPixel.isTouched;
   }
 }
 
@@ -24,7 +24,7 @@ void touchscreen::setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, in
   touchscreenCal = TouchCalibration{xMin, xMax, yMin, yMax, w, h};
 }
 
-TouchPoint* touchscreen::getTouchedPixel() {
+TouchPixel* touchscreen::getTouchedPixel() {
   if(millis() - lastPolledMillis <= POLLING_GAP_MS) {
     // return last touch point
   }
@@ -36,8 +36,8 @@ TouchPoint* touchscreen::getTouchedPixel() {
     TS_Point touch = touchscreenObj.getPoint();
 
     if(touch.z < 100) {
-      lastTouchPt = TouchPoint{-1, -1, false};
-      return &lastTouchPt;
+      lastTouchPixel = TouchPixel{-1, -1, false};
+      return &lastTouchPixel;
     }
     
     // Rotate and map
@@ -56,7 +56,7 @@ TouchPoint* touchscreen::getTouchedPixel() {
     if (y < 0) {
         y = 0;
     }
-    lastTouchPt = TouchPoint{x, y, true};
+    lastTouchPixel = TouchPixel{x, y, true};
   }
-  return &lastTouchPt;
+  return &lastTouchPixel;
 }

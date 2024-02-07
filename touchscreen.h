@@ -5,10 +5,10 @@
 #include <XPT2046_Touchscreen.h>
 
 // struct declerations
-struct TouchPoint {
-  int16_t x = -1;
-  int16_t y = -1;
-  bool isTouched = false;
+struct TouchPixel {
+  int16_t x;
+  int16_t y;
+  bool isTouched;
 };
 
 struct TouchCalibration {
@@ -27,7 +27,7 @@ private:
 // OBJECTS
 
   // store last touchpoint
-  TouchPoint lastTouchPt;
+  TouchPixel lastTouchPixel;
 
   // store last time touchscreen was polled
   unsigned long lastPolledMillis = 0;
@@ -50,7 +50,7 @@ public:
   void setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h);
   bool isTouched();
   // function to get x, y and isTouched flag
-  TouchPoint* getTouchedPixel();
+  TouchPixel* getTouchedPixel();
 
 };
 

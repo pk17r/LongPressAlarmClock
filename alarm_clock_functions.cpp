@@ -196,11 +196,11 @@ void alarm_clock_main::loop() {
 
     Serial.println();
 
-#if defined(MCU_IS_ESP32)
-    // if button is inactive, then go to sleep
-    if(!pushBtn.buttonActiveDebounced())
-      putEsp32ToLightSleep();
-#endif
+// #if defined(MCU_IS_ESP32)
+//     // if button is inactive, then go to sleep
+//     if(!pushBtn.buttonActiveDebounced())
+//       putEsp32ToLightSleep();
+// #endif
   }
   else if(currentPage == screensaverPage)
     display->screensaver();   // continous motion clock
