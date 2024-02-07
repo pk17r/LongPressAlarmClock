@@ -170,7 +170,7 @@ void rgb_display_class::prepareTimeDayDateArrays() {
     newDisplayData._pmNotAm = true;
   }
   // Mon dd Day
-  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s %d %s", months_table[main->rtc.month() - 1], main->rtc.day(), days_table[main->rtc.dayOfWeek() - 1]);
+  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", months_table[main->rtc.month() - 1], main->rtc.day(), days_table[main->rtc.dayOfWeek() - 1]);
   if(main->alarmOn)
     snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", main->alarmHr, main->alarmMin, (main->alarmIsAm ? amLabel : pmLabel));
   else
@@ -196,36 +196,3 @@ void rgb_display_class::serialPrintRtcDateTime() {
   Serial.print(newDisplayData.alarmStr);
   Serial.flush();
 }
-
-// #if defined(TOUCHSCREEN_IS_XPT2046)
-// void rgb_display_class::setTouchscreenCalibration(uint16_t xMin, uint16_t xMax, uint16_t yMin, uint16_t yMax, uint16_t w, uint16_t h) {
-//     touchscreenCal = TouchCalibration{xMin, xMax, yMin, yMax, w, h};
-// }
-
-// TouchPoint rgb_display_class::getCalibratedTouch() {
-//   // get touch point from XPT2046
-//   TS_Point touch = ts.getPoint();
-
-//   if(touch.z < 100) {
-//     return TouchPoint{0, 0, 0, 0, 0};
-//   }
-  
-//   // Rotate and map
-//   uint16_t x = map(touch.x, touchscreenCal.xMin, touchscreenCal.xMax, 0, touchscreenCal.screenWidth);
-//   uint16_t y = map(touch.y, touchscreenCal.yMin, touchscreenCal.yMax, 0, touchscreenCal.screenHeight);
-
-//   if (x > touchscreenCal.screenWidth){
-//       x = touchscreenCal.screenWidth;
-//   }
-//   if (x < 0) {
-//       x = 0;
-//   }
-//   if (y > touchscreenCal.screenHeight) {
-//       y = touchscreenCal.screenHeight;
-//   }
-//   if (y < 0) {
-//       y = 0;
-//   }
-//   return TouchPoint{x, y, touch.x, touch.y, touch.z};
-// }
-// #endif  // #if defined(TOUCHSCREEN_IS_XPT2046)

@@ -16,6 +16,7 @@
 #endif
 #include <Fonts/ComingSoon_Regular70pt7b.h>   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSansBold48pt7b.h>
+#include <Fonts/Satisfy_Regular24pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
@@ -111,7 +112,7 @@ private:
   int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
 
   // Display Visible Data Struct
-  const int HHMM_ARR_SIZE = 6, SS_ARR_SIZE = 4, DATE_ARR_SIZE = 11, ALARM_ARR_SIZE = 10;
+  const int HHMM_ARR_SIZE = 6, SS_ARR_SIZE = 4, DATE_ARR_SIZE = 13, ALARM_ARR_SIZE = 10;
   struct displayData {
     char* timeHHMM;
     char* timeSS;
@@ -133,7 +134,7 @@ private:
 
   // user defined locations of various text strings on display
   const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80;
-  const int16_t DATE_ROW_Y0 = 135;
+  const int16_t DATE_ROW_Y0 = 140;
   const int16_t ALARM_ROW_Y0 = 210;
   const int16_t DISPLAY_TEXT_GAP = 10;
 

@@ -496,7 +496,7 @@ void rgb_display_class::displayTimeUpdate() {
   // date string center aligned
   if (strcmp(newDisplayData.dateStr, displayedData.dateStr) != 0 || redrawDisplay) {
     // set font
-    tft.setFont(&FreeSansBold24pt7b);
+    tft.setFont(&Satisfy_Regular24pt7b);
 
     // change the text color to the background color
     tft.setTextColor(Display_Backround_Color);
@@ -536,7 +536,7 @@ void rgb_display_class::displayTimeUpdate() {
   // alarm string center aligned
   if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0 || newDisplayData._alarmOn != displayedData._alarmOn || redrawDisplay) {
     // set font
-    tft.setFont(&FreeSansBold24pt7b);
+    tft.setFont(&Satisfy_Regular24pt7b);
 
     int16_t alarm_icon_w, alarm_icon_h;
 
@@ -588,8 +588,8 @@ void rgb_display_class::displayTimeUpdate() {
     uint16_t equal_gaps = (tft.width() - graphic_width) / 3;
     alarm_row_x0 = equal_gaps + alarm_icon_w + equal_gaps;
     alarm_icon_x0 = equal_gaps;
-    // align bell center with text center
-    alarm_icon_y0 = ALARM_ROW_Y0 - alarm_row_h / 2 - alarm_icon_h / 2;
+    // align bell at bottom of screen
+    alarm_icon_y0 = tft.height() - alarm_icon_h;
 
     // home the cursor
     tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
