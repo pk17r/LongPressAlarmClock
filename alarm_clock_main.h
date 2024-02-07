@@ -88,10 +88,16 @@ public:
 
   // flag to set alarm On or Off
   bool alarmOn = true;
-  int16_t alarmScreenAreaMainPageY = 160;
+  const int16_t alarmScreenAreaMainPageY = 160;
   uint8_t alarmHr = 7;
   uint8_t alarmMin = 0;
   bool alarmIsAm = true;
+  // Alarm Set Screen variables
+  uint8_t alarmHrSetPage;
+  uint8_t alarmMinSetPage;
+  bool alarmIsAmSetPage;
+  bool alarmOnSetPage;
+
 };
 
 

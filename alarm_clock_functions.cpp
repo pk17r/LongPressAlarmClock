@@ -67,18 +67,22 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 
 // arduino loop function
 void alarm_clock_main::loop() {
+  // button pressed or touchscreen touched
   if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
+    // show response by turing up brightness
     display->setMaxBrightness();
-    if(currentPage == screensaverPage)
-      setPage(mainPage);
-    inactivitySeconds = 0;
-  }
 
-  if (ts.isTouched()) {
-    Serial.print("x = "); Serial.print((ts.getTouchedPixel())->x); Serial.print(", y = "); Serial.println((ts.getTouchedPixel())->y);
-    if((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)
-      if(currentPage != alarmSetPage)
-        setPage(alarmSetPage);
+    // turn off screensaver if on
+    if(currentPage == screensaverPage) {
+      setPage(mainPage);
+    } // if on main page and user clicked on Alarm, then go to alarm set screen
+    else if(currentPage == mainPage && ((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)) {
+      setPage(alarmSetPage);
+    } // if already on alarm page, then take alarm set page user inputs
+    else if(currentPage == alarmSetPage) {
+      display->setAlarmScreen(false, (ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
+    }
+    inactivitySeconds = 0;
   }
 
   // process time actions every second
@@ -180,12 +184,18 @@ void alarm_clock_main::setPage(ScreenPage page) {
       currentPage = screensaverPage;
       break;
     case alarmSetPage:
-      currentPage = alarmSetPage;
-      display->setAlarmScreen();
+      currentPage = alarmSetPage; // set page
+      // set variables for alarm set screen
+      alarmHrSetPage = alarmHr;
+      alarmMinSetPage = alarmMin;
+      alarmIsAmSetPage = alarmIsAm;
+      alarmOnSetPage = alarmOn;
+      display->setAlarmScreen(true, 0, 0);
       break;
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
+  delay(500); // a delay just to stop instant clicks on new page
 }
 
 
@@ -342,8 +352,11 @@ void alarm_clock_main::rtc_clock_initialize() {
 void alarm_clock_main::serialTimeStampPrefix() {
   Serial.print(F("("));
   Serial.print(millis());
+  Serial.print(F(":s"));
   if(second < 10) Serial.print('0');
   Serial.print(second);
+  Serial.print(F(":i"));
+  Serial.print(inactivitySeconds);
   Serial.print(F(") - "));
   Serial.flush();
 }

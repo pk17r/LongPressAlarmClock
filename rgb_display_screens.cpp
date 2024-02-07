@@ -3,10 +3,304 @@
 #include "alarm_clock_main.h"
 #include <Arduino.h>
 
-void rgb_display_class::setAlarmScreen() {
-  tft.fillScreen(Display_Backround_Color);
-  tft.setCursor(0, 80);
-  tft.print("Set Alarm Screen");
+void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
+
+  int16_t gap_x = tft.width() / 11;
+  int16_t gap_y = tft.height() / 9;
+  int16_t hr_x = gap_x / 2, min_x = 2.25*gap_x, amPm_x = 4.25*gap_x, onOff_x = 6.5*gap_x, setCancel_x = 9*gap_x;
+  int16_t time_y = 6*gap_y, onSet_y = 3.5*gap_y, offCancel_y = 6.5*gap_y, inc_y = 4*gap_y, dec_y = 8*gap_y;
+  int16_t incB_y = time_y - 3*gap_y, decB_y = time_y + gap_y;
+  uint16_t onFill = Display_Color_Green, offFill = Display_Color_Black, borderColor = Display_Color_Cyan;
+  uint16_t button_w = 2*gap_x, button_h = 2*gap_y;
+
+  if(firstDraw) {
+    // make alarm set page
+
+    tft.fillScreen(Display_Backround_Color);
+
+    // set title font
+    tft.setFont(&Satisfy_Regular18pt7b);
+
+    char* title = "Set Alarm";
+
+    // change the text color to the background color
+    tft.setTextColor(Display_Backround_Color);
+
+    int16_t title_x0, title_y0;
+    uint16_t title_w, title_h;
+    // get bounds of title on tft display (with background color as this causes a blink)
+    tft.getTextBounds(title, 0, 0, &title_x0, &title_y0, &title_w, &title_h);
+
+    int16_t title_x = (tft.width() - title_w) / 2;
+    int16_t title_y = 2*gap_y;
+
+    // change the text color to the Alarm color
+    tft.setTextColor(Display_Alarm_Color);
+    tft.setCursor(title_x, title_y);
+    tft.print(title);
+
+    // font color inside
+    tft.setTextColor(Display_Color_Green);
+
+    // print alarm time
+    tft.setCursor(hr_x, time_y);
+    tft.print(main->alarmHrSetPage);
+    tft.setCursor(min_x, time_y);
+    if(main->alarmMinSetPage < 10)
+      tft.print('0');
+    tft.print(main->alarmMinSetPage);
+    tft.setCursor(amPm_x, time_y);
+    if(main->alarmIsAmSetPage)
+      tft.print(amLabel);
+    else
+      tft.print(pmLabel);
+
+    // draw increase / dec buttons
+    // hour
+    drawTriangleButton(hr_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    drawTriangleButton(hr_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    // min
+    drawTriangleButton(min_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    drawTriangleButton(min_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    // am / pm
+    drawTriangleButton(amPm_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    drawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+
+    // ON button
+    drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+    // OFF button
+    drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+    // Set button
+    drawButton(setCancel_x, onSet_y, button_w, button_h, "Set", borderColor, Display_Color_Orange, offFill, true);
+    // Cancel button
+    drawButton(setCancel_x, offCancel_y, button_w, button_h, "X", borderColor, Display_Color_Orange, offFill, true);
+
+  }
+  else {
+    // user action
+
+    // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
+    //    0 = no button clicked
+    //    1 = Hr Inc button
+    //    2 = Hr Dec button
+    //    3 = Min Inc button
+    //    4 = Min Dec button
+    //    5 = AmPm Inc button
+    //    6 = AmPm Dec button
+    //    7 = Alarm On button
+    //    8 = Alarm Off button
+    //    9 = Set button
+    //    10 = Cancel button
+    int16_t userButtonClick = 0;
+
+    // find if user clicked a button
+    if(ts_x < amPm_x + gap_x && ts_y > incB_y) {
+      // check for increase or decrease button press
+      // font color inside
+      if(ts_y < incB_y + gap_y) {
+        // increase button
+        if(ts_x > hr_x && ts_x < hr_x + gap_x)
+          userButtonClick = 1;
+        else if(ts_x > min_x && ts_x < min_x + gap_x)
+          userButtonClick = 3;
+        else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+          userButtonClick = 5;
+      }
+      else if(ts_y > decB_y && ts_y < decB_y + gap_y) {
+        // decrease button
+        if(ts_x > hr_x && ts_x < hr_x + gap_x)
+          userButtonClick = 2;
+        else if(ts_x > min_x && ts_x < min_x + gap_x)
+          userButtonClick = 4;
+        else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+          userButtonClick = 6;
+      }
+    }
+    else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) 
+      userButtonClick = 7;
+    else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+      userButtonClick = 8;
+    else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h)
+      userButtonClick = 9;
+    else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+      userButtonClick = 10;
+
+    // Process user input
+    if(userButtonClick >= 1 && userButtonClick <= 6) {
+      // hr min amPm buttons
+      // action is increase/decrease
+      // blink triangle
+      int16_t triangle_x, triangle_y;
+      bool isUp;
+      switch(userButtonClick) {
+        case 1: triangle_x = hr_x; triangle_y = incB_y; isUp = true; break;
+        case 2: triangle_x = hr_x; triangle_y = decB_y; isUp = false; break;
+        case 3: triangle_x = min_x; triangle_y = incB_y; isUp = true; break;
+        case 4: triangle_x = min_x; triangle_y = decB_y; isUp = false; break;
+        case 5: triangle_x = amPm_x; triangle_y = incB_y; isUp = true; break;
+        case 6: triangle_x = amPm_x; triangle_y = decB_y; isUp = false; break;
+      }
+      // turn triangle On
+      drawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, onFill);
+      // clear old values
+      tft.setFont(&Satisfy_Regular18pt7b);
+      tft.setCursor(triangle_x, time_y);
+      tft.setTextColor(Display_Backround_Color);
+      if(userButtonClick <= 2)
+        tft.print(main->alarmHrSetPage);
+      else if(userButtonClick <= 4) {
+        if(main->alarmMinSetPage < 10) tft.print('0');
+        tft.print(main->alarmMinSetPage);
+      }
+      else {
+        if(main->alarmIsAmSetPage)
+          tft.print(amLabel);
+        else
+          tft.print(pmLabel);
+      }
+      // update value
+      if(userButtonClick <= 2) {
+        if(isUp) {  // increase hour
+          if(main->alarmHrSetPage < 12)
+            main->alarmHrSetPage++;
+          else
+            main->alarmHrSetPage = 1;
+        }
+        else {  // decrease hour
+          if(main->alarmHrSetPage > 1)
+            main->alarmHrSetPage--;
+          else
+            main->alarmHrSetPage = 12;
+        }
+      }
+      else if(userButtonClick <= 4) {
+        if(isUp) {  // increase min
+          if(main->alarmMinSetPage  < 59)
+            main->alarmMinSetPage++;
+          else
+            main->alarmMinSetPage = 0;
+        }
+        else {  // decrease min
+          if(main->alarmMinSetPage  > 0)
+            main->alarmMinSetPage--;
+          else
+            main->alarmMinSetPage = 59;
+        }
+      }
+      else  // turn alarm On or Off
+        main->alarmIsAmSetPage = !main->alarmIsAmSetPage;
+      // print updated value
+      tft.setCursor(triangle_x, time_y);
+      tft.setTextColor(Display_Color_Green);
+      if(userButtonClick <= 2)
+        tft.print(main->alarmHrSetPage);
+      else if(userButtonClick <= 4) {
+        if(main->alarmMinSetPage < 10) tft.print('0');
+        tft.print(main->alarmMinSetPage);
+      }
+      else {
+        if(main->alarmIsAmSetPage)
+          tft.print(amLabel);
+        else
+          tft.print(pmLabel);
+      }
+      // wait a little
+      unsigned long waitTime = 200;
+      if(userButtonClick == 3 || userButtonClick == 4)  // wait less for minutes
+        waitTime = 100;
+      delay(waitTime);
+      // turn triangle Off
+      drawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, offFill);
+    }
+    else if(userButtonClick == 7 || userButtonClick == 8) {
+      // On or Off button pressed
+      if((userButtonClick == 7 && !main->alarmOnSetPage) || (userButtonClick == 8 && main->alarmOnSetPage)) {
+        // toggle alarm
+        main->alarmOnSetPage = !main->alarmOnSetPage;
+        // draw new ON button with push effect
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->alarmOnSetPage);
+        // draw new OFF button
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+        delay(100);
+        // draw new ON button
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+      }
+      else if(userButtonClick == 7 && main->alarmOnSetPage) {
+        // alarm is On but user pressed On button
+        // show a little graphic of input taken
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, Display_Alarm_Color, offFill, main->alarmOnSetPage);
+        delay(100);
+        drawButton(onOff_x, onSet_y, button_w, button_h, "ON", borderColor, onFill, offFill, main->alarmOnSetPage);
+      }
+      else if(userButtonClick == 8 && !main->alarmOnSetPage) {
+        // alarm is Off but user pressed Off button
+        // show a little graphic of input taken
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, Display_Alarm_Color, offFill, !main->alarmOnSetPage);
+        delay(100);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, "OFF", borderColor, onFill, offFill, !main->alarmOnSetPage);
+      }
+    }
+    else if(userButtonClick == 9 || userButtonClick == 10) {
+      // set or cancel button pressed
+      if(userButtonClick == 9) {  // set button pressed
+        // show a little graphic of Set Button Press
+        drawButton(setCancel_x, onSet_y, button_w, button_h, "Set", borderColor, Display_Color_Red, offFill, true);
+        // set alarm page values to system
+        main->alarmHr = main->alarmHrSetPage;
+        main->alarmMin = main->alarmMinSetPage;
+        main->alarmIsAm = main->alarmIsAmSetPage;
+        main->alarmOn = main->alarmOnSetPage;
+      }
+      else  // show a little graphic of Cancel button Press
+        drawButton(setCancel_x, offCancel_y, button_w, button_h, "X", borderColor, Display_Color_Red, offFill, true);
+      // wait a little
+      delay(100);
+      // go back to main page
+      main->setPage(main->mainPage);
+    }
+    
+  }
+}
+
+void rgb_display_class::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
+  int16_t r = 3;
+  tft.setFont(&FreeSans12pt7b);
+  tft.setTextColor((isOn ? onFill : offFill));
+  int16_t title_x0, title_y0;
+  uint16_t title_w, title_h;
+  // get bounds of title on tft display (with background color as this causes a blink)
+  tft.getTextBounds(label, x, y + h, &title_x0, &title_y0, &title_w, &title_h);
+  // make button
+  tft.fillRoundRect(x, y, w, h, r, (isOn ? onFill : offFill));
+  tft.drawRoundRect(x, y, w, h, r, borderColor);
+  tft.setTextColor((isOn ? offFill : onFill));
+  title_x0 = x + (w - title_w) / 2;
+  title_y0 = y + h / 2 + title_h / 2;
+  tft.setCursor(title_x0, title_y0);
+  tft.print(label);
+}
+
+void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor) {
+  int16_t x1, y1, x2, y2, x3, y3;
+  if(isUp) {
+    x1 = x + w / 2;
+    y1 = y;
+    x2 = x;
+    y2 = y + h;
+    x3 = x + w;
+    y3 = y + h;
+  }
+  else {
+    x1 = x;
+    y1 = y;
+    x2 = x + w / 2;
+    y2 = y + h;
+    x3 = x + w;
+    y3 = y;
+  }
+  // make button
+  tft.fillTriangle(x1, y1, x2, y2, x3, y3, fillColor);
+  tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
 void rgb_display_class::screensaver() {

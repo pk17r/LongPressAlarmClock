@@ -14,11 +14,13 @@
 #elif defined(DISPLAY_IS_ILI9488)
   #include "ILI9488_t3.h"   // Teensy Hardware DMA accelerated library
 #endif
-#include <Fonts/ComingSoon_Regular70pt7b.h>
+#include <Fonts/ComingSoon_Regular70pt7b.h>   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSansBold48pt7b.h>
 #include <Fonts/FreeSansBold24pt7b.h>
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
+#include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include <Fonts/FreeSans12pt7b.h>
 #include <SPI.h>
 // #if defined(TOUCHSCREEN_IS_XPT2046)
   // #include <XPT2046_Touchscreen.h>
@@ -44,7 +46,7 @@ public:
   void displayTimeUpdate();
   void screensaver();
   void goodMorningScreen();
-  void setAlarmScreen();
+  void setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y);
 
   // functions
   void setup(alarm_clock_main* main_ptr);
@@ -83,6 +85,8 @@ private:
   void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void pickNewRandomColor();  // for screensaver
+  void drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
+  void drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
 
 // PRIVATE VARIABLES
 
