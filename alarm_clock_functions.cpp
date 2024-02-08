@@ -3,8 +3,12 @@
 #include "alarm_clock_main.h"
 
 // constructor
-alarm_clock_main::alarm_clock_main() {
-  #if defined(MCU_IS_TEENSY)
+void alarm_clock_main::populateSavedAlarm() {
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    EEPROM.begin(512);
+  #endif
+
+  #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
     // start reading from the first byte (address 0) of the EEPROM
     unsigned int address = ALAMR_ADDRESS_EEPROM;
     byte value;
@@ -18,8 +22,14 @@ alarm_clock_main::alarm_clock_main() {
       alarmMin = EEPROM.read(address); address++;
       alarmIsAm = EEPROM.read(address); address++;
       alarmOn = EEPROM.read(address);
+      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+        EEPROM.end();
+      #endif
     }
     else {
+      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+        EEPROM.end();
+      #endif
       // write alarm on EEPROM
       saveAlarm();
     }
@@ -27,7 +37,13 @@ alarm_clock_main::alarm_clock_main() {
 }
 
 void alarm_clock_main::saveAlarm() {
+  alarmHr = var1;
+  alarmMin = var2;
+  alarmIsAm = var3AmPm;
+  alarmOn = var4OnOff;
+
   #if defined(MCU_IS_TEENSY)
+
     // start writing from the first byte of the EEPROM
     unsigned int address = ALAMR_ADDRESS_EEPROM;
     // write alarm on EEPROM
@@ -37,7 +53,28 @@ void alarm_clock_main::saveAlarm() {
     EEPROM.update(address, alarmIsAm); address++;
     EEPROM.update(address, alarmOn);
     Serial.println("Alarm written to EEPROM");
+
+  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    EEPROM.begin(512);
+
+    // start writing from the first byte of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    // write alarm on EEPROM
+    EEPROM.write(address, 1); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmHr); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmMin); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmIsAm); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmOn);
+    EEPROM.commit();
+    Serial.println("Alarm written to EEPROM");
+    EEPROM.end();
+
   #endif
+
 }
 
 // interrupt ISR
@@ -52,12 +89,21 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   WiFi.mode(WIFI_OFF);
   delay(1);
   WiFi.disconnect();
-  setCpuFrequencyMhz(80);
+  setCpuFrequencyMhz(160);
 #endif
+  // make all CS pins high
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, HIGH);
+  pinMode(TS_CS_PIN, OUTPUT);
+  digitalWrite(TS_CS_PIN, HIGH);
+  
   Serial.begin(9600);
   delay(100);
   // while(!Serial) {};
   Serial.println(F("\nSerial OK"));
+
+  // populate saved alarm settings
+  populateSavedAlarm();
 
   // setup alarm clock program
 
@@ -72,6 +118,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 
   // seconds blink LED
   pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
 
   // initialize push button
   pushBtn.setButtonPin(BUTTON_PIN);
@@ -122,6 +169,12 @@ void alarm_clock_main::loop() {
     inactivitySeconds = 0;
   }
 
+  if(pushBtn.buttonActiveDebounced())
+    digitalWrite(LED_PIN, HIGH);
+  else
+    digitalWrite(LED_PIN, LOW);
+
+
   // process time actions every second
   if (alarm_clock_main::secondsIncremented) {
     alarm_clock_main::secondsIncremented = false;
@@ -137,7 +190,7 @@ void alarm_clock_main::loop() {
 
     // blink LED every second
     blink = !blink;
-    digitalWrite(LED_PIN, blink);
+    // digitalWrite(LED_PIN, blink);
 
     // get time update
     if (refreshRtcTime) {
@@ -232,85 +285,85 @@ void alarm_clock_main::setPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
-  delay(500); // a delay just to stop instant clicks on new page
+  delay(100); // a delay just to stop instant clicks on new page
 }
 
 
-#if defined(MCU_IS_ESP32)
-/*
-  Esp32 light sleep function
-  https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
-*/
-void alarm_clock_main::putEsp32ToLightSleep() {
-  /*
-  First we configure the wake up source
-  We set our ESP32 to wake up for an external trigger.
-  There are two types for ESP32, ext0 and ext1 .
-  ext0 uses RTC_IO to wakeup thus requires RTC peripherals
-  to be on while ext1 uses RTC Controller so doesnt need
-  peripherals to be powered on.
-  Note that using internal pullups/pulldowns also requires
-  RTC peripherals to be turned on.
-  */
-  // add a timer to wake up ESP32
-  esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
-  // ext1 button press as wake up source
-  esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
-  //Go to sleep now
-  serialTimeStampPrefix();
-  Serial.println("Go To Light Sleep for 0.5 sec or button press");
-  Serial.flush();
-  // go to light sleep
-  esp_light_sleep_start();
-  // On WAKEUP disable timer as wake up source
-  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+// #if defined(MCU_IS_ESP32)
+// /*
+//   Esp32 light sleep function
+//   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
+// */
+// void alarm_clock_main::putEsp32ToLightSleep() {
+//   /*
+//   First we configure the wake up source
+//   We set our ESP32 to wake up for an external trigger.
+//   There are two types for ESP32, ext0 and ext1 .
+//   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
+//   to be on while ext1 uses RTC Controller so doesnt need
+//   peripherals to be powered on.
+//   Note that using internal pullups/pulldowns also requires
+//   RTC peripherals to be turned on.
+//   */
+//   // add a timer to wake up ESP32
+//   esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
+//   // ext1 button press as wake up source
+//   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
+//   //Go to sleep now
+//   serialTimeStampPrefix();
+//   Serial.println("Go To Light Sleep for 0.5 sec or button press");
+//   Serial.flush();
+//   // go to light sleep
+//   esp_light_sleep_start();
+//   // On WAKEUP disable timer as wake up source
+//   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
 
-  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-  //Print the wakeup reason for ESP32
-  serialTimeStampPrefix();
-  print_wakeup_reason(wakeup_reason);
+//   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+//   //Print the wakeup reason for ESP32
+//   serialTimeStampPrefix();
+//   print_wakeup_reason(wakeup_reason);
 
-  // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
-  if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-    // add ext0 RTC seconds ticker as wake up source
-    esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
-    //Go to sleep now
-    serialTimeStampPrefix();
-    Serial.println("Go To Light Sleep until seconds tick or button press");
-    //esp_deep_sleep_start();
-    Serial.flush();
-    // go to light sleep
-    esp_light_sleep_start();
+//   // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
+//   if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
+//     // add ext0 RTC seconds ticker as wake up source
+//     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
+//     //Go to sleep now
+//     serialTimeStampPrefix();
+//     Serial.println("Go To Light Sleep until seconds tick or button press");
+//     //esp_deep_sleep_start();
+//     Serial.flush();
+//     // go to light sleep
+//     esp_light_sleep_start();
 
-    // On WAKEUP disable EXT0 as wake up source
-    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
+//     // On WAKEUP disable EXT0 as wake up source
+//     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
 
-    wakeup_reason = esp_sleep_get_wakeup_cause();
-    // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
-    //   turnBacklightOn();
+//     wakeup_reason = esp_sleep_get_wakeup_cause();
+//     // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
+//     //   turnBacklightOn();
 
-    //Print the wakeup reason for ESP32
-    serialTimeStampPrefix();
-    print_wakeup_reason(wakeup_reason);
-  }
-}
+//     //Print the wakeup reason for ESP32
+//     serialTimeStampPrefix();
+//     print_wakeup_reason(wakeup_reason);
+//   }
+// }
 
-/*
-Method to print the reason by which ESP32
-has been awaken from sleep
-*/
-void alarm_clock_main::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
-  switch(wakeup_reason)
-  {
-    case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
-    case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
-    case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
-    case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
-    default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
-  }
-}
-#endif
+// /*
+// Method to print the reason by which ESP32
+// has been awaken from sleep
+// */
+// void alarm_clock_main::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
+//   switch(wakeup_reason)
+//   {
+//     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
+//     case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
+//     case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
+//     case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
+//     case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
+//     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
+//   }
+// }
+// #endif
 
 void alarm_clock_main::rtc_clock_initialize() {
 

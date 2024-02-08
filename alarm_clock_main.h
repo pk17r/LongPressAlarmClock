@@ -4,7 +4,7 @@
 #if defined(MCU_IS_ESP32)
   #include "WiFi.h"
 #endif
-#if defined(MCU_IS_TEENSY)
+#if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include <EEPROM.h>
 #endif
 #include "pin_defs.h"
@@ -35,10 +35,11 @@ public:
 // FUNCTIONS
 
   // constructor / destructor
-  alarm_clock_main();
+  alarm_clock_main(){};
 
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
+  void populateSavedAlarm();
   void loop();
   void rtc_clock_initialize();
   // interrupt ISR
@@ -49,10 +50,10 @@ public:
   void processSerialInput();
   void setPage(ScreenPage page);
   void saveAlarm();
-  #if defined(MCU_IS_ESP32)
-  void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
-  void putEsp32ToLightSleep();
-  #endif
+  // #if defined(MCU_IS_ESP32)
+  // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
+  // void putEsp32ToLightSleep();
+  // #endif
 
 // OBJECTS and VARIABLES
 
@@ -97,16 +98,14 @@ public:
   uint8_t alarmMin = 0;
   bool alarmIsAm = true;
   // Set Screen variables
-  uint8_t var1;
-  uint8_t var2;
-  bool var3AmPm;
-  bool var4OnOff;
+  uint8_t var1 = alarmHr;
+  uint8_t var2 = alarmMin;
+  bool var3AmPm = alarmIsAm;
+  bool var4OnOff = alarmOn;
 
 // PRIVATE CONSTANTS
   /** the address in the EEPROM **/
-  #if defined(MCU_IS_TEENSY)
-    const unsigned int ALAMR_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
-  #endif
+  const unsigned int ALAMR_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
 
 };
 

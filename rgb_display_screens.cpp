@@ -245,11 +245,7 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
       if(userButtonClick == 9) {  // set button pressed
         // show a little graphic of Set Button Press
         drawButton(setCancel_x, onSet_y, button_w, button_h, "Set", borderColor, Display_Color_Red, offFill, true);
-        // set alarm page values to system
-        main->alarmHr = main->var1;
-        main->alarmMin = main->var2;
-        main->alarmIsAm = main->var3AmPm;
-        main->alarmOn = main->var4OnOff;
+        // save Set Alarm Page values
         main->saveAlarm();
       }
       else  // show a little graphic of Cancel button Press
@@ -342,7 +338,6 @@ void rgb_display_class::screensaver() {
   canvas.print(newDisplayData.timeHHMM);
   // In code later:
   tft.drawRGBBitmap(0, 0, canvas.getBuffer(), tft.width(), tft.height()); // Copy to screen
-  // delay(2000);
 }
 
 void rgb_display_class::pickNewRandomColor() {
