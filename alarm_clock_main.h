@@ -1,7 +1,7 @@
 #ifndef ALARM_CLOCK_MAIN_H
 #define ALARM_CLOCK_MAIN_H
 
-#if defined(MCU_IS_ESP32)
+#if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "WiFi.h"
 #endif
 #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)

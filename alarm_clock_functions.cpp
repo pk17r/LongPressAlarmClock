@@ -91,6 +91,12 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   WiFi.disconnect();
   setCpuFrequencyMhz(160);
 #endif
+#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  Serial.println("Turning off wifi.");
+  WiFi.persistent(false);
+  WiFi.mode(WIFI_OFF);
+  Serial.println("WiFi Off.");
+#endif
   // make all CS pins high
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
@@ -266,12 +272,12 @@ void alarm_clock_main::loop() {
 void alarm_clock_main::setPage(ScreenPage page) {
   switch(page) {
     case mainPage:
-      display->screensaverControl(false);
       currentPage = mainPage;
+      display->screensaverControl(false);
       break;
     case screensaverPage:
-      display->screensaverControl(true);
       currentPage = screensaverPage;
+      display->screensaverControl(true);
       break;
     case alarmSetPage:
       currentPage = alarmSetPage; // set page
