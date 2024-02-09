@@ -445,13 +445,13 @@ void rgb_display_class::screensaver() {
     // set direction
     if(tft_HHMM_x0 + gapBand + gap_right_x <= 0) {   // left edge
       screensaverMoveRight = true;
-      if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
-        screensaverCanvasMade = false;
+      // if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
+      //   screensaverCanvasMade = false;
     }
     else if(tft_HHMM_x0 + gapBand + tft_HHMM_w >= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
-      if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
-        screensaverCanvasMade = false;
+      // if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
+      //   screensaverCanvasMade = false;
     }
     if(tft_HHMM_y0 + gapBand <= 0)  {   // top edge
       screensaverMoveDown = true;
