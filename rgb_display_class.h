@@ -23,7 +23,7 @@
 #include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSans12pt7b.h>
 #include <SPI.h>
-
+#include <elapsedMillis.h>
 
 // forward decleration of other classes
 class alarm_clock_main;
@@ -75,6 +75,9 @@ public:
   // redraw full display flag
   bool redrawDisplay = false;
 
+  // tft dimensions
+  const uint16_t TFT_WIDTH = 320, TFT_HEIGHT = 240;
+  // SPISettings settingsA(80000000, MSBFIRST, SPI_MODE0);
 private:
 
 // PRIVATE FUNCTIONS
@@ -85,6 +88,8 @@ private:
   void pickNewRandomColor();  // for screensaver
   void drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
+  void fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+
 
 // PRIVATE VARIABLES
 
@@ -97,6 +102,8 @@ private:
   // screensaver
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
+  bool screensaverCanvasMade = false;
+  GFXcanvas16* screensaverCanvas;
 
   // location of various display text strings
   int16_t gap_right_x, gap_up_y;
@@ -122,7 +129,7 @@ private:
 
 
 // PRIVATE CONSTANTS
-
+  
   // display brightness constants
   const int NIGHT_BRIGHTNESS = 1;
   // const int EVENING_BRIGHTNESS = 10;
@@ -130,10 +137,10 @@ private:
   const int MAX_BRIGHTNESS = 255;
 
   // user defined locations of various text strings on display
-  const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80;
+  const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
+  const int16_t DISPLAY_TEXT_GAP = 10;
   const int16_t DATE_ROW_Y0 = 140;
   const int16_t ALARM_ROW_Y0 = 210;
-  const int16_t DISPLAY_TEXT_GAP = 10;
 
   // day arrays
   #define DAY_ARR_SIZE 4

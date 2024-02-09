@@ -48,7 +48,10 @@ void rgb_display_class::setup(alarm_clock_main* main_ptr) {
 #if defined(DISPLAY_IS_ST7789V)
 
   // OR use this initializer (uncomment) if using a 2.0" 320x240 TFT:
-  tft.init(240, 320);           // Init ST7789 320x240
+  // tft.init(TFT_HEIGHT, TFT_WIDTH);           // Init ST7789 320x240
+  uint32_t SPI_Speed = 80000000;
+  tft.init(TFT_HEIGHT, TFT_WIDTH);           // Init ST7789 320x240
+  tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
   // make display landscape orientation
   tft.setRotation(3);
@@ -138,6 +141,9 @@ void rgb_display_class::setSeconds(uint8_t &second) {
 }
 
 void rgb_display_class::screensaverControl(bool turnOn) {
+  // if(!turnOn)
+    // delete screensaverCanvas;
+  screensaverCanvasMade = false;
   // clear screen
   tft.fillScreen(Display_Color_Black);
   tft_HHMM_x0 = 20;
