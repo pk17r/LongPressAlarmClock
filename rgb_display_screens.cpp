@@ -422,6 +422,7 @@ void rgb_display_class::screensaver() {
     tft.setFont(&ComingSoon_Regular70pt7b);
     tft.setTextColor(Display_Backround_Color);
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+    tft.fillScreen(Display_Backround_Color);
     screensaverCanvas = new GFXcanvas16(tft_HHMM_w + 20, tft_HHMM_h + 20);
     screensaverCanvas->setTextWrap(false);
     screensaverCanvas->fillScreen(Display_Backround_Color);
@@ -429,9 +430,10 @@ void rgb_display_class::screensaver() {
     pickNewRandomColor();
     uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
     screensaverCanvas->setTextColor(randomColor);
-    screensaverCanvas->setCursor(5, tft_HHMM_h + 5);
+    screensaverCanvas->setCursor(10, tft_HHMM_h + 5);
     screensaverCanvas->print(newDisplayData.timeHHMM);
-    // screensaverCanvas->drawRect(0,0,tft_HHMM_w + 20, tft_HHMM_h + 20, Display_Color_White);
+    // screensaverCanvas->drawRect(10+gap_right_x,tft_HHMM_h + 5 + gap_up_y,tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
+    // screensaverCanvas->drawRect(0,0,tft_HHMM_w + 20, tft_HHMM_h + 20, Display_Color_White);  // canvas border
     screensaverCanvasMade = true;
   }
   else {
@@ -439,19 +441,21 @@ void rgb_display_class::screensaver() {
     tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
     tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
     // set direction
-    if(tft_HHMM_x0 <= 0) {
+    if(tft_HHMM_x0 <= -10) {
       screensaverMoveRight = true;
-      screensaverCanvasMade = false;
+      if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
+        screensaverCanvasMade = false;
     }
-    else if(tft_HHMM_x0 + tft_HHMM_w + 20 >= TFT_WIDTH) {
+    else if(tft_HHMM_x0 + tft_HHMM_w + 6 >= TFT_WIDTH) {
       screensaverMoveRight = false;
-      screensaverCanvasMade = false;
+      if(main->rtc.hour() != 10 && main->rtc.hour() != 12)
+        screensaverCanvasMade = false;
     }
-    if(tft_HHMM_y0 <= 0)  {
+    if(tft_HHMM_y0 <= -10)  {
       screensaverMoveDown = true;
       screensaverCanvasMade = false;
     }
-    else if(tft_HHMM_y0 + tft_HHMM_h + 20 >= TFT_HEIGHT)  {
+    else if(tft_HHMM_y0 + tft_HHMM_h + 6 >= TFT_HEIGHT)  {
       screensaverMoveDown = false;
       screensaverCanvasMade = false;
     }
