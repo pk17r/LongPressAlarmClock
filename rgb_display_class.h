@@ -23,9 +23,6 @@
 #include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSans12pt7b.h>
 #include <SPI.h>
-// #if defined(TOUCHSCREEN_IS_XPT2046)
-  // #include <XPT2046_Touchscreen.h>
-// #endif
 
 
 // forward decleration of other classes
@@ -36,7 +33,7 @@ class rgb_display_class {
 
 public:
 
-// FUNCTIONS
+// PUBLIC FUNCTIONS
 
   // constructor
   rgb_display_class();
@@ -59,7 +56,7 @@ public:
   void serialPrintRtcDateTime();
   void setSeconds(uint8_t &second);
 
-// VARIABLES
+// PUBLIC VARIABLES
 
   // display object
   #if defined(DISPLAY_IS_ST7789V)
@@ -124,7 +121,7 @@ private:
   } newDisplayData, displayedData;
 
 
-// CONSTANTS
+// PRIVATE CONSTANTS
 
   // display brightness constants
   const int NIGHT_BRIGHTNESS = 1;

@@ -351,8 +351,16 @@ void rgb_display_class::pickNewRandomColor() {
 void rgb_display_class::displayTimeUpdate() {
   bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
 
+  // if new minute has come then clear the full time row and recreate it
+  // GFXcanvas16* canvasPtr;
+  if(main->second == 0) {
+    // canvasPtr = GFXcanvas16(tft.width(), TIME_ROW_Y0 + gap_up_y + tft_HHMM_h);
+    // canvasPtr->fillScreen(Display_Backround_Color);
+    tft.fillRect(0, 0, tft.width(), TIME_ROW_Y0 + gap_up_y + tft_HHMM_h, Display_Backround_Color);
+  }
+
   // HH:MM string and AM/PM string
-  if (strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
+  if (main->second == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
     // HH:MM
 
@@ -364,7 +372,7 @@ void rgb_display_class::displayTimeUpdate() {
     tft.setTextColor(Display_Backround_Color);
 
     // clear old time if it was there
-    if(!isThisTheFirstTime) {
+    if(main->second != 0 && !isThisTheFirstTime) {
       // home the cursor to currently displayed text location
       tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
@@ -399,7 +407,7 @@ void rgb_display_class::displayTimeUpdate() {
     tft.setFont(&FreeSans18pt7b);
 
     // clear old AM/PM
-    if(!isThisTheFirstTime && displayedData._12hourMode) {
+    if(main->second != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
       // home the cursor
       tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
 
@@ -455,12 +463,12 @@ void rgb_display_class::displayTimeUpdate() {
   }
 
   // :SS string
-  if (strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
+  if (main->second == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
     // set font
     tft.setFont(&FreeSans24pt7b);
 
     // clear old seconds
-    if(!isThisTheFirstTime) {
+    if(main->second != 0 && !isThisTheFirstTime) {
       // change the text color to the background color
       tft.setTextColor(Display_Backround_Color);
 

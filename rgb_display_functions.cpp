@@ -166,7 +166,7 @@ void rgb_display_class::prepareTimeDayDateArrays() {
     newDisplayData._pmNotAm = true;
   }
   // Mon dd Day
-  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", months_table[main->rtc.month() - 1], main->rtc.day(), days_table[main->rtc.dayOfWeek() - 1]);
+  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", days_table[main->rtc.dayOfWeek() - 1], main->rtc.day(), months_table[main->rtc.month() - 1]);
   if(main->alarmOn)
     snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", main->alarmHr, main->alarmMin, (main->alarmIsAm ? amLabel : pmLabel));
   else
