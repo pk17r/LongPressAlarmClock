@@ -55,6 +55,7 @@ public:
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
   void setSeconds(uint8_t &second);
+  void highlightMainScreenTouch(int touchArea);
 
 // PUBLIC VARIABLES
 

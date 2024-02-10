@@ -573,12 +573,12 @@ void rgb_display_class::displayTimeUpdate() {
     strcpy(displayedData.timeSS, newDisplayData.timeSS);
 
     // draw canvas to tft   fastDrawBitmap
-    elapsedMillis time1;
+    // elapsedMillis time1;
     // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
     tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
-    unsigned long timeA = time1;
-    Serial.println();
-    Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
+    // unsigned long timeA = time1;
+    // Serial.println();
+    // Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
 
     // delete created canvas and null the pointer
     delete myCanvas;
@@ -851,6 +851,15 @@ void rgb_display_class::displayTimeUpdate() {
   }
 
   redrawDisplay = false;
+}
+
+void rgb_display_class::highlightMainScreenTouch(int touchArea) {
+  switch(touchArea) {
+    case (int)(main->alarmSetPage):
+      tft.drawRoundRect(0, main->alarmScreenAreaMainPageY, TFT_WIDTH, TFT_HEIGHT - main->alarmScreenAreaMainPageY, 5, Display_Color_Cyan);
+      delay(100);
+      break;
+  }
 }
 
 void rgb_display_class::goodMorningScreen() {

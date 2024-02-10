@@ -181,7 +181,8 @@ void alarm_clock_main::loop() {
     if(currentPage == screensaverPage) {
       setPage(mainPage);
     } // if on main page and user clicked on Alarm, then go to alarm set screen
-    else if(currentPage == mainPage && ((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)) {
+    else if(currentPage == mainPage && inactivitySeconds >= 1 && ((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)) {
+      display->highlightMainScreenTouch((int)alarmSetPage);
       setPage(alarmSetPage);
     } // if already on alarm page, then take alarm set page user inputs
     else if(currentPage == alarmSetPage) {
@@ -293,6 +294,7 @@ void alarm_clock_main::setPage(ScreenPage page) {
     case mainPage:
       currentPage = mainPage;   // page needs to be set before any action
       display->screensaverControl(false);
+      display->displayTimeUpdate();
       break;
     case screensaverPage:
       currentPage = screensaverPage;  // page needs to be set before any action
@@ -310,7 +312,6 @@ void alarm_clock_main::setPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
-  delay(100); // a delay just to stop instant clicks on new page
 }
 
 
