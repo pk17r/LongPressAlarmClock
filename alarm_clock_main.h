@@ -69,7 +69,7 @@ public:
   uRTCLib rtc;
 
   // display object
-  rgb_display_class* display;
+  rgb_display_class* display = NULL;
 
   // seconds blinker
   bool blink = false;

@@ -99,7 +99,7 @@ private:
 // PRIVATE VARIABLES
 
   // pointers to main class object
-  alarm_clock_main* main;
+  alarm_clock_main* main = NULL;
 
   // current screen brightness
   int current_brightness = 0;
@@ -107,14 +107,14 @@ private:
   // screensaver
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
-  GFXcanvas16* myCanvas;
+  GFXcanvas16* myCanvas = NULL;
 
   // location of various display text strings
-  int16_t gap_right_x, gap_up_y;
+  int16_t gap_right_x = 0, gap_up_y = 0;
   int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = 2 * TIME_ROW_Y0;   // default starting location of screensaver
-  uint16_t tft_HHMM_w, tft_HHMM_h;
-  int16_t tft_AmPm_x0, tft_AmPm_y0;
-  int16_t tft_SS_x0;
+  uint16_t tft_HHMM_w = 0, tft_HHMM_h = 0;
+  int16_t tft_AmPm_x0 = 0, tft_AmPm_y0 = 0;
+  int16_t tft_SS_x0 = 0;
   int16_t date_row_x0 = 0;
   int16_t alarm_row_x0 = 0;
   int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
@@ -228,41 +228,6 @@ private:
 
   constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 33;
   const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
-
-  const char* color_names[COLOR_PICKER_WHEEL_SIZE] = {
-"Argentinian_blue  ??   ",
-"Light_sky_blue       ",
-"Blue_violet          ",
-"Vivid_sky_blue       ",
-"Beige                ",
-"Buff                 ",
-"Sandy_brown          ",
-"Cyan                 ",
-"Turquoise            ",
-"Puce                 ",
-"Bright_green         ",
-"Caribbean_green      ",
-"Electric_green       ",
-"Green_yellow         ",
-"Magenta              ",
-"Shocking_pink        ",
-"Apricot              ",
-"Atomic_tangerine     ",
-"Dark_orange          ",
-"Orange               ",
-"Tart_orange          ",
-"Light_deep_pink      ",
-"Pink_flamingo        ",
-"Electric_purple      ",
-"Purple_x11           ",
-"Candy_apple_red      ",
-"Red_rgb              ",
-"Tomato               ",
-"Ivory                ",
-"Chartreuse_web       ",
-"Golden_yellow        ",
-"Yellow_rgb_x11_yellow",
-"Lime_color_wheel     "};
 
   // The colors we actually want to use
   const uint16_t        Display_Time_Color         = Display_Color_Yellow;

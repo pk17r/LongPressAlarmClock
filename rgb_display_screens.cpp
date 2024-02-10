@@ -343,14 +343,14 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   elapsedMillis timer1;
 //   GFXcanvas16 myCanvas(TFT_WIDTH, TFT_HEIGHT);
 //   unsigned long time1 = timer1; timer1 = 0;
-//   myCanvas.fillScreen(Display_Backround_Color);
+//   myCanvas->fillScreen(Display_Backround_Color);
 //   // tft.fillScreen(Display_Backround_Color);
-//   myCanvas.setTextWrap(false);
+//   myCanvas->setTextWrap(false);
 //   unsigned long time2 = timer1; timer1 = 0;
-//   myCanvas.setFont(&ComingSoon_Regular70pt7b);
+//   myCanvas->setFont(&ComingSoon_Regular70pt7b);
 //   unsigned long time3 = timer1; timer1 = 0;
 //   // tft.setFont(&ComingSoon_Regular70pt7b);
-//   myCanvas.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+//   myCanvas->getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
 //   // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h);
 //   // move around
 //   unsigned long time4 = timer1; timer1 = 0;
@@ -378,22 +378,22 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   // Serial.print("screensaverMoveRight "); Serial.print(screensaverMoveRight); Serial.print(" screensaverMoveDown "); Serial.println(screensaverMoveDown);
 //   // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
 //   unsigned long time5 = timer1; timer1 = 0;
-//   myCanvas.setCursor(tft_HHMM_x0, tft_HHMM_y0);
+//   myCanvas->setCursor(tft_HHMM_x0, tft_HHMM_y0);
 //   unsigned long time6 = timer1; timer1 = 0;
 //   // tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
-//   // myCanvas.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
+//   // myCanvas->drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
 //   uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
-//   myCanvas.setTextColor(randomColor);
+//   myCanvas->setTextColor(randomColor);
 //   // tft.setTextColor(randomColor);
 //   unsigned long time7 = timer1; timer1 = 0;
-//   myCanvas.print(newDisplayData.timeHHMM);
+//   myCanvas->print(newDisplayData.timeHHMM);
 //   unsigned long time8 = timer1; timer1 = 0;
 //   // tft.print(newDisplayData.timeHHMM);
 //   // Serial.println("Printed time on tft");
 //   // delay(2000);
 //   // In code later:
 //   // elapsedMillis time1;
-//   // tft.drawBitmap(0, 0, myCanvas.getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
+//   // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
 //   // unsigned long timeA = time1;
 //   // Serial.println();
 //   // Serial.print("Time to run tft.drawBitmap (ms) = "); Serial.println(timeA);
@@ -401,8 +401,8 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   // tft.fillScreen(Display_Backround_Color);
 //   // delay(1000);
 //   // time1 = 0;
-//   // fastDrawBitmap(0, 0, myCanvas.getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
-//   tft.drawRGBBitmap(0, 0, myCanvas.getBuffer(), TFT_WIDTH, TFT_HEIGHT); // Copy to screen
+//   // fastDrawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
+//   tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT); // Copy to screen
 //   unsigned long time9 = timer1; timer1 = 0;
 //   Serial.println();
 //   Serial.print(time1); Serial.print(' '); Serial.print(time2); Serial.print(' '); Serial.print(time3); Serial.print(' '); Serial.print(time4); Serial.print(' '); Serial.print(time5); Serial.print(' '); Serial.print(time6); Serial.print(' '); Serial.print(time7); Serial.print(' '); Serial.print(time8); Serial.print(' '); Serial.println(time9);
@@ -419,33 +419,46 @@ void rgb_display_class::screensaver() {
   // elapsedMillis timer1;
   const int16_t GAP_BAND = 2, GAP_BAND_RIGHT = 30;
   if(refreshScreensaverCanvas) {
-    delete myCanvas;
+
+    // delete created canvas and null the pointer
+    if(myCanvas != NULL) {
+      delete myCanvas;
+      myCanvas = NULL;
+    }
+
+    // get bounds of HH:MM text on screen
     tft.setFont(&ComingSoon_Regular70pt7b);
     tft.setTextColor(Display_Backround_Color);
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+
+    // create canvas
     myCanvas = new GFXcanvas16(tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND);
     myCanvas->setTextWrap(false);
     myCanvas->fillScreen(Display_Backround_Color);
     myCanvas->setFont(&ComingSoon_Regular70pt7b);
+
+    // picknew  random color
     pickNewRandomColor();
-    // currentRandomColorIndex++;
-    // if(currentRandomColorIndex >= COLOR_PICKER_WHEEL_SIZE)  currentRandomColorIndex = 0;
     uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
+
     myCanvas->setTextColor(randomColor);
     myCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
     myCanvas->print(newDisplayData.timeHHMM);
+
+    // get visual bounds of created canvas and time string
     // myCanvas->drawRect(GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
     // myCanvas->drawRect(0,0, tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
+
+    // stop refreshing canvas until time change or if it hits top or bottom screen edges
     refreshScreensaverCanvas = false;
-    // myCanvas->setCursor(70,50);
-    // myCanvas->setFont(&FreeSans12pt7b);
-    // myCanvas->setTextColor(Display_Color_White);
-    // myCanvas->print(color_names[currentRandomColorIndex]);
   }
   else {
+
+    // move the time text on screen
     const int16_t adder = 1;
     tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
     tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
+
     // set direction on hitting any edge
     // left and right edge - only change direction
     if(tft_HHMM_x0 + GAP_BAND + gap_right_x <= 0) {   // left edge
@@ -468,6 +481,8 @@ void rgb_display_class::screensaver() {
       }
     }
   }
+
+  // paste the canvas on screen
   // unsigned long time1 = timer1; timer1 = 0;
   tft.drawRGBBitmap(tft_HHMM_x0, tft_HHMM_y0, myCanvas->getBuffer(), tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND); // Copy to screen
   // unsigned long time2 = timer1;
@@ -486,83 +501,91 @@ void rgb_display_class::displayTimeUpdate() {
 
   bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
 
-  if(0) {
-    // GFXcanvas16 myCanvas(TFT_WIDTH, TIME_ROW_Y0 + 6);
-    GFXcanvas1 myCanvas(TFT_WIDTH, TIME_ROW_Y0 + 6);
-    // myCanvas.fillScreen(Display_Backround_Color);
-    myCanvas.setTextWrap(false);
+  if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it
+
+    // delete canvas if it exists
+    if(myCanvas != NULL) {
+      delete myCanvas;
+      myCanvas = NULL;
+    }
+
+    // create new canvas for time row
+    myCanvas = new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6);
+    myCanvas->fillScreen(Display_Backround_Color);
+    myCanvas->setTextWrap(false);
+
 
     // HH:MM
 
     // set font
-    myCanvas.setFont(&FreeSansBold48pt7b);
+    myCanvas->setFont(&FreeSansBold48pt7b);
 
     // home the cursor
-    myCanvas.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+    myCanvas->setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
     // change the text color to foreground color
-    // myCanvas.setTextColor(Display_Time_Color);
+    myCanvas->setTextColor(Display_Time_Color);
 
     // draw the new time value
-    myCanvas.print(newDisplayData.timeHHMM);
+    myCanvas->print(newDisplayData.timeHHMM);
     // tft.setTextSize(1);
     // delay(2000);
 
     // and remember the new value
     strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
 
+
     // AM/PM
 
-    int16_t x0_pos = myCanvas.getCursorX();
+    int16_t x0_pos = myCanvas->getCursorX();
 
     // set font
-    myCanvas.setFont(&FreeSans18pt7b);
+    myCanvas->setFont(&FreeSans18pt7b);
 
     // draw new AM/PM
     if(newDisplayData._12hourMode) {
 
       // home the cursor
-      myCanvas.setCursor(x0_pos + DISPLAY_TEXT_GAP, AM_PM_ROW_Y0);
+      myCanvas->setCursor(x0_pos + DISPLAY_TEXT_GAP, AM_PM_ROW_Y0);
       // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
       // draw the new time value
       if(newDisplayData._pmNotAm)
-        myCanvas.print(pmLabel);
+        myCanvas->print(pmLabel);
       else
-        myCanvas.print(amLabel);
+        myCanvas->print(amLabel);
     }
 
     // and remember the new value
     displayedData._12hourMode = newDisplayData._12hourMode;
     displayedData._pmNotAm = newDisplayData._pmNotAm;
 
+
     // :SS
 
     // home the cursor
-    myCanvas.setCursor(x0_pos + DISPLAY_TEXT_GAP, TIME_ROW_Y0);
+    myCanvas->setCursor(x0_pos + DISPLAY_TEXT_GAP, TIME_ROW_Y0);
 
     // draw the new time value
-    myCanvas.print(newDisplayData.timeSS);
+    myCanvas->print(newDisplayData.timeSS);
 
     // and remember the new value
     strcpy(displayedData.timeSS, newDisplayData.timeSS);
 
     // draw canvas to tft   fastDrawBitmap
     elapsedMillis time1;
-    tft.drawBitmap(0, 0, myCanvas.getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
+    // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
+    tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
     unsigned long timeA = time1;
     Serial.println();
-    Serial.print("Time to run tft.drawBitmap (ms) = "); Serial.println(timeA);
-    delay(1000);
-    tft.fillScreen(Display_Backround_Color);
-    delay(1000);
-    time1 = 0;
-    fastDrawBitmap(0, 0, myCanvas.getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color);
-    timeA = time1;
-    Serial.print("Time to run fastDrawBitmap (ms) = "); Serial.println(timeA);
-    delay(1000);
+    Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
+
+    // delete created canvas and null the pointer
+    delete myCanvas;
+    myCanvas = NULL;
+
   }
-  else {
+  else {    // CODE THAT CHECKS AND UPDATES ONLY CHANGES ON SCREEN HH:MM :SS AmPm
 
     // if new minute has come then clear the full time row and recreate it
     // GFXcanvas16* canvasPtr;
@@ -711,7 +734,7 @@ void rgb_display_class::displayTimeUpdate() {
       strcpy(displayedData.timeSS, newDisplayData.timeSS);
     }
   }
-  
+
   // date string center aligned
   if (strcmp(newDisplayData.dateStr, displayedData.dateStr) != 0 || redrawDisplay) {
     // set font
