@@ -419,28 +419,28 @@ void rgb_display_class::screensaver() {
   // elapsedMillis timer1;
   const int16_t GAP_BAND = 2, GAP_BAND_RIGHT = 30;
   if(refreshScreensaverCanvas) {
-    delete screensaverCanvas;
+    delete myCanvas;
     tft.setFont(&ComingSoon_Regular70pt7b);
     tft.setTextColor(Display_Backround_Color);
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
-    screensaverCanvas = new GFXcanvas16(tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND);
-    screensaverCanvas->setTextWrap(false);
-    screensaverCanvas->fillScreen(Display_Backround_Color);
-    screensaverCanvas->setFont(&ComingSoon_Regular70pt7b);
+    myCanvas = new GFXcanvas16(tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND);
+    myCanvas->setTextWrap(false);
+    myCanvas->fillScreen(Display_Backround_Color);
+    myCanvas->setFont(&ComingSoon_Regular70pt7b);
     pickNewRandomColor();
     // currentRandomColorIndex++;
     // if(currentRandomColorIndex >= COLOR_PICKER_WHEEL_SIZE)  currentRandomColorIndex = 0;
     uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
-    screensaverCanvas->setTextColor(randomColor);
-    screensaverCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
-    screensaverCanvas->print(newDisplayData.timeHHMM);
-    // screensaverCanvas->drawRect(GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
-    // screensaverCanvas->drawRect(0,0, tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
+    myCanvas->setTextColor(randomColor);
+    myCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
+    myCanvas->print(newDisplayData.timeHHMM);
+    // myCanvas->drawRect(GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
+    // myCanvas->drawRect(0,0, tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
     refreshScreensaverCanvas = false;
-    // screensaverCanvas->setCursor(70,50);
-    // screensaverCanvas->setFont(&FreeSans12pt7b);
-    // screensaverCanvas->setTextColor(Display_Color_White);
-    // screensaverCanvas->print(color_names[currentRandomColorIndex]);
+    // myCanvas->setCursor(70,50);
+    // myCanvas->setFont(&FreeSans12pt7b);
+    // myCanvas->setTextColor(Display_Color_White);
+    // myCanvas->print(color_names[currentRandomColorIndex]);
   }
   else {
     const int16_t adder = 1;
@@ -469,7 +469,7 @@ void rgb_display_class::screensaver() {
     }
   }
   // unsigned long time1 = timer1; timer1 = 0;
-  tft.drawRGBBitmap(tft_HHMM_x0, tft_HHMM_y0, screensaverCanvas->getBuffer(), tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND); // Copy to screen
+  tft.drawRGBBitmap(tft_HHMM_x0, tft_HHMM_y0, myCanvas->getBuffer(), tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND); // Copy to screen
   // unsigned long time2 = timer1;
   // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
 }

@@ -107,7 +107,7 @@ private:
   // screensaver
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
-  GFXcanvas16* screensaverCanvas;
+  GFXcanvas16* myCanvas;
 
   // location of various display text strings
   int16_t gap_right_x, gap_up_y;
