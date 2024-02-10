@@ -143,7 +143,7 @@ void rgb_display_class::setSeconds(uint8_t &second) {
 void rgb_display_class::screensaverControl(bool turnOn) {
   // if(!turnOn)
     // delete screensaverCanvas;
-  screensaverCanvasMade = false;
+  refreshScreensaverCanvas = true;
   // clear screen
   tft.fillScreen(Display_Color_Black);
   tft_HHMM_x0 = 20;

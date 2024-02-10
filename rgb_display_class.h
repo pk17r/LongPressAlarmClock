@@ -75,9 +75,14 @@ public:
   // redraw full display flag
   bool redrawDisplay = false;
 
+  // refresh screensaver canvas
+  bool refreshScreensaverCanvas = true;
+
   // tft dimensions
   const uint16_t TFT_WIDTH = 320, TFT_HEIGHT = 240;
   // SPISettings settingsA(80000000, MSBFIRST, SPI_MODE0);
+
+
 private:
 
 // PRIVATE FUNCTIONS
@@ -102,7 +107,6 @@ private:
   // screensaver
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
-  bool screensaverCanvasMade = false;
   GFXcanvas16* screensaverCanvas;
 
   // location of various display text strings
@@ -224,6 +228,41 @@ private:
 
   constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 33;
   const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
+
+  const char* color_names[COLOR_PICKER_WHEEL_SIZE] = {
+"Argentinian_blue  ??   ",
+"Light_sky_blue       ",
+"Blue_violet          ",
+"Vivid_sky_blue       ",
+"Beige                ",
+"Buff                 ",
+"Sandy_brown          ",
+"Cyan                 ",
+"Turquoise            ",
+"Puce                 ",
+"Bright_green         ",
+"Caribbean_green      ",
+"Electric_green       ",
+"Green_yellow         ",
+"Magenta              ",
+"Shocking_pink        ",
+"Apricot              ",
+"Atomic_tangerine     ",
+"Dark_orange          ",
+"Orange               ",
+"Tart_orange          ",
+"Light_deep_pink      ",
+"Pink_flamingo        ",
+"Electric_purple      ",
+"Purple_x11           ",
+"Candy_apple_red      ",
+"Red_rgb              ",
+"Tomato               ",
+"Ivory                ",
+"Chartreuse_web       ",
+"Golden_yellow        ",
+"Yellow_rgb_x11_yellow",
+"Lime_color_wheel     "};
 
   // The colors we actually want to use
   const uint16_t        Display_Time_Color         = Display_Color_Yellow;

@@ -242,6 +242,10 @@ void alarm_clock_main::loop() {
       // set display brightness based on time
       if(inactivitySeconds >= INACTIVITY_SECONDS_LIM)
         display->checkTimeAndSetBrightness();
+
+      // if screensaver is On, then update time on it
+      if(currentPage == screensaverPage)
+        display->refreshScreensaverCanvas = true;
     }
 
     // prepare date and time arrays
