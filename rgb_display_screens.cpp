@@ -417,7 +417,7 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 
 void rgb_display_class::screensaver() {
   // elapsedMillis timer1;
-  const int16_t GAP_BAND = 2, GAP_BAND_RIGHT = 30;
+  const int16_t GAP_BAND = 5, GAP_BAND_RIGHT = 30;
   if(refreshScreensaverCanvas) {
 
     // delete created canvas and null the pointer
@@ -430,20 +430,36 @@ void rgb_display_class::screensaver() {
     tft.setFont(&ComingSoon_Regular70pt7b);
     tft.setTextColor(Display_Backround_Color);
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+    // get bounds of date string
+    uint16_t h = 0, w = 0;
+    int16_t x = 0, y = 0;
+    tft.setFont(&Satisfy_Regular24pt7b);
+    tft.getTextBounds(newDisplayData.dateStr, 0, 0, &x, &y, &w, &h);
+    tft_HHMM_h += h + GAP_BAND;
 
     // create canvas
     myCanvas = new GFXcanvas16(tft_HHMM_w + GAP_BAND + GAP_BAND_RIGHT, tft_HHMM_h + 2*GAP_BAND);
     myCanvas->setTextWrap(false);
     myCanvas->fillScreen(Display_Backround_Color);
-    myCanvas->setFont(&ComingSoon_Regular70pt7b);
 
-    // picknew  random color
+    // picknew random color
     pickNewRandomColor();
     uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
 
+    // print HH:MM
+    myCanvas->setFont(&ComingSoon_Regular70pt7b);
     myCanvas->setTextColor(randomColor);
     myCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
     myCanvas->print(newDisplayData.timeHHMM);
+
+    // print date string
+    myCanvas->setFont(&Satisfy_Regular24pt7b);
+    myCanvas->setTextColor(randomColor);
+    myCanvas->setCursor(GAP_BAND - x, tft_HHMM_h - GAP_BAND);
+    myCanvas->print(newDisplayData.dateStr);
+
+    // draw bell
+    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - h + GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), (newDisplayData._alarmOn ? bell_small_w : bell_fallen_small_w), (newDisplayData._alarmOn ? bell_small_h : bell_fallen_small_h), randomColor);
 
     // get visual bounds of created canvas and time string
     // myCanvas->drawRect(GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
