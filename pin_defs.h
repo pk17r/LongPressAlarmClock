@@ -123,6 +123,7 @@
   #define SQW_INT_PIN 3
   #define BUTTON_PIN 14
   #define LED_PIN 15
+  #define BUZZER_PIN 11
 
 #endif
 

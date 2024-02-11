@@ -2,6 +2,7 @@
 #define ALARM_CLOCK_MAIN_H
 
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  #include "secrets.h"
   #include "WiFi.h"
 #endif
 #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
@@ -34,12 +35,9 @@ public:
 
 // FUNCTIONS
 
-  // constructor / destructor
-  alarm_clock_main(){};
-
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
-  void populateSavedAlarm();
+  void retrieveSettings();
   void loop();
   void rtc_clock_initialize();
   // interrupt ISR
@@ -50,6 +48,10 @@ public:
   void processSerialInput();
   void setPage(ScreenPage page);
   void saveAlarm();
+  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  void turn_WiFi_On();
+  void turn_WiFi_Off();
+  #endif
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   // void putEsp32ToLightSleep();
@@ -73,6 +75,19 @@ public:
 
   // seconds blinker
   bool blink = false;
+
+  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    #if defined(MY_WIFI_SSID)
+      char* ssid = MY_WIFI_SSID;
+    #else
+      char* ssid = "";
+    #endif
+    #if defined(MY_WIFI_PASSWD)
+      char* password = MY_WIFI_PASSWD;
+    #else
+      char* password = "";
+    #endif
+  #endif
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60

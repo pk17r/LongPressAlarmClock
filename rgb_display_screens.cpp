@@ -449,7 +449,7 @@ void rgb_display_class::screensaver() {
     // print HH:MM
     myCanvas->setFont(&ComingSoon_Regular70pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor((TFT_WIDTH - tft_HHMM_w) / 2 - gap_right_x, GAP_BAND - gap_up_y);
+    myCanvas->setCursor((TFT_WIDTH - tft_HHMM_w) / 2, GAP_BAND - gap_up_y);
     myCanvas->print(newDisplayData.timeHHMM);
 
     // print date string
@@ -462,7 +462,7 @@ void rgb_display_class::screensaver() {
     myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - h + GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), (newDisplayData._alarmOn ? bell_small_w : bell_fallen_small_w), (newDisplayData._alarmOn ? bell_small_h : bell_fallen_small_h), randomColor);
 
     // get visual bounds of created canvas and time string
-    // myCanvas->drawRect((TFT_WIDTH - tft_HHMM_w) / 2 - gap_right_x, GAP_BAND, tft_HHMM_w, tft_HHMM_h - h - GAP_BAND, Display_Color_Green);  // time border
+    // myCanvas->drawRect((TFT_WIDTH - tft_HHMM_w) / 2, GAP_BAND, tft_HHMM_w, tft_HHMM_h - h - GAP_BAND, Display_Color_Green);  // time border
     // myCanvas->drawRect(0,0, TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
@@ -477,10 +477,10 @@ void rgb_display_class::screensaver() {
 
     // set direction on hitting any edge
     // left and right edge - only change direction
-    if(tft_HHMM_x0 + (TFT_WIDTH - tft_HHMM_w) / 2 - gap_right_x <= 0) {   // left edge
+    if(tft_HHMM_x0 + (TFT_WIDTH - tft_HHMM_w) / 2 <= 0) {   // left edge
       screensaverMoveRight = true;
     }
-    else if(tft_HHMM_x0 + (TFT_WIDTH + tft_HHMM_w) / 2 - gap_right_x >= TFT_WIDTH) {    // right edge
+    else if(tft_HHMM_x0 + (TFT_WIDTH + tft_HHMM_w) / 2 >= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
     }
     // top and bottom edge - when hit change color as well

@@ -2,129 +2,29 @@
 #include <Arduino.h>
 #include "alarm_clock_main.h"
 
-// constructor
-void alarm_clock_main::populateSavedAlarm() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    EEPROM.begin(512);
-  #endif
-
-  #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // start reading from the first byte (address 0) of the EEPROM
-    unsigned int address = ALAMR_ADDRESS_EEPROM;
-    byte value;
-    // read a byte from the current address of the EEPROM
-    value = EEPROM.read(address);
-    if(value == 1) {
-      // alarm data is stored in EEPROM
-      // retrieve it
-      address++;
-      alarmHr = EEPROM.read(address); address++;
-      alarmMin = EEPROM.read(address); address++;
-      alarmIsAm = EEPROM.read(address); address++;
-      alarmOn = EEPROM.read(address);
-      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-        EEPROM.end();
-      #endif
-    }
-    else {
-      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-        EEPROM.end();
-      #endif
-      // write alarm on EEPROM
-      saveAlarm();
-    }
-  #endif
-}
-
-void alarm_clock_main::saveAlarm() {
-  alarmHr = var1;
-  alarmMin = var2;
-  alarmIsAm = var3AmPm;
-  alarmOn = var4OnOff;
-
-  #if defined(MCU_IS_TEENSY)
-
-    // start writing from the first byte of the EEPROM
-    unsigned int address = ALAMR_ADDRESS_EEPROM;
-    // write alarm on EEPROM
-    EEPROM.update(address, 1); address++;
-    EEPROM.update(address, alarmHr); address++;
-    EEPROM.update(address, alarmMin); address++;
-    EEPROM.update(address, alarmIsAm); address++;
-    EEPROM.update(address, alarmOn);
-    Serial.println("Alarm written to EEPROM");
-
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    EEPROM.begin(512);
-
-    // start writing from the first byte of the EEPROM
-    unsigned int address = ALAMR_ADDRESS_EEPROM;
-    // write alarm on EEPROM
-    EEPROM.write(address, 1); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmHr); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmMin); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmIsAm); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmOn);
-    EEPROM.commit();
-    Serial.println("Alarm written to EEPROM");
-    EEPROM.end();
-
-  #endif
-
-}
-
-// interrupt ISR
-void alarm_clock_main::sqwPinInterruptFn() {
-  alarm_clock_main::secondsIncremented = true;
-}
-
-
 // program setup function
 void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
-#if defined(MCU_IS_ESP32)
-  WiFi.mode(WIFI_OFF);
-  delay(1);
-  WiFi.disconnect();
-  setCpuFrequencyMhz(160);
-#endif
-#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  Serial.println("Turning off wifi.");
-  WiFi.persistent(false);
-  delay(1);
-  WiFi.mode(WIFI_OFF);
-  delay(1);
-  WiFi.disconnect();
-  Serial.println("WiFi Off.");
-  // Turn WiFi back On using:
-  //
-  // WiFi.persistent(true);
-  // WiFi.begin(ssid, password);
-  // Serial.println("Connecting to WiFi");
-  // int i = 0;
-  // while(WiFi.status() != WL_CONNECTED) {
-  //   delay(1000);
-  //   Serial.print(".");
-  //   i++;
-  //   if(i >= 10) break;
-  // }
-#endif
-  // make all CS pins high
-  pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
-  pinMode(TS_CS_PIN, OUTPUT);
-  digitalWrite(TS_CS_PIN, HIGH);
-  
+  #if defined(MCU_IS_ESP32)
+    setCpuFrequencyMhz(160);
+  #endif
+
   Serial.begin(9600);
   delay(100);
   // while(!Serial) {};
   Serial.println(F("\nSerial OK"));
 
-  // populate saved alarm settings
-  populateSavedAlarm();
+  // make all CS pins high
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, HIGH);
+  pinMode(TS_CS_PIN, OUTPUT);
+  digitalWrite(TS_CS_PIN, HIGH);
+
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W) || defined(MCU_IS_ESP32)
+    turn_WiFi_Off();
+  #endif
+
+  // retrieve saved settings
+  retrieveSettings();
 
   // setup alarm clock program
 
@@ -140,6 +40,10 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   // seconds blink LED
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
+
+  // initialize buzzer
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
 
   // initialize push button
   pushBtn.setButtonPin(BUTTON_PIN);
@@ -314,6 +218,113 @@ void alarm_clock_main::setPage(ScreenPage page) {
   }
 }
 
+void alarm_clock_main::retrieveSettings() {
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    EEPROM.begin(512);
+  #endif
+
+  #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    // start reading from the first byte (address 0) of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    byte value;
+    // read a byte from the current address of the EEPROM
+    value = EEPROM.read(address);
+    if(value == 1) {
+      // alarm data is stored in EEPROM
+      // retrieve it
+      address++;
+      alarmHr = EEPROM.read(address); address++;
+      alarmMin = EEPROM.read(address); address++;
+      alarmIsAm = EEPROM.read(address); address++;
+      alarmOn = EEPROM.read(address);
+      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+        EEPROM.end();
+      #endif
+    }
+    else {
+      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+        EEPROM.end();
+      #endif
+      // write alarm on EEPROM
+      saveAlarm();
+    }
+  #endif
+}
+
+void alarm_clock_main::saveAlarm() {
+  alarmHr = var1;
+  alarmMin = var2;
+  alarmIsAm = var3AmPm;
+  alarmOn = var4OnOff;
+
+  #if defined(MCU_IS_TEENSY)
+
+    // start writing from the first byte of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    // write alarm on EEPROM
+    EEPROM.update(address, 1); address++;
+    EEPROM.update(address, alarmHr); address++;
+    EEPROM.update(address, alarmMin); address++;
+    EEPROM.update(address, alarmIsAm); address++;
+    EEPROM.update(address, alarmOn);
+    Serial.println("Alarm written to EEPROM");
+
+  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    EEPROM.begin(512);
+
+    // start writing from the first byte of the EEPROM
+    unsigned int address = ALAMR_ADDRESS_EEPROM;
+    // write alarm on EEPROM
+    EEPROM.write(address, 1); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmHr); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmMin); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmIsAm); address++;
+    EEPROM.commit();
+    EEPROM.write(address, alarmOn);
+    EEPROM.commit();
+    Serial.println("Alarm written to EEPROM");
+    EEPROM.end();
+
+  #endif
+
+}
+
+// interrupt ISR
+void alarm_clock_main::sqwPinInterruptFn() {
+  alarm_clock_main::secondsIncremented = true;
+}
+
+#if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+void alarm_clock_main::turn_WiFi_On() {
+  Serial.println(F("Connecting to WiFi"));
+  WiFi.persistent(true);
+  delay(1);
+  WiFi.begin(ssid, password);
+  int i = 0;
+  while(WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.print(".");
+    i++;
+    if(i >= 10) break;
+  }
+  if(WiFi.status() == WL_CONNECTED)
+    Serial.println(F("WiFi Connected."));
+  else
+    Serial.println(F("Could NOT connect to WiFi."));
+}
+
+void alarm_clock_main::turn_WiFi_Off() {
+  WiFi.persistent(false);
+  delay(1);
+  WiFi.mode(WIFI_OFF);
+  delay(1);
+  WiFi.disconnect();
+  Serial.println(F("WiFi Off."));
+}
+#endif
 
 // #if defined(MCU_IS_ESP32)
 // /*
