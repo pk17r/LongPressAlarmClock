@@ -45,6 +45,7 @@ public:
   void screensaver();
   void goodMorningScreen();
   void setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y);
+  void alarmOnScreen(bool firstTime, int8_t buttonPressSecondsCounter);
 
   // functions
   void setup(alarm_clock_main* main_ptr);

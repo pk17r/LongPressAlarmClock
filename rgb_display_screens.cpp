@@ -415,6 +415,42 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   // delay(2000);
 // }
 
+void rgb_display_class::alarmOnScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
+  
+  if(firstTime) {
+
+    // clear screen
+    tft.fillScreen(Display_Backround_Color);
+
+    // set font
+    // tft.setTextSize(1);
+    tft.setFont(&Satisfy_Regular24pt7b);
+
+    // home the cursor
+    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+
+    // change the text color to foreground color
+    tft.setTextColor(Display_Time_Color);
+
+    // draw the new time value
+    tft.print("ALARM ON!");
+    // tft.setTextSize(1);
+    // delay(2000);
+  }
+
+  // fill rect
+  tft.fillRect(0, 100, 100, 220, Display_Backround_Color);
+
+  // set font
+  // tft.setTextSize(1);
+  tft.setFont(&Satisfy_Regular24pt7b);
+
+  // home the cursor
+  tft.setCursor(20, 200);
+
+  tft.print(buttonPressSecondsCounter);
+}
+
 void rgb_display_class::screensaver() {
   // elapsedMillis timer1;
   const int16_t GAP_BAND = 5, GAP_BAND_RIGHT = 30;
