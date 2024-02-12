@@ -10,7 +10,6 @@
 ***************************************************************************/
 #include "alarm_clock_main.h"
 #include "rgb_display_class.h"
-#include <elapsedMillis.h>
 
 alarm_clock_main programObj;
 rgb_display_class displayObj;
@@ -31,7 +30,7 @@ void setup() {
 }
 
 void loop() {
-  // display_freeram();
   // put your main code here, to run repeatedly:
   programObj.loop();
+  // display_freeram();
 }

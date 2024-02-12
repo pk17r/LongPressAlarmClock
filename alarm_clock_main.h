@@ -2,7 +2,7 @@
 #define ALARM_CLOCK_MAIN_H
 
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  #include "secrets.h"
+  // #include "secrets.h"
   #include "WiFi.h"
 #endif
 #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
@@ -49,6 +49,7 @@ public:
   void setPage(ScreenPage page);
   void saveAlarm();
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  void saveWiFiDetails();
   void turn_WiFi_On();
   void turn_WiFi_Off();
   #endif
@@ -77,15 +78,16 @@ public:
   bool blink = false;
 
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    #if defined(MY_WIFI_SSID)
-      char* ssid = MY_WIFI_SSID;
+    const unsigned int WIFI_SSID_PASSWORD_LENGTH_MAX = 32;
+    #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
+      char* wifi_ssid = MY_WIFI_SSID;
     #else
-      char* ssid = "";
+      char* wifi_ssid = NULL;
     #endif
-    #if defined(MY_WIFI_PASSWD)
-      char* password = MY_WIFI_PASSWD;
+    #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
+      char* wifi_password = MY_WIFI_PASSWD;
     #else
-      char* password = "";
+      char* wifi_password = NULL;
     #endif
   #endif
 
@@ -120,7 +122,8 @@ public:
 
 // PRIVATE CONSTANTS
   /** the address in the EEPROM **/
-  const unsigned int ALAMR_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
+  const unsigned int ALARM_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
+  const unsigned int WIFI_ADDRESS_EEPROM = 5; // stores data in order 5 = wifi_ssid ending with \0 thereafter wifi_password ending with \0
 
 };
 
