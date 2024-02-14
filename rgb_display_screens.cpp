@@ -424,12 +424,12 @@ void rgb_display_class::settingsPage() {
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
   tft.print("ssid: ");
-  tft.print(main->wifi_ssid);
+  tft.print(main->wifiStuff->wifi_ssid);
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= main->WIFI_SSID_PASSWORD_LENGTH_MAX) {
-    char c = *(main->wifi_password + i);
+  while(i <= main->wifiStuff->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+    char c = *(main->wifiStuff->wifi_password + i);
     if(c == '\0')
      break;
     if(i % 4 == 0)
@@ -474,7 +474,18 @@ void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressS
     tft.print(newDisplayData.dateStr);
 
     // show today's weather
-    
+    if(main->wifiStuff->gotWeatherInfo) {
+      tft.setFont(&FreeMono9pt7b);
+      tft.setCursor(20, s_y0 + 65);
+      tft.setTextColor(Display_Color_Orange);
+      tft.print(main->wifiStuff->weather_main); tft.print(" : "); tft.print(main->wifiStuff->weather_description);
+      tft.setCursor(20, s_y0 + 85);
+      tft.print("Temp : "); tft.print(main->wifiStuff->weather_temp); tft.print("F ("); tft.print(main->wifiStuff->weather_temp_max); tft.print("/"); tft.print(main->wifiStuff->weather_temp_min); tft.print(")");
+      tft.setCursor(20, s_y0 + 105);
+      tft.print("Wind Speed : "); tft.print(main->wifiStuff->weather_wind_speed); tft.print("m/s");
+      tft.setCursor(20, s_y0 + 125);
+      tft.print("Humidity : "); tft.print(main->wifiStuff->weather_humidity); tft.print("%");
+    }
   }
 
   char timer_str[4];

@@ -2,10 +2,7 @@
 #define ALARM_CLOCK_MAIN_H
 
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  // #include "secrets.h"
-  #include "WiFi.h"
-  #include <HTTPClient.h>
-  #include <Arduino_JSON.h>
+  #include "wifi_stuff.h"
 #endif
 #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include <EEPROM.h>
@@ -26,7 +23,7 @@
 
 // forward decleration of other classes
 class rgb_display_class;
-
+class wifi_stuff;
 
 class alarm_clock_main {
 
@@ -46,7 +43,7 @@ public:
 
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
-  void retrieveSettings();
+  void retrieveAlarmSettings();
   void loop();
   void rtc_clock_initialize();
   // clock seconds interrupt ISR
@@ -59,12 +56,6 @@ public:
   void processSerialInput();
   void setPage(ScreenPage page);
   void saveAlarm();
-  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  void saveWiFiDetails();
-  void turn_WiFi_On();
-  void turn_WiFi_Off();
-  void getTodaysWeatherInfo();
-  #endif
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   // void putEsp32ToLightSleep();
@@ -86,22 +77,11 @@ public:
   // display object
   rgb_display_class* display = NULL;
 
+  // wifi stuff including weather info
+  wifi_stuff* wifiStuff;
+
   // seconds blinker
   bool blink = false;
-
-  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    const unsigned int WIFI_SSID_PASSWORD_LENGTH_MAX = 32;
-    #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
-      char* wifi_ssid = MY_WIFI_SSID;
-    #else
-      char* wifi_ssid = NULL;
-    #endif
-    #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
-      char* wifi_password = MY_WIFI_PASSWD;
-    #else
-      char* wifi_password = NULL;
-    #endif
-  #endif
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60
@@ -140,16 +120,9 @@ public:
   bool var3AmPm = alarmIsAm;
   bool var4OnOff = alarmOn;
 
-  // weather information
-  char* weather_main = NULL;
-  char* weather_description = NULL;
-  char* weather_temp = NULL;
-  char* weather_temp_max = NULL;
-  char* weather_temp_min = NULL;
-  char* weather_wind_speed = NULL;
-  char* weather_humidity = NULL;
 
 // PRIVATE FUNCTIONS AND VARIABLES / CONSTANTS
+private:
 
   // buzzer functions
   void setupBuzzerTimer();
@@ -164,7 +137,6 @@ public:
 
   /** the address in the EEPROM **/
   const unsigned int ALARM_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
-  const unsigned int WIFI_ADDRESS_EEPROM = 5; // stores data in order 5 = wifi_ssid ending with \0 thereafter wifi_password ending with \0
 
   // Hardware Timer
   #if defined(MCU_IS_ESP32)
