@@ -140,6 +140,15 @@ public:
   bool var3AmPm = alarmIsAm;
   bool var4OnOff = alarmOn;
 
+  // weather information
+  char* weather_main = NULL;
+  char* weather_description = NULL;
+  char* weather_temp = NULL;
+  char* weather_temp_max = NULL;
+  char* weather_temp_min = NULL;
+  char* weather_wind_speed = NULL;
+  char* weather_humidity = NULL;
+
 // PRIVATE FUNCTIONS AND VARIABLES / CONSTANTS
 
   // buzzer functions

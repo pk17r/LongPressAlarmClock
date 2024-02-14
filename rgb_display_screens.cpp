@@ -427,7 +427,17 @@ void rgb_display_class::settingsPage() {
   tft.print(main->wifi_ssid);
   tft.setCursor(10, 60);
   tft.print("pass: ");
-  tft.print(main->wifi_password);
+  int i = 0;
+  while(i <= main->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+    char c = *(main->wifi_password + i);
+    if(c == '\0')
+     break;
+    if(i % 4 == 0)
+      tft.print(c);
+    else
+      tft.print('*');
+    i++;
+  }
   // draw settings gear to edit WiFi details
   tft.drawBitmap(SETTINGS_GEAR_X, 10, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
 

@@ -406,7 +406,7 @@ void alarm_clock_main::saveWiFiDetails() {
     // write wifi_ssid on EEPROM
     int i = 0;
     while(1) {
-      char c = *wifi_ssid + i;
+      char c = *(wifi_ssid + i);
       EEPROM.write(address, c); address++;
       EEPROM.commit();
       i++;
@@ -424,7 +424,7 @@ void alarm_clock_main::saveWiFiDetails() {
     // write wifi_password on EEPROM
     i = 0;
     while(1) {
-      char c = *wifi_password + i;
+      char c = *(wifi_password + i);
       EEPROM.write(address, c); address++;
       EEPROM.commit();
       i++;
@@ -457,8 +457,6 @@ void alarm_clock_main::turn_WiFi_On() {
   WiFi.persistent(true);
   delay(1);
   WiFi.begin(wifi_ssid, wifi_password);
-  Serial.print("wifi_ssid "); Serial.println(wifi_ssid);
-  Serial.print("wifi_password "); Serial.println(wifi_password);
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -489,7 +487,7 @@ void alarm_clock_main::getTodaysWeatherInfo() {
   String openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
 
   // Replace with your country code and city
-  String city = "San Diego";
+  String city = "San%20Diego";
   String countryCode = "840";
 
   // Check WiFi connection status
@@ -529,14 +527,50 @@ void alarm_clock_main::getTodaysWeatherInfo() {
     else {
       Serial.print("JSON object = ");
       Serial.println(myObject);
-      Serial.print("Temperature: ");
-      Serial.println(myObject["main"]["temp"]);
-      Serial.print("Pressure: ");
-      Serial.println(myObject["main"]["pressure"]);
-      Serial.print("Humidity: ");
-      Serial.println(myObject["main"]["humidity"]);
-      Serial.print("Wind Speed: ");
-      Serial.println(myObject["wind"]["speed"]);
+      Serial.print("Weather: ");
+      {
+      String sss = myObject["weather"][0]["main"];
+      if(weather_main != NULL) { delete weather_main; weather_main = NULL;}
+      weather_main = new char[sss.length()];
+      strcpy(weather_main, sss.c_str());
+      } {
+      String sss = myObject["weather"][0]["description"];
+      if(weather_description != NULL) { delete weather_description; weather_description = NULL;}
+      weather_description = new char[sss.length()];
+      strcpy(weather_description, sss.c_str());
+      } {
+      String sss = JSONVar::stringify(myObject["main"]["temp"]);
+      if(weather_temp != NULL) { delete weather_temp; weather_temp = NULL;}
+      weather_temp = new char[sss.length()];
+      strcpy(weather_temp, sss.c_str());
+      } {
+      String sss = JSONVar::stringify(myObject["main"]["temp_max"]);
+      if(weather_temp_max != NULL) { delete weather_temp_max; weather_temp_max = NULL;}
+      weather_temp_max = new char[sss.length()];
+      strcpy(weather_temp_max, sss.c_str());
+      } {
+      String sss = JSONVar::stringify(myObject["main"]["temp_min"]);
+      if(weather_temp_min != NULL) { delete weather_temp_min; weather_temp_min = NULL;}
+      weather_temp_min = new char[sss.length()];
+      strcpy(weather_temp_min, sss.c_str());
+      } {
+      String sss = JSONVar::stringify(myObject["wind"]["speed"]);
+      if(weather_wind_speed != NULL) { delete weather_wind_speed; weather_wind_speed = NULL;}
+      weather_wind_speed = new char[sss.length()];
+      strcpy(weather_wind_speed, sss.c_str());
+      } {
+      String sss = JSONVar::stringify(myObject["main"]["humidity"]);
+      if(weather_humidity != NULL) { delete weather_humidity; weather_humidity = NULL;}
+      weather_humidity = new char[sss.length()];
+      strcpy(weather_humidity, sss.c_str());
+      }
+      Serial.print("weather_main "); Serial.println(weather_main);
+      Serial.print("weather_description "); Serial.println(weather_description);
+      Serial.print("weather_temp "); Serial.println(weather_temp);
+      Serial.print("weather_temp_max "); Serial.println(weather_temp_max);
+      Serial.print("weather_temp_min "); Serial.println(weather_temp_min);
+      Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed);
+      Serial.print("weather_humidity "); Serial.println(weather_humidity);
     }
   }
   else {
@@ -832,6 +866,43 @@ void alarm_clock_main::processSerialInput() {
         getTodaysWeatherInfo();
         // refresh time
         refreshRtcTime = true;
+      }
+      break;
+    case 'i':   // set WiFi details
+      {
+        Serial.println(F("**** Enter WiFi Details ****"));
+        String inputStr;
+        Serial.print("SSID: ");
+        while(Serial.available() == 0) {
+          delay(20);
+        }
+        delay(20);
+        inputStr = Serial.readString();
+        inputStr[inputStr.length()-1] = '\0';
+        Serial.println(inputStr);
+        // fill wifi_ssid
+        if(wifi_ssid != NULL) {
+          delete wifi_ssid;
+          wifi_ssid = NULL;
+        }
+        wifi_ssid = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_ssid,inputStr.c_str());
+        Serial.print("PASSWORD: ");
+        while(Serial.available() == 0) {
+          delay(20);
+        }
+        delay(20);
+        inputStr = Serial.readString();
+        inputStr[inputStr.length()-1] = '\0';
+        Serial.println(inputStr);
+        // fill wifi_ssid
+        if(wifi_password != NULL) {
+          delete wifi_password;
+          wifi_password = NULL;
+        }
+        wifi_password = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_password,inputStr.c_str());
+        saveWiFiDetails();
       }
       break;
     default:
