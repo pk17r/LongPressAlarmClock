@@ -415,40 +415,60 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   // delay(2000);
 // }
 
-void rgb_display_class::alarmOnScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
+void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
+
+  int16_t title_x0 = 30, title_y0 = 50;
+  int16_t s_x0 = 215, s_y0 = title_y0 + 48;
   
   if(firstTime) {
 
-    // clear screen
     tft.fillScreen(Display_Backround_Color);
-
-    // set font
-    // tft.setTextSize(1);
     tft.setFont(&Satisfy_Regular24pt7b);
+    tft.setTextColor(Display_Color_Yellow);
+    tft.setCursor(title_x0, title_y0);
+    tft.print("WAKE UP!");
+    tft.setTextColor(Display_Color_Cyan);
+    char* press_button_text1 = "To turn off Alarm,";
+    char* press_button_text2 = "press button for:";
+    tft.setFont(&FreeMono9pt7b);
+    tft.setCursor(10, s_y0 - 18);
+    tft.print(press_button_text1);
+    tft.setCursor(10, s_y0);
+    tft.print(press_button_text2);
+    
+    // show today's date
+    tft.setCursor(20, s_y0 + 35);
+    tft.setFont(&Satisfy_Regular18pt7b);
+    tft.setTextColor(Display_Date_Color);
+    tft.print(newDisplayData.dateStr);
 
-    // home the cursor
-    tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
-
-    // change the text color to foreground color
-    tft.setTextColor(Display_Time_Color);
-
-    // draw the new time value
-    tft.print("ALARM ON!");
-    // tft.setTextSize(1);
-    // delay(2000);
+    // show today's weather
+    
   }
 
+  char timer_str[4];
+  int charIndex = 0;
+  if(buttonPressSecondsCounter > 9) {
+    timer_str[charIndex] = (char)(buttonPressSecondsCounter / 10 + 48); charIndex++;
+  }
+  timer_str[charIndex] = (char)(buttonPressSecondsCounter % 10 + 48); charIndex++;
+  timer_str[charIndex] = 's'; charIndex++;
+  timer_str[charIndex] = '\0';
+
   // fill rect
-  tft.fillRect(0, 100, 100, 220, Display_Backround_Color);
+  tft.fillRect(s_x0 - 5, s_y0 - 40, 80, 46, Display_Backround_Color);
 
   // set font
-  // tft.setTextSize(1);
   tft.setFont(&Satisfy_Regular24pt7b);
+  tft.setTextColor(Display_Color_Yellow);
 
   // home the cursor
-  tft.setCursor(20, 200);
-
-  tft.print(buttonPressSecondsCounter);
+  // uint16_t h = 0, w = 0;
+  // int16_t x = 0, y = 0;
+  // tft.getTextBounds(timer_str, 10, 150, &x, &y, &w, &h);
+  // Serial.print("\nx "); Serial.print(x); Serial.print(" y "); Serial.print(y); Serial.print(" w "); Serial.print(w); Serial.print(" h "); Serial.println(h); 
+  tft.setCursor(s_x0, s_y0);
+  tft.print(timer_str);
 }
 
 void rgb_display_class::screensaver() {

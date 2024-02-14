@@ -230,7 +230,7 @@ void alarm_clock_main::setPage(ScreenPage page) {
       break;
     case alarmTriggeredPage:
       currentPage = alarmTriggeredPage;     // page needs to be set before any action
-      display->alarmOnScreen(true, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
+      display->alarmTriggeredScreen(true, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
       display->setMaxBrightness();
       break;
     default:
@@ -446,6 +446,8 @@ void alarm_clock_main::turn_WiFi_On() {
   WiFi.persistent(true);
   delay(1);
   WiFi.begin(wifi_ssid, wifi_password);
+  Serial.print("wifi_ssid "); Serial.println(wifi_ssid);
+  Serial.print("wifi_password "); Serial.println(wifi_password);
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
@@ -466,6 +468,72 @@ void alarm_clock_main::turn_WiFi_Off() {
   delay(1);
   WiFi.disconnect();
   Serial.println(F("WiFi Off."));
+}
+
+void alarm_clock_main::getTodaysWeatherInfo() {
+  // turn On Wifi
+  turn_WiFi_On();
+
+  // Your Domain name with URL path or IP address with path
+  String openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
+
+  // Replace with your country code and city
+  String city = "San Diego";
+  String countryCode = "840";
+
+  // Check WiFi connection status
+  if(WiFi.status()== WL_CONNECTED){
+    String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
+
+    WiFiClient client;
+    HTTPClient http;
+      
+    // Your Domain name with URL path or IP address with path
+    http.begin(client, serverPath.c_str());
+    
+    // Send HTTP POST request
+    int httpResponseCode = http.GET();
+    
+    String jsonBuffer = "{}"; 
+    
+    if (httpResponseCode>0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      jsonBuffer = http.getString();
+    }
+    else {
+      Serial.print("Error code: ");
+      Serial.println(httpResponseCode);
+    }
+    // Free resources
+    http.end();
+    
+    Serial.println(jsonBuffer);
+    JSONVar myObject = JSON.parse(jsonBuffer);
+
+    // JSON.typeof(jsonVar) can be used to get the type of the var
+    if (JSON.typeof(myObject) == "undefined") {
+      Serial.println("Parsing input failed!");
+    }
+    else {
+      Serial.print("JSON object = ");
+      Serial.println(myObject);
+      Serial.print("Temperature: ");
+      Serial.println(myObject["main"]["temp"]);
+      Serial.print("Pressure: ");
+      Serial.println(myObject["main"]["pressure"]);
+      Serial.print("Humidity: ");
+      Serial.println(myObject["main"]["humidity"]);
+      Serial.print("Wind Speed: ");
+      Serial.println(myObject["wind"]["speed"]);
+    }
+  }
+  else {
+    Serial.println("WiFi not connected");
+  }
+
+  // turn off WiFi
+  turn_WiFi_Off();
 }
 #endif
 
@@ -723,6 +791,38 @@ void alarm_clock_main::processSerialInput() {
         inactivitySeconds = 0;
       }
       break;
+    case 'y':   // show alarm triggered screen
+      {
+        Serial.println(F("**** Show Alarm Triggered Screen ****"));
+        // start alarm triggered page
+        setPage(alarmTriggeredPage);
+        delay(1000);
+        display->alarmTriggeredScreen(false, 24);
+        delay(1000);
+        display->alarmTriggeredScreen(false, 13);
+        delay(1000);
+        display->alarmTriggeredScreen(false, 14);
+        delay(1000);
+        // refresh time
+        rtc.refresh();
+        // make second equal to rtc seconds
+        second = rtc.second();
+        // prepare date and time arrays
+        display->prepareTimeDayDateArrays();
+        // set main page back
+        setPage(mainPage);
+        inactivitySeconds = 0;
+      }
+      break;
+    case 'w':   // get today's weather info
+      {
+        Serial.println(F("**** Get Weather Info ****"));
+        // start alarm triggered page
+        getTodaysWeatherInfo();
+        // refresh time
+        refreshRtcTime = true;
+      }
+      break;
     default:
       Serial.println(F("Unrecognized user input"));
   }
@@ -797,7 +897,7 @@ void alarm_clock_main::buzzAlarmFn() {
         // display countdown to alarm off
         if(ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;
-          display->alarmOnScreen(false, buttonPressSecondsCounter);
+          display->alarmTriggeredScreen(false, buttonPressSecondsCounter);
         }
         // end alarm after holding button for ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS
         if(millis() - buttonPressStartTimeMs > ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS * 1000) {
@@ -817,7 +917,7 @@ void alarm_clock_main::buzzAlarmFn() {
       if(buttonPressSecondsCounter != ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS) {
         // display Alarm On screen with seconds user needs to press and hold button to end alarm
         buttonPressSecondsCounter = ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS;
-        display->alarmOnScreen(false, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
+        display->alarmTriggeredScreen(false, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
       }
     }
     // if user did not stop alarm within ALARM_MAX_ON_TIME_MS, make sure to stop buzzer

@@ -22,6 +22,7 @@
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSans12pt7b.h>
+#include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
 #include <elapsedMillis.h>
 
@@ -45,7 +46,7 @@ public:
   void screensaver();
   void goodMorningScreen();
   void setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y);
-  void alarmOnScreen(bool firstTime, int8_t buttonPressSecondsCounter);
+  void alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter);
 
   // functions
   void setup(alarm_clock_main* main_ptr);

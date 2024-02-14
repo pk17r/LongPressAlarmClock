@@ -4,6 +4,8 @@
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   // #include "secrets.h"
   #include "WiFi.h"
+  #include <HTTPClient.h>
+  #include <Arduino_JSON.h>
 #endif
 #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include <EEPROM.h>
@@ -60,6 +62,7 @@ public:
   void saveWiFiDetails();
   void turn_WiFi_On();
   void turn_WiFi_Off();
+  void getTodaysWeatherInfo();
   #endif
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
