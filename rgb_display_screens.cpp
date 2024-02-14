@@ -415,6 +415,22 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
 //   // delay(2000);
 // }
 
+void rgb_display_class::settingsPage() {
+
+  tft.fillScreen(Display_Backround_Color);
+  tft.setTextColor(Display_Color_Yellow);
+  tft.setFont(&FreeSans12pt7b);
+  tft.setCursor(10, 20);
+  tft.print("WiFi:");
+  tft.setFont(&FreeMono9pt7b);
+  tft.setCursor(10, 40);
+  tft.print("ssid: ");
+  tft.print(main->wifi_ssid);
+  tft.setCursor(10, 60);
+  tft.print("pass: ");
+  tft.print(main->wifi_password);
+}
+
 void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
   int16_t title_x0 = 30, title_y0 = 50;
@@ -832,7 +848,7 @@ void rgb_display_class::displayTimeUpdate() {
     uint16_t date_row_w, date_row_h;
     // get bounds of new dateStr on tft display (with background color as this causes a blink)
     tft.getTextBounds(newDisplayData.dateStr, tft.getCursorX(), tft.getCursorY(), &date_row_x0, &date_row_y1, &date_row_w, &date_row_h);
-    date_row_x0 = (TFT_WIDTH - SETTINGS_GEAR_W - 10 - date_row_w) / 2;
+    date_row_x0 = (SETTINGS_GEAR_X - date_row_w) / 2;
 
     // home the cursor
     tft.setCursor(date_row_x0, DATE_ROW_Y0);
@@ -844,7 +860,7 @@ void rgb_display_class::displayTimeUpdate() {
     tft.print(newDisplayData.dateStr);
 
     // draw settings gear
-    tft.drawBitmap(TFT_WIDTH - SETTINGS_GEAR_W - 10, DATE_ROW_Y0 - SETTINGS_GEAR_H + 5, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
+    tft.drawBitmap(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
 
     // and remember the new value
     strcpy(displayedData.dateStr, newDisplayData.dateStr);
@@ -928,13 +944,30 @@ void rgb_display_class::displayTimeUpdate() {
   redrawDisplay = false;
 }
 
-void rgb_display_class::highlightMainScreenTouch(int touchArea) {
-  switch(touchArea) {
-    case (int)(main->alarmSetPage):
-      tft.drawRoundRect(0, main->alarmScreenAreaMainPageY, TFT_WIDTH, TFT_HEIGHT - main->alarmScreenAreaMainPageY, 5, Display_Color_Cyan);
+int rgb_display_class::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
+  int returnVal = -1, roundRectRadius = 5;
+
+  // main page touch input
+  if(main->currentPage == main->mainPage) {
+    // if settings gear is touched
+    if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= SETTINGS_GEAR_Y && ts_y <= SETTINGS_GEAR_Y + SETTINGS_GEAR_H) {
+      tft.drawRoundRect(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, SETTINGS_GEAR_W, SETTINGS_GEAR_H, roundRectRadius, Display_Color_Cyan);
       delay(100);
-      break;
+      return main->settingsPage;
+    }
+
+    // alarm area
+    if(ts_y >= ALARM_ROW_Y1) {
+      tft.drawRoundRect(0, ALARM_ROW_Y1, TFT_WIDTH, TFT_HEIGHT - ALARM_ROW_Y1, roundRectRadius, Display_Color_Cyan);
+      delay(100);
+      return main->alarmSetPage;
+    }
   }
+  else if(main->currentPage == main->settingsPage) {
+
+  }
+
+  return returnVal;
 }
 
 void rgb_display_class::goodMorningScreen() {

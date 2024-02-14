@@ -84,10 +84,11 @@ void alarm_clock_main::loop() {
     // turn off screensaver if on
     if(currentPage == screensaverPage) {
       setPage(mainPage);
-    } // if on main page and user clicked on Alarm, then go to alarm set screen
-    else if(currentPage == mainPage && inactivitySeconds >= 1 && ((ts.getTouchedPixel())->y >= alarmScreenAreaMainPageY)) {
-      display->highlightMainScreenTouch((int)alarmSetPage);
-      setPage(alarmSetPage);
+    } // if on main page and user clicked somewhere, get touch input
+    else if(currentPage == mainPage && inactivitySeconds >= 1) {
+      int userTouchRegion = display->classifyMainPageTouchInput((ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
+      if(userTouchRegion != -1)
+        setPage((ScreenPage)userTouchRegion);
     } // if already on alarm page, then take alarm set page user inputs
     else if(currentPage == alarmSetPage) {
       display->setAlarmScreen(false, (ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
@@ -231,6 +232,11 @@ void alarm_clock_main::setPage(ScreenPage page) {
     case alarmTriggeredPage:
       currentPage = alarmTriggeredPage;     // page needs to be set before any action
       display->alarmTriggeredScreen(true, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
+      display->setMaxBrightness();
+      break;
+    case settingsPage:
+      currentPage = settingsPage;     // page needs to be set before any action
+      display->settingsPage();
       display->setMaxBrightness();
       break;
     default:

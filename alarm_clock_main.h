@@ -39,6 +39,7 @@ public:
     alarmSetPage,
     alarmTriggeredPage,
     timeSetPage,
+    settingsPage,
      } currentPage;
 
 // FUNCTIONS

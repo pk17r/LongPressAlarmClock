@@ -47,6 +47,7 @@ public:
   void goodMorningScreen();
   void setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y);
   void alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter);
+  void settingsPage();
 
   // functions
   void setup(alarm_clock_main* main_ptr);
@@ -57,7 +58,7 @@ public:
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
   void setSeconds(uint8_t &second);
-  void highlightMainScreenTouch(int touchArea);
+  int classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y);
 
 // PUBLIC VARIABLES
 
@@ -147,7 +148,7 @@ private:
   const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
   const int16_t DISPLAY_TEXT_GAP = 10;
   const int16_t DATE_ROW_Y0 = 140;
-  const int16_t ALARM_ROW_Y0 = 210;
+  const int16_t ALARM_ROW_Y0 = 210, ALARM_ROW_Y1 = 160;
 
   // day arrays
   #define DAY_ARR_SIZE 4
@@ -427,6 +428,7 @@ private:
   };
 
   const uint8_t SETTINGS_GEAR_W = 40, SETTINGS_GEAR_H = 40;
+  const int16_t SETTINGS_GEAR_X = TFT_WIDTH - SETTINGS_GEAR_W - 10, SETTINGS_GEAR_Y = DATE_ROW_Y0 - SETTINGS_GEAR_H + 5;
   // 'gear-settings-1-48', 40x40px
   const unsigned char settings_gear_bitmap[200] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 
