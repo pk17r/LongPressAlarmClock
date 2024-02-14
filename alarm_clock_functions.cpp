@@ -78,20 +78,22 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 void alarm_clock_main::loop() {
   // button pressed or touchscreen touched
   if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
-    // show response by turing up brightness
+    // show instant response by turing up brightness
     display->setMaxBrightness();
 
-    // turn off screensaver if on
-    if(currentPage == screensaverPage) {
+    if(currentPage == screensaverPage)
+    { // turn off screensaver if on
       setPage(mainPage);
-    } // if on main page and user clicked somewhere, get touch input
-    else if(currentPage == mainPage && inactivitySeconds >= 1) {
+    }
+    else if(currentPage == alarmSetPage)
+    { // if on alarm page, then take alarm set page user inputs
+      display->setAlarmScreen(false, (ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
+    }
+    else if(currentPage != alarmSetPage && inactivitySeconds >= 1)
+    { // if on main page and user clicked somewhere, get touch input
       int userTouchRegion = display->classifyMainPageTouchInput((ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
       if(userTouchRegion != -1)
         setPage((ScreenPage)userTouchRegion);
-    } // if already on alarm page, then take alarm set page user inputs
-    else if(currentPage == alarmSetPage) {
-      display->setAlarmScreen(false, (ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
     }
     inactivitySeconds = 0;
   }
@@ -212,16 +214,19 @@ void alarm_clock_main::loop() {
 void alarm_clock_main::setPage(ScreenPage page) {
   switch(page) {
     case mainPage:
-      currentPage = mainPage;   // page needs to be set before any action
-      display->screensaverControl(false);
+      // if screensaver is active then clear screensaver canvas to free memory
+      if(currentPage == screensaverPage)
+        display->screensaverControl(false);
+      currentPage = mainPage;         // new page needs to be set before any action
+      display->redrawDisplay = true;
       display->displayTimeUpdate();
       break;
     case screensaverPage:
-      currentPage = screensaverPage;  // page needs to be set before any action
+      currentPage = screensaverPage;      // new page needs to be set before any action
       display->screensaverControl(true);
       break;
     case alarmSetPage:
-      currentPage = alarmSetPage;     // page needs to be set before any action
+      currentPage = alarmSetPage;     // new page needs to be set before any action
       // set variables for alarm set screen
       var1 = alarmHr;
       var2 = alarmMin;
@@ -230,12 +235,12 @@ void alarm_clock_main::setPage(ScreenPage page) {
       display->setAlarmScreen(true, 0, 0);
       break;
     case alarmTriggeredPage:
-      currentPage = alarmTriggeredPage;     // page needs to be set before any action
+      currentPage = alarmTriggeredPage;     // new page needs to be set before any action
       display->alarmTriggeredScreen(true, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
       display->setMaxBrightness();
       break;
     case settingsPage:
-      currentPage = settingsPage;     // page needs to be set before any action
+      currentPage = settingsPage;     // new page needs to be set before any action
       display->settingsPage();
       display->setMaxBrightness();
       break;

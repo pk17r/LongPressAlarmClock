@@ -141,15 +141,18 @@ void rgb_display_class::setSeconds(uint8_t &second) {
 }
 
 void rgb_display_class::screensaverControl(bool turnOn) {
-  // if(!turnOn)
+  if(!turnOn && myCanvas != NULL) {
     // delete screensaverCanvas;
-  refreshScreensaverCanvas = true;
+    delete myCanvas;
+    myCanvas = NULL;
+  }
+  else
+    refreshScreensaverCanvas = true;
   // clear screen
   tft.fillScreen(Display_Color_Black);
   tft_HHMM_x0 = 20;
   tft_HHMM_y0 = 20;
   redrawDisplay = true;
-  main->inactivitySeconds = 0;
   prepareTimeDayDateArrays();
 }
 

@@ -295,7 +295,6 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
 }
 
 void rgb_display_class::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
-  int16_t r = 3;
   tft.setFont(&FreeSans12pt7b);
   tft.setTextColor((isOn ? onFill : offFill));
   int16_t title_x0, title_y0;
@@ -303,8 +302,8 @@ void rgb_display_class::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h,
   // get bounds of title on tft display (with background color as this causes a blink)
   tft.getTextBounds(label, x, y + h, &title_x0, &title_y0, &title_w, &title_h);
   // make button
-  tft.fillRoundRect(x, y, w, h, r, (isOn ? onFill : offFill));
-  tft.drawRoundRect(x, y, w, h, r, borderColor);
+  tft.fillRoundRect(x, y, w, h, RADIUS_BUTTON_ROUND_RECT, (isOn ? onFill : offFill));
+  tft.drawRoundRect(x, y, w, h, RADIUS_BUTTON_ROUND_RECT, borderColor);
   tft.setTextColor((isOn ? offFill : onFill));
   title_x0 = x + (w - title_w) / 2;
   title_y0 = y + h / 2 + title_h / 2;
@@ -429,6 +428,12 @@ void rgb_display_class::settingsPage() {
   tft.setCursor(10, 60);
   tft.print("pass: ");
   tft.print(main->wifi_password);
+  // draw settings gear to edit WiFi details
+  tft.drawBitmap(SETTINGS_GEAR_X, 10, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
+
+
+  // Cancel button
+  drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, "X", Display_Color_Cyan, Display_Color_Orange, Display_Color_Black, true);
 }
 
 void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
@@ -588,6 +593,10 @@ void rgb_display_class::pickNewRandomColor() {
 void rgb_display_class::displayTimeUpdate() {
 
   bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
+  if(redrawDisplay) {
+    tft.fillScreen(Display_Backround_Color);
+    isThisTheFirstTime = true;
+  }
 
   if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it
 
@@ -945,26 +954,40 @@ void rgb_display_class::displayTimeUpdate() {
 }
 
 int rgb_display_class::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
-  int returnVal = -1, roundRectRadius = 5;
+  int returnVal = -1;
 
   // main page touch input
   if(main->currentPage == main->mainPage) {
     // if settings gear is touched
     if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= SETTINGS_GEAR_Y && ts_y <= SETTINGS_GEAR_Y + SETTINGS_GEAR_H) {
-      tft.drawRoundRect(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, SETTINGS_GEAR_W, SETTINGS_GEAR_H, roundRectRadius, Display_Color_Cyan);
+      tft.drawRoundRect(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
       delay(100);
       return main->settingsPage;
     }
 
     // alarm area
     if(ts_y >= ALARM_ROW_Y1) {
-      tft.drawRoundRect(0, ALARM_ROW_Y1, TFT_WIDTH, TFT_HEIGHT - ALARM_ROW_Y1, roundRectRadius, Display_Color_Cyan);
+      tft.drawRoundRect(0, ALARM_ROW_Y1, TFT_WIDTH, TFT_HEIGHT - ALARM_ROW_Y1, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
       delay(100);
       return main->alarmSetPage;
     }
   }
   else if(main->currentPage == main->settingsPage) {
 
+    // edit wifi details button
+    if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= 10 && ts_y <= 10 + SETTINGS_GEAR_H) {
+      tft.drawRoundRect(SETTINGS_GEAR_X, 10, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
+      delay(100);
+      return main->settingsPage;
+    }
+
+    // cancel button
+    if(ts_x >= SETTINGS_GEAR_X && ts_y >= SETTINGS_PAGE_BACK_BUTTON_Y1) {
+      // show a little graphic of Cancel button Press
+      drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, "X", Display_Color_Cyan, Display_Color_Red, Display_Color_Black, true);
+      delay(100);
+      return main->mainPage;
+    }
   }
 
   return returnVal;

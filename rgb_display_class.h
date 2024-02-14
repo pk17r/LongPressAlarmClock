@@ -149,6 +149,8 @@ private:
   const int16_t DISPLAY_TEXT_GAP = 10;
   const int16_t DATE_ROW_Y0 = 140;
   const int16_t ALARM_ROW_Y0 = 210, ALARM_ROW_Y1 = 160;
+  const int16_t SETTINGS_PAGE_BACK_BUTTON_Y1 = TFT_HEIGHT - 50;
+  const int16_t RADIUS_BUTTON_ROUND_RECT = 5;
 
   // day arrays
   #define DAY_ARR_SIZE 4
