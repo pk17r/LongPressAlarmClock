@@ -515,7 +515,7 @@ void rgb_display_class::screensaver() {
     myCanvas->print(newDisplayData.dateStr);
 
     // draw bell
-    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - h + GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), (newDisplayData._alarmOn ? bell_small_w : bell_fallen_small_w), (newDisplayData._alarmOn ? bell_small_h : bell_fallen_small_h), randomColor);
+    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - h + GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W), (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
 
     // get visual bounds of created canvas and time string
     // myCanvas->drawRect((TFT_WIDTH - tft_HHMM_w) / 2, GAP_BAND, tft_HHMM_w, tft_HHMM_h - h - GAP_BAND, Display_Color_Green);  // time border
@@ -832,7 +832,7 @@ void rgb_display_class::displayTimeUpdate() {
     uint16_t date_row_w, date_row_h;
     // get bounds of new dateStr on tft display (with background color as this causes a blink)
     tft.getTextBounds(newDisplayData.dateStr, tft.getCursorX(), tft.getCursorY(), &date_row_x0, &date_row_y1, &date_row_w, &date_row_h);
-    date_row_x0 = (TFT_WIDTH - date_row_w) / 2;
+    date_row_x0 = (TFT_WIDTH - SETTINGS_GEAR_W - 10 - date_row_w) / 2;
 
     // home the cursor
     tft.setCursor(date_row_x0, DATE_ROW_Y0);
@@ -842,6 +842,9 @@ void rgb_display_class::displayTimeUpdate() {
 
     // draw the new dateStr value
     tft.print(newDisplayData.dateStr);
+
+    // draw settings gear
+    tft.drawBitmap(TFT_WIDTH - SETTINGS_GEAR_W - 10, DATE_ROW_Y0 - SETTINGS_GEAR_H + 5, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
 
     // and remember the new value
     strcpy(displayedData.dateStr, newDisplayData.dateStr);
@@ -866,12 +869,12 @@ void rgb_display_class::displayTimeUpdate() {
       tft.print(displayedData.alarmStr);
 
       if(displayedData._alarmOn) {
-        alarm_icon_w = bell_w;
-        alarm_icon_h = bell_h;
+        alarm_icon_w = BELL_W;
+        alarm_icon_h = BELL_H;
       }
       else {
-        alarm_icon_w = bell_fallen_w;
-        alarm_icon_h = bell_fallen_h;
+        alarm_icon_w = BELL_FALLEN_W;
+        alarm_icon_h = BELL_FALLEN_H;
       }
 
       // erase bell
@@ -881,12 +884,12 @@ void rgb_display_class::displayTimeUpdate() {
     //  Redraw new alarm data
 
     if(newDisplayData._alarmOn) {
-      alarm_icon_w = bell_w;
-      alarm_icon_h = bell_h;
+      alarm_icon_w = BELL_W;
+      alarm_icon_h = BELL_H;
     }
     else {
-      alarm_icon_w = bell_fallen_w;
-      alarm_icon_h = bell_fallen_h;
+      alarm_icon_w = BELL_FALLEN_W;
+      alarm_icon_h = BELL_FALLEN_H;
     }
 
     // home the cursor
