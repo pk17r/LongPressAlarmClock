@@ -4,9 +4,7 @@
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
-#if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  #include <EEPROM.h>
-#endif
+#include "persistent_data.h"
 #if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
   #include <stdio.h>
   #include "pico/stdlib.h"
@@ -43,10 +41,11 @@ public:
 
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
-  void retrieveAlarmSettings();
   void updateTimePriorityLoop();
   void nonPriorityTasksLoop();
   void rtc_clock_initialize();
+  void retrieveAlarmSettings();
+  void saveAlarm();
   // clock seconds interrupt ISR
   static void sqwPinInterruptFn();
   void serialTimeStampPrefix();
@@ -56,7 +55,6 @@ public:
   void serial_input_flush();
   void processSerialInput();
   void setPage(ScreenPage page);
-  void saveAlarm();
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   // void putEsp32ToLightSleep();
@@ -81,6 +79,9 @@ public:
   // wifi stuff including weather info
   wifi_stuff* wifiStuff;
   bool tryGetWeatherInfoOnSecondCore = false;
+
+  // persistent data class pointer
+  persistent_data* persistentData = NULL;
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60
@@ -134,9 +135,6 @@ private:
   void buzzer_enable();
   void buzzer_disable();
   void deallocateBuzzerTimer();
-
-  /** the address in the EEPROM **/
-  const unsigned int ALARM_ADDRESS_EEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
 
   // Hardware Timer
   #if defined(MCU_IS_ESP32)

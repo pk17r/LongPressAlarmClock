@@ -1,3 +1,4 @@
+#include "hardware/sync.h"
 #include "pin_defs.h"
 #include <Arduino.h>
 #include "alarm_clock_main.h"
@@ -20,12 +21,13 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   digitalWrite(TS_CS_PIN, HIGH);
 
   // retrieve alarm settings
+  persistentData = new persistent_data();
   retrieveAlarmSettings();
 
   // retrieve wifi details
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
     wifiStuff = new wifi_stuff();
-    wifiStuff->retrieveWiFiDetails();
+    wifiStuff->setup(persistentData);
     wifiStuff->turn_WiFi_Off();
   #endif
 
@@ -290,43 +292,9 @@ void alarm_clock_main::setPage(ScreenPage page) {
 }
 
 void alarm_clock_main::retrieveAlarmSettings() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // Begin reading EEPROM on Raspberry Pi Pico
-    EEPROM.begin(512);
-  #endif
-
-  #if defined(MCU_IS_TEENSY) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-
-    // start reading from the first byte (address 0) of the EEPROM
-    unsigned int address = ALARM_ADDRESS_EEPROM;
-    byte value;
-    // read a byte from the current address of the EEPROM
-    value = EEPROM.read(address);
-    if(value == 1) {
-      // alarm data is stored in EEPROM
-      // retrieve it
-      address++;
-      alarmHr = EEPROM.read(address); address++;
-      alarmMin = EEPROM.read(address); address++;
-      alarmIsAm = EEPROM.read(address); address++;
-      alarmOn = EEPROM.read(address); address++;
-
-      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-        // End reading EEPROM on Raspberry Pi Pico
-        EEPROM.end();
-      #endif
-
-      Serial.println(F("Alarm settings retrieved from EEPROM."));
-    }
-    else {
-      #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-        // End reading EEPROM on Raspberry Pi Pico
-        EEPROM.end();
-      #endif
-      // write alarm on EEPROM
-      saveAlarm();
-    }
-  #endif
+  
+  if(!(persistentData->retrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn)))
+    saveAlarm();
 }
 
 void alarm_clock_main::saveAlarm() {
@@ -335,44 +303,8 @@ void alarm_clock_main::saveAlarm() {
   alarmIsAm = var3AmPm;
   alarmOn = var4OnOff;
 
-  #if defined(MCU_IS_TEENSY)
-
-    // start writing from the first byte of the EEPROM
-    unsigned int address = ALARM_ADDRESS_EEPROM;
-    // write alarm on EEPROM
-    EEPROM.update(address, 1); address++;
-    EEPROM.update(address, alarmHr); address++;
-    EEPROM.update(address, alarmMin); address++;
-    EEPROM.update(address, alarmIsAm); address++;
-    EEPROM.update(address, alarmOn);
-
-    Serial.println("Alarm written to EEPROM");
-
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-
-    // Begin reading EEPROM on Raspberry Pi Pico
-    EEPROM.begin(512);
-
-    // start writing from the first byte of the EEPROM
-    unsigned int address = ALARM_ADDRESS_EEPROM;
-    // write alarm on EEPROM
-    EEPROM.write(address, 1); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmHr); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmMin); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmIsAm); address++;
-    EEPROM.commit();
-    EEPROM.write(address, alarmOn);
-    EEPROM.commit();
-
-    // End reading EEPROM on Raspberry Pi Pico
-    EEPROM.end();
-    Serial.println("Alarm written to EEPROM");
-
-  #endif
-
+  // save alarm settings
+  persistentData->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
 }
 
 // interrupt ISR

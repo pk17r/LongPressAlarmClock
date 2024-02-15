@@ -314,7 +314,7 @@ void rgb_display_class::settingsPage() {
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= main->wifiStuff->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+  while(i <= main->persistentData->WIFI_SSID_PASSWORD_LENGTH_MAX) {
     char c = *(main->wifiStuff->wifi_password + i);
     if(c == '\0')
      break;

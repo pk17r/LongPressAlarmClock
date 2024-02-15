@@ -1,128 +1,17 @@
 #include "wifi_stuff.h"
 
+void wifi_stuff::setup(persistent_data* persistentDataPtr) {
+  this->persistentData = persistentDataPtr;
+
+  retrieveWiFiDetails();
+}
+
 void wifi_stuff::retrieveWiFiDetails() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    
-    // Begin reading EEPROM on Raspberry Pi Pico
-    EEPROM.begin(512);
-    
-    // read WiFi SSID and Password
-    char eeprom_read_array[WIFI_SSID_PASSWORD_LENGTH_MAX + 1];
-
-    // read wifi_ssid
-    int address = WIFI_ADDRESS_EEPROM;
-    int char_arr_start_address = WIFI_ADDRESS_EEPROM;
-    while(1) {
-      char eeprom_char_read = EEPROM.read(address);
-      eeprom_read_array[address - char_arr_start_address] = eeprom_char_read;
-      address++;
-      // break at null character
-      if(eeprom_char_read == '\0')
-        break;
-      // limit to force out of while loop, won't reach here in normal operation
-      if(address >= char_arr_start_address + WIFI_SSID_PASSWORD_LENGTH_MAX) {
-        eeprom_read_array[address - char_arr_start_address] = '\0';
-        break;
-      }
-    }
-    // fill wifi_ssid
-    if(wifi_ssid != NULL) {
-      delete wifi_ssid;
-      wifi_ssid = NULL;
-    }
-    wifi_ssid = new char[address - char_arr_start_address];   // allocate space
-    strcpy(wifi_ssid,eeprom_read_array);
-
-    // read wifi_password
-    char_arr_start_address = address;
-    while(1) {
-      char eeprom_char_read = EEPROM.read(address);
-      eeprom_read_array[address - char_arr_start_address] = eeprom_char_read;
-      address++;
-      // break at null character
-      if(eeprom_char_read == '\0')
-        break;
-      // limit to force out of while loop, won't reach here in normal operation
-      if(address >= char_arr_start_address + WIFI_SSID_PASSWORD_LENGTH_MAX) {
-        eeprom_read_array[address - char_arr_start_address] = '\0';
-        break;
-      }
-    }
-    // fill wifi_password
-    if(wifi_password != NULL) {
-      delete wifi_password;
-      wifi_password = NULL;
-    }
-    wifi_password = new char[address - char_arr_start_address];   // allocate space
-    strcpy(wifi_password,eeprom_read_array);
-
-    // End reading EEPROM on Raspberry Pi Pico
-    EEPROM.end();
-
-    Serial.println(F("WiFi details retrieved from EEPROM."));
-
-  #elif defined(MCU_IS_ESP32)
-
-    Serial.println(F("WiFi details retrieving on ESP32 is not Implemented yet."));
-
-  #endif
+  persistentData->retrieveWiFiDetails(wifi_ssid, wifi_password);
 }
 
 void wifi_stuff::saveWiFiDetails() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // Begin reading EEPROM on Raspberry Pi Pico
-    EEPROM.begin(512);
-
-    // start writing from the first byte of the EEPROM
-    unsigned int address = WIFI_ADDRESS_EEPROM;
-
-    // write wifi_ssid on EEPROM
-    int i = 0;
-    while(1) {
-      char c = *(wifi_ssid + i);
-      EEPROM.write(address, c); address++;
-      EEPROM.commit();
-      i++;
-      // break at null character
-      if(c == '\0')
-        break;
-      // limit to force out of while loop, won't reach here in normal operation
-      if(i >= WIFI_SSID_PASSWORD_LENGTH_MAX) {
-        EEPROM.write(address, '\0'); address++;
-        EEPROM.commit();
-        break;
-      }
-    }
-    
-    // write wifi_password on EEPROM
-    i = 0;
-    while(1) {
-      char c = *(wifi_password + i);
-      EEPROM.write(address, c); address++;
-      EEPROM.commit();
-      i++;
-      // break at null character
-      if(c == '\0')
-        break;
-      // limit to force out of while loop, won't reach here in normal operation
-      if(i >= WIFI_SSID_PASSWORD_LENGTH_MAX) {
-        EEPROM.write(address, '\0'); address++;
-        EEPROM.commit();
-        break;
-      }
-    }
-
-    // End reading EEPROM on Raspberry Pi Pico
-    EEPROM.end();
-
-    Serial.println(F("WiFi ssid and password written to EEPROM"));
-
-  #elif defined(MCU_IS_ESP32)
-
-    Serial.println(F("WiFi details saving on ESP32 is not Implemented yet."));
-
-  #endif
-
+  persistentData->saveWiFiDetails(wifi_ssid, wifi_password);
 }
 
 void wifi_stuff::turn_WiFi_On() {

@@ -1,25 +1,26 @@
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
+#include <Arduino.h>
 #include "pin_defs.h"
 // #include "secrets.h"
 #include "WiFi.h"
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
-#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  #include <EEPROM.h>
-#endif
+#include "persistent_data.h"
 
 class wifi_stuff {
 
 public:
+  void setup(persistent_data* persistentDataPtr);
   void retrieveWiFiDetails();
   void saveWiFiDetails();
   void turn_WiFi_On();
   void turn_WiFi_Off();
   void getTodaysWeatherInfo();
 
-  const unsigned int WIFI_SSID_PASSWORD_LENGTH_MAX = 32;
+  // persistent data class pointer
+  persistent_data* persistentData;
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     char* wifi_ssid = MY_WIFI_SSID;
@@ -40,6 +41,7 @@ public:
   char* weather_temp_min = NULL;
   char* weather_wind_speed = NULL;
   char* weather_humidity = NULL;
+
   bool gotWeatherInfo = false;
 
   bool tempInCnotF = false;
@@ -48,7 +50,6 @@ public:
 // PRIVATE VARIABLES
 private:
 
-  const unsigned int WIFI_ADDRESS_EEPROM = 5; // stores data in order 5 = wifi_ssid ending with \0 thereafter wifi_password ending with \0
 
 };
 
