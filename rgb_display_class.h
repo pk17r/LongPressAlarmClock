@@ -97,7 +97,6 @@ private:
   void pickNewRandomColor();  // for screensaver
   void drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
-  void fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
 
 
 // PRIVATE VARIABLES
@@ -145,7 +144,7 @@ private:
   const int MAX_BRIGHTNESS = 255;
 
   // user defined locations of various text strings on display
-  const int16_t TIME_ROW_X0 = 0, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
+  const int16_t TIME_ROW_X0 = 10, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
   const int16_t DISPLAY_TEXT_GAP = 10;
   const int16_t DATE_ROW_Y0 = 140;
   const int16_t ALARM_ROW_Y0 = 210, ALARM_ROW_Y1 = 160;

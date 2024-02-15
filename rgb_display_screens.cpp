@@ -2,41 +2,7 @@
 #include "rgb_display_class.h"
 #include "alarm_clock_main.h"
 #include <Arduino.h>
-// #define SPI_BUSY (!(SPSR & (1 << SPIF)))     // non-zero if SPI transmitter busy
 
-void rgb_display_class::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg)
-{
-  // SPI.beginTransaction(settingsA);
-  // SPI.beginTransaction( SPISettings(12000000, LSBFIRST, SPI_MODE3) );
-  digitalWrite(TFT_CS, 0);  // indicate "transfer"
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2A);              // send column span command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-  SPI.transfer16(x);//     >> 8;      // send Xmin
-  SPI.transfer16(x+w-1);// >> 8;      // send Xmax
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2B);              // send row span command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-  SPI.transfer16(y);//     >> 8;      // send Ymin
-  SPI.transfer16(y+h-1);// >> 8;      // send Ymax
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2C);              // send write command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-
-  int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-  int8_t bits8 = 0;
-  for (int16_t j = 0; j < h; j++)
-    for (int16_t i = 0; i < w; i++)
-    {
-      bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-      uint16_t c = bits8 < 0 ? color : bg;   // select color
-      SPI.transfer16(c);    // send color
-    }
-  // digitalWrite(TFT_CS, 1);                   // indicate "idle"
-  pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
-  digitalWrite(TFT_CS, HIGH); // Enable internal pull-up
-  // SPI.endTransaction();
-}
 
 void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
 
@@ -334,86 +300,6 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-// void rgb_display_class::screensaver() {
-//   // Serial.println("inside screensaver()"); Serial.flush();
-//   // Serial.print("newDisplayData.timeHHMM = "); Serial.println(newDisplayData.timeHHMM); Serial.flush();
-//   // In global declarations:
-//   // GFXcanvas16 canvas(TFT_WIDTH, TFT_HEIGHT); // 128x32 pixel canvas
-//   elapsedMillis timer1;
-//   GFXcanvas16 myCanvas(TFT_WIDTH, TFT_HEIGHT);
-//   unsigned long time1 = timer1; timer1 = 0;
-//   myCanvas->fillScreen(Display_Backround_Color);
-//   // tft.fillScreen(Display_Backround_Color);
-//   myCanvas->setTextWrap(false);
-//   unsigned long time2 = timer1; timer1 = 0;
-//   myCanvas->setFont(&ComingSoon_Regular70pt7b);
-//   unsigned long time3 = timer1; timer1 = 0;
-//   // tft.setFont(&ComingSoon_Regular70pt7b);
-//   myCanvas->getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
-//   // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h);
-//   // move around
-//   unsigned long time4 = timer1; timer1 = 0;
-//   const int16_t adder = 1;
-//   tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
-//   tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
-//   // set direction
-//   if(tft_HHMM_x0 + gap_right_x <= 0) {
-//     screensaverMoveRight = true;
-//     pickNewRandomColor();
-//   }
-//   else if(tft_HHMM_x0 + gap_right_x + tft_HHMM_w >= TFT_WIDTH) {
-//     screensaverMoveRight = false;
-//     pickNewRandomColor();
-//   }
-//   if(tft_HHMM_y0 + gap_up_y <= 0)  {
-//     screensaverMoveDown = true;
-//     pickNewRandomColor();
-//   }
-//   else if(tft_HHMM_y0 + gap_up_y + tft_HHMM_h >= TFT_HEIGHT)  {
-//     screensaverMoveDown = false;
-//     pickNewRandomColor();
-//   }
-//   // Serial.print("x0 "); Serial.print(tft_HHMM_x0); Serial.print(" y0 "); Serial.println(tft_HHMM_y0);
-//   // Serial.print("screensaverMoveRight "); Serial.print(screensaverMoveRight); Serial.print(" screensaverMoveDown "); Serial.println(screensaverMoveDown);
-//   // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
-//   unsigned long time5 = timer1; timer1 = 0;
-//   myCanvas->setCursor(tft_HHMM_x0, tft_HHMM_y0);
-//   unsigned long time6 = timer1; timer1 = 0;
-//   // tft.setCursor(tft_HHMM_x0, tft_HHMM_y0);
-//   // myCanvas->drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
-//   uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
-//   myCanvas->setTextColor(randomColor);
-//   // tft.setTextColor(randomColor);
-//   unsigned long time7 = timer1; timer1 = 0;
-//   myCanvas->print(newDisplayData.timeHHMM);
-//   unsigned long time8 = timer1; timer1 = 0;
-//   // tft.print(newDisplayData.timeHHMM);
-//   // Serial.println("Printed time on tft");
-//   // delay(2000);
-//   // In code later:
-//   // elapsedMillis time1;
-//   // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
-//   // unsigned long timeA = time1;
-//   // Serial.println();
-//   // Serial.print("Time to run tft.drawBitmap (ms) = "); Serial.println(timeA);
-//   // delay(1000);
-//   // tft.fillScreen(Display_Backround_Color);
-//   // delay(1000);
-//   // time1 = 0;
-//   // fastDrawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT, randomColor, Display_Backround_Color); // Copy to screen
-//   tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TFT_HEIGHT); // Copy to screen
-//   unsigned long time9 = timer1; timer1 = 0;
-//   Serial.println();
-//   Serial.print(time1); Serial.print(' '); Serial.print(time2); Serial.print(' '); Serial.print(time3); Serial.print(' '); Serial.print(time4); Serial.print(' '); Serial.print(time5); Serial.print(' '); Serial.print(time6); Serial.print(' '); Serial.print(time7); Serial.print(' '); Serial.print(time8); Serial.print(' '); Serial.println(time9);
-//   // timeA = time1;
-//   // Serial.print("Time to run fastDrawBitmap (ms) = "); Serial.println(timeA);
-//   // delay(1000);
-//   // delete myCanvas;
-//   // yield ();
-//   // Serial.println("Printed canvas on tft");
-//   // delay(2000);
-// }
-
 void rgb_display_class::settingsPage() {
 
   tft.fillScreen(Display_Backround_Color);
@@ -619,7 +505,7 @@ void rgb_display_class::displayTimeUpdate() {
     isThisTheFirstTime = true;
   }
 
-  if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it
+  if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it every second
 
     // delete canvas if it exists
     if(myCanvas != NULL) {
@@ -638,8 +524,11 @@ void rgb_display_class::displayTimeUpdate() {
     // set font
     myCanvas->setFont(&FreeSansBold48pt7b);
 
+    // initial gap if single digit hour
+    int16_t hh_gap_x = (main->rtc.hour() >= 10 ? 0 : 30);
+
     // home the cursor
-    myCanvas->setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+    myCanvas->setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
 
     // change the text color to foreground color
     myCanvas->setTextColor(Display_Time_Color);

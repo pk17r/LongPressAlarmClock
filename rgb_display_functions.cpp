@@ -158,10 +158,7 @@ void rgb_display_class::screensaverControl(bool turnOn) {
 
 void rgb_display_class::prepareTimeDayDateArrays() {
   // HH:MM
-  if(main->currentPage != main->screensaverPage && main->rtc.hour() < 10)
-    snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, " %d:%02d", main->rtc.hour(), main->rtc.minute());
-  else
-    snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", main->rtc.hour(), main->rtc.minute());
+  snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", main->rtc.hour(), main->rtc.minute());
   // :SS
   snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", main->second);
   if(main->rtc.hourModeAndAmPm() == 0)

@@ -20,6 +20,7 @@ public:
   void getTodaysWeatherInfo();
 
   const unsigned int WIFI_SSID_PASSWORD_LENGTH_MAX = 32;
+
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     char* wifi_ssid = MY_WIFI_SSID;
   #else
@@ -40,6 +41,8 @@ public:
   char* weather_wind_speed = NULL;
   char* weather_humidity = NULL;
   bool gotWeatherInfo = false;
+
+  bool tempInCnotF = false;
 
 
 // PRIVATE VARIABLES
