@@ -26,11 +26,25 @@ rgb_display_class displayObj;
 // }
 
 void setup() {
+  // idle the other core
+  rp2040.idleOtherCore();
+  // setup program
   programObj.setup(&displayObj);
+  // restart the other core
+  rp2040.restartCore1();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  programObj.loop();
+  programObj.updateTimePriorityLoop();
+}
+
+void setup1() {
+  delay(500);
+}
+
+void loop1() {
+  // put your main code here, to run repeatedly:
+  programObj.nonPriorityTasksLoop();
   // display_freeram();
 }

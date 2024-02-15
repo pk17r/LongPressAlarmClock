@@ -136,7 +136,7 @@ void rgb_display_class::checkTimeAndSetBrightness() {
   }
 }
 
-void rgb_display_class::setSeconds(uint8_t &second) {
+void rgb_display_class::updateSecondsOnTimeStrArr(uint8_t &second) {
   snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", second);
 }
 

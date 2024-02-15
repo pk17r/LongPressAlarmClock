@@ -44,7 +44,8 @@ public:
   // function declerations
   void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
   void retrieveAlarmSettings();
-  void loop();
+  void updateTimePriorityLoop();
+  void nonPriorityTasksLoop();
   void rtc_clock_initialize();
   // clock seconds interrupt ISR
   static void sqwPinInterruptFn();
@@ -79,9 +80,7 @@ public:
 
   // wifi stuff including weather info
   wifi_stuff* wifiStuff;
-
-  // seconds blinker
-  bool blink = false;
+  bool tryGetWeatherInfoOnSecondCore = false;
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60
@@ -97,7 +96,8 @@ public:
   const uint8_t INACTIVITY_SECONDS_LIM = 120;
 
   // seconds flag triggered by interrupt
-  static inline volatile bool secondsIncremented;
+  static inline volatile bool rtcHwSecUpdate;
+  volatile bool mcuSecUpdate = false;
 
   // location of Alarm 
   const int16_t alarmScreenAreaMainPageY = 160;

@@ -10,7 +10,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 
   Serial.begin(9600);
   delay(100);
-  while(!Serial) { delay(20); };
+  // while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
 
   // make all CS pins high
@@ -40,7 +40,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   // setup display
   display->setup(this);
 
-  // seconds blink LED
+  // LED
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
 
@@ -77,9 +77,10 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
   rtc.sqwgSetMode(URTCLIB_SQWG_1H);
 }
 
-// arduino loop function
-void alarm_clock_main::loop() {
-  // button pressed or touchscreen touched
+// arduino loop function - High Priority one
+void alarm_clock_main::updateTimePriorityLoop() {
+
+    // button pressed or touchscreen touched
   if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
     // show instant response by turing up brightness
     display->setMaxBrightness();
@@ -101,28 +102,24 @@ void alarm_clock_main::loop() {
     inactivitySeconds = 0;
   }
 
+  // if user presses button, show response by turning On LED
   if(pushBtn.buttonActiveDebounced())
     digitalWrite(LED_PIN, HIGH);
   else
     digitalWrite(LED_PIN, LOW);
 
-
   // process time actions every second
-  if (alarm_clock_main::secondsIncremented) {
-    alarm_clock_main::secondsIncremented = false;
+  if (alarm_clock_main::rtcHwSecUpdate) {
+    alarm_clock_main::rtcHwSecUpdate = false;
     // update seconds
     ++second;
     if (second >= 60)
       refreshRtcTime = true;
 
     // prepare updated seconds array
-    display->setSeconds(second);
+    display->updateSecondsOnTimeStrArr(second);
 
     serialTimeStampPrefix();
-
-    // blink LED every second
-    blink = !blink;
-    // digitalWrite(LED_PIN, blink);
 
     // get time update
     if (refreshRtcTime) {
@@ -160,28 +157,20 @@ void alarm_clock_main::loop() {
 
       // 5 mins before alarm time, try to get weather info
       #if defined(MCU_IS_RASPBERRY_PI_PICO_W) || defined(MCU_IS_ESP32)
-        if(!wifiStuff->gotWeatherInfo) {
-          bool tryGetWeatherInfo = false;
+
+        if(!wifiStuff->gotWeatherInfo && !tryGetWeatherInfoOnSecondCore) {
+
           if(alarmMin >= 5)
             if(rtc.hour() == alarmHr && rtc.minute() == alarmMin - 5)
-              tryGetWeatherInfo = true;
+              tryGetWeatherInfoOnSecondCore = true;
           else if(alarmHr > 1)
             if(rtc.hour() == alarmHr - 1 && rtc.minute() == 55)
-              tryGetWeatherInfo = true;
+              tryGetWeatherInfoOnSecondCore = true;
           else
             if(rtc.hour() == 12 && rtc.minute() == 55)
-              tryGetWeatherInfo = true;
-          // try get weather info
-          if(tryGetWeatherInfo) {
-            // get today's weather info
-            wifiStuff->getTodaysWeatherInfo();
-            // try once more if did not get info
-            if(!wifiStuff->gotWeatherInfo)
-              wifiStuff->getTodaysWeatherInfo();
-            // refresh time
-            refreshRtcTime = true;
-          }
+              tryGetWeatherInfoOnSecondCore = true;
         }
+
       #endif
 
       // Activate Buzzer at Alarm Time
@@ -216,29 +205,50 @@ void alarm_clock_main::loop() {
       }
     }
 
-    // update TFT display for changes
+    // update time on main page
     if(currentPage == mainPage)
       display->displayTimeUpdate();
-    else if(currentPage == screensaverPage)
-      display->screensaver();
 
     // serial print RTC Date Time
     display->serialPrintRtcDateTime();
 
     Serial.println();
 
+    // seconds updated on MCU flag, to be used by other core
+    mcuSecUpdate = true;
+  }
+
+  // make screensaver motion fast
+  if(currentPage == screensaverPage)
+    display->screensaver();
+
+  // accept user inputs
+  if (Serial.available() != 0)
+    processSerialInput();
+
 // #if defined(MCU_IS_ESP32)
 //     // if button is inactive, then go to sleep
 //     if(!pushBtn.buttonActiveDebounced())
 //       putEsp32ToLightSleep();
 // #endif
-  }
-  else if(currentPage == screensaverPage)
-    display->screensaver();   // continous motion clock
 
-  // accept user inputs
-  if (Serial.available() != 0)
-    processSerialInput();
+}
+
+// arduino loop function - less priority one
+void alarm_clock_main::nonPriorityTasksLoop() {
+
+  // try get weather info
+  if (tryGetWeatherInfoOnSecondCore) {
+
+    // get today's weather info
+    wifiStuff->getTodaysWeatherInfo();
+
+    // try once more if did not get info
+    if(!wifiStuff->gotWeatherInfo)
+      wifiStuff->getTodaysWeatherInfo();
+
+    tryGetWeatherInfoOnSecondCore = false;
+  }
 }
 
 void alarm_clock_main::setPage(ScreenPage page) {
@@ -367,7 +377,7 @@ void alarm_clock_main::saveAlarm() {
 
 // interrupt ISR
 void alarm_clock_main::sqwPinInterruptFn() {
-  alarm_clock_main::secondsIncremented = true;
+  alarm_clock_main::rtcHwSecUpdate = true;
 }
 
 // #if defined(MCU_IS_ESP32)
@@ -651,9 +661,7 @@ void alarm_clock_main::processSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-      wifiStuff->getTodaysWeatherInfo();
-        // refresh time
-        refreshRtcTime = true;
+        tryGetWeatherInfoOnSecondCore = true;
       }
       break;
     case 'i':   // set WiFi details
