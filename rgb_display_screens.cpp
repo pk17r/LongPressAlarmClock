@@ -2,6 +2,7 @@
 #include "rgb_display.h"
 #include "alarm_clock.h"
 #include <Arduino.h>
+#include "wifi_stuff.h"
 
 
 void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
@@ -311,12 +312,12 @@ void RGBDisplay::settingsPage() {
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
   tft.print("ssid: ");
-  tft.print(alarmClock->wifiStuff->wifi_ssid);
+  tft.print(wifiStuff->wifi_ssid);
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= alarmClock->eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
-    char c = *(alarmClock->wifiStuff->wifi_password + i);
+  while(i <= eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+    char c = *(wifiStuff->wifi_password + i);
     if(c == '\0')
      break;
     if(i % 4 == 0)
@@ -362,17 +363,17 @@ void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.print(newDisplayData.dateStr);
 
     // show today's weather
-    if(alarmClock->wifiStuff->gotWeatherInfo) {
+    if(wifiStuff->gotWeatherInfo) {
       tft.setFont(&FreeMono9pt7b);
       tft.setCursor(20, s_y0 + 65);
       tft.setTextColor(Display_Color_Orange);
-      tft.print(alarmClock->wifiStuff->weather_main); tft.print(" : "); tft.print(alarmClock->wifiStuff->weather_description);
+      tft.print(wifiStuff->weather_main); tft.print(" : "); tft.print(wifiStuff->weather_description);
       tft.setCursor(20, s_y0 + 85);
-      tft.print("Temp : "); tft.print(alarmClock->wifiStuff->weather_temp); tft.print("F ("); tft.print(alarmClock->wifiStuff->weather_temp_max); tft.print("/"); tft.print(alarmClock->wifiStuff->weather_temp_min); tft.print(")");
+      tft.print("Temp : "); tft.print(wifiStuff->weather_temp); tft.print("F ("); tft.print(wifiStuff->weather_temp_max); tft.print("/"); tft.print(wifiStuff->weather_temp_min); tft.print(")");
       tft.setCursor(20, s_y0 + 105);
-      tft.print("Wind Speed : "); tft.print(alarmClock->wifiStuff->weather_wind_speed); tft.print("m/s");
+      tft.print("Wind Speed : "); tft.print(wifiStuff->weather_wind_speed); tft.print("m/s");
       tft.setCursor(20, s_y0 + 125);
-      tft.print("Humidity : "); tft.print(alarmClock->wifiStuff->weather_humidity); tft.print("%");
+      tft.print("Humidity : "); tft.print(wifiStuff->weather_humidity); tft.print("%");
     }
   }
 

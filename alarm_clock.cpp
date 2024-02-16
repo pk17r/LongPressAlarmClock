@@ -2,42 +2,20 @@
 #include "pin_defs.h"
 #include <Arduino.h>
 #include "alarm_clock.h"
+#include "wifi_stuff.h"
+#include "eeprom.h"
+#include <PushButtonTaps.h>
+#if defined(TOUCHSCREEN_IS_XPT2046)
+  #include "touchscreen.h"
+#endif
 
 // program setup function
 void AlarmClock::setup() {
-  #if defined(MCU_IS_ESP32)
-    setCpuFrequencyMhz(160);
-  #endif
-
-  Serial.begin(9600);
-  delay(100);
-  // while(!Serial) { delay(20); };
-  Serial.println(F("\nSerial OK"));
-
-  // make all CS pins high
-  pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
-  pinMode(TS_CS_PIN, OUTPUT);
-  digitalWrite(TS_CS_PIN, HIGH);
-
-  // retrieve alarm settings
-  eeprom = new EEPROM();
-  retrieveAlarmSettings();
-
-  // retrieve wifi details
-  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff = new WiFiStuff();
-    wifiStuff->setup(eeprom);
-    wifiStuff->turn_WiFi_Off();
-  #endif
-
+  
   // setup alarm clock program
 
   // initialize rtc time
   rtc_clock_initialize();
-
-  // setup display
-  display->setup();
 
   // LED
   pinMode(LED_PIN, OUTPUT);
@@ -47,14 +25,8 @@ void AlarmClock::setup() {
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
 
-  // initialize push button
-  pushBtn.setButtonPin(BUTTON_PIN);
-  // pushBtn.setButtonActiveLow(false);
-
-  #if defined(TOUCHSCREEN_IS_XPT2046)
-    // touchscreen setup and calibration
-    ts.setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
-  #endif
+  // retrieve alarm settings
+  retrieveAlarmSettings();
 
   // seconds interrupt pin
   pinMode(SQW_INT_PIN, INPUT_PULLUP);

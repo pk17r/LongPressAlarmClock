@@ -3,10 +3,6 @@
 
 #include "common.h"
 #include "rgb_display.h"
-#if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  #include "wifi_stuff.h"
-#endif
-#include "eeprom.h"
 #if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
   #include <stdio.h>
   #include "pico/stdlib.h"
@@ -14,11 +10,7 @@
   #include "hardware/irq.h"
 #endif
 #include "pin_defs.h"
-#include <PushButtonTaps.h>
 #include "uRTCLib.h"
-#if defined(TOUCHSCREEN_IS_XPT2046)
-  #include "touchscreen.h"
-#endif
 
 // forward decleration of other classes
 class WiFiStuff;
@@ -62,22 +54,11 @@ public:
 
 // OBJECTS and VARIABLES
 
-  // Push Button
-  PushButtonTaps pushBtn;
-
-  #if defined(TOUCHSCREEN_IS_XPT2046)
-    // touch screen
-    Touchscreen ts;
-  #endif
-
   // RTC clock object for DC3231 rtc
   uRTCLib rtc;
 
   // display object
   // RGBDisplay* display = NULL;
-
-  // wifi stuff including weather info
-  WiFiStuff* wifiStuff;
 
   // secondCoreControlFlag controls idling and restarting core1 from core0
   //    0 = core is idling
@@ -85,9 +66,6 @@ public:
   //    2 = core is running some operation
   //    3 = core is done processing and can be idled
   volatile byte secondCoreControlFlag = 0;
-
-  // persistent data class pointer
-  EEPROM* eeprom = NULL;
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60
