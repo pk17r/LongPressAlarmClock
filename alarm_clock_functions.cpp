@@ -1,10 +1,10 @@
 #include "hardware/sync.h"
 #include "pin_defs.h"
 #include <Arduino.h>
-#include "alarm_clock_main.h"
+#include "alarm_clock.h"
 
 // program setup function
-void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
+void AlarmClock::setup(rgb_display_class* disp_ptr) {
   #if defined(MCU_IS_ESP32)
     setCpuFrequencyMhz(160);
   #endif
@@ -80,7 +80,7 @@ void alarm_clock_main::setup(rgb_display_class* disp_ptr) {
 }
 
 // arduino loop function - High Priority one
-void alarm_clock_main::updateTimePriorityLoop() {
+void AlarmClock::updateTimePriorityLoop() {
 
     // button pressed or touchscreen touched
   if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
@@ -111,8 +111,8 @@ void alarm_clock_main::updateTimePriorityLoop() {
     digitalWrite(LED_PIN, LOW);
 
   // process time actions every second
-  if (alarm_clock_main::rtcHwSecUpdate) {
-    alarm_clock_main::rtcHwSecUpdate = false;
+  if (AlarmClock::rtcHwSecUpdate) {
+    AlarmClock::rtcHwSecUpdate = false;
     // update seconds
     ++second;
     if (second >= 60)
@@ -237,7 +237,7 @@ void alarm_clock_main::updateTimePriorityLoop() {
 }
 
 // arduino loop function - less priority one
-void alarm_clock_main::nonPriorityTasksLoop() {
+void AlarmClock::nonPriorityTasksLoop() {
 
   // try get weather info
   if (tryGetWeatherInfoOnSecondCore) {
@@ -253,7 +253,7 @@ void alarm_clock_main::nonPriorityTasksLoop() {
   }
 }
 
-void alarm_clock_main::setPage(ScreenPage page) {
+void AlarmClock::setPage(ScreenPage page) {
   switch(page) {
     case mainPage:
       // if screensaver is active then clear screensaver canvas to free memory
@@ -291,13 +291,13 @@ void alarm_clock_main::setPage(ScreenPage page) {
   }
 }
 
-void alarm_clock_main::retrieveAlarmSettings() {
+void AlarmClock::retrieveAlarmSettings() {
   
   if(!(persistentData->retrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn)))
     saveAlarm();
 }
 
-void alarm_clock_main::saveAlarm() {
+void AlarmClock::saveAlarm() {
   alarmHr = var1;
   alarmMin = var2;
   alarmIsAm = var3AmPm;
@@ -308,8 +308,8 @@ void alarm_clock_main::saveAlarm() {
 }
 
 // interrupt ISR
-void alarm_clock_main::sqwPinInterruptFn() {
-  alarm_clock_main::rtcHwSecUpdate = true;
+void AlarmClock::sqwPinInterruptFn() {
+  AlarmClock::rtcHwSecUpdate = true;
 }
 
 // #if defined(MCU_IS_ESP32)
@@ -317,7 +317,7 @@ void alarm_clock_main::sqwPinInterruptFn() {
 //   Esp32 light sleep function
 //   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
 // */
-// void alarm_clock_main::putEsp32ToLightSleep() {
+// void AlarmClock::putEsp32ToLightSleep() {
 //   /*
 //   First we configure the wake up source
 //   We set our ESP32 to wake up for an external trigger.
@@ -375,7 +375,7 @@ void alarm_clock_main::sqwPinInterruptFn() {
 // Method to print the reason by which ESP32
 // has been awaken from sleep
 // */
-// void alarm_clock_main::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
+// void AlarmClock::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
 //   switch(wakeup_reason)
 //   {
 //     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
@@ -388,7 +388,7 @@ void alarm_clock_main::sqwPinInterruptFn() {
 // }
 // #endif
 
-void alarm_clock_main::rtc_clock_initialize() {
+void AlarmClock::rtc_clock_initialize() {
 
   /* INITIALIZE RTC */
 
@@ -462,7 +462,7 @@ void alarm_clock_main::rtc_clock_initialize() {
   second = rtc.second() - 1;
 }
 
-void alarm_clock_main::serialTimeStampPrefix() {
+void AlarmClock::serialTimeStampPrefix() {
   Serial.print(F("("));
   Serial.print(millis());
   Serial.print(F(":s"));
@@ -474,7 +474,7 @@ void alarm_clock_main::serialTimeStampPrefix() {
   Serial.flush();
 }
 
-void alarm_clock_main::serial_input_flush() {
+void AlarmClock::serial_input_flush() {
   while (true) {
     delay(20);  // give data a chance to arrive
     if (Serial.available()) {
@@ -487,7 +487,7 @@ void alarm_clock_main::serial_input_flush() {
   }
 }
 
-void alarm_clock_main::processSerialInput() {
+void AlarmClock::processSerialInput() {
   // take user input
   char input = Serial.read();
   serial_input_flush();
@@ -641,7 +641,7 @@ void alarm_clock_main::processSerialInput() {
 /*
   Check if alarm time is hit
 */
-bool alarm_clock_main::timeToStartAlarm() {
+bool AlarmClock::timeToStartAlarm() {
 
   if(!alarmOn) return false;
 
@@ -684,7 +684,7 @@ bool alarm_clock_main::timeToStartAlarm() {
   If user does not end alarm by ALARM_MAX_ON_TIME_MS milliseconds,
   it will end alarm on its own.
 */
-void alarm_clock_main::buzzAlarmFn() {
+void AlarmClock::buzzAlarmFn() {
   // start alarm triggered page
   setPage(alarmTriggeredPage);
   // setup buzzer timer
@@ -741,9 +741,9 @@ void alarm_clock_main::buzzAlarmFn() {
 
 // Passive Buzzer Timer Interrupt Service Routine
 #if defined(MCU_IS_ESP32)
-void IRAM_ATTR alarm_clock_main::passiveBuzzerTimerISR() {
+void IRAM_ATTR AlarmClock::passiveBuzzerTimerISR() {
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-bool alarm_clock_main::passiveBuzzerTimerISR(struct repeating_timer *t) {
+bool AlarmClock::passiveBuzzerTimerISR(struct repeating_timer *t) {
 #endif
   // passiveBuzzerTimerISR() function
   if(millis() - _beepStartTimeMs > BEEP_LENGTH_MS) {
@@ -759,7 +759,7 @@ bool alarm_clock_main::passiveBuzzerTimerISR(struct repeating_timer *t) {
   #endif
 }
 
-void alarm_clock_main::buzzer_enable() {
+void AlarmClock::buzzer_enable() {
   // Timer Enable
   #if defined(MCU_IS_ESP32)
     timerAlarmEnable(passiveBuzzerTimerPtr);
@@ -769,7 +769,7 @@ void alarm_clock_main::buzzer_enable() {
   #endif
 }
 
-void alarm_clock_main::buzzer_disable() {
+void AlarmClock::buzzer_disable() {
   // Timer Disable
   #if defined(MCU_IS_ESP32)
     timerAlarmDisable(passiveBuzzerTimerPtr);
@@ -782,7 +782,7 @@ void alarm_clock_main::buzzer_disable() {
   _beepToggle = false;
 }
 
-void alarm_clock_main::setupBuzzerTimer() {
+void AlarmClock::setupBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
     passiveBuzzerTimerPtr = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
@@ -795,7 +795,7 @@ void alarm_clock_main::setupBuzzerTimer() {
   Serial.println(F("Timer setup successful!"));
 }
 
-void alarm_clock_main::deallocateBuzzerTimer() {
+void AlarmClock::deallocateBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
     passiveBuzzerTimerPtr = NULL;

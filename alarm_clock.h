@@ -23,7 +23,7 @@
 class rgb_display_class;
 class wifi_stuff;
 
-class alarm_clock_main {
+class AlarmClock {
 
 public:
 

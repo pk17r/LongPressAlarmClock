@@ -1,6 +1,6 @@
 #include "pin_defs.h"
 #include "rgb_display_class.h"
-#include "alarm_clock_main.h"
+#include "alarm_clock.h"
 #include "uRTCLib.h"
 #include <Arduino.h>
 
@@ -36,7 +36,7 @@ rgb_display_class::~rgb_display_class() {
   delete displayedData.alarmStr;
 }
 
-void rgb_display_class::setup(alarm_clock_main* main_ptr) {
+void rgb_display_class::setup(AlarmClock* main_ptr) {
   // friend class pointer
   this->main = main_ptr;
 

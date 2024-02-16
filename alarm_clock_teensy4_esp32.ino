@@ -8,10 +8,10 @@
   Prashant Kumar
 
 ***************************************************************************/
-#include "alarm_clock_main.h"
+#include "alarm_clock.h"
 #include "rgb_display_class.h"
 
-alarm_clock_main programObj;
+AlarmClock programObj;
 rgb_display_class displayObj;
 
 // extern "C" char* sbrk(int incr);
