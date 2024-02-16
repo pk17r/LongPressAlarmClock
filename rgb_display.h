@@ -96,7 +96,7 @@ private:
   void pickNewRandomColor();  // for screensaver
   void drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
-
+  void fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
 
 // PRIVATE VARIABLES
 
@@ -106,7 +106,7 @@ private:
   // screensaver
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
-  GFXcanvas16* myCanvas = NULL;
+  GFXcanvas1* myCanvas = NULL;
   // std::unique_ptr<GFXcanvas16> myCanvas;
   // vector<GFXcanvas16> myCanvasVec(1);
 

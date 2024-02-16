@@ -4,6 +4,38 @@
 #include <Arduino.h>
 #include "wifi_stuff.h"
 
+void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+  SPI.beginTransaction( SPISettings(120000000, MSBFIRST, SPI_MODE0) );
+  digitalWrite(TFT_CS, 0);  // indicate "transfer"
+  digitalWrite(TFT_DC, 0);  // indicate "command"
+  SPI.transfer(0x2A);              // send column span command
+  digitalWrite(TFT_DC, 1);  // indicate "data"
+  SPI.transfer16(x);//     >> 8;      // send Xmin
+  SPI.transfer16(x+w-1);// >> 8;      // send Xmax
+  digitalWrite(TFT_DC, 0);  // indicate "command"
+  SPI.transfer(0x2B);              // send row span command
+  digitalWrite(TFT_DC, 1);  // indicate "data"
+  SPI.transfer16(y);//     >> 8;      // send Ymin
+  SPI.transfer16(y+h-1);// >> 8;      // send Ymax
+  digitalWrite(TFT_DC, 0);  // indicate "command"
+  SPI.transfer(0x2C);              // send write command
+  digitalWrite(TFT_DC, 1);  // indicate "data"
+
+  int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
+  int8_t bits8 = 0;
+  for (int16_t j = 0; j < h; j++) {
+    for (int16_t i = 0; i < w; i++)
+    {
+      bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
+      uint16_t c = bits8 < 0 ? color : bg;   // select color
+      SPI.transfer16(c);    // send color
+    }
+  }
+  digitalWrite(TFT_CS, 1);                   // indicate "idle"
+  // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
+  // digitalWrite(TFT_CS, 1); // Enable internal pull-up
+  SPI.endTransaction();
+}
 
 void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
 
@@ -438,8 +470,8 @@ void RGBDisplay::screensaver() {
     date_x0 = (screensaver_w - date_row_w) / 2;// - date_gap_x;
     
     // create canvas
-    // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND));
-    myCanvas = new GFXcanvas16(screensaver_w, screensaver_h);
+    // myCanvas = new GFXcanvas16(screensaver_w, screensaver_h);
+    myCanvas = new GFXcanvas1(screensaver_w, screensaver_h);
 
     alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas."); Serial.flush();
 
@@ -492,7 +524,7 @@ void RGBDisplay::screensaver() {
     if(screensaver_x1 + 2 * GAP_BAND <= 0) {   // left edge
       screensaverMoveRight = true;
     }
-    else if(screensaver_x1 + screensaver_w - GAP_BAND >= TFT_WIDTH) {    // right edge
+    else if(screensaver_x1 + screensaver_w >= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
     }
     // top and bottom edge - when hit change color as well
@@ -512,7 +544,9 @@ void RGBDisplay::screensaver() {
 
   // paste the canvas on screen
   // unsigned long time1 = timer1; timer1 = 0;
-  tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
+  // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
+  // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
+  fastDrawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color);
   // unsigned long time2 = timer1;
   // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
 }
@@ -548,7 +582,7 @@ void RGBDisplay::displayTimeUpdate() {
 
     // create new canvas for time row
     // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6));
-    myCanvas = new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6);
+    myCanvas = new GFXcanvas1(TFT_WIDTH, TIME_ROW_Y0 + 6);
     myCanvas->fillScreen(Display_Backround_Color);
     myCanvas->setTextWrap(false);
 
@@ -611,8 +645,8 @@ void RGBDisplay::displayTimeUpdate() {
 
     // draw canvas to tft   fastDrawBitmap
     // elapsedMillis time1;
-    // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
-    tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
+    tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
+    // tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
     // unsigned long timeA = time1;
     // Serial.println();
     // Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
