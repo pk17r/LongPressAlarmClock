@@ -157,17 +157,17 @@ void AlarmClock::updateTimePriorityLoop() {
       // 5 mins before alarm time, try to get weather info
       #if defined(MCU_IS_RASPBERRY_PI_PICO_W) || defined(MCU_IS_ESP32)
 
-        if(!wifiStuff->gotWeatherInfo && !tryGetWeatherInfoOnSecondCore) {
+        if(!wifiStuff->gotWeatherInfo && secondCoreControlFlag == 0) {
 
           if(alarmMin >= 5)
             if(rtc.hour() == alarmHr && rtc.minute() == alarmMin - 5)
-              tryGetWeatherInfoOnSecondCore = true;
+              secondCoreControlFlag = 1;
           else if(alarmHr > 1)
             if(rtc.hour() == alarmHr - 1 && rtc.minute() == 55)
-              tryGetWeatherInfoOnSecondCore = true;
+              secondCoreControlFlag = 1;
           else
             if(rtc.hour() == 12 && rtc.minute() == 55)
-              tryGetWeatherInfoOnSecondCore = true;
+              secondCoreControlFlag = 1;
         }
 
       #endif
@@ -225,6 +225,21 @@ void AlarmClock::updateTimePriorityLoop() {
   if (Serial.available() != 0)
     processSerialInput();
 
+  // second core control operations
+  switch(secondCoreControlFlag) {
+    case 1: // resume the other core
+      // rp2040.restartCore1();
+      rp2040.resumeOtherCore();
+      secondCoreControlFlag = 2;  // core started
+      Serial.println("  Resumed core1");
+      break;
+    case 3: // core1 is done processing and can be idled
+      rp2040.idleOtherCore();
+      secondCoreControlFlag = 0;  // core idled
+      Serial.println("  Idled core1");
+      break;
+  }
+
 // #if defined(MCU_IS_ESP32)
 //     // if button is inactive, then go to sleep
 //     if(!pushBtn.buttonActiveDebounced())
@@ -236,8 +251,8 @@ void AlarmClock::updateTimePriorityLoop() {
 // arduino loop function - less priority one
 void AlarmClock::nonPriorityTasksLoop() {
 
-  // try get weather info
-  if (tryGetWeatherInfoOnSecondCore) {
+  // run the core only to do specific not time important operations
+  if (secondCoreControlFlag == 2) {
 
     // get today's weather info
     wifiStuff->getTodaysWeatherInfo();
@@ -246,7 +261,9 @@ void AlarmClock::nonPriorityTasksLoop() {
     if(!wifiStuff->gotWeatherInfo)
       wifiStuff->getTodaysWeatherInfo();
 
-    tryGetWeatherInfoOnSecondCore = false;
+    // done processing the task
+    // set the core up to be idled from core0
+    secondCoreControlFlag = 3;
   }
 }
 
@@ -460,13 +477,12 @@ void AlarmClock::rtc_clock_initialize() {
 }
 
 void AlarmClock::serialTimeStampPrefix() {
-  Serial.print(F("("));
-  Serial.print(millis());
-  Serial.print(F(":s"));
+  Serial.print(F("(s"));
   if(second < 10) Serial.print('0');
   Serial.print(second);
   Serial.print(F(":i"));
   Serial.print(inactivitySeconds);
+  Serial.print(F(": SRAM left: ")); Serial.print(freeRam());
   Serial.print(F(") - "));
   Serial.flush();
 }
@@ -590,7 +606,7 @@ void AlarmClock::processSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        tryGetWeatherInfoOnSecondCore = true;
+        secondCoreControlFlag = 1;
       }
       break;
     case 'i':   // set WiFi details

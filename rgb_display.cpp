@@ -101,8 +101,7 @@ void RGBDisplay::setup() {
 // set display brightness function
 void RGBDisplay::setBrightness(int brightness) {
   analogWrite(TFT_BL, brightness);
-  Serial.print(F("Display Brightness set to "));
-  Serial.println(brightness);
+  Serial.print(F("Display Brightness set to ")); Serial.print(brightness); Serial.print(charSpace);
   current_brightness = brightness;
 }
 

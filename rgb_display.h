@@ -3,6 +3,7 @@
 
 #include "pin_defs.h"
 #include "common.h"
+#include "alarm_clock.h"
 #include <Arduino.h>
 #include <Adafruit_GFX.h>     // Core graphics library
 #if defined(DISPLAY_IS_ST7789V)
@@ -25,6 +26,7 @@
 #include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
 #include <elapsedMillis.h>
+#include <memory>     // for unique_ptr
 
 
 class RGBDisplay {
@@ -105,6 +107,8 @@ private:
   bool screensaverMoveDown = true, screensaverMoveRight = true;
   int currentRandomColorIndex = 0;
   GFXcanvas16* myCanvas = NULL;
+  // std::unique_ptr<GFXcanvas16> myCanvas;
+  // vector<GFXcanvas16> myCanvasVec(1);
 
   // location of various display text strings
   int16_t gap_right_x = 0, gap_up_y = 0;

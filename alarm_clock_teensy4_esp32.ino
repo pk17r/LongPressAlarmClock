@@ -14,16 +14,13 @@
 RGBDisplay* display = NULL;
 AlarmClock* alarmClock = NULL;
 
-// extern "C" char* sbrk(int incr);
+extern "C" char* sbrk(int incr);
 
-// void display_freeram(){
-//   Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
-// }
-
-// int freeRam() {
-//   char top;
-//   return &top - reinterpret_cast<char*>(sbrk(0));
-// }
+// Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
+int freeRam() {
+  char top;
+  return &top - reinterpret_cast<char*>(sbrk(0));
+}
 
 void setup() {
   // idle the other core
@@ -34,7 +31,7 @@ void setup() {
   // setup program
   alarmClock->setup();
   // restart the other core
-  rp2040.restartCore1();
+  // rp2040.restartCore1();
 }
 
 void loop() {
@@ -49,5 +46,4 @@ void setup1() {
 void loop1() {
   // put your main code here, to run repeatedly:
   alarmClock->nonPriorityTasksLoop();
-  // display_freeram();
 }

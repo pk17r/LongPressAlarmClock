@@ -410,12 +410,15 @@ void RGBDisplay::screensaver() {
     if(myCanvas != NULL) {
       delete myCanvas;
       myCanvas = NULL;
+      // myCanvas.reset(nullptr);
     }
+    alarmClock->serialTimeStampPrefix(); Serial.println("After deleting myCanvas.");
 
     // get bounds of HH:MM text on screen
     tft.setFont(&ComingSoon_Regular70pt7b);
     tft.setTextColor(Display_Backround_Color);
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+
     // get bounds of date string
     uint16_t h = 0, w = 0;
     int16_t x = 0, y = 0;
@@ -424,9 +427,15 @@ void RGBDisplay::screensaver() {
     tft_HHMM_h += h + GAP_BAND;
 
     // create canvas
+    // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND));
     myCanvas = new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND);
+
+    alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas.");
+
     myCanvas->setTextWrap(false);
     myCanvas->fillScreen(Display_Backround_Color);
+
+    alarmClock->serialTimeStampPrefix(); Serial.println("After clearing canvas.");
 
     // picknew random color
     pickNewRandomColor();
@@ -513,13 +522,14 @@ void RGBDisplay::displayTimeUpdate() {
     if(myCanvas != NULL) {
       delete myCanvas;
       myCanvas = NULL;
+      // myCanvas.reset(nullptr);
     }
 
     // create new canvas for time row
+    // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6));
     myCanvas = new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6);
     myCanvas->fillScreen(Display_Backround_Color);
     myCanvas->setTextWrap(false);
-
 
     // HH:MM
 
@@ -592,6 +602,7 @@ void RGBDisplay::displayTimeUpdate() {
     // delete created canvas and null the pointer
     delete myCanvas;
     myCanvas = NULL;
+    // myCanvas.reset(nullptr);
 
   }
   else {    // CODE THAT CHECKS AND UPDATES ONLY CHANGES ON SCREEN HH:MM :SS AmPm

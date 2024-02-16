@@ -2,6 +2,7 @@
 #define ALARM_CLOCK_H
 
 #include "common.h"
+#include "rgb_display.h"
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
@@ -77,7 +78,12 @@ public:
 
   // wifi stuff including weather info
   WiFiStuff* wifiStuff;
-  bool tryGetWeatherInfoOnSecondCore = false;
+  // secondCoreControlFlag controls idling and restarting core1 from core0
+  //    0 = core is idling
+  //    1 = resume the other core from core0
+  //    2 = core is running some operation
+  //    3 = core is done processing and can be idled
+  volatile byte secondCoreControlFlag = 0;
 
   // persistent data class pointer
   EEPROM* eeprom = NULL;
@@ -93,7 +99,7 @@ public:
 
   // counter to note user inactivity seconds
   uint8_t inactivitySeconds = 0;
-  const uint8_t INACTIVITY_SECONDS_LIM = 120;
+  const uint8_t INACTIVITY_SECONDS_LIM = 15;
 
   // seconds flag triggered by interrupt
   static inline volatile bool rtcHwSecUpdate;
