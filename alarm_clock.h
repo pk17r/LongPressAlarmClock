@@ -78,6 +78,7 @@ public:
 
   // wifi stuff including weather info
   WiFiStuff* wifiStuff;
+
   // secondCoreControlFlag controls idling and restarting core1 from core0
   //    0 = core is idling
   //    1 = resume the other core from core0
@@ -99,11 +100,10 @@ public:
 
   // counter to note user inactivity seconds
   uint8_t inactivitySeconds = 0;
-  const uint8_t INACTIVITY_SECONDS_LIM = 15;
+  const uint8_t INACTIVITY_SECONDS_LIM = 120;
 
   // seconds flag triggered by interrupt
   static inline volatile bool rtcHwSecUpdate;
-  volatile bool mcuSecUpdate = false;
 
   // location of Alarm 
   const int16_t alarmScreenAreaMainPageY = 160;

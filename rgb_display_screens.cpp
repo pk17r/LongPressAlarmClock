@@ -420,15 +420,30 @@ void RGBDisplay::screensaver() {
     tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
 
     // get bounds of date string
-    uint16_t h = 0, w = 0;
-    int16_t x = 0, y = 0;
-    tft.setFont(&Satisfy_Regular24pt7b);
-    tft.getTextBounds(newDisplayData.dateStr, 0, 0, &x, &y, &w, &h);
-    tft_HHMM_h += h + GAP_BAND;
+    uint16_t date_h = 0, date_w = 0;
+    int16_t date_gap_x = 0, date_gap_y = 0;
+    if(alarmClock->rtc.hour() >= 10)
+      tft.setFont(&Satisfy_Regular24pt7b);
+    else
+      tft.setFont(&Satisfy_Regular18pt7b);
+    tft.getTextBounds(newDisplayData.dateStr, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
+    tft_HHMM_h += date_h + 2*GAP_BAND;
+
+    int16_t date_x0 = GAP_BAND - date_gap_x, alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
+    if(tft_HHMM_w >= date_w + 2*GAP_BAND + alarm_icon_w) {
+      // middle the date row
+      date_x0 = GAP_BAND - gap_right_x + tft_HHMM_w / 2 - (date_w + 2*GAP_BAND + alarm_icon_w) / 2;
+    }
+    else {
+      // dont worry about it
+      date_x0 = GAP_BAND - date_gap_x;
+    }
+
+    uint16_t canvas_w = TFT_WIDTH; // max(tft_HHMM_w + 2*GAP_BAND, date_w + 4*GAP_BAND + alarm_icon_w);
 
     // create canvas
     // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND));
-    myCanvas = new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND);
+    myCanvas = new GFXcanvas16(canvas_w, tft_HHMM_h + 2*GAP_BAND);
 
     alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas.");
 
@@ -444,20 +459,23 @@ void RGBDisplay::screensaver() {
     // print HH:MM
     myCanvas->setFont(&ComingSoon_Regular70pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor((TFT_WIDTH - tft_HHMM_w) / 2, GAP_BAND - gap_up_y);
+    myCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
     myCanvas->print(newDisplayData.timeHHMM);
 
     // print date string
-    myCanvas->setFont(&Satisfy_Regular24pt7b);
+    if(alarmClock->rtc.hour() >= 10)
+      myCanvas->setFont(&Satisfy_Regular24pt7b);
+    else
+      myCanvas->setFont(&Satisfy_Regular18pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(2*GAP_BAND - x, tft_HHMM_h - GAP_BAND);
+    myCanvas->setCursor(date_x0, tft_HHMM_h - GAP_BAND);
     myCanvas->print(newDisplayData.dateStr);
 
     // draw bell
-    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - h + GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W), (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
+    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - date_h - GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
 
     // get visual bounds of created canvas and time string
-    // myCanvas->drawRect((TFT_WIDTH - tft_HHMM_w) / 2, GAP_BAND, tft_HHMM_w, tft_HHMM_h - h - GAP_BAND, Display_Color_Green);  // time border
+    // myCanvas->drawRect(GAP_BAND - gap_right_x, GAP_BAND, tft_HHMM_w, tft_HHMM_h - date_h - GAP_BAND, Display_Color_Green);  // time border
     // myCanvas->drawRect(0,0, TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
@@ -472,10 +490,10 @@ void RGBDisplay::screensaver() {
 
     // set direction on hitting any edge
     // left and right edge - only change direction
-    if(tft_HHMM_x0 + (TFT_WIDTH - tft_HHMM_w) / 2 <= 0) {   // left edge
+    if(tft_HHMM_x0 + GAP_BAND <= 0) {   // left edge
       screensaverMoveRight = true;
     }
-    else if(tft_HHMM_x0 + (TFT_WIDTH + tft_HHMM_w) / 2 >= TFT_WIDTH) {    // right edge
+    else if(tft_HHMM_x0 + GAP_BAND + tft_HHMM_w >= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
     }
     // top and bottom edge - when hit change color as well

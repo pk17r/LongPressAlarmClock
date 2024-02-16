@@ -8,6 +8,8 @@ class AlarmClock;
 // extern all global variables
 extern RGBDisplay* display;
 extern AlarmClock* alarmClock;
+
+// extern all global functions
 extern int freeRam();
 
 #endif // COMMON_H
