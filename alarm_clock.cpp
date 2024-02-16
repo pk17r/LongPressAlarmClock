@@ -4,7 +4,7 @@
 #include "alarm_clock.h"
 
 // program setup function
-void AlarmClock::setup(rgb_display_class* disp_ptr) {
+void AlarmClock::setup(RGBDisplay* disp_ptr) {
   #if defined(MCU_IS_ESP32)
     setCpuFrequencyMhz(160);
   #endif
@@ -21,13 +21,13 @@ void AlarmClock::setup(rgb_display_class* disp_ptr) {
   digitalWrite(TS_CS_PIN, HIGH);
 
   // retrieve alarm settings
-  persistentData = new persistent_data();
+  eeprom = new EEPROM();
   retrieveAlarmSettings();
 
   // retrieve wifi details
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff = new wifi_stuff();
-    wifiStuff->setup(persistentData);
+    wifiStuff = new WiFiStuff();
+    wifiStuff->setup(eeprom);
     wifiStuff->turn_WiFi_Off();
   #endif
 
@@ -293,7 +293,7 @@ void AlarmClock::setPage(ScreenPage page) {
 
 void AlarmClock::retrieveAlarmSettings() {
   
-  if(!(persistentData->retrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn)))
+  if(!(eeprom->retrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn)))
     saveAlarm();
 }
 
@@ -304,7 +304,7 @@ void AlarmClock::saveAlarm() {
   alarmOn = var4OnOff;
 
   // save alarm settings
-  persistentData->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
+  eeprom->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
 }
 
 // interrupt ISR

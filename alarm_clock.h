@@ -1,10 +1,10 @@
-#ifndef ALARM_CLOCK_MAIN_H
-#define ALARM_CLOCK_MAIN_H
+#ifndef ALARM_CLOCK_H
+#define ALARM_CLOCK_H
 
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
-#include "persistent_data.h"
+#include "eeprom.h"
 #if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
   #include <stdio.h>
   #include "pico/stdlib.h"
@@ -13,15 +13,15 @@
 #endif
 #include "pin_defs.h"
 #include <PushButtonTaps.h>
-#include "rgb_display_class.h"
+#include "rgb_display.h"
 #include "uRTCLib.h"
 #if defined(TOUCHSCREEN_IS_XPT2046)
   #include "touchscreen.h"
 #endif
 
 // forward decleration of other classes
-class rgb_display_class;
-class wifi_stuff;
+class RGBDisplay;
+class WiFiStuff;
 
 class AlarmClock {
 
@@ -40,7 +40,7 @@ public:
 // FUNCTIONS
 
   // function declerations
-  void setup(rgb_display_class* disp_ptr);//, touchscreen* ts_ptr);
+  void setup(RGBDisplay* disp_ptr);
   void updateTimePriorityLoop();
   void nonPriorityTasksLoop();
   void rtc_clock_initialize();
@@ -67,21 +67,21 @@ public:
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
     // touch screen
-    touchscreen ts;
+    Touchscreen ts;
   #endif
 
   // RTC clock object for DC3231 rtc
   uRTCLib rtc;
 
   // display object
-  rgb_display_class* display = NULL;
+  RGBDisplay* display = NULL;
 
   // wifi stuff including weather info
-  wifi_stuff* wifiStuff;
+  WiFiStuff* wifiStuff;
   bool tryGetWeatherInfoOnSecondCore = false;
 
   // persistent data class pointer
-  persistent_data* persistentData = NULL;
+  EEPROM* eeprom = NULL;
 
   // seconds counter to track RTC HW seconds
   // we'll refresh RTC time everytime second reaches 60
@@ -153,4 +153,4 @@ private:
 };
 
 
-#endif     // ALARM_CLOCK_MAIN_H
+#endif     // ALARM_CLOCK_H

@@ -20,7 +20,7 @@ struct TouchCalibration {
   int16_t screenHeight;
 };
 
-class touchscreen {
+class Touchscreen {
 
 private:
 
@@ -46,7 +46,7 @@ private:
 public:
 
   // constructor
-  touchscreen() : touchscreenObj(TS_CS_PIN, TS_IRQ_PIN) {};
+  Touchscreen() : touchscreenObj(TS_CS_PIN, TS_IRQ_PIN) {};
   void setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h);
   bool isTouched();
   // function to get x, y and isTouched flag

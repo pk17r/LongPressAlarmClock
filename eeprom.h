@@ -1,14 +1,14 @@
-#ifndef PERSISTENT_DATA_H
-#define PERSISTENT_DATA_H
+#ifndef EEPROM_H
+#define EEPROM_H
 
 #include <Arduino.h>
 #include "Wire.h"
 #include "uEEPROMLib.h"
 
-class persistent_data {
+class EEPROM {
 
 public:
-  persistent_data();
+  EEPROM();
   bool retrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
   void saveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
   void retrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password);
@@ -29,4 +29,4 @@ private:
 };
 
 
-#endif  // PERSISTENT_DATA_H
+#endif  // EEPROM_H

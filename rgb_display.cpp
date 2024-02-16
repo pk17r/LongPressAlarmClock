@@ -1,11 +1,11 @@
 #include "pin_defs.h"
-#include "rgb_display_class.h"
+#include "rgb_display.h"
 #include "alarm_clock.h"
 #include "uRTCLib.h"
 #include <Arduino.h>
 
 // constructor
-rgb_display_class::rgb_display_class() {
+RGBDisplay::RGBDisplay() {
   newDisplayData.timeHHMM = new char[HHMM_ARR_SIZE];
   newDisplayData.timeSS = new char[SS_ARR_SIZE];
   newDisplayData.dateStr = new char[DATE_ARR_SIZE];
@@ -25,7 +25,7 @@ rgb_display_class::rgb_display_class() {
 };
 
 // destructor
-rgb_display_class::~rgb_display_class() {
+RGBDisplay::~RGBDisplay() {
   delete newDisplayData.timeHHMM;
   delete newDisplayData.timeSS;
   delete newDisplayData.dateStr;
@@ -36,7 +36,7 @@ rgb_display_class::~rgb_display_class() {
   delete displayedData.alarmStr;
 }
 
-void rgb_display_class::setup(AlarmClock* main_ptr) {
+void RGBDisplay::setup(AlarmClock* main_ptr) {
   // friend class pointer
   this->main = main_ptr;
 
@@ -101,19 +101,19 @@ void rgb_display_class::setup(AlarmClock* main_ptr) {
 }
 
 // set display brightness function
-void rgb_display_class::setBrightness(int brightness) {
+void RGBDisplay::setBrightness(int brightness) {
   analogWrite(TFT_BL, brightness);
   Serial.print(F("Display Brightness set to "));
   Serial.println(brightness);
   current_brightness = brightness;
 }
 
-void rgb_display_class::setMaxBrightness() {
+void RGBDisplay::setMaxBrightness() {
   if(current_brightness != MAX_BRIGHTNESS)
     setBrightness(MAX_BRIGHTNESS);
 }
 
-void rgb_display_class::checkTimeAndSetBrightness() {
+void RGBDisplay::checkTimeAndSetBrightness() {
   if (main->rtc.hourModeAndAmPm() == 1) {  // 12hr AM
     if (main->rtc.hour() < 7 || main->rtc.hour() == 12)
       setBrightness(NIGHT_BRIGHTNESS);
@@ -136,11 +136,11 @@ void rgb_display_class::checkTimeAndSetBrightness() {
   }
 }
 
-void rgb_display_class::updateSecondsOnTimeStrArr(uint8_t &second) {
+void RGBDisplay::updateSecondsOnTimeStrArr(uint8_t &second) {
   snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", second);
 }
 
-void rgb_display_class::screensaverControl(bool turnOn) {
+void RGBDisplay::screensaverControl(bool turnOn) {
   if(!turnOn && myCanvas != NULL) {
     // delete screensaverCanvas;
     delete myCanvas;
@@ -156,7 +156,7 @@ void rgb_display_class::screensaverControl(bool turnOn) {
   prepareTimeDayDateArrays();
 }
 
-void rgb_display_class::prepareTimeDayDateArrays() {
+void RGBDisplay::prepareTimeDayDateArrays() {
   // HH:MM
   snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", main->rtc.hour(), main->rtc.minute());
   // :SS
@@ -180,7 +180,7 @@ void rgb_display_class::prepareTimeDayDateArrays() {
   newDisplayData._alarmOn = main->alarmOn;
 }
 
-void rgb_display_class::serialPrintRtcDateTime() {
+void RGBDisplay::serialPrintRtcDateTime() {
   // full serial print time date day array
   Serial.print(newDisplayData.timeHHMM);
   // snprintf(timeArraySec, SS_ARR_SIZE, ":%02d", second);

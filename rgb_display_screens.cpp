@@ -1,10 +1,10 @@
 #include "pin_defs.h"
-#include "rgb_display_class.h"
+#include "rgb_display.h"
 #include "alarm_clock.h"
 #include <Arduino.h>
 
 
-void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
+void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
 
   int16_t gap_x = TFT_WIDTH / 11;
   int16_t gap_y = TFT_HEIGHT / 9;
@@ -261,7 +261,7 @@ void rgb_display_class::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_
   }
 }
 
-void rgb_display_class::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
+void RGBDisplay::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
   tft.setFont(&FreeSans12pt7b);
   tft.setTextColor((isOn ? onFill : offFill));
   int16_t title_x0, title_y0;
@@ -278,7 +278,7 @@ void rgb_display_class::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h,
   tft.print(label);
 }
 
-void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor) {
+void RGBDisplay::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor) {
   int16_t x1, y1, x2, y2, x3, y3;
   if(isUp) {
     x1 = x + w / 2;
@@ -301,7 +301,7 @@ void rgb_display_class::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uin
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-void rgb_display_class::settingsPage() {
+void RGBDisplay::settingsPage() {
 
   tft.fillScreen(Display_Backround_Color);
   tft.setTextColor(Display_Color_Yellow);
@@ -315,7 +315,7 @@ void rgb_display_class::settingsPage() {
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= main->persistentData->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+  while(i <= main->eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
     char c = *(main->wifiStuff->wifi_password + i);
     if(c == '\0')
      break;
@@ -334,7 +334,7 @@ void rgb_display_class::settingsPage() {
   drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, cancelStr, Display_Color_Cyan, Display_Color_Orange, Display_Color_Black, true);
 }
 
-void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
+void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
   int16_t title_x0 = 30, title_y0 = 50;
   int16_t s_x0 = 215, s_y0 = title_y0 + 48;
@@ -401,7 +401,7 @@ void rgb_display_class::alarmTriggeredScreen(bool firstTime, int8_t buttonPressS
   tft.print(timer_str);
 }
 
-void rgb_display_class::screensaver() {
+void RGBDisplay::screensaver() {
   // elapsedMillis timer1;
   const int16_t GAP_BAND = 5, GAP_BAND_RIGHT = 30;
   if(refreshScreensaverCanvas) {
@@ -491,7 +491,7 @@ void rgb_display_class::screensaver() {
   // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
 }
 
-void rgb_display_class::pickNewRandomColor() {
+void RGBDisplay::pickNewRandomColor() {
   int newIndex = currentRandomColorIndex;
   while(newIndex == currentRandomColorIndex)
     newIndex = random(0, COLOR_PICKER_WHEEL_SIZE - 1);
@@ -499,7 +499,7 @@ void rgb_display_class::pickNewRandomColor() {
   // Serial.println(currentRandomColorIndex);
 }
 
-void rgb_display_class::displayTimeUpdate() {
+void RGBDisplay::displayTimeUpdate() {
 
   bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
   if(redrawDisplay) {
@@ -865,7 +865,7 @@ void rgb_display_class::displayTimeUpdate() {
   redrawDisplay = false;
 }
 
-int rgb_display_class::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
+int RGBDisplay::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
   int returnVal = -1;
 
   // main page touch input
@@ -906,7 +906,7 @@ int rgb_display_class::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
   return returnVal;
 }
 
-void rgb_display_class::goodMorningScreen() {
+void RGBDisplay::goodMorningScreen() {
   tft.fillScreen(Display_Color_Black);
   // set font
   tft.setFont(&FreeSansBold24pt7b);
@@ -939,7 +939,7 @@ void rgb_display_class::goodMorningScreen() {
  * 
  * params: top left corner 'x0' and 'y0', square edge length of graphic 'edge'
  */ 
-void rgb_display_class::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
+void RGBDisplay::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
 
   // set dimensions of sun and rays
 
@@ -1015,7 +1015,7 @@ void rgb_display_class::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
  * 
  * params: center cx, cy; inner radius of rays rr, length of rays rl, width of rays rw, number of rays rn, start angle degStart, color
  */ 
-void rgb_display_class::drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color) {
+void RGBDisplay::drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color) {
   // rays
   for(uint8_t i = 0; i < rn; i++) {
     // find coordinates of two triangles for each ray and use fillTriangle function to draw rays
@@ -1038,7 +1038,7 @@ void rgb_display_class::drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t 
 /* drawDenseCircle
  * densely pack a circle's circumference
  */
-void rgb_display_class::drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color) {
+void RGBDisplay::drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color) {
   // calculate angular resolution required
   // r*dTheta = 0.5
   double dTheta = 0.5 / static_cast<double>(r);

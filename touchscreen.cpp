@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <XPT2046_Touchscreen.h>
 
-bool touchscreen::isTouched() {
+bool Touchscreen::isTouched() {
   // irq touch is super fast
   if(!touchscreenObj.tirqTouched())
     return false;
@@ -18,13 +18,13 @@ bool touchscreen::isTouched() {
   }
 }
 
-void touchscreen::setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h) {
+void Touchscreen::setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h) {
   touchscreenObj.begin(SPI);
   touchscreenObj.setRotation(1);
   touchscreenCal = TouchCalibration{xMin, xMax, yMin, yMax, w, h};
 }
 
-TouchPixel* touchscreen::getTouchedPixel() {
+TouchPixel* Touchscreen::getTouchedPixel() {
   if(millis() - lastPolledMillis <= POLLING_GAP_MS) {
     // return last touch point
   }

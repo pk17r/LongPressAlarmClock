@@ -1,13 +1,13 @@
 
-#include "persistent_data.h"
+#include "eeprom.h"
 
-persistent_data::persistent_data() {
+EEPROM::EEPROM() {
   eeprom.set_address(0x57);
   Wire.begin();
 }
 
 
-bool persistent_data::retrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
+bool EEPROM::retrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
 
   // start reading from the first byte (address 0) of the EEPROM
   unsigned int address = ALARM_ADDRESS_EEPROM;
@@ -30,7 +30,7 @@ bool persistent_data::retrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin,
   return false;
 }
 
-void persistent_data::saveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
+void EEPROM::saveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
 
   // start writing from the first byte of the EEPROM
   unsigned int address = ALARM_ADDRESS_EEPROM;
@@ -55,7 +55,7 @@ void persistent_data::saveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarm
 
 }
 
-void persistent_data::retrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
+void EEPROM::retrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
 
   // read WiFi SSID and Password
   char eeprom_read_array[WIFI_SSID_PASSWORD_LENGTH_MAX + 1];
@@ -113,7 +113,7 @@ void persistent_data::retrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password
 }
 
 
-void persistent_data::saveWiFiDetails(char* wifi_ssid, char* wifi_password) {
+void EEPROM::saveWiFiDetails(char* wifi_ssid, char* wifi_password) {
 
   // start writing from the first byte of the EEPROM
   unsigned int address = WIFI_ADDRESS_EEPROM;

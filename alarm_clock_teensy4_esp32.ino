@@ -9,10 +9,10 @@
 
 ***************************************************************************/
 #include "alarm_clock.h"
-#include "rgb_display_class.h"
+#include "rgb_display.h"
 
 AlarmClock programObj;
-rgb_display_class displayObj;
+RGBDisplay displayObj;
 
 // extern "C" char* sbrk(int incr);
 

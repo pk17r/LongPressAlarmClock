@@ -1,5 +1,5 @@
-#ifndef RGB_DISPLAY_CLASS_H
-#define RGB_DISPLAY_CLASS_H
+#ifndef RGB_DISPLAY_H
+#define RGB_DISPLAY_H
 
 #include "pin_defs.h"
 #include "alarm_clock.h"
@@ -30,16 +30,16 @@
 class AlarmClock;
 
 
-class rgb_display_class {
+class RGBDisplay {
 
 public:
 
 // PUBLIC FUNCTIONS
 
   // constructor
-  rgb_display_class();
+  RGBDisplay();
   // destructor
-  ~rgb_display_class();
+  ~RGBDisplay();
 
   // screens
   void displayTimeUpdate();
@@ -449,4 +449,4 @@ private:
 
 };
 
-#endif    // RGB_DISPLAY_CLASS_H
+#endif    // RGB_DISPLAY_H

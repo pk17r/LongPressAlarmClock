@@ -1,20 +1,20 @@
 #include "wifi_stuff.h"
 
-void wifi_stuff::setup(persistent_data* persistentDataPtr) {
-  this->persistentData = persistentDataPtr;
+void WiFiStuff::setup(EEPROM* eepromPtr) {
+  this->eeprom = eepromPtr;
 
   retrieveWiFiDetails();
 }
 
-void wifi_stuff::retrieveWiFiDetails() {
-  persistentData->retrieveWiFiDetails(wifi_ssid, wifi_password);
+void WiFiStuff::retrieveWiFiDetails() {
+  eeprom->retrieveWiFiDetails(wifi_ssid, wifi_password);
 }
 
-void wifi_stuff::saveWiFiDetails() {
-  persistentData->saveWiFiDetails(wifi_ssid, wifi_password);
+void WiFiStuff::saveWiFiDetails() {
+  eeprom->saveWiFiDetails(wifi_ssid, wifi_password);
 }
 
-void wifi_stuff::turn_WiFi_On() {
+void WiFiStuff::turn_WiFi_On() {
   Serial.println(F("Connecting to WiFi"));
   WiFi.persistent(true);
   delay(1);
@@ -32,7 +32,7 @@ void wifi_stuff::turn_WiFi_On() {
     Serial.println(F("Could NOT connect to WiFi."));
 }
 
-void wifi_stuff::turn_WiFi_Off() {
+void WiFiStuff::turn_WiFi_Off() {
   WiFi.persistent(false);
   delay(1);
   WiFi.mode(WIFI_OFF);
@@ -41,7 +41,7 @@ void wifi_stuff::turn_WiFi_Off() {
   Serial.println(F("WiFi Off."));
 }
 
-void wifi_stuff::getTodaysWeatherInfo() {
+void WiFiStuff::getTodaysWeatherInfo() {
   gotWeatherInfo = false;
 
   // turn On Wifi

@@ -7,12 +7,12 @@
 #include "WiFi.h"
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
-#include "persistent_data.h"
+#include "eeprom.h"
 
-class wifi_stuff {
+class WiFiStuff {
 
 public:
-  void setup(persistent_data* persistentDataPtr);
+  void setup(EEPROM* eepromPtr);
   void retrieveWiFiDetails();
   void saveWiFiDetails();
   void turn_WiFi_On();
@@ -20,7 +20,7 @@ public:
   void getTodaysWeatherInfo();
 
   // persistent data class pointer
-  persistent_data* persistentData;
+  EEPROM* eeprom;
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     char* wifi_ssid = MY_WIFI_SSID;
