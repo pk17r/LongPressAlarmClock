@@ -112,8 +112,10 @@ private:
 
   // location of various display text strings
   int16_t gap_right_x = 0, gap_up_y = 0;
-  int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = 2 * TIME_ROW_Y0;   // default starting location of screensaver
+  int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = 2 * TIME_ROW_Y0;
   uint16_t tft_HHMM_w = 0, tft_HHMM_h = 0;
+  int16_t screensaver_x1 = 0, screensaver_y1 = 0;
+  uint16_t screensaver_w = 0, screensaver_h = 0;
   int16_t tft_AmPm_x0 = 0, tft_AmPm_y0 = 0;
   int16_t tft_SS_x0 = 0;
   int16_t date_row_x0 = 0;

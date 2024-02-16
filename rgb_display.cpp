@@ -147,8 +147,8 @@ void RGBDisplay::screensaverControl(bool turnOn) {
     refreshScreensaverCanvas = true;
   // clear screen
   tft.fillScreen(Display_Color_Black);
-  tft_HHMM_x0 = 20;
-  tft_HHMM_y0 = 20;
+  screensaver_x1 = 20;
+  screensaver_y1 = 20;
   redrawDisplay = true;
   prepareTimeDayDateArrays();
 }

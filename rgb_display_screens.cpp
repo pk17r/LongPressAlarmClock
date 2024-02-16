@@ -413,7 +413,7 @@ void RGBDisplay::screensaver() {
       myCanvas = NULL;
       // myCanvas.reset(nullptr);
     }
-    alarmClock->serialTimeStampPrefix(); Serial.println("After deleting myCanvas.");
+    alarmClock->serialTimeStampPrefix(); Serial.println("After deleting myCanvas."); Serial.flush();
 
     // get bounds of HH:MM text on screen
     tft.setFont(&ComingSoon_Regular70pt7b);
@@ -428,30 +428,25 @@ void RGBDisplay::screensaver() {
     else
       tft.setFont(&Satisfy_Regular18pt7b);
     tft.getTextBounds(newDisplayData.dateStr, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
-    tft_HHMM_h += date_h + 2*GAP_BAND;
+    screensaver_h = tft_HHMM_h + date_h + 4*GAP_BAND;
 
     int16_t date_x0 = GAP_BAND - date_gap_x, alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
-    if(tft_HHMM_w >= date_w + 2*GAP_BAND + alarm_icon_w) {
-      // middle the date row
-      date_x0 = GAP_BAND - gap_right_x + tft_HHMM_w / 2 - (date_w + 2*GAP_BAND + alarm_icon_w) / 2;
-    }
-    else {
-      // dont worry about it
-      date_x0 = GAP_BAND - date_gap_x;
-    }
-
-    uint16_t canvas_w = TFT_WIDTH; // max(tft_HHMM_w + 2*GAP_BAND, date_w + 4*GAP_BAND + alarm_icon_w);
-
+    uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
+    screensaver_w = max(tft_HHMM_w + 3 * GAP_BAND, date_row_w + 3 * GAP_BAND);
+    // middle both rows
+    tft_HHMM_x0 = (screensaver_w - tft_HHMM_w) / 2;// - gap_right_x;
+    date_x0 = (screensaver_w - date_row_w) / 2;// - date_gap_x;
+    
     // create canvas
     // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND));
-    myCanvas = new GFXcanvas16(canvas_w, tft_HHMM_h + 2*GAP_BAND);
+    myCanvas = new GFXcanvas16(screensaver_w, screensaver_h);
 
-    alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas.");
+    alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas."); Serial.flush();
 
     myCanvas->setTextWrap(false);
     myCanvas->fillScreen(Display_Backround_Color);
 
-    alarmClock->serialTimeStampPrefix(); Serial.println("After clearing canvas.");
+    alarmClock->serialTimeStampPrefix(); Serial.println("After clearing canvas."); Serial.flush();
 
     // picknew random color
     pickNewRandomColor();
@@ -460,7 +455,7 @@ void RGBDisplay::screensaver() {
     // print HH:MM
     myCanvas->setFont(&ComingSoon_Regular70pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(GAP_BAND - gap_right_x, GAP_BAND - gap_up_y);
+    myCanvas->setCursor(tft_HHMM_x0 + GAP_BAND, GAP_BAND - gap_up_y);
     myCanvas->print(newDisplayData.timeHHMM);
 
     // print date string
@@ -469,42 +464,45 @@ void RGBDisplay::screensaver() {
     else
       myCanvas->setFont(&Satisfy_Regular18pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(date_x0, tft_HHMM_h - GAP_BAND);
+    myCanvas->setCursor(date_x0 + GAP_BAND, screensaver_h - 3 * GAP_BAND);
     myCanvas->print(newDisplayData.dateStr);
 
     // draw bell
-    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h - date_h - GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
+    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h + 2 * GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
 
     // get visual bounds of created canvas and time string
-    // myCanvas->drawRect(GAP_BAND - gap_right_x, GAP_BAND, tft_HHMM_w, tft_HHMM_h - date_h - GAP_BAND, Display_Color_Green);  // time border
-    // myCanvas->drawRect(0,0, TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND, Display_Color_White);  // canvas border
+    // myCanvas->drawRect(tft_HHMM_x0 + GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
+    // myCanvas->drawRect(date_x0 + GAP_BAND, screensaver_h - 3 * GAP_BAND + date_gap_y, date_row_w, date_h, Display_Color_Cyan);  // date row border
+    // myCanvas->drawRect(0,0, screensaver_w, screensaver_h, Display_Color_White);  // canvas border
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
     refreshScreensaverCanvas = false;
+
+    alarmClock->serialTimeStampPrefix(); Serial.println("After completing canvas."); Serial.flush();
   }
   else {
 
     // move the time text on screen
     const int16_t adder = 1;
-    tft_HHMM_x0 += (screensaverMoveRight ? adder : -adder);
-    tft_HHMM_y0 += (screensaverMoveDown ? adder : -adder);
+    screensaver_x1 += (screensaverMoveRight ? adder : -adder);
+    screensaver_y1 += (screensaverMoveDown ? adder : -adder);
 
     // set direction on hitting any edge
     // left and right edge - only change direction
-    if(tft_HHMM_x0 + GAP_BAND <= 0) {   // left edge
+    if(screensaver_x1 + 2 * GAP_BAND <= 0) {   // left edge
       screensaverMoveRight = true;
     }
-    else if(tft_HHMM_x0 + GAP_BAND + tft_HHMM_w >= TFT_WIDTH) {    // right edge
+    else if(screensaver_x1 + screensaver_w - GAP_BAND >= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
     }
     // top and bottom edge - when hit change color as well
-    if(tft_HHMM_y0 + GAP_BAND <= 0)  {   // top edge
+    if(screensaver_y1 + GAP_BAND <= 0)  {   // top edge
       if(!screensaverMoveDown) {
         screensaverMoveDown = true;
         refreshScreensaverCanvas = true;
       }
     }
-    else if(tft_HHMM_y0 + GAP_BAND + tft_HHMM_h >= TFT_HEIGHT)  {   // bottom edge
+    else if(screensaver_y1 + screensaver_h - GAP_BAND >= TFT_HEIGHT)  {   // bottom edge
       if(screensaverMoveDown) {
         screensaverMoveDown = false;
         refreshScreensaverCanvas = true;
@@ -514,7 +512,7 @@ void RGBDisplay::screensaver() {
 
   // paste the canvas on screen
   // unsigned long time1 = timer1; timer1 = 0;
-  tft.drawRGBBitmap(tft_HHMM_x0, tft_HHMM_y0, myCanvas->getBuffer(), TFT_WIDTH, tft_HHMM_h + 2*GAP_BAND); // Copy to screen
+  tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // unsigned long time2 = timer1;
   // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
 }
