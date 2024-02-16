@@ -462,11 +462,13 @@ void RGBDisplay::screensaver() {
     else
       tft.setFont(&Satisfy_Regular18pt7b);
     tft.getTextBounds(newDisplayData.dateStr, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
-    screensaver_h = tft_HHMM_h + date_h + 4*GAP_BAND;
-
-    int16_t date_x0 = GAP_BAND - date_gap_x, alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
+    
+    int16_t date_x0 = GAP_BAND - date_gap_x;
+    int16_t alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
+    int16_t alarm_icon_h = (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H);
     uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
     screensaver_w = max(tft_HHMM_w + 3 * GAP_BAND, date_row_w + 3 * GAP_BAND);
+    screensaver_h = tft_HHMM_h + max(date_h, alarm_icon_h) + 3*GAP_BAND;
     // middle both rows
     tft_HHMM_x0 = (screensaver_w - tft_HHMM_w) / 2;// - gap_right_x;
     date_x0 = (screensaver_w - date_row_w) / 2;// - date_gap_x;
@@ -498,15 +500,15 @@ void RGBDisplay::screensaver() {
     else
       myCanvas->setFont(&Satisfy_Regular18pt7b);
     myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(date_x0 + GAP_BAND, screensaver_h - 3 * GAP_BAND);
+    myCanvas->setCursor(date_x0 + GAP_BAND, screensaver_h - 2 * GAP_BAND);
     myCanvas->print(newDisplayData.dateStr);
 
     // draw bell
-    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, tft_HHMM_h + 2 * GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H), randomColor);
+    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, screensaver_h - alarm_icon_h - GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, alarm_icon_h, randomColor);
 
     // get visual bounds of created canvas and time string
     // myCanvas->drawRect(tft_HHMM_x0 + GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
-    // myCanvas->drawRect(date_x0 + GAP_BAND, screensaver_h - 3 * GAP_BAND + date_gap_y, date_row_w, date_h, Display_Color_Cyan);  // date row border
+    // myCanvas->drawRect(date_x0 + GAP_BAND, screensaver_h + date_gap_y - 2 * GAP_BAND, date_row_w, date_h, Display_Color_Cyan);  // date row border
     // myCanvas->drawRect(0,0, screensaver_w, screensaver_h, Display_Color_White);  // canvas border
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
