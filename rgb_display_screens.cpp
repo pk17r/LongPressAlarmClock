@@ -5,7 +5,9 @@
 #include "wifi_stuff.h"
 
 void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
-  SPI.beginTransaction( SPISettings(120000000, MSBFIRST, SPI_MODE0) );
+
+  elapsedMillis timer1;
+  SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
   digitalWrite(TFT_CS, 0);  // indicate "transfer"
   digitalWrite(TFT_DC, 0);  // indicate "command"
   SPI.transfer(0x2A);              // send column span command
@@ -20,7 +22,6 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w
   digitalWrite(TFT_DC, 0);  // indicate "command"
   SPI.transfer(0x2C);              // send write command
   digitalWrite(TFT_DC, 1);  // indicate "data"
-
   int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
   int8_t bits8 = 0;
   for (int16_t j = 0; j < h; j++) {
@@ -28,13 +29,14 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w
     {
       bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
       uint16_t c = bits8 < 0 ? color : bg;   // select color
-      SPI.transfer16(c);    // send color
+      tft.SPI_WRITE16(c);
     }
   }
-  digitalWrite(TFT_CS, 1);                   // indicate "idle"
   // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
   // digitalWrite(TFT_CS, 1); // Enable internal pull-up
+  digitalWrite(TFT_CS, 1);                   // indicate "idle"
   SPI.endTransaction();
+  Serial.print(" fastDrawBitmapTime "); Serial.println(timer1);
 }
 
 void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
