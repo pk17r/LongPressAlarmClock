@@ -24,7 +24,7 @@ int freeRam() {
 
 void setup() {
   // idle the other core
-  rp2040.idleOtherCore();
+  // rp2040.idleOtherCore();
   // initialize modules
   alarmClock = new AlarmClock();
   display = new RGBDisplay();
@@ -40,7 +40,7 @@ void loop() {
 }
 
 void setup1() {
-  delay(500);
+  delay(2000);
 }
 
 void loop1() {

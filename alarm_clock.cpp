@@ -210,11 +210,22 @@ void AlarmClock::updateTimePriorityLoop() {
 
     // serial print RTC Date Time
     display->serialPrintRtcDateTime();
-
     Serial.println();
 
-    // seconds updated on MCU flag, to be used by other core
-    mcuSecUpdate = true;
+    // second core control operations
+    switch(secondCoreControlFlag) {
+      case 1: // resume the other core
+        // rp2040.restartCore1();
+        // rp2040.resumeOtherCore();
+        secondCoreControlFlag = 2;  // core started
+        // Serial.println("Resumed core1");
+        break;
+      case 3: // core1 is done processing and can be idled
+        // rp2040.idleOtherCore();
+        secondCoreControlFlag = 0;  // core idled
+        // Serial.println("Idled core1");
+        break;
+    }
   }
 
   // make screensaver motion fast
@@ -224,21 +235,6 @@ void AlarmClock::updateTimePriorityLoop() {
   // accept user inputs
   if (Serial.available() != 0)
     processSerialInput();
-
-  // second core control operations
-  switch(secondCoreControlFlag) {
-    case 1: // resume the other core
-      // rp2040.restartCore1();
-      rp2040.resumeOtherCore();
-      secondCoreControlFlag = 2;  // core started
-      Serial.println("  Resumed core1");
-      break;
-    case 3: // core1 is done processing and can be idled
-      rp2040.idleOtherCore();
-      secondCoreControlFlag = 0;  // core idled
-      Serial.println("  Idled core1");
-      break;
-  }
 
 // #if defined(MCU_IS_ESP32)
 //     // if button is inactive, then go to sleep
@@ -265,6 +261,9 @@ void AlarmClock::nonPriorityTasksLoop() {
     // set the core up to be idled from core0
     secondCoreControlFlag = 3;
   }
+
+  // a delay to slow things down and not crash
+  delay(1000);
 }
 
 void AlarmClock::setPage(ScreenPage page) {

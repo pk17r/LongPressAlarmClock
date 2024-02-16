@@ -143,7 +143,7 @@ private:
 
   // user defined locations of various text strings on display
   const int16_t TIME_ROW_X0 = 10, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
-  const int16_t DISPLAY_TEXT_GAP = 10;
+  const int16_t DISPLAY_TEXT_GAP = 5;
   const int16_t DATE_ROW_Y0 = 140;
   const int16_t ALARM_ROW_Y0 = 210, ALARM_ROW_Y1 = 160;
   const int16_t SETTINGS_PAGE_BACK_BUTTON_Y1 = TFT_HEIGHT - 50;

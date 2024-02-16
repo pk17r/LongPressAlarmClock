@@ -516,7 +516,11 @@ void RGBDisplay::displayTimeUpdate() {
     isThisTheFirstTime = true;
   }
 
-  if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it every second
+  // initial gap if single digit hour
+  const int16_t SINGLE_DIGIT_HOUR_GAP = 30;
+  int16_t hh_gap_x = (alarmClock->rtc.hour() >= 10 ? 0 : SINGLE_DIGIT_HOUR_GAP);
+
+  if(0) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it every second
 
     // delete canvas if it exists
     if(myCanvas != NULL) {
@@ -535,9 +539,6 @@ void RGBDisplay::displayTimeUpdate() {
 
     // set font
     myCanvas->setFont(&FreeSansBold48pt7b);
-
-    // initial gap if single digit hour
-    int16_t hh_gap_x = (alarmClock->rtc.hour() >= 10 ? 0 : 30);
 
     // home the cursor
     myCanvas->setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
@@ -630,7 +631,10 @@ void RGBDisplay::displayTimeUpdate() {
       // clear old time if it was there
       if(alarmClock->second != 0 && !isThisTheFirstTime) {
         // home the cursor to currently displayed text location
-        tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+        if(alarmClock->rtc.hour() == 10 && alarmClock->rtc.minute() == 0 && alarmClock->second == 0)  // handle special case of moving from single digit hour to 2 digit hour while clearing old value
+          tft.setCursor(TIME_ROW_X0 + SINGLE_DIGIT_HOUR_GAP, TIME_ROW_Y0);
+        else
+          tft.setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
 
         // redraw the old value to erase
         tft.print(displayedData.timeHHMM);
@@ -642,7 +646,7 @@ void RGBDisplay::displayTimeUpdate() {
       // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
 
       // home the cursor
-      tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
+      tft.setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
       // Serial.print("X0 "); Serial.print(TIME_ROW_X0); Serial.print(" Y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
       // tft.drawRect(TIME_ROW_X0 + gap_right_x, TIME_ROW_Y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
 
@@ -680,7 +684,7 @@ void RGBDisplay::displayTimeUpdate() {
       // draw new AM/PM
       if(newDisplayData._12hourMode) {
         // set test location of Am/Pm
-        tft_AmPm_x0 = TIME_ROW_X0 + gap_right_x + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
+        tft_AmPm_x0 = TIME_ROW_X0 + hh_gap_x + gap_right_x + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
         tft_AmPm_y0 = TIME_ROW_Y0 + gap_up_y / 2;
 
         // home the cursor
@@ -739,7 +743,7 @@ void RGBDisplay::displayTimeUpdate() {
       }
 
       // fill new home values
-      tft_SS_x0 = TIME_ROW_X0 + gap_right_x + tft_HHMM_w + DISPLAY_TEXT_GAP;
+      tft_SS_x0 = TIME_ROW_X0 + hh_gap_x + gap_right_x + tft_HHMM_w + DISPLAY_TEXT_GAP;
 
       // home the cursor
       tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
