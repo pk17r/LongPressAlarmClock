@@ -2,7 +2,7 @@
 #define RGB_DISPLAY_H
 
 #include "pin_defs.h"
-#include "alarm_clock.h"
+#include "common.h"
 #include <Arduino.h>
 #include <Adafruit_GFX.h>     // Core graphics library
 #if defined(DISPLAY_IS_ST7789V)
@@ -26,9 +26,6 @@
 #include <SPI.h>
 #include <elapsedMillis.h>
 
-// forward decleration of other classes
-class AlarmClock;
-
 
 class RGBDisplay {
 
@@ -50,7 +47,7 @@ public:
   void settingsPage();
 
   // functions
-  void setup(AlarmClock* main_ptr);
+  void setup();
   void setBrightness(int brightness);
   void setMaxBrightness();
   void checkTimeAndSetBrightness();
@@ -100,9 +97,6 @@ private:
 
 
 // PRIVATE VARIABLES
-
-  // pointers to main class object
-  AlarmClock* main = NULL;
 
   // current screen brightness
   int current_brightness = 0;

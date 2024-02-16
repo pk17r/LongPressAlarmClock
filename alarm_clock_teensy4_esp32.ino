@@ -11,8 +11,8 @@
 #include "alarm_clock.h"
 #include "rgb_display.h"
 
-AlarmClock programObj;
-RGBDisplay displayObj;
+RGBDisplay* display = NULL;
+AlarmClock* alarmClock = NULL;
 
 // extern "C" char* sbrk(int incr);
 
@@ -28,15 +28,18 @@ RGBDisplay displayObj;
 void setup() {
   // idle the other core
   rp2040.idleOtherCore();
+  // initialize modules
+  alarmClock = new AlarmClock();
+  display = new RGBDisplay();
   // setup program
-  programObj.setup(&displayObj);
+  alarmClock->setup();
   // restart the other core
   rp2040.restartCore1();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  programObj.updateTimePriorityLoop();
+  alarmClock->updateTimePriorityLoop();
 }
 
 void setup1() {
@@ -45,6 +48,6 @@ void setup1() {
 
 void loop1() {
   // put your main code here, to run repeatedly:
-  programObj.nonPriorityTasksLoop();
+  alarmClock->nonPriorityTasksLoop();
   // display_freeram();
 }

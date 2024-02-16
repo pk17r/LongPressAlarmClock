@@ -46,13 +46,13 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
 
     // print alarm time
     tft.setCursor(hr_x, time_y);
-    tft.print(main->var1);
+    tft.print(alarmClock->var1);
     tft.setCursor(min_x, time_y);
-    if(main->var2 < 10)
+    if(alarmClock->var2 < 10)
       tft.print('0');
-    tft.print(main->var2);
+    tft.print(alarmClock->var2);
     tft.setCursor(amPm_x, time_y);
-    if(main->var3AmPm)
+    if(alarmClock->var3AmPm)
       tft.print(amLabel);
     else
       tft.print(pmLabel);
@@ -69,9 +69,9 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
     drawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
 
     // ON button
-    drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, main->var4OnOff);
+    drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
     // OFF button
-    drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !main->var4OnOff);
+    drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
     // Set button
     drawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, Display_Color_Orange, offFill, true);
     // Cancel button
@@ -149,13 +149,13 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(Display_Backround_Color);
       if(userButtonClick <= 2)
-        tft.print(main->var1);
+        tft.print(alarmClock->var1);
       else if(userButtonClick <= 4) {
-        if(main->var2 < 10) tft.print('0');
-        tft.print(main->var2);
+        if(alarmClock->var2 < 10) tft.print('0');
+        tft.print(alarmClock->var2);
       }
       else {
-        if(main->var3AmPm)
+        if(alarmClock->var3AmPm)
           tft.print(amLabel);
         else
           tft.print(pmLabel);
@@ -163,45 +163,45 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
       // update value
       if(userButtonClick <= 2) {
         if(isUp) {  // increase hour
-          if(main->var1 < 12)
-            main->var1++;
+          if(alarmClock->var1 < 12)
+            alarmClock->var1++;
           else
-            main->var1 = 1;
+            alarmClock->var1 = 1;
         }
         else {  // decrease hour
-          if(main->var1 > 1)
-            main->var1--;
+          if(alarmClock->var1 > 1)
+            alarmClock->var1--;
           else
-            main->var1 = 12;
+            alarmClock->var1 = 12;
         }
       }
       else if(userButtonClick <= 4) {
         if(isUp) {  // increase min
-          if(main->var2  < 59)
-            main->var2++;
+          if(alarmClock->var2  < 59)
+            alarmClock->var2++;
           else
-            main->var2 = 0;
+            alarmClock->var2 = 0;
         }
         else {  // decrease min
-          if(main->var2  > 0)
-            main->var2--;
+          if(alarmClock->var2  > 0)
+            alarmClock->var2--;
           else
-            main->var2 = 59;
+            alarmClock->var2 = 59;
         }
       }
       else  // turn alarm On or Off
-        main->var3AmPm = !main->var3AmPm;
+        alarmClock->var3AmPm = !alarmClock->var3AmPm;
       // print updated value
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(Display_Color_Green);
       if(userButtonClick <= 2)
-        tft.print(main->var1);
+        tft.print(alarmClock->var1);
       else if(userButtonClick <= 4) {
-        if(main->var2 < 10) tft.print('0');
-        tft.print(main->var2);
+        if(alarmClock->var2 < 10) tft.print('0');
+        tft.print(alarmClock->var2);
       }
       else {
-        if(main->var3AmPm)
+        if(alarmClock->var3AmPm)
           tft.print(amLabel);
         else
           tft.print(pmLabel);
@@ -216,30 +216,30 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
     }
     else if(userButtonClick == 7 || userButtonClick == 8) {
       // On or Off button pressed
-      if((userButtonClick == 7 && !main->var4OnOff) || (userButtonClick == 8 && main->var4OnOff)) {
+      if((userButtonClick == 7 && !alarmClock->var4OnOff) || (userButtonClick == 8 && alarmClock->var4OnOff)) {
         // toggle alarm
-        main->var4OnOff = !main->var4OnOff;
+        alarmClock->var4OnOff = !alarmClock->var4OnOff;
         // draw new ON button with push effect
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, main->var4OnOff);
+        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, alarmClock->var4OnOff);
         // draw new OFF button
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !main->var4OnOff);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
         delay(100);
         // draw new ON button
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, main->var4OnOff);
+        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
       }
-      else if(userButtonClick == 7 && main->var4OnOff) {
+      else if(userButtonClick == 7 && alarmClock->var4OnOff) {
         // alarm is On but user pressed On button
         // show a little graphic of input taken
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, main->var4OnOff);
+        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, alarmClock->var4OnOff);
         delay(100);
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, main->var4OnOff);
+        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
       }
-      else if(userButtonClick == 8 && !main->var4OnOff) {
+      else if(userButtonClick == 8 && !alarmClock->var4OnOff) {
         // alarm is Off but user pressed Off button
         // show a little graphic of input taken
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, Display_Alarm_Color, offFill, !main->var4OnOff);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, Display_Alarm_Color, offFill, !alarmClock->var4OnOff);
         delay(100);
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !main->var4OnOff);
+        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
       }
     }
     else if(userButtonClick == 9 || userButtonClick == 10) {
@@ -248,14 +248,14 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
         // show a little graphic of Set Button Press
         drawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, Display_Color_Red, offFill, true);
         // save Set Alarm Page values
-        main->saveAlarm();
+        alarmClock->saveAlarm();
       }
       else  // show a little graphic of Cancel button Press
         drawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, Display_Color_Red, offFill, true);
       // wait a little
       delay(100);
       // go back to main page
-      main->setPage(main->mainPage);
+      alarmClock->setPage(alarmClock->mainPage);
     }
     
   }
@@ -311,12 +311,12 @@ void RGBDisplay::settingsPage() {
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
   tft.print("ssid: ");
-  tft.print(main->wifiStuff->wifi_ssid);
+  tft.print(alarmClock->wifiStuff->wifi_ssid);
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= main->eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
-    char c = *(main->wifiStuff->wifi_password + i);
+  while(i <= alarmClock->eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
+    char c = *(alarmClock->wifiStuff->wifi_password + i);
     if(c == '\0')
      break;
     if(i % 4 == 0)
@@ -362,17 +362,17 @@ void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.print(newDisplayData.dateStr);
 
     // show today's weather
-    if(main->wifiStuff->gotWeatherInfo) {
+    if(alarmClock->wifiStuff->gotWeatherInfo) {
       tft.setFont(&FreeMono9pt7b);
       tft.setCursor(20, s_y0 + 65);
       tft.setTextColor(Display_Color_Orange);
-      tft.print(main->wifiStuff->weather_main); tft.print(" : "); tft.print(main->wifiStuff->weather_description);
+      tft.print(alarmClock->wifiStuff->weather_main); tft.print(" : "); tft.print(alarmClock->wifiStuff->weather_description);
       tft.setCursor(20, s_y0 + 85);
-      tft.print("Temp : "); tft.print(main->wifiStuff->weather_temp); tft.print("F ("); tft.print(main->wifiStuff->weather_temp_max); tft.print("/"); tft.print(main->wifiStuff->weather_temp_min); tft.print(")");
+      tft.print("Temp : "); tft.print(alarmClock->wifiStuff->weather_temp); tft.print("F ("); tft.print(alarmClock->wifiStuff->weather_temp_max); tft.print("/"); tft.print(alarmClock->wifiStuff->weather_temp_min); tft.print(")");
       tft.setCursor(20, s_y0 + 105);
-      tft.print("Wind Speed : "); tft.print(main->wifiStuff->weather_wind_speed); tft.print("m/s");
+      tft.print("Wind Speed : "); tft.print(alarmClock->wifiStuff->weather_wind_speed); tft.print("m/s");
       tft.setCursor(20, s_y0 + 125);
-      tft.print("Humidity : "); tft.print(main->wifiStuff->weather_humidity); tft.print("%");
+      tft.print("Humidity : "); tft.print(alarmClock->wifiStuff->weather_humidity); tft.print("%");
     }
   }
 
@@ -527,7 +527,7 @@ void RGBDisplay::displayTimeUpdate() {
     myCanvas->setFont(&FreeSansBold48pt7b);
 
     // initial gap if single digit hour
-    int16_t hh_gap_x = (main->rtc.hour() >= 10 ? 0 : 30);
+    int16_t hh_gap_x = (alarmClock->rtc.hour() >= 10 ? 0 : 30);
 
     // home the cursor
     myCanvas->setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
@@ -598,14 +598,14 @@ void RGBDisplay::displayTimeUpdate() {
 
     // if new minute has come then clear the full time row and recreate it
     // GFXcanvas16* canvasPtr;
-    if(main->second == 0) {
+    if(alarmClock->second == 0) {
       // canvasPtr = GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h);
       // canvasPtr->fillScreen(Display_Backround_Color);
       tft.fillRect(0, 0, TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h, Display_Backround_Color);
     }
 
     // HH:MM string and AM/PM string
-    if (main->second == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
+    if (alarmClock->second == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
       // HH:MM
 
@@ -617,7 +617,7 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setTextColor(Display_Backround_Color);
 
       // clear old time if it was there
-      if(main->second != 0 && !isThisTheFirstTime) {
+      if(alarmClock->second != 0 && !isThisTheFirstTime) {
         // home the cursor to currently displayed text location
         tft.setCursor(TIME_ROW_X0, TIME_ROW_Y0);
 
@@ -652,7 +652,7 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setFont(&FreeSans18pt7b);
 
       // clear old AM/PM
-      if(main->second != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
+      if(alarmClock->second != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
         // home the cursor
         tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
 
@@ -708,12 +708,12 @@ void RGBDisplay::displayTimeUpdate() {
     }
 
     // :SS string
-    if (main->second == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
+    if (alarmClock->second == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
       // set font
       tft.setFont(&FreeSans24pt7b);
 
       // clear old seconds
-      if(main->second != 0 && !isThisTheFirstTime) {
+      if(alarmClock->second != 0 && !isThisTheFirstTime) {
         // change the text color to the background color
         tft.setTextColor(Display_Backround_Color);
 
@@ -869,28 +869,28 @@ int RGBDisplay::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
   int returnVal = -1;
 
   // main page touch input
-  if(main->currentPage == main->mainPage) {
+  if(alarmClock->currentPage == alarmClock->mainPage) {
     // if settings gear is touched
     if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= SETTINGS_GEAR_Y && ts_y <= SETTINGS_GEAR_Y + SETTINGS_GEAR_H) {
       tft.drawRoundRect(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
       delay(100);
-      return main->settingsPage;
+      return alarmClock->settingsPage;
     }
 
     // alarm area
     if(ts_y >= ALARM_ROW_Y1) {
       tft.drawRoundRect(0, ALARM_ROW_Y1, TFT_WIDTH, TFT_HEIGHT - ALARM_ROW_Y1, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
       delay(100);
-      return main->alarmSetPage;
+      return alarmClock->alarmSetPage;
     }
   }
-  else if(main->currentPage == main->settingsPage) {
+  else if(alarmClock->currentPage == alarmClock->settingsPage) {
 
     // edit wifi details button
     if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= 10 && ts_y <= 10 + SETTINGS_GEAR_H) {
       tft.drawRoundRect(SETTINGS_GEAR_X, 10, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
       delay(100);
-      return main->settingsPage;
+      return alarmClock->settingsPage;
     }
 
     // cancel button
@@ -899,7 +899,7 @@ int RGBDisplay::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
       char cancelStr[] = "X";
       drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, cancelStr, Display_Color_Cyan, Display_Color_Red, Display_Color_Black, true);
       delay(100);
-      return main->mainPage;
+      return alarmClock->mainPage;
     }
   }
 
@@ -931,7 +931,7 @@ void RGBDisplay::goodMorningScreen() {
     drawSun(x0, y0, edge);
 
   tft.fillScreen(Display_Color_Black);
-  main->refreshRtcTime = true;
+  alarmClock->refreshRtcTime = true;
   redrawDisplay = true;
 }
 

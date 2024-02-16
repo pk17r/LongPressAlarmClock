@@ -36,9 +36,7 @@ RGBDisplay::~RGBDisplay() {
   delete displayedData.alarmStr;
 }
 
-void RGBDisplay::setup(AlarmClock* main_ptr) {
-  // friend class pointer
-  this->main = main_ptr;
+void RGBDisplay::setup() {
 
   /* INITIALIZE DISPLAYS */
 
@@ -94,7 +92,7 @@ void RGBDisplay::setup(AlarmClock* main_ptr) {
   tft.fillScreen(Display_Color_Black);
   tft.setTextWrap(false);
 
-  unsigned long seed = (((((main->rtc.year() + 2000) * 12 + main->rtc.month()) * 30 + main->rtc.day()) * 24 + main->rtc.hour()) * 60 + main->rtc.minute()) * 60 + main->rtc.second();
+  unsigned long seed = (((((alarmClock->rtc.year() + 2000) * 12 + alarmClock->rtc.month()) * 30 + alarmClock->rtc.day()) * 24 + alarmClock->rtc.hour()) * 60 + alarmClock->rtc.minute()) * 60 + alarmClock->rtc.second();
   randomSeed(seed);
 
   Serial.println(F("Display Initialized"));
@@ -114,20 +112,20 @@ void RGBDisplay::setMaxBrightness() {
 }
 
 void RGBDisplay::checkTimeAndSetBrightness() {
-  if (main->rtc.hourModeAndAmPm() == 1) {  // 12hr AM
-    if (main->rtc.hour() < 7 || main->rtc.hour() == 12)
+  if (alarmClock->rtc.hourModeAndAmPm() == 1) {  // 12hr AM
+    if (alarmClock->rtc.hour() < 7 || alarmClock->rtc.hour() == 12)
       setBrightness(NIGHT_BRIGHTNESS);
     else
       setBrightness(DAY_BRIGHTNESS);
-  } else if (main->rtc.hourModeAndAmPm() == 2) {  // 12hr PM
-    if (main->rtc.hour() > 10 && main->rtc.hour() != 12)
+  } else if (alarmClock->rtc.hourModeAndAmPm() == 2) {  // 12hr PM
+    if (alarmClock->rtc.hour() > 10 && alarmClock->rtc.hour() != 12)
       setBrightness(NIGHT_BRIGHTNESS);
     // else if(rtc.hour() > 6)
     //   setBrightness(EVENING_BRIGHTNESS);
     else
       setBrightness(DAY_BRIGHTNESS);
-  } else if (main->rtc.hourModeAndAmPm() == 0) {  // 24hr
-    if (main->rtc.hour() > 21 || main->rtc.hour() < 7)
+  } else if (alarmClock->rtc.hourModeAndAmPm() == 0) {  // 24hr
+    if (alarmClock->rtc.hour() > 21 || alarmClock->rtc.hour() < 7)
       setBrightness(NIGHT_BRIGHTNESS);
     // else if(rtc.hour() > 18)
     //   setBrightness(EVENING_BRIGHTNESS);
@@ -158,12 +156,12 @@ void RGBDisplay::screensaverControl(bool turnOn) {
 
 void RGBDisplay::prepareTimeDayDateArrays() {
   // HH:MM
-  snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", main->rtc.hour(), main->rtc.minute());
+  snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", alarmClock->rtc.hour(), alarmClock->rtc.minute());
   // :SS
-  snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", main->second);
-  if(main->rtc.hourModeAndAmPm() == 0)
+  snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", alarmClock->second);
+  if(alarmClock->rtc.hourModeAndAmPm() == 0)
     newDisplayData._12hourMode = false;
-  else if(main->rtc.hourModeAndAmPm() == 1) {
+  else if(alarmClock->rtc.hourModeAndAmPm() == 1) {
     newDisplayData._12hourMode = true;
     newDisplayData._pmNotAm = false;
   }
@@ -172,12 +170,12 @@ void RGBDisplay::prepareTimeDayDateArrays() {
     newDisplayData._pmNotAm = true;
   }
   // Mon dd Day
-  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", days_table[main->rtc.dayOfWeek() - 1], main->rtc.day(), months_table[main->rtc.month() - 1]);
-  if(main->alarmOn)
-    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", main->alarmHr, main->alarmMin, (main->alarmIsAm ? amLabel : pmLabel));
+  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", days_table[alarmClock->rtc.dayOfWeek() - 1], alarmClock->rtc.day(), months_table[alarmClock->rtc.month() - 1]);
+  if(alarmClock->alarmOn)
+    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", alarmClock->alarmHr, alarmClock->alarmMin, (alarmClock->alarmIsAm ? amLabel : pmLabel));
   else
     snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%s %s", alarmLabel, offLabel);
-  newDisplayData._alarmOn = main->alarmOn;
+  newDisplayData._alarmOn = alarmClock->alarmOn;
 }
 
 void RGBDisplay::serialPrintRtcDateTime() {
@@ -195,7 +193,7 @@ void RGBDisplay::serialPrintRtcDateTime() {
   Serial.print(charSpace);
   Serial.print(newDisplayData.dateStr);
   Serial.print(charSpace);
-  Serial.print(main->rtc.year() + 2000);
+  Serial.print(alarmClock->rtc.year() + 2000);
   Serial.print(charSpace);
   Serial.print(newDisplayData.alarmStr);
   Serial.flush();

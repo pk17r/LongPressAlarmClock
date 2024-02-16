@@ -1,6 +1,7 @@
 #ifndef ALARM_CLOCK_H
 #define ALARM_CLOCK_H
 
+#include "common.h"
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
@@ -13,14 +14,12 @@
 #endif
 #include "pin_defs.h"
 #include <PushButtonTaps.h>
-#include "rgb_display.h"
 #include "uRTCLib.h"
 #if defined(TOUCHSCREEN_IS_XPT2046)
   #include "touchscreen.h"
 #endif
 
 // forward decleration of other classes
-class RGBDisplay;
 class WiFiStuff;
 
 class AlarmClock {
@@ -40,7 +39,7 @@ public:
 // FUNCTIONS
 
   // function declerations
-  void setup(RGBDisplay* disp_ptr);
+  void setup();
   void updateTimePriorityLoop();
   void nonPriorityTasksLoop();
   void rtc_clock_initialize();
@@ -74,7 +73,7 @@ public:
   uRTCLib rtc;
 
   // display object
-  RGBDisplay* display = NULL;
+  // RGBDisplay* display = NULL;
 
   // wifi stuff including weather info
   WiFiStuff* wifiStuff;

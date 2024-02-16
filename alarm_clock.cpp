@@ -4,7 +4,7 @@
 #include "alarm_clock.h"
 
 // program setup function
-void AlarmClock::setup(RGBDisplay* disp_ptr) {
+void AlarmClock::setup() {
   #if defined(MCU_IS_ESP32)
     setCpuFrequencyMhz(160);
   #endif
@@ -33,14 +33,11 @@ void AlarmClock::setup(RGBDisplay* disp_ptr) {
 
   // setup alarm clock program
 
-  // store display object pointer
-  this->display = disp_ptr;
-
   // initialize rtc time
   rtc_clock_initialize();
 
   // setup display
-  display->setup(this);
+  display->setup();
 
   // LED
   pinMode(LED_PIN, OUTPUT);
