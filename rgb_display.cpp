@@ -112,22 +112,22 @@ void RGBDisplay::setMaxBrightness() {
 
 void RGBDisplay::checkTimeAndSetBrightness() {
   if (alarmClock->rtc.hourModeAndAmPm() == 1) {  // 12hr AM
-    if (alarmClock->rtc.hour() < 7 || alarmClock->rtc.hour() == 12)
+    if (alarmClock->rtc.hour() < 6 || alarmClock->rtc.hour() == 12)
       setBrightness(NIGHT_BRIGHTNESS);
     else
       setBrightness(DAY_BRIGHTNESS);
   } else if (alarmClock->rtc.hourModeAndAmPm() == 2) {  // 12hr PM
     if (alarmClock->rtc.hour() > 10 && alarmClock->rtc.hour() != 12)
       setBrightness(NIGHT_BRIGHTNESS);
-    // else if(rtc.hour() > 6)
-    //   setBrightness(EVENING_BRIGHTNESS);
+    else if(alarmClock->rtc.hour() >= 6)
+      setBrightness(EVENING_BRIGHTNESS);
     else
       setBrightness(DAY_BRIGHTNESS);
   } else if (alarmClock->rtc.hourModeAndAmPm() == 0) {  // 24hr
     if (alarmClock->rtc.hour() > 21 || alarmClock->rtc.hour() < 7)
       setBrightness(NIGHT_BRIGHTNESS);
-    // else if(rtc.hour() > 18)
-    //   setBrightness(EVENING_BRIGHTNESS);
+    else if(alarmClock->rtc.hour() > 18)
+      setBrightness(EVENING_BRIGHTNESS);
     else
       setBrightness(DAY_BRIGHTNESS);
   }

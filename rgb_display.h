@@ -109,6 +109,7 @@ private:
   GFXcanvas1* myCanvas = NULL;
   // std::unique_ptr<GFXcanvas16> myCanvas;
   // vector<GFXcanvas16> myCanvasVec(1);
+  bool toggler = false;
 
   // location of various display text strings
   int16_t gap_right_x = 0, gap_up_y = 0;
@@ -139,8 +140,8 @@ private:
   
   // display brightness constants
   const int NIGHT_BRIGHTNESS = 1;
-  // const int EVENING_BRIGHTNESS = 10;
-  const int DAY_BRIGHTNESS = 150;
+  const int EVENING_BRIGHTNESS = 150;
+  const int DAY_BRIGHTNESS = 180;
   const int MAX_BRIGHTNESS = 255;
 
   // user defined locations of various text strings on display

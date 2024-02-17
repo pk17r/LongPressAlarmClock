@@ -4,39 +4,151 @@
 #include <Arduino.h>
 #include "wifi_stuff.h"
 
-void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+// void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+//   toggler = false;
+//   elapsedMillis timer1;
+//   if(toggler) {
+//     SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
+//     digitalWrite(TFT_CS, 0);  // indicate "transfer"
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2A);              // send column span command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     SPI.transfer16(x);//     >> 8;      // send Xmin
+//     SPI.transfer16(x+w-1);// >> 8;      // send Xmax
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2B);              // send row span command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     SPI.transfer16(y);//     >> 8;      // send Ymin
+//     SPI.transfer16(y+h-1);// >> 8;      // send Ymax
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2C);              // send write command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
+//     int8_t bits8 = 0;
+//     for (int16_t j = 0; j < h; j++) {
+//       for (int16_t i = 0; i < w; i++)
+//       {
+//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
+//         uint16_t c = bits8 < 0 ? color : bg;   // select color
+//         tft.SPI_WRITE16(c);
+//       }
+//     }
+//     // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
+//     // digitalWrite(TFT_CS, 1); // Enable internal pull-up
+//     digitalWrite(TFT_CS, 1);                   // indicate "idle"
+//     SPI.endTransaction();
+//   }
+//   else {
+//     Serial.println("***SEE_HERE***");
+//     // make a 16 bit rgbBitmap buffer to test send time of drawRGBBitmap
+//     // int bitmapSize = w*h/8 + (w*h%8 > 0 ? 1 : 0);
+//     // for (int r = 0; r<bitmapSize; r++) {
+//     //   Serial.print(bitmap[r]);Serial.print(charSpace);
+//     // }
+//     // Serial.println();
+//     int bufferSize = w;// * h;
+//     uint16_t buffer16Bit[bufferSize];
+//     tft.startWrite();
+//     tft.setAddrWindow(x, y, w, h);
+    
+//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
+//     int8_t bits8 = 0;
+//     for (int16_t j = 0; j < h; j++) {
+//       int bufi = 0;
+//       for (int16_t i = 0; i < w; i++)
+//       {
+//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
+//         uint16_t c = bits8 < 0 ? color : bg;   // select color
+//         buffer16Bit[bufi] = c;
+//         bufi++;
+//         // tft.writePixels(&c, 1);
+//       }
+//       tft.writePixels(buffer16Bit, bufferSize);
+//     }
+    
+//     tft.endWrite();
+//     // alarmClock->serialTimeStampPrefix(); Serial.print(charSpace); Serial.print(timer1);
+//     // tft.drawRGBBitmap(x, y, buffer16Bit, w, h); // Copy to screen
+//     alarmClock->serialTimeStampPrefix();
+//     Serial.println("***DONE***");
+//   }
+  
+//   Serial.print(" w "); Serial.print(w);Serial.print(" h "); Serial.print(h); Serial.print(" fastDrawBitmapTime "); Serial.print(toggler); Serial.print(charSpace); Serial.println(timer1);
 
-  elapsedMillis timer1;
-  SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
-  digitalWrite(TFT_CS, 0);  // indicate "transfer"
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2A);              // send column span command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-  SPI.transfer16(x);//     >> 8;      // send Xmin
-  SPI.transfer16(x+w-1);// >> 8;      // send Xmax
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2B);              // send row span command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-  SPI.transfer16(y);//     >> 8;      // send Ymin
-  SPI.transfer16(y+h-1);// >> 8;      // send Ymax
-  digitalWrite(TFT_DC, 0);  // indicate "command"
-  SPI.transfer(0x2C);              // send write command
-  digitalWrite(TFT_DC, 1);  // indicate "data"
-  int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-  int8_t bits8 = 0;
-  for (int16_t j = 0; j < h; j++) {
-    for (int16_t i = 0; i < w; i++)
-    {
-      bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-      uint16_t c = bits8 < 0 ? color : bg;   // select color
-      tft.SPI_WRITE16(c);
-    }
+//   toggler = !toggler;
+// }
+
+/*!
+    @brief  Draw a 565 RGB image at the specified (x,y) position using monochrome 8-bit image.
+            Converts each bitmap rows into 16-bit RGB buffer and sends over SPI.
+            Adapted from Adafruit_SPITFT.cpp drawRGBBitmap function which is itself
+            adapted from https://github.com/PaulStoffregen/ILI9341_t3
+            by Marc MERLIN. See examples/pictureEmbed to use this.
+            Handles its own transaction and edge clipping/rejection.
+    @param  x        Top left corner horizontal coordinate.
+    @param  y        Top left corner vertical coordinate.
+    @param  bitmap   Pointer to 8-bit array of monochrome image
+    @param  w        Width of bitmap in pixels.
+    @param  h        Height of bitmap in pixels.
+*/
+void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+  int16_t x2, y2;                 // Lower-right coord
+  if ((x >= TFT_WIDTH) ||            // Off-edge right
+      (y >= TFT_HEIGHT) ||           // " top
+      ((x2 = (x + w - 1)) < 0) || // " left
+      ((y2 = (y + h - 1)) < 0))
+    return; // " bottom
+
+  // elapsedMillis timer1;
+
+  int16_t bx1 = 0, by1 = 0, // Clipped top-left within bitmap
+      saveW = w,            // Save original bitmap width value
+      saveH = h;
+  if (x < 0) {              // Clip left
+    w += x;
+    bx1 = -x;
+    x = 0;
   }
-  // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
-  // digitalWrite(TFT_CS, 1); // Enable internal pull-up
-  digitalWrite(TFT_CS, 1);                   // indicate "idle"
-  SPI.endTransaction();
-  Serial.print(" fastDrawBitmapTime "); Serial.println(timer1);
+  if (y < 0) { // Clip top
+    h += y;
+    by1 = -y;
+    y = 0;
+  }
+  if (x2 >= TFT_WIDTH)
+    w = TFT_WIDTH - x; // Clip right
+  if (y2 >= TFT_HEIGHT)
+    h = TFT_HEIGHT - y; // Clip bottom
+
+  int16_t jLim = min(saveH, h + by1);
+  int16_t iLim = min(saveW, w + bx1);
+  uint8_t currentByte = 0;
+
+  // new 16 bit buffter of length w to hold 1 row colors
+  uint16_t buffer16Bit[w];
+  tft.startWrite();
+  tft.setAddrWindow(x, y, w, h);
+  
+  int16_t byteWidth = (saveW + 7) >> 3;          // bitmap width in bytes
+  int8_t bits8 = 0;
+  for (int16_t j = by1; j < jLim; j++) {
+    int bufi = 0;
+    int16_t i = bx1;
+    uint8_t currentByte = bitmap[j * byteWidth + (i >> 3)];
+    uint8_t bitIndex = 7 - i % 8;
+    while(1) {
+      buffer16Bit[bufi] = (((currentByte >> bitIndex)  & 0x01) ? color : bg);
+      bufi++;   // next row buffer index
+      i++;  // next pixel
+      if(i >= iLim)
+        break;
+      bitIndex = 7 - i % 8; // next bit index
+      if(bitIndex == 7)  // new byte
+        currentByte = bitmap[j * byteWidth + (i >> 3)];
+    }
+    tft.writePixels(buffer16Bit, w);
+  }
+  tft.endWrite();
+  // Serial.print(" fastDrawBitmapTime "); Serial.print(charSpace); Serial.println(timer1);
 }
 
 void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
@@ -467,7 +579,7 @@ void RGBDisplay::screensaver() {
     int16_t alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
     int16_t alarm_icon_h = (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H);
     uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
-    screensaver_w = max(tft_HHMM_w + 3 * GAP_BAND, date_row_w + 3 * GAP_BAND);
+    screensaver_w = max(tft_HHMM_w + 4 * GAP_BAND, date_row_w + 4 * GAP_BAND);
     screensaver_h = tft_HHMM_h + max(date_h, alarm_icon_h) + 3*GAP_BAND;
     // middle both rows
     tft_HHMM_x0 = (screensaver_w - tft_HHMM_w) / 2;// - gap_right_x;
@@ -525,10 +637,10 @@ void RGBDisplay::screensaver() {
 
     // set direction on hitting any edge
     // left and right edge - only change direction
-    if(screensaver_x1 + 2 * GAP_BAND <= 0) {   // left edge
+    if(screensaver_x1 + 2* GAP_BAND <= 0) {   // left edge
       screensaverMoveRight = true;
     }
-    else if(screensaver_x1 + screensaver_w >= TFT_WIDTH) {    // right edge
+    else if(screensaver_x1 + screensaver_w + GAP_BAND>= TFT_WIDTH) {    // right edge
       screensaverMoveRight = false;
     }
     // top and bottom edge - when hit change color as well
