@@ -103,6 +103,7 @@ void RGBDisplay::setBrightness(int brightness) {
   analogWrite(TFT_BL, brightness);
   Serial.print(F("Display Brightness set to ")); Serial.print(brightness); Serial.print(charSpace);
   current_brightness = brightness;
+  showColoredEdgeScreensaver = (brightness >= EVENING_BRIGHTNESS);
 }
 
 void RGBDisplay::setMaxBrightness() {
