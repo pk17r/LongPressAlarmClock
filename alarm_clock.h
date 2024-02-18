@@ -2,7 +2,6 @@
 #define ALARM_CLOCK_H
 
 #include "common.h"
-#include "uRTCLib.h"
 #if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
   #include <stdio.h>
   #include "pico/stdlib.h"
@@ -30,16 +29,11 @@ public:
   void setup();
   void updateTimePriorityLoop();
   void nonPriorityTasksLoop();
-  void rtc_clock_initialize();
   void retrieveAlarmSettings();
   void saveAlarm();
-  // clock seconds interrupt ISR
-  static void sqwPinInterruptFn();
   void serialTimeStampPrefix();
-  void updateSecond();
   bool timeToStartAlarm();
   void buzzAlarmFn();
-  void serial_input_flush();
   void processSerialInput();
   void setPage(ScreenPage page);
   // #if defined(MCU_IS_ESP32)
@@ -49,9 +43,6 @@ public:
 
 // OBJECTS and VARIABLES
 
-  // RTC clock object for DC3231 rtc
-  uRTCLib rtc;
-
   // secondCoreControlFlag controls idling and restarting core1 from core0
   //    0 = core is idling
   //    1 = resume the other core from core0
@@ -59,21 +50,12 @@ public:
   //    3 = core is done processing and can be idled
   volatile byte secondCoreControlFlag = 0;
 
-  // seconds counter to track RTC HW seconds
-  // we'll refresh RTC time everytime second reaches 60
-  // All other parameters of RTC will not change at any other time
-  // at 60 seconds, we'll update the time row
-  uint8_t second = 0;
-
   // flag to refresh RTC time from RTC HW
   bool refreshRtcTime = false;
 
   // counter to note user inactivity seconds
   uint8_t inactivitySeconds = 0;
   const uint8_t INACTIVITY_SECONDS_LIM = 120;
-
-  // seconds flag triggered by interrupt
-  static inline volatile bool rtcHwSecUpdate;
 
   // location of Alarm 
   const int16_t alarmScreenAreaMainPageY = 160;

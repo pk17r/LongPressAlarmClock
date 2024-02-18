@@ -8,8 +8,9 @@
   Prashant Kumar
 
 ***************************************************************************/
-#include "alarm_clock.h"
+#include "rtc.h"
 #include "rgb_display.h"
+#include "alarm_clock.h"
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
@@ -20,13 +21,14 @@
 #endif
 
 // modules - hardware or software
-RGBDisplay* display = NULL;   // display class object
-AlarmClock* alarmClock = NULL;  // object that controls RTC and Alarm functions
-WiFiStuff* wifiStuff = NULL;  // WiFi and Weather fetch functions
-EEPROM* eeprom = NULL;    // External EEPROM
-PushButtonTaps pushBtn;   // Push Button
+RTC* rtc = NULL;  // ptr to class object containing RTC HW ** Initialization Order 1
+RGBDisplay* display = NULL;   // ptr to display class object that manages the display ** Initialization Order 2
+AlarmClock* alarmClock = NULL;  // ptr to alarm clock class object that controls Alarm functions ** Initialization Order 3
+EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object ** Initialization Order 4
+WiFiStuff* wifiStuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions ** Initialization Order 5
+PushButtonTaps pushBtn;   // Push Button object ** Initialization Order 6
 #if defined(TOUCHSCREEN_IS_XPT2046)
-  Touchscreen ts;         // touchscreen
+  Touchscreen ts;         // Touchscreen class object ** Initialization Order 7
 #endif
 
 extern "C" char* sbrk(int incr);
@@ -58,6 +60,7 @@ void setup() {
   digitalWrite(TS_CS_PIN, HIGH);
 
   // initialize modules
+  rtc = new RTC();
   alarmClock = new AlarmClock();
   display = new RGBDisplay();
   eeprom = new EEPROM();
@@ -102,4 +105,17 @@ void setup1() {
 void loop1() {
   // put your main code here, to run repeatedly:
   alarmClock->nonPriorityTasksLoop();
+}
+
+void serial_input_flush() {
+  while (true) {
+    delay(20);  // give data a chance to arrive
+    if (Serial.available()) {
+      // we received something, get all of it and discard it
+      while (Serial.available())
+        Serial.read();
+      continue;  // stay in the main loop
+    } else
+      break;  // nothing arrived for 20 ms
+  }
 }

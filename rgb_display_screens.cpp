@@ -2,6 +2,7 @@
 #include "alarm_clock.h"
 #include "wifi_stuff.h"
 #include "eeprom.h"
+#include "rtc.h"
 
 /*!
     @brief  Draw a 565 RGB image at the specified (x,y) position using monochrome 8-bit image.
@@ -494,7 +495,7 @@ void RGBDisplay::screensaver() {
     // get bounds of date string
     uint16_t date_h = 0, date_w = 0;
     int16_t date_gap_x = 0, date_gap_y = 0;
-    if(alarmClock->rtc.hour() >= 10)
+    if(rtc->hour() >= 10)
       tft.setFont(&Satisfy_Regular24pt7b);
     else
       tft.setFont(&Satisfy_Regular18pt7b);
@@ -532,7 +533,7 @@ void RGBDisplay::screensaver() {
     myCanvas->print(newDisplayData.timeHHMM);
 
     // print date string
-    if(alarmClock->rtc.hour() >= 10)
+    if(rtc->hour() >= 10)
       myCanvas->setFont(&Satisfy_Regular24pt7b);
     else
       myCanvas->setFont(&Satisfy_Regular18pt7b);
@@ -566,7 +567,7 @@ void RGBDisplay::screensaver() {
     if(screensaver_x1 + 2* GAP_BAND <= 0) {   // left edge
       if(!screensaverMoveRight) {
         screensaverMoveRight = true;
-        if(alarmClock->rtc.hour() < 10)
+        if(rtc->hour() < 10)
           refreshScreensaverCanvas = true;
       }
     }
@@ -574,7 +575,7 @@ void RGBDisplay::screensaver() {
       if(!flyScreensaverHorizontally) {
         if(screensaverMoveRight) {
           screensaverMoveRight = false;
-          if(alarmClock->rtc.hour() < 10)
+          if(rtc->hour() < 10)
             refreshScreensaverCanvas = true;
         }
       }
@@ -625,7 +626,7 @@ void RGBDisplay::displayTimeUpdate() {
 
   // initial gap if single digit hour
   const int16_t SINGLE_DIGIT_HOUR_GAP = 30;
-  int16_t hh_gap_x = (alarmClock->rtc.hour() >= 10 ? 0 : SINGLE_DIGIT_HOUR_GAP);
+  int16_t hh_gap_x = (rtc->hour() >= 10 ? 0 : SINGLE_DIGIT_HOUR_GAP);
 
   if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it every second
 
@@ -718,14 +719,14 @@ void RGBDisplay::displayTimeUpdate() {
 
     // if new minute has come then clear the full time row and recreate it
     // GFXcanvas16* canvasPtr;
-    if(alarmClock->second == 0) {
+    if(rtc->second() == 0) {
       // canvasPtr = GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h);
       // canvasPtr->fillScreen(Display_Backround_Color);
       tft.fillRect(0, 0, TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h, Display_Backround_Color);
     }
 
     // HH:MM string and AM/PM string
-    if (alarmClock->second == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
+    if (rtc->second() == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
 
       // HH:MM
 
@@ -737,9 +738,9 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setTextColor(Display_Backround_Color);
 
       // clear old time if it was there
-      if(alarmClock->second != 0 && !isThisTheFirstTime) {
+      if(rtc->second() != 0 && !isThisTheFirstTime) {
         // home the cursor to currently displayed text location
-        if(alarmClock->rtc.hour() == 10 && alarmClock->rtc.minute() == 0 && alarmClock->second == 0)  // handle special case of moving from single digit hour to 2 digit hour while clearing old value
+        if(rtc->hour() == 10 && rtc->minute() == 0 && rtc->second() == 0)  // handle special case of moving from single digit hour to 2 digit hour while clearing old value
           tft.setCursor(TIME_ROW_X0 + SINGLE_DIGIT_HOUR_GAP, TIME_ROW_Y0);
         else
           tft.setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
@@ -775,7 +776,7 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setFont(&FreeSans18pt7b);
 
       // clear old AM/PM
-      if(alarmClock->second != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
+      if(rtc->second() != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
         // home the cursor
         tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
 
@@ -831,12 +832,12 @@ void RGBDisplay::displayTimeUpdate() {
     }
 
     // :SS string
-    if (alarmClock->second == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
+    if (rtc->second() == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
       // set font
       tft.setFont(&FreeSans24pt7b);
 
       // clear old seconds
-      if(alarmClock->second != 0 && !isThisTheFirstTime) {
+      if(rtc->second() != 0 && !isThisTheFirstTime) {
         // change the text color to the background color
         tft.setTextColor(Display_Backround_Color);
 

@@ -52,7 +52,7 @@ public:
   void screensaverControl(bool turnOn);
   void prepareTimeDayDateArrays();
   void serialPrintRtcDateTime();
-  void updateSecondsOnTimeStrArr(uint8_t &second);
+  void updateSecondsOnTimeStrArr(uint8_t second);
   int classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y);
 
 // PUBLIC VARIABLES

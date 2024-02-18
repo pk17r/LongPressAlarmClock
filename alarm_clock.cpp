@@ -1,5 +1,6 @@
 #include "alarm_clock.h"
 #include "rgb_display.h"
+#include "rtc.h"
 // #include "hardware/sync.h"
 #include "wifi_stuff.h"
 #include "eeprom.h"
@@ -13,9 +14,6 @@ void AlarmClock::setup() {
   
   // setup alarm clock program
 
-  // initialize rtc time
-  rtc_clock_initialize();
-
   // LED
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
@@ -26,25 +24,6 @@ void AlarmClock::setup() {
 
   // retrieve alarm settings
   retrieveAlarmSettings();
-
-  // seconds interrupt pin
-  pinMode(SQW_INT_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), sqwPinInterruptFn, RISING);
-
-  // prepare date and time arrays and serial print RTC Date Time
-  display->prepareTimeDayDateArrays();
-
-  // serial print RTC Date Time
-  display->serialPrintRtcDateTime();
-
-  // update TFT display
-  display->displayTimeUpdate();
-
-  // set display brightness based on time of day
-  display->checkTimeAndSetBrightness();
-
-  // set sqw pin to trigger every second
-  rtc.sqwgSetMode(URTCLIB_SQWG_1H);
 }
 
 // arduino loop function - High Priority one
@@ -79,40 +58,20 @@ void AlarmClock::updateTimePriorityLoop() {
     digitalWrite(LED_PIN, LOW);
 
   // process time actions every second
-  if (AlarmClock::rtcHwSecUpdate) {
-    AlarmClock::rtcHwSecUpdate = false;
-    // update seconds
-    ++second;
-    if (second >= 60)
+  if (rtc->rtcHwSecUpdate) {
+    rtc->rtcHwSecUpdate = false;
+    if (rtc->second() >= 60)
       refreshRtcTime = true;
 
     // prepare updated seconds array
-    display->updateSecondsOnTimeStrArr(second);
+    display->updateSecondsOnTimeStrArr(rtc->second());
 
     serialTimeStampPrefix();
 
     // get time update
     if (refreshRtcTime) {
-      Serial.println(F("__RTC Refresh__ "));
-      rtc.refresh();
+      rtc->refresh();
       refreshRtcTime = false;
-
-      // make second equal to rtc seconds -> should be 0
-      second = rtc.second();
-
-      serialTimeStampPrefix();
-
-      // Check if time is up to date
-      if (rtc.lostPower()) {
-        Serial.println(F("POWER FAILED. Time is not up to date!"));
-        Serial.println(F("Stopping!"));
-        exit(1);
-      }
-
-      // Check whether OSC is set to use VBAT or not
-      if (rtc.getEOSCFlag()) {
-        Serial.println(F("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!"));
-      }
 
       serialTimeStampPrefix();
 
@@ -131,26 +90,24 @@ void AlarmClock::updateTimePriorityLoop() {
         if(!wifiStuff->gotWeatherInfo && secondCoreControlFlag == 0) {
 
           if(alarmMin >= 5)
-            if(rtc.hour() == alarmHr && rtc.minute() == alarmMin - 5)
+            if(rtc->hour() == alarmHr && rtc->minute() == alarmMin - 5)
               secondCoreControlFlag = 1;
           else if(alarmHr > 1)
-            if(rtc.hour() == alarmHr - 1 && rtc.minute() == 55)
+            if(rtc->hour() == alarmHr - 1 && rtc->minute() == 55)
               secondCoreControlFlag = 1;
           else
-            if(rtc.hour() == 12 && rtc.minute() == 55)
+            if(rtc->hour() == 12 && rtc->minute() == 55)
               secondCoreControlFlag = 1;
         }
 
       #endif
 
       // Activate Buzzer at Alarm Time
-      if(timeToStartAlarm() && second < 10) {
+      if(timeToStartAlarm() && rtc->second() < 10) {
         // go to buzz alarm function
         buzzAlarmFn();
         // refresh time
-        rtc.refresh();
-        // make second equal to rtc seconds
-        second = rtc.second();
+        rtc->refresh();
         // prepare date and time arrays
         display->prepareTimeDayDateArrays();
         // set main page back
@@ -291,183 +248,15 @@ void AlarmClock::saveAlarm() {
   eeprom->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
 }
 
-// interrupt ISR
-void AlarmClock::sqwPinInterruptFn() {
-  AlarmClock::rtcHwSecUpdate = true;
-}
-
-// #if defined(MCU_IS_ESP32)
-// /*
-//   Esp32 light sleep function
-//   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
-// */
-// void AlarmClock::putEsp32ToLightSleep() {
-//   /*
-//   First we configure the wake up source
-//   We set our ESP32 to wake up for an external trigger.
-//   There are two types for ESP32, ext0 and ext1 .
-//   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
-//   to be on while ext1 uses RTC Controller so doesnt need
-//   peripherals to be powered on.
-//   Note that using internal pullups/pulldowns also requires
-//   RTC peripherals to be turned on.
-//   */
-//   // add a timer to wake up ESP32
-//   esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
-//   // ext1 button press as wake up source
-//   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
-//   //Go to sleep now
-//   serialTimeStampPrefix();
-//   Serial.println("Go To Light Sleep for 0.5 sec or button press");
-//   Serial.flush();
-//   // go to light sleep
-//   esp_light_sleep_start();
-//   // On WAKEUP disable timer as wake up source
-//   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
-
-//   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-//   //Print the wakeup reason for ESP32
-//   serialTimeStampPrefix();
-//   print_wakeup_reason(wakeup_reason);
-
-//   // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
-//   if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-//     // add ext0 RTC seconds ticker as wake up source
-//     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
-//     //Go to sleep now
-//     serialTimeStampPrefix();
-//     Serial.println("Go To Light Sleep until seconds tick or button press");
-//     //esp_deep_sleep_start();
-//     Serial.flush();
-//     // go to light sleep
-//     esp_light_sleep_start();
-
-//     // On WAKEUP disable EXT0 as wake up source
-//     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
-
-//     wakeup_reason = esp_sleep_get_wakeup_cause();
-//     // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
-//     //   turnBacklightOn();
-
-//     //Print the wakeup reason for ESP32
-//     serialTimeStampPrefix();
-//     print_wakeup_reason(wakeup_reason);
-//   }
-// }
-
-// /*
-// Method to print the reason by which ESP32
-// has been awaken from sleep
-// */
-// void AlarmClock::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
-//   switch(wakeup_reason)
-//   {
-//     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
-//     case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
-//     case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
-//     case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
-//     case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
-//     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
-//   }
-// }
-// #endif
-
-void AlarmClock::rtc_clock_initialize() {
-
-  /* INITIALIZE RTC */
-
-  // initialize Wire lib
-  URTCLIB_WIRE.begin();
-
-  // set rtc model
-  rtc.set_model(URTCLIB_MODEL_DS3231);
-
-  // get data from DS3231
-  rtc.refresh();
-
-  // to setup DS3231 - run this only for the first time during setup, thereafter set back to false and flash the code again so this is never run again
-  if (0) {
-    // Set Oscillator to use VBAT when VCC turns off
-    if(rtc.enableBattery())
-      Serial.println(F("Enable Battery Success"));
-    else
-      Serial.println(F("Enable Battery UNSUCCESSFUL!"));
-
-    // disable SQ wave out
-    rtc.disable32KOut();
-    Serial.println(F("disable32KOut() done"));
-
-    // stop sq wave on sqw pin
-    rtc.sqwgSetMode(URTCLIB_SQWG_OFF_1);
-    Serial.println(F("stop sq wave on sqw pin. Mode set: URTCLIB_SQWG_OFF_1"));
-
-    // clear alarms flags
-    rtc.alarmClearFlag(URTCLIB_ALARM_1);
-    rtc.alarmClearFlag(URTCLIB_ALARM_2);
-    Serial.println(F("alarmClearFlag() done"));
-
-    // disable alarms
-    rtc.alarmDisable(URTCLIB_ALARM_1);
-    rtc.alarmDisable(URTCLIB_ALARM_2);
-    Serial.println(F("alarmDisable() done"));
-
-    // Set current time and date
-    Serial.println();
-    Serial.println(F("Waiting for input from user to set time."));
-    Serial.println(F("Provide a keyboard input when set time is equal to real world time..."));
-    while (Serial.available() == 0) {};
-    // Only used once, then disabled
-    rtc.set(0, 30, 2, 6, 26, 1, 24);
-    //  RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
-    Serial.println(F("Time set"));
-    serial_input_flush();
-  }
-
-  // Check if time is up to date
-  Serial.print(F("Lost power status: "));
-  if (rtc.lostPower()) {
-    Serial.println(F("POWER FAILED. Clearing flag..."));
-    rtc.lostPowerClear();
-  }
-  else
-    Serial.println(F("POWER OK"));
-
-  // Check whether OSC is set to use VBAT or not
-  if (rtc.getEOSCFlag())
-    Serial.println(F("Oscillator will NOT use VBAT when VCC cuts off. Time will not increment without VCC!"));
-  else
-    Serial.println(F("Oscillator will use VBAT if VCC cuts off."));
-
-  // we won't use RTC for alarm
-  rtc.alarmDisable(URTCLIB_ALARM_1);
-  rtc.alarmDisable(URTCLIB_ALARM_2);
-
-  // make second equal to rtc second (-1 just to make first rtc refresh come later than when it should, as there is no time sync initially)
-  second = rtc.second() - 1;
-}
-
 void AlarmClock::serialTimeStampPrefix() {
   Serial.print(F("(s"));
-  if(second < 10) Serial.print('0');
-  Serial.print(second);
+  if(rtc->second() < 10) Serial.print('0');
+  Serial.print(rtc->second());
   Serial.print(F(":i"));
   Serial.print(inactivitySeconds);
   Serial.print(F(": SRAM left: ")); Serial.print(freeRam());
   Serial.print(F(") - "));
   Serial.flush();
-}
-
-void AlarmClock::serial_input_flush() {
-  while (true) {
-    delay(20);  // give data a chance to arrive
-    if (Serial.available()) {
-      // we received something, get all of it and discard it
-      while (Serial.available())
-        Serial.read();
-      continue;  // stay in the main loop
-    } else
-      break;  // nothing arrived for 20 ms
-  }
 }
 
 void AlarmClock::processSerialInput() {
@@ -479,7 +268,7 @@ void AlarmClock::processSerialInput() {
   Serial.println(input);
   // process user input
   switch (input) {
-    case 'a': // toggle alarm On Off
+    case 'a':   // toggle alarm On Off
       Serial.println(F("**** Toggle Alarm ****"));
       alarmOn = !alarmOn;
       Serial.print(F("alarmOn = ")); Serial.println(alarmOn);
@@ -493,38 +282,9 @@ void AlarmClock::processSerialInput() {
         display->setBrightness(brightnessVal);
       }
       break;
-    case 'd':  //disable battery
-      {
-        Serial.println(F("Disable Battery"));
-        bool ret = rtc.disableBattery();
-        if (ret) Serial.println(F("Disable Battery Success"));
-        else Serial.println(F("Could not Disable Battery!"));
-      }
-      break;
-    case 'e':  //enable battery
-      {
-        Serial.println(F("Enable Battery"));
-        bool ret = rtc.enableBattery();
-        if (ret) Serial.println(F("Enable Battery Success"));
-        else Serial.println(F("Could not Enable Battery!"));
-      }
-      break;
-    case 'g': // good morning
+    case 'g':   // good morning
       {
         display->goodMorningScreen();
-      }
-      break;
-    case 'h': // clock 12/24 hour mode
-      {
-        Serial.println(F("**** Set clock 12/24 hr mode ****"));
-        Serial.println(F("Enter 'twelveHrMode' = 0 or 1"));
-        while (Serial.available() == 0) {};
-        unsigned int clockModeInp = Serial.parseInt();
-        Serial.println(clockModeInp);
-        serial_input_flush();
-        rtc.set_12hour_mode((bool)clockModeInp);
-        // print RTC Date Time and Alarm
-        refreshRtcTime = true;
       }
       break;
     case 's':   // screensaver
@@ -539,9 +299,7 @@ void AlarmClock::processSerialInput() {
         // go to buzz alarm function
         buzzAlarmFn();
         // refresh time
-        rtc.refresh();
-        // make second equal to rtc seconds
-        second = rtc.second();
+        rtc->refresh();
         // prepare date and time arrays
         display->prepareTimeDayDateArrays();
         // set main page back
@@ -562,9 +320,7 @@ void AlarmClock::processSerialInput() {
         display->alarmTriggeredScreen(false, 14);
         delay(1000);
         // refresh time
-        rtc.refresh();
-        // make second equal to rtc seconds
-        second = rtc.second();
+        rtc->refresh();
         // prepare date and time arrays
         display->prepareTimeDayDateArrays();
         // set main page back
@@ -621,14 +377,12 @@ void AlarmClock::processSerialInput() {
   }
 }
 
-/*
-  Check if alarm time is hit
-*/
+// Check if alarm time is hit
 bool AlarmClock::timeToStartAlarm() {
 
   if(!alarmOn) return false;
 
-  if(rtc.hourModeAndAmPm() == 0) {
+  if(rtc->hourModeAndAmPm() == 0) {
     // 24 hour clock mode
     uint8_t alarmHr24hr = alarmHr;
     if(alarmHr == 12) {
@@ -639,15 +393,15 @@ bool AlarmClock::timeToStartAlarm() {
       if(!alarmIsAm) alarmHr24hr -= 12;
     }
     // check if alarm is hit
-    if(rtc.hour() == alarmHr24hr && rtc.minute() == alarmMin)
+    if(rtc->hour() == alarmHr24hr && rtc->minute() == alarmMin)
       return true;
     else
       return false;
   }
   else { // 12 hour mode
     // check if alarm is hit
-    if((rtc.hourModeAndAmPm() == 1 && alarmIsAm) || (rtc.hourModeAndAmPm() == 2 && !alarmIsAm)) {
-      if(rtc.hour() == alarmHr && rtc.minute() == alarmMin)
+    if((rtc->hourModeAndAmPm() == 1 && alarmIsAm) || (rtc->hourModeAndAmPm() == 2 && !alarmIsAm)) {
+      if(rtc->hour() == alarmHr && rtc->minute() == alarmMin)
         return true;
       else
         return false;
@@ -657,16 +411,14 @@ bool AlarmClock::timeToStartAlarm() {
   }
 }
 
-/*
-  Function that starts buzzer and Alarm Screen
-  It wait for user to press button to pause buzzer
-  User needs to continue to press and hold button for
-  ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS to end alarm.
-  If user stops pressing button before alarm end, it will
-  restart buzzer and the alarm end counter.
-  If user does not end alarm by ALARM_MAX_ON_TIME_MS milliseconds,
-  it will end alarm on its own.
-*/
+// Function that starts buzzer and Alarm Screen
+// It wait for user to press button to pause buzzer
+// User needs to continue to press and hold button for
+// ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS to end alarm.
+// If user stops pressing button before alarm end, it will
+// restart buzzer and the alarm end counter.
+// If user does not end alarm by ALARM_MAX_ON_TIME_MS milliseconds,
+// it will end alarm on its own.
 void AlarmClock::buzzAlarmFn() {
   // start alarm triggered page
   setPage(alarmTriggeredPage);
@@ -789,3 +541,80 @@ void AlarmClock::deallocateBuzzerTimer() {
 
   Serial.println(F("Buzzer Timer deallocated."));
 }
+
+
+// #if defined(MCU_IS_ESP32)
+// /*
+//   Esp32 light sleep function
+//   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
+// */
+// void AlarmClock::putEsp32ToLightSleep() {
+//   /*
+//   First we configure the wake up source
+//   We set our ESP32 to wake up for an external trigger.
+//   There are two types for ESP32, ext0 and ext1 .
+//   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
+//   to be on while ext1 uses RTC Controller so doesnt need
+//   peripherals to be powered on.
+//   Note that using internal pullups/pulldowns also requires
+//   RTC peripherals to be turned on.
+//   */
+//   // add a timer to wake up ESP32
+//   esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
+//   // ext1 button press as wake up source
+//   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
+//   //Go to sleep now
+//   serialTimeStampPrefix();
+//   Serial.println("Go To Light Sleep for 0.5 sec or button press");
+//   Serial.flush();
+//   // go to light sleep
+//   esp_light_sleep_start();
+//   // On WAKEUP disable timer as wake up source
+//   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+
+//   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+//   //Print the wakeup reason for ESP32
+//   serialTimeStampPrefix();
+//   print_wakeup_reason(wakeup_reason);
+
+//   // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
+//   if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
+//     // add ext0 RTC seconds ticker as wake up source
+//     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
+//     //Go to sleep now
+//     serialTimeStampPrefix();
+//     Serial.println("Go To Light Sleep until seconds tick or button press");
+//     //esp_deep_sleep_start();
+//     Serial.flush();
+//     // go to light sleep
+//     esp_light_sleep_start();
+
+//     // On WAKEUP disable EXT0 as wake up source
+//     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
+
+//     wakeup_reason = esp_sleep_get_wakeup_cause();
+//     // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
+//     //   turnBacklightOn();
+
+//     //Print the wakeup reason for ESP32
+//     serialTimeStampPrefix();
+//     print_wakeup_reason(wakeup_reason);
+//   }
+// }
+
+// /*
+// Method to print the reason by which ESP32
+// has been awaken from sleep
+// */
+// void AlarmClock::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
+//   switch(wakeup_reason)
+//   {
+//     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
+//     case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
+//     case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
+//     case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
+//     case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
+//     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
+//   }
+// }
+// #endif
