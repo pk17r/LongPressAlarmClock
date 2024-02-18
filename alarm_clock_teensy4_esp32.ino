@@ -94,6 +94,9 @@ void loop1() {
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
+// Display Visible Data Struct
+DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_data_ { "", "", "", "", true, false, true };
+
 // current page on display
 ScreenPage current_page = kMainPage;
 
@@ -123,11 +126,11 @@ void SerialInputFlush() {
 
 void SerialTimeStampPrefix() {
   Serial.print(F("(s"));
-  if(rtc->second() < 10) Serial.print('0');
+  if(rtc->second() < 10) Serial.print(kCharZero);
   Serial.print(rtc->second());
   Serial.print(F(":i"));
-  if(alarm_clock->inactivity_seconds_ < 100) Serial.print('0');
-  if(alarm_clock->inactivity_seconds_ < 10) Serial.print('0');
+  if(alarm_clock->inactivity_seconds_ < 100) Serial.print(kCharZero);
+  if(alarm_clock->inactivity_seconds_ < 10) Serial.print(kCharZero);
   Serial.print(alarm_clock->inactivity_seconds_);
   Serial.print(F(": SRAM left: ")); Serial.print(AvailableRam());
   Serial.print(F(") - "));

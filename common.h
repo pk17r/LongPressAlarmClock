@@ -4,6 +4,7 @@
 // common includes
 #include <Arduino.h>
 #include "pin_defs.h"
+#include "general_constants.h"
 
 // forward decleration of other classes
 class RTC;
@@ -37,8 +38,25 @@ enum ScreenPage {
   kTimeSetPage,
   kSettingsPage,
   kNoPageSelected
-    };
+  };
 
-extern ScreenPage current_page;    // current page on display
+// current page on display
+extern ScreenPage current_page;
+
+// display time data in char arrays
+struct DisplayData {
+    char time_HHMM[kHHMM_ArraySize];
+    char time_SS[kSS_ArraySize];
+    char date_str[kDateArraySize];
+    char alarm_str[kAlarmArraySize];
+    bool _12_hour_mode;
+    bool pm_not_am;
+    bool alarm_ON;
+  };
+
+// Display Visible Data Struct
+extern DisplayData new_display_data_, displayed_data_;
+
+
 
 #endif // COMMON_H

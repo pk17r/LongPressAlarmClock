@@ -4,35 +4,15 @@
 
 // constructor
 RGBDisplay::RGBDisplay() {
-  new_display_data_.time_HHMM = new char[kHHMM_ArraySize];
-  new_display_data_.time_SS = new char[kSS_ArraySize];
-  new_display_data_.date_str = new char[kDateArraySize];
-  new_display_data_.alarm_str = new char[kAlarmArraySize];
-  displayed_data_.time_HHMM = new char[kHHMM_ArraySize];
-  displayed_data_.time_SS = new char[kSS_ArraySize];
-  displayed_data_.date_str = new char[kDateArraySize];
-  displayed_data_.alarm_str = new char[kAlarmArraySize];
-  new_display_data_.time_HHMM[0] = '\0';
-  new_display_data_.time_SS[0] = '\0';
-  new_display_data_.date_str[0] = '\0';
-  new_display_data_.alarm_str[0] = '\0';
-  displayed_data_.time_HHMM[0] = '\0';
-  displayed_data_.time_SS[0] = '\0';
-  displayed_data_.date_str[0] = '\0';
-  displayed_data_.alarm_str[0] = '\0';
+  // new_display_data_.time_HHMM[0] = '\0';
+  // new_display_data_.time_SS[0] = '\0';
+  // new_display_data_.date_str[0] = '\0';
+  // new_display_data_.alarm_str[0] = '\0';
+  // displayed_data_.time_HHMM[0] = '\0';
+  // displayed_data_.time_SS[0] = '\0';
+  // displayed_data_.date_str[0] = '\0';
+  // displayed_data_.alarm_str[0] = '\0';
 };
-
-// destructor
-RGBDisplay::~RGBDisplay() {
-  delete new_display_data_.time_HHMM;
-  delete new_display_data_.time_SS;
-  delete new_display_data_.date_str;
-  delete new_display_data_.alarm_str;
-  delete displayed_data_.time_HHMM;
-  delete displayed_data_.time_SS;
-  delete displayed_data_.date_str;
-  delete displayed_data_.alarm_str;
-}
 
 void RGBDisplay::Setup() {
 
@@ -180,7 +160,7 @@ void RGBDisplay::PrepareTimeDayDateArrays() {
     new_display_data_.pm_not_am = true;
   }
   // Mon dd Day
-  snprintf(new_display_data_.date_str, kDateArraySize, "%s  %d  %s", days_table_[rtc->dayOfWeek() - 1], rtc->day(), months_table[rtc->month() - 1]);
+  snprintf(new_display_data_.date_str, kDateArraySize, "%s  %d  %s", kDaysTable_[rtc->dayOfWeek() - 1], rtc->day(), kMonthsTable[rtc->month() - 1]);
   if(alarm_clock->alarm_ON_)
     snprintf(new_display_data_.alarm_str, kAlarmArraySize, "%d:%02d %s", alarm_clock->alarm_hr_, alarm_clock->alarm_min_, (alarm_clock->alarm_is_AM_ ? kAmLabel : kPmLabel));
   else

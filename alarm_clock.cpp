@@ -518,7 +518,7 @@ void AlarmClock::SetupBuzzerTimer() {
 void AlarmClock::DeallocateBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
-    passive_buzzer_timer_ptr_ = NULL;
+  passive_buzzer_timer_ptr_ = NULL;
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     delete passive_buzzer_timer_ptr_;
     passive_buzzer_timer_ptr_ = NULL;

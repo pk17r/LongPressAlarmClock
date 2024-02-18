@@ -33,8 +33,6 @@ public:
 
   // constructor
   RGBDisplay();
-  // destructor
-  ~RGBDisplay();
 
   // screens
   void DisplayTimeUpdate();
@@ -79,7 +77,6 @@ public:
 
   // tft dimensions
   const uint16_t kTftWidth = 320, kTftHeight = 240;
-  // SPISettings settingsA(80000000, MSBFIRST, SPI_MODE0);
 
 
 private:
@@ -118,18 +115,6 @@ private:
   int16_t alarm_row_x0_ = 0;
   int16_t alarm_icon_x0_ = 0, alarm_icon_y0_ = 0;
 
-  // Display Visible Data Struct
-  const int kHHMM_ArraySize = 6, kSS_ArraySize = 4, kDateArraySize = 13, kAlarmArraySize = 10;
-  struct DisplayData {
-    char* time_HHMM;
-    char* time_SS;
-    char* date_str;
-    char* alarm_str;
-    bool _12_hour_mode;
-    bool pm_not_am;
-    bool alarm_ON;
-  } new_display_data_, displayed_data_;
-
 
 // PRIVATE CONSTANTS
   
@@ -146,40 +131,6 @@ private:
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kSettingsPageBackButtonY1 = kTftHeight - 50;
   const int16_t kRadiusButtonRoundRect = 5;
-
-  // day arrays
-  #define DAY_ARR_SIZE 4
-  const char kDaySun[DAY_ARR_SIZE] = "Sun";
-  const char kDayMon[DAY_ARR_SIZE] = "Mon";
-  const char kDayTue[DAY_ARR_SIZE] = "Tue";
-  const char kDayWed[DAY_ARR_SIZE] = "Wed";
-  const char kDayThu[DAY_ARR_SIZE] = "Thu";
-  const char kDayFri[DAY_ARR_SIZE] = "Fri";
-  const char kDaySat[DAY_ARR_SIZE] = "Sat";
-
-  // Then set up a table to refer to your strings.
-  const char *const days_table_[7] = { kDaySun, kDayMon, kDayTue, kDayWed, kDayThu, kDayFri, kDaySat };
-
-  // day arrays
-  #define MONTH_ARR_SIZE 4
-  const char month_Jan[MONTH_ARR_SIZE] = "Jan";
-  const char month_Feb[MONTH_ARR_SIZE] = "Feb";
-  const char month_Mar[MONTH_ARR_SIZE] = "Mar";
-  const char month_Apr[MONTH_ARR_SIZE] = "Apr";
-  const char month_May[MONTH_ARR_SIZE] = "May";
-  const char month_Jun[MONTH_ARR_SIZE] = "Jun";
-  const char month_Jul[MONTH_ARR_SIZE] = "Jul";
-  const char month_Aug[MONTH_ARR_SIZE] = "Aug";
-  const char month_Sep[MONTH_ARR_SIZE] = "Sep";
-  const char month_Oct[MONTH_ARR_SIZE] = "Oct";
-  const char month_Nov[MONTH_ARR_SIZE] = "Nov";
-  const char month_Dec[MONTH_ARR_SIZE] = "Dec";
-
-  // Then set up a table to refer to your strings.
-  const char *const months_table[12] = { month_Jan, month_Feb, month_Mar, month_Apr, month_May, month_Jun, month_Jul, month_Aug, month_Sep, month_Oct, month_Nov, month_Dec };
-
-  const char kAmLabel[3] = "AM", kPmLabel[3] = "PM", kOffLabel[4] = "Off", kAlarmLabel[6] = "Alarm";
-  const char kCharSpace = ' ';
 
   // color definitions
   const uint16_t  kDisplayColorBlack        = 0x0000;
