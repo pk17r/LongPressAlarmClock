@@ -17,8 +17,6 @@ public:
 
   // function declerations
   void Setup();
-  void UpdateTimePriorityLoop();
-  void NonPriorityTasksLoop();
   void RetrieveAlarmSettings();
   void SaveAlarm();
   int16_t MinutesToAlarm();
