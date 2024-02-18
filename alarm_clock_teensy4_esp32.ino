@@ -56,25 +56,22 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
 
-  // initialize modules
-  rtc = new RTC();
-  eeprom = new EEPROM();
-  alarmClock = new AlarmClock();
-  display = new RGBDisplay();
-  ts = new Touchscreen();
-  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff = new WiFiStuff();
-  #endif
-
   // initialize push button
   pushBtn = new PushButtonTaps(BUTTON_PIN);
 
-  // setup display
-  display->setup();
-
+  // initialize modules
+  eeprom = new EEPROM();
+  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    wifiStuff = new WiFiStuff();
+  #endif
+  rtc = new RTC();
+  alarmClock = new AlarmClock();
   // setup alarm clock
   alarmClock->setup();
-
+  display = new RGBDisplay();
+  // setup display
+  display->setup();
+  ts = new Touchscreen();
   // restart the other core
   // rp2040.restartCore1();
 }
