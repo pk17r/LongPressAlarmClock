@@ -5,9 +5,7 @@
 #include "wifi_stuff.h"
 #include "eeprom.h"
 #include <PushButtonTaps.h>
-#if defined(TOUCHSCREEN_IS_XPT2046)
-  #include "touchscreen.h"
-#endif
+#include "touchscreen.h"
 
 // program setup function
 void AlarmClock::Setup() {
@@ -200,79 +198,3 @@ void AlarmClock::DeallocateBuzzerTimer() {
   Serial.println(F("Buzzer Timer deallocated."));
 }
 
-
-// #if defined(MCU_IS_ESP32)
-// /*
-//   Esp32 light sleep function
-//   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
-// */
-// void AlarmClock::putEsp32ToLightSleep() {
-//   /*
-//   First we configure the wake up source
-//   We set our ESP32 to wake up for an external trigger.
-//   There are two types for ESP32, ext0 and ext1 .
-//   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
-//   to be on while ext1 uses RTC Controller so doesnt need
-//   peripherals to be powered on.
-//   Note that using internal pullups/pulldowns also requires
-//   RTC peripherals to be turned on.
-//   */
-//   // add a timer to wake up ESP32
-//   esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
-//   // ext1 button press as wake up source
-//   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
-//   //Go to sleep now
-//   serialTimeStampPrefix();
-//   Serial.println("Go To Light Sleep for 0.5 sec or button press");
-//   Serial.flush();
-//   // go to light sleep
-//   esp_light_sleep_start();
-//   // On WAKEUP disable timer as wake up source
-//   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
-
-//   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-//   //Print the wakeup reason for ESP32
-//   serialTimeStampPrefix();
-//   print_wakeup_reason(wakeup_reason);
-
-//   // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
-//   if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-//     // add ext0 RTC seconds ticker as wake up source
-//     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
-//     //Go to sleep now
-//     serialTimeStampPrefix();
-//     Serial.println("Go To Light Sleep until seconds tick or button press");
-//     //esp_deep_sleep_start();
-//     Serial.flush();
-//     // go to light sleep
-//     esp_light_sleep_start();
-
-//     // On WAKEUP disable EXT0 as wake up source
-//     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
-
-//     wakeup_reason = esp_sleep_get_wakeup_cause();
-//     // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
-//     //   turnBacklightOn();
-
-//     //Print the wakeup reason for ESP32
-//     serialTimeStampPrefix();
-//     print_wakeup_reason(wakeup_reason);
-//   }
-// }
-
-// /*
-// Method to print the reason by which ESP32
-// has been awaken from sleep
-// */
-// void AlarmClock::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
-//   switch(wakeup_reason)
-//   {
-//     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
-//     case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
-//     case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
-//     case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
-//     case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
-//     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
-//   }
-// }
-// #endif

@@ -2,7 +2,9 @@
 #define PIN_DEFS_H
 
 // SELECT MCU
-// #define MCU_IS_ESP32
+// #define MCU_IS_ESP32_WROOM_DA_MODULE
+// #define MCU_IS_ESP32_S2_MINI
+// #define MCU_IS_ESP32_C3_SUPER_MINI
 // #define MCU_IS_TEENSY
 #define MCU_IS_RASPBERRY_PI_PICO_W
 
@@ -15,53 +17,74 @@
 // SELECT IF TOUCHSCREEN IS PRESENT
 #define TOUCHSCREEN_IS_XPT2046
 
+
+
+  // DEFINE PINS
+
+
+
 // define pins
-#if defined(MCU_IS_ESP32)
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
 
   // FOR ESP32 WROOM DA MODULE
 
-  // #define TFT_COPI 23
-  // #define TFT_CLK 18
-  // #define TFT_CS 5
-  // #define TFT_RST 27  // Or set to -1 and connect to Arduino RESET pin
-  // #define TFT_DC 26
-  // #define TFT_BL 25  //  controls TFT Display backlight as output of PWM pin
+  #define MCU_IS_ESP32
+  #define WIFI_IS_USED
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-  //   #define TS_CIPO 19    // don't connect CIPO (MISO) to TFT
-  //   #define TS_CS_PIN 33
-  //   #define TS_IRQ_PIN 34
-  // #endif
+  #define TFT_COPI 23
+  #define TFT_CLK 18
+  #define TFT_CS 5
+  #define TFT_RST 27  // Or set to -1 and connect to Arduino RESET pin
+  #define TFT_DC 26
+  #define TFT_BL 25  //  controls TFT Display backlight as output of PWM pin
 
-  // // Sqw Alarm Interrupt Pin
-  // #define SQW_INT_PIN 4
-  // #define BUTTON_PIN 35
-  // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  // #define LED_PIN 32
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CIPO 19    // don't connect CIPO (MISO) to TFT
+    #define TS_CS_PIN 33
+    #define TS_IRQ_PIN 34
+  #endif
+
+  // Sqw Alarm Interrupt Pin
+  #define SQW_INT_PIN 4
+  #define BUTTON_PIN 35
+  #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
+  #define LED_PIN 32
+
+
+// define pins
+#elif defined(MCU_IS_ESP32_C3_SUPER_MINI)
+
+  #define MCU_IS_ESP32
+  #define WIFI_IS_USED
 
   // FOR ESP32 C3 SUPER MINI MODULE
 
-  // #define TFT_COPI 6
-  // #define TFT_CLK 4
-  // #define TFT_CS 7
-  // #define TFT_RST 3  // Or set to -1 and connect to Arduino RESET pin
-  // #define TFT_DC 2
-  // #define TFT_BL 1  //  controls TFT Display backlight as output of PWM pin
+  #define TFT_COPI 6
+  #define TFT_CLK 4
+  #define TFT_CS 7
+  #define TFT_RST 3  // Or set to -1 and connect to Arduino RESET pin
+  #define TFT_DC 2
+  #define TFT_BL 1  //  controls TFT Display backlight as output of PWM pin
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-  //   #define TS_CIPO 5    // don't connect CIPO (MISO) to TFT
-  //   #define TS_CS_PIN 10
-  //   #define TS_IRQ_PIN 0
-  // #endif
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    #define TS_CIPO 5    // don't connect CIPO (MISO) to TFT
+    #define TS_CS_PIN 10
+    #define TS_IRQ_PIN 0
+  #endif
 
-  // // Sqw Alarm Interrupt Pin
-  // #define SQW_INT_PIN 21
-  // #define BUTTON_PIN 20
-  // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  // // #define LED_PIN 32
+  // Sqw Alarm Interrupt Pin
+  #define SQW_INT_PIN 21
+  #define BUTTON_PIN 20
+  #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
+  // #define LED_PIN 32
 
+
+#elif defined(MCU_IS_ESP32_S2_MINI)
 
   // FOR ESP32 S2 MINI MODULE
+
+  #define MCU_IS_ESP32
+  #define WIFI_IS_USED
 
   #define TFT_COPI 35
   #define TFT_CLK 36
@@ -105,6 +128,8 @@
   #define LED_PIN 14
 
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+
+  #define WIFI_IS_USED
 
   #define TFT_COPI 19
   #define TFT_CLK 18
