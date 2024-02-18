@@ -110,6 +110,13 @@ ScreenPage current_page = kMainPage;
 // seconds flag triggered by interrupt
 // static volatile bool rtcHwSecUpdate = false;
 
+// secondCoreControlFlag controls idling and restarting core1 from core0
+//    0 = core is idling
+//    1 = resume the other core from core0
+//    2 = core is running some operation
+//    3 = core is done processing and can be idled
+volatile byte second_core_control_flag = 0;
+
 extern "C" char* sbrk(int incr);
 // Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
 int AvailableRam() {
@@ -219,7 +226,7 @@ void ProcessSerialInput() {
     case 's':   // screensaver
       {
         Serial.println(F("**** Screensaver ****"));
-        alarm_clock->SetPage(kScreensaverPage);
+        SetPage(kScreensaverPage);
       }
       break;
     case 't':   // go to buzzAlarm Function
@@ -232,7 +239,7 @@ void ProcessSerialInput() {
         // prepare date and time arrays
         PrepareTimeDayDateArrays();
         // set main page back
-        alarm_clock->SetPage(kMainPage);
+        SetPage(kMainPage);
         inactivity_seconds = 0;
       }
       break;
@@ -240,7 +247,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Show Alarm Triggered Screen ****"));
         // start alarm triggered page
-        alarm_clock->SetPage(kAlarmTriggeredPage);
+        SetPage(kAlarmTriggeredPage);
         delay(1000);
         display->AlarmTriggeredScreen(false, 24);
         delay(1000);
@@ -253,7 +260,7 @@ void ProcessSerialInput() {
         // prepare date and time arrays
         PrepareTimeDayDateArrays();
         // set main page back
-        alarm_clock->SetPage(kMainPage);
+        SetPage(kMainPage);
         inactivity_seconds = 0;
       }
       break;
@@ -261,7 +268,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        alarm_clock->second_core_control_flag_ = 1;
+        second_core_control_flag = 1;
       }
       break;
     case 'i':   // set WiFi details
@@ -303,5 +310,43 @@ void ProcessSerialInput() {
       break;
     default:
       Serial.println(F("Unrecognized user input"));
+  }
+}
+
+void SetPage(ScreenPage page) {
+  switch(page) {
+    case kMainPage:
+      // if screensaver is active then clear screensaver canvas to free memory
+      if(current_page == kScreensaverPage)
+        display->ScreensaverControl(false);
+      current_page = kMainPage;         // new page needs to be set before any action
+      display->redraw_display_ = true;
+      display->DisplayTimeUpdate();
+      break;
+    case kScreensaverPage:
+      current_page = kScreensaverPage;      // new page needs to be set before any action
+      display->ScreensaverControl(true);
+      break;
+    case kAlarmSetPage:
+      current_page = kAlarmSetPage;     // new page needs to be set before any action
+      // set variables for alarm set screen
+      alarm_clock->var_1_ = alarm_clock->alarm_hr_;
+      alarm_clock->var_2_ = alarm_clock->alarm_min_;
+      alarm_clock->var_3_AM_PM_ = alarm_clock->alarm_is_AM_;
+      alarm_clock->var_4_ON_OFF_ = alarm_clock->alarm_ON_;
+      display->SetAlarmScreen(false);
+      break;
+    case kAlarmTriggeredPage:
+      current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
+      display->AlarmTriggeredScreen(true, alarm_clock->kAlarmEndButtonPressAndHoldSeconds);
+      display->SetMaxBrightness();
+      break;
+    case kSettingsPage:
+      current_page = kSettingsPage;     // new page needs to be set before any action
+      display->SettingsPage();
+      display->SetMaxBrightness();
+      break;
+    default:
+      Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
 }

@@ -11,6 +11,7 @@ public:
   RTC();  // constructor
 
   static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
+  static inline volatile bool rtc_hw_min_update_ = false;     // minutes change flag
 
   // to update rtc's time and date
   void SetRtcTimeAndDate();

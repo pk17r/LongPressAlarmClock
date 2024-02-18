@@ -56,18 +56,17 @@ void AlarmClock::UpdateTimePriorityLoop() {
   // process time actions every second
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
-    if (rtc->second() >= 60)
-      refresh_rtc_time_ = true;
 
     // prepare updated seconds array
     display->UpdateSecondsOnTimeStrArr(rtc->second());
 
     SerialTimeStampPrefix();
 
-    // get time update
-    if (refresh_rtc_time_) {
+    // get time update on new minute
+    if (rtc->rtc_hw_min_update_) {
+      rtc->rtc_hw_min_update_ = false;
+
       rtc->Refresh();
-      refresh_rtc_time_ = false;
 
       SerialTimeStampPrefix();
 
@@ -83,25 +82,25 @@ void AlarmClock::UpdateTimePriorityLoop() {
       // 5 mins before alarm time, try to get weather info
       #if defined(MCU_IS_RASPBERRY_PI_PICO_W) || defined(MCU_IS_ESP32)
 
-        if(!wifi_stuff->got_weather_info_ && second_core_control_flag_ == 0) {
+        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000) && second_core_control_flag == 0) {
+          if(wifi_stuff->got_weather_info_time_ms == 0)
+            second_core_control_flag = 1;
+          else if(millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000)
+            second_core_control_flag = 1;
+          else if(MinutesToAlarm() == 5) // get updated weather info 5 minutes before alarm time
+            second_core_control_flag = 1;
 
-          if(alarm_min_ >= 5)
-            if(rtc->hour() == alarm_hr_ && rtc->minute() == alarm_min_ - 5)
-              second_core_control_flag_ = 1;
-          else if(alarm_hr_ > 1)
-            if(rtc->hour() == alarm_hr_ - 1 && rtc->minute() == 55)
-              second_core_control_flag_ = 1;
-          else
-            if(rtc->hour() == 12 && rtc->minute() == 55)
-              second_core_control_flag_ = 1;
+          if(second_core_control_flag == 1)
+            Serial.println("Time to update weather info!");
         }
 
       #endif
 
       // Activate Buzzer at Alarm Time
-      if(TimeToStartAlarm() && rtc->second() < 10) {
+      if(MinutesToAlarm() == 0) {
         // go to buzz alarm function
         BuzzAlarmFn();
+        // returned from Alarm Triggered Screen and Good Morning Screen
         // refresh time
         rtc->Refresh();
         // prepare date and time arrays
@@ -109,7 +108,6 @@ void AlarmClock::UpdateTimePriorityLoop() {
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds = 0;
-        wifi_stuff->got_weather_info_ = false;
       }
     }
 
@@ -137,16 +135,16 @@ void AlarmClock::UpdateTimePriorityLoop() {
     Serial.println();
 
     // second core control operations
-    switch(second_core_control_flag_) {
+    switch(second_core_control_flag) {
       case 1: // resume the other core
         // rp2040.restartCore1();
         // rp2040.resumeOtherCore();
-        second_core_control_flag_ = 2;  // core started
+        second_core_control_flag = 2;  // core started
         // Serial.println("Resumed core1");
         break;
       case 3: // core1 is done processing and can be idled
         // rp2040.idleOtherCore();
-        second_core_control_flag_ = 0;  // core idled
+        second_core_control_flag = 0;  // core idled
         // Serial.println("Idled core1");
         break;
     }
@@ -172,7 +170,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
 void AlarmClock::NonPriorityTasksLoop() {
 
   // run the core only to do specific not time important operations
-  if (second_core_control_flag_ == 2) {
+  if (second_core_control_flag == 2) {
 
     // get today's weather info
     wifi_stuff->GetTodaysWeatherInfo();
@@ -183,49 +181,11 @@ void AlarmClock::NonPriorityTasksLoop() {
 
     // done processing the task
     // set the core up to be idled from core0
-    second_core_control_flag_ = 3;
+    second_core_control_flag = 3;
   }
 
   // a delay to slow things down and not crash
   delay(1000);
-}
-
-void AlarmClock::SetPage(ScreenPage page) {
-  switch(page) {
-    case kMainPage:
-      // if screensaver is active then clear screensaver canvas to free memory
-      if(current_page == kScreensaverPage)
-        display->ScreensaverControl(false);
-      current_page = kMainPage;         // new page needs to be set before any action
-      display->redraw_display_ = true;
-      display->DisplayTimeUpdate();
-      break;
-    case kScreensaverPage:
-      current_page = kScreensaverPage;      // new page needs to be set before any action
-      display->ScreensaverControl(true);
-      break;
-    case kAlarmSetPage:
-      current_page = kAlarmSetPage;     // new page needs to be set before any action
-      // set variables for alarm set screen
-      var_1_ = alarm_hr_;
-      var_2_ = alarm_min_;
-      var_3_AM_PM_ = alarm_is_AM_;
-      var_4_ON_OFF_ = alarm_ON_;
-      display->SetAlarmScreen(false);
-      break;
-    case kAlarmTriggeredPage:
-      current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
-      display->AlarmTriggeredScreen(true, kAlarmEndButtonPressAndHoldSeconds);
-      display->SetMaxBrightness();
-      break;
-    case kSettingsPage:
-      current_page = kSettingsPage;     // new page needs to be set before any action
-      display->SettingsPage();
-      display->SetMaxBrightness();
-      break;
-    default:
-      Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
-  }
 }
 
 void AlarmClock::RetrieveAlarmSettings() {
@@ -244,38 +204,35 @@ void AlarmClock::SaveAlarm() {
   eeprom->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 }
 
-// Check if alarm time is hit
-bool AlarmClock::TimeToStartAlarm() {
+int16_t AlarmClock::MinutesToAlarm() {
 
-  if(!alarm_ON_) return false;
+  if(!alarm_ON_) return -1;
 
+  uint16_t minutesToday, alarmAtMinute;
+
+  // calculate alarmAtMinute
+  if(alarm_hr_ == 12)
+    alarmAtMinute = alarm_min_;
+  else
+    alarmAtMinute = alarm_hr_ * 60 + alarm_min_;
+  if(!alarm_is_AM_) 
+    alarmAtMinute += 12 * 60;
+
+  // calculate minutesToday
   if(rtc->hourModeAndAmPm() == 0) {
     // 24 hour clock mode
-    uint8_t alarmHr24hr = alarm_hr_;
-    if(alarm_hr_ == 12) {
-      if(alarm_is_AM_) alarmHr24hr = 0;
-      else alarmHr24hr = 12;
-    }
-    else {
-      if(!alarm_is_AM_) alarmHr24hr -= 12;
-    }
-    // check if alarm is hit
-    if(rtc->hour() == alarmHr24hr && rtc->minute() == alarm_min_)
-      return true;
-    else
-      return false;
+    minutesToday = rtc->hour() * 60 + rtc->minute();
   }
   else { // 12 hour mode
-    // check if alarm is hit
-    if((rtc->hourModeAndAmPm() == 1 && alarm_is_AM_) || (rtc->hourModeAndAmPm() == 2 && !alarm_is_AM_)) {
-      if(rtc->hour() == alarm_hr_ && rtc->minute() == alarm_min_)
-        return true;
-      else
-        return false;
-    }
+    if(rtc->hour() == 12)
+      minutesToday = rtc->minute();
     else
-      return false;
+      minutesToday = rtc->hour() * 60 + rtc->minute();
+    if(rtc->hourModeAndAmPm() == 2) 
+      minutesToday += 12 * 60;
   }
+
+  return alarmAtMinute - minutesToday;
 }
 
 // Function that starts buzzer and Alarm Screen

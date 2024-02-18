@@ -118,6 +118,9 @@ void RTC::SecondsUpdateInterruptISR() {
   second_++;
   // a flag for others that time has updated!
   rtc_hw_sec_update_ = true;
+
+  if(second_ >= 60)
+    rtc_hw_min_update_ = true;
 }
 
 // to update rtcHw's time and date

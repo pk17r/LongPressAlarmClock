@@ -90,6 +90,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     {
       // got response
       got_weather_info_ = true;
+      got_weather_info_time_ms = millis();
 
       Serial.print("JSON object = ");
       Serial.println(myObject);

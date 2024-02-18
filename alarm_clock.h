@@ -21,25 +21,14 @@ public:
   void NonPriorityTasksLoop();
   void RetrieveAlarmSettings();
   void SaveAlarm();
-  bool TimeToStartAlarm();
+  int16_t MinutesToAlarm();
   void BuzzAlarmFn();
-  void SetPage(ScreenPage page);
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   // void putEsp32ToLightSleep();
   // #endif
 
 // OBJECTS and VARIABLES
-
-  // secondCoreControlFlag controls idling and restarting core1 from core0
-  //    0 = core is idling
-  //    1 = resume the other core from core0
-  //    2 = core is running some operation
-  //    3 = core is done processing and can be idled
-  volatile byte second_core_control_flag_ = 0;
-
-  // flag to refresh RTC time from RTC HW
-  bool refresh_rtc_time_ = false;
 
   // alarm time
   uint8_t alarm_hr_ = 7;

@@ -331,7 +331,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
       // wait a little
       delay(100);
       // go back to main page
-      alarm_clock->SetPage(kMainPage);
+      SetPage(kMainPage);
     }
     
   }
@@ -1059,7 +1059,6 @@ void RGBDisplay::GoodMorningScreen() {
     DrawSun(x0, y0, edge);
 
   tft.fillScreen(kDisplayColorBlack);
-  alarm_clock->refresh_rtc_time_ = true;
   redraw_display_ = true;
 }
 
