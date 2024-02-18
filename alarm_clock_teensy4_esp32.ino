@@ -27,9 +27,9 @@ RGBDisplay* display = NULL;   // ptr to display class object that manages the di
 AlarmClock* alarmClock = NULL;  // ptr to alarm clock class object that controls Alarm functions ** Initialization Order 3
 EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object ** Initialization Order 4
 WiFiStuff* wifiStuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions ** Initialization Order 5
-PushButtonTaps pushBtn;   // Push Button object ** Initialization Order 6
+PushButtonTaps* pushBtn = NULL;   // Push Button object ** Initialization Order 6
 #if defined(TOUCHSCREEN_IS_XPT2046)
-  Touchscreen ts;         // Touchscreen class object ** Initialization Order 7
+  Touchscreen* ts = NULL;         // Touchscreen class object ** Initialization Order 7
 #endif
 
 void setup() {
@@ -56,18 +56,19 @@ void setup() {
   rtc = new RTC();
   alarmClock = new AlarmClock();
   display = new RGBDisplay();
+  ts = new Touchscreen();
   eeprom = new EEPROM();
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
     wifiStuff = new WiFiStuff();
   #endif
 
   // initialize push button
-  pushBtn.setButtonPin(BUTTON_PIN);
+  pushBtn = new PushButtonTaps(BUTTON_PIN);
   // pushBtn.setButtonActiveLow(false);
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
     // touchscreen setup and calibration
-    ts.setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
+    ts->setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
   #endif
 
   // retrieve wifi details

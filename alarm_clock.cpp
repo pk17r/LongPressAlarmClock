@@ -30,7 +30,7 @@ void AlarmClock::setup() {
 void AlarmClock::updateTimePriorityLoop() {
 
     // button pressed or touchscreen touched
-  if(pushBtn.checkButtonStatus() != 0 || ts.isTouched()) {
+  if(pushBtn->checkButtonStatus() != 0 || ts->isTouched()) {
     // show instant response by turing up brightness
     display->setMaxBrightness();
 
@@ -40,11 +40,11 @@ void AlarmClock::updateTimePriorityLoop() {
     }
     else if(currentPage == alarmSetPage)
     { // if on alarm page, then take alarm set page user inputs
-      display->setAlarmScreen(false, (ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
+      display->setAlarmScreen(false, (ts->getTouchedPixel())->x, (ts->getTouchedPixel())->y);
     }
     else if(currentPage != alarmSetPage && inactivitySeconds >= 1)
     { // if on main page and user clicked somewhere, get touch input
-      int userTouchRegion = display->classifyMainPageTouchInput((ts.getTouchedPixel())->x, (ts.getTouchedPixel())->y);
+      int userTouchRegion = display->classifyMainPageTouchInput((ts->getTouchedPixel())->x, (ts->getTouchedPixel())->y);
       if(userTouchRegion != -1)
         setPage((ScreenPage)userTouchRegion);
     }
@@ -52,7 +52,7 @@ void AlarmClock::updateTimePriorityLoop() {
   }
 
   // if user presses button, show response by turning On LED
-  if(pushBtn.buttonActiveDebounced())
+  if(pushBtn->buttonActiveDebounced())
     digitalWrite(LED_PIN, HIGH);
   else
     digitalWrite(LED_PIN, LOW);
@@ -166,7 +166,7 @@ void AlarmClock::updateTimePriorityLoop() {
 
 // #if defined(MCU_IS_ESP32)
 //     // if button is inactive, then go to sleep
-//     if(!pushBtn.buttonActiveDebounced())
+//     if(!pushBtn->buttonActiveDebounced())
 //       putEsp32ToLightSleep();
 // #endif
 
@@ -420,14 +420,14 @@ void AlarmClock::buzzAlarmFn() {
   int buttonPressSecondsCounter = ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS;
   while(!alarmStopped) {
     // if user presses button then pauze buzzer and start alarm end countdown!
-    if(pushBtn.buttonActiveDebounced()) {
+    if(pushBtn->buttonActiveDebounced()) {
       if(!buzzerPausedByUser) {
         buzzer_disable();
         buzzerPausedByUser = true;
       }
       unsigned long buttonPressStartTimeMs = millis(); //note time of button press
       // while button is pressed, display seconds countdown
-      while(pushBtn.buttonActiveDebounced() && !alarmStopped) {
+      while(pushBtn->buttonActiveDebounced() && !alarmStopped) {
         // display countdown to alarm off
         if(ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;
@@ -442,7 +442,7 @@ void AlarmClock::buzzAlarmFn() {
       }
     }
     // activate buzzer if button is not pressed by user
-    if(!pushBtn.buttonActiveDebounced() && !alarmStopped) {
+    if(!pushBtn->buttonActiveDebounced() && !alarmStopped) {
       if(buzzerPausedByUser) {
         buzzer_enable();
         buzzerPausedByUser = false;

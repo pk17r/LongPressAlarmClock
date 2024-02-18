@@ -20,8 +20,8 @@ extern RGBDisplay* display;
 extern AlarmClock* alarmClock;
 extern WiFiStuff* wifiStuff;
 extern EEPROM* eeprom;
-extern PushButtonTaps pushBtn;
-extern Touchscreen ts;
+extern PushButtonTaps* pushBtn;
+extern Touchscreen* ts;
 
 // extern all global functions
 extern int availableRam();
