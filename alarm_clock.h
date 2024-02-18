@@ -23,7 +23,6 @@ public:
   void SaveAlarm();
   bool TimeToStartAlarm();
   void BuzzAlarmFn();
-  void ProcessSerialInput();
   void SetPage(ScreenPage page);
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);

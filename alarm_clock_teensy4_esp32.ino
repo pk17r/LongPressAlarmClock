@@ -187,3 +187,121 @@ void SerialPrintRtcDateTime() {
   Serial.print(new_display_data_.alarm_str);
   Serial.flush();
 }
+
+void ProcessSerialInput() {
+  // take user input
+  char input = Serial.read();
+  SerialInputFlush();
+  // acceptable user input
+  Serial.print(F("User input: "));
+  Serial.println(input);
+  // process user input
+  switch (input) {
+    case 'a':   // toggle alarm On Off
+      Serial.println(F("**** Toggle Alarm ****"));
+      alarm_clock->alarm_ON_ = !alarm_clock->alarm_ON_;
+      Serial.print(F("alarmOn = ")); Serial.println(alarm_clock->alarm_ON_);
+      break;
+    case 'b':   // brightness
+      {
+        Serial.println(F("**** Set Brightness [0-255] ****"));
+        while (Serial.available() == 0) {};
+        int brightnessVal = Serial.parseInt();
+        SerialInputFlush();
+        display->SetBrightness(brightnessVal);
+      }
+      break;
+    case 'g':   // good morning
+      {
+        display->GoodMorningScreen();
+      }
+      break;
+    case 's':   // screensaver
+      {
+        Serial.println(F("**** Screensaver ****"));
+        alarm_clock->SetPage(kScreensaverPage);
+      }
+      break;
+    case 't':   // go to buzzAlarm Function
+      {
+        Serial.println(F("**** buzzAlarm Function ****"));
+        // go to buzz alarm function
+        alarm_clock->BuzzAlarmFn();
+        // refresh time
+        rtc->Refresh();
+        // prepare date and time arrays
+        PrepareTimeDayDateArrays();
+        // set main page back
+        alarm_clock->SetPage(kMainPage);
+        inactivity_seconds = 0;
+      }
+      break;
+    case 'y':   // show alarm triggered screen
+      {
+        Serial.println(F("**** Show Alarm Triggered Screen ****"));
+        // start alarm triggered page
+        alarm_clock->SetPage(kAlarmTriggeredPage);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 24);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 13);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 14);
+        delay(1000);
+        // refresh time
+        rtc->Refresh();
+        // prepare date and time arrays
+        PrepareTimeDayDateArrays();
+        // set main page back
+        alarm_clock->SetPage(kMainPage);
+        inactivity_seconds = 0;
+      }
+      break;
+    case 'w':   // get today's weather info
+      {
+        Serial.println(F("**** Get Weather Info ****"));
+        // get today's weather info
+        alarm_clock->second_core_control_flag_ = 1;
+      }
+      break;
+    case 'i':   // set WiFi details
+      {
+        Serial.println(F("**** Enter WiFi Details ****"));
+        String inputStr;
+        Serial.print("SSID: ");
+        while(Serial.available() == 0) {
+          delay(20);
+        }
+        delay(20);
+        inputStr = Serial.readString();
+        inputStr[inputStr.length()-1] = '\0';
+        Serial.println(inputStr);
+        // fill wifi_ssid
+        if(wifi_stuff->wifi_ssid_ != NULL) {
+          delete wifi_stuff->wifi_ssid_;
+          wifi_stuff->wifi_ssid_ = NULL;
+        }
+        wifi_stuff->wifi_ssid_ = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_stuff->wifi_ssid_,inputStr.c_str());
+        Serial.print("PASSWORD: ");
+        while(Serial.available() == 0) {
+          delay(20);
+        }
+        delay(20);
+        inputStr = Serial.readString();
+        inputStr[inputStr.length()-1] = '\0';
+        Serial.println(inputStr);
+        // fill wifi_ssid
+        if(wifi_stuff->wifi_password_ != NULL) {
+          delete wifi_stuff->wifi_password_;
+          wifi_stuff->wifi_password_ = NULL;
+        }
+        wifi_stuff->wifi_password_ = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_stuff->wifi_password_,inputStr.c_str());
+        wifi_stuff->SaveWiFiDetails();
+      }
+      break;
+    default:
+      Serial.println(F("Unrecognized user input"));
+  }
+}

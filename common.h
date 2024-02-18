@@ -62,6 +62,6 @@ extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();
 extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
-
+extern void ProcessSerialInput();
 
 #endif // COMMON_H
