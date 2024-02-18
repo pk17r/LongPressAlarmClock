@@ -1,5 +1,12 @@
 #include "touchscreen.h"
 #include <SPI.h>
+#include "rgb_display.h"
+
+Touchscreen::Touchscreen() {
+  touchscreenObj.begin(SPI);
+  touchscreenObj.setRotation(1);
+  touchscreenCal = TouchCalibration{220, 3800, 280, 3830, display->TFT_WIDTH, display->TFT_HEIGHT};
+}
 
 bool Touchscreen::isTouched() {
   // irq touch is super fast
@@ -14,12 +21,6 @@ bool Touchscreen::isTouched() {
     getTouchedPixel();
     return lastTouchPixel.isTouched;
   }
-}
-
-void Touchscreen::setupAndCalibrate(int16_t xMin, int16_t xMax, int16_t yMin, int16_t yMax, int16_t w, int16_t h) {
-  touchscreenObj.begin(SPI);
-  touchscreenObj.setRotation(1);
-  touchscreenCal = TouchCalibration{xMin, xMax, yMin, yMax, w, h};
 }
 
 TouchPixel* Touchscreen::getTouchedPixel() {

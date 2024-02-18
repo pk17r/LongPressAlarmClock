@@ -68,12 +68,6 @@ void setup() {
 
   // initialize push button
   pushBtn = new PushButtonTaps(BUTTON_PIN);
-  // pushBtn.setButtonActiveLow(false);
-
-  #if defined(TOUCHSCREEN_IS_XPT2046)
-    // touchscreen setup and calibration
-    ts->setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
-  #endif
 
   // setup display
   display->setup();
