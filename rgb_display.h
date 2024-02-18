@@ -31,9 +31,6 @@ public:
 
 // PUBLIC FUNCTIONS
 
-  // constructor
-  RGBDisplay();
-
   // screens
   void DisplayTimeUpdate();
   void Screensaver();
@@ -48,8 +45,6 @@ public:
   void SetMaxBrightness();
   void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
-  void PrepareTimeDayDateArrays();
-  void SerialPrintRtcDateTime();
   void UpdateSecondsOnTimeStrArr(uint8_t second);
   ScreenPage ClassifyMainPageTouchInput();
 

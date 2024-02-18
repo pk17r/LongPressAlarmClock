@@ -68,6 +68,10 @@ void setup() {
   alarm_clock = new AlarmClock();
   // setup alarm clock
   alarm_clock->Setup();
+  // prepare date and time arrays and serial print RTC Date Time
+  PrepareTimeDayDateArrays();
+  // serial print RTC Date Time
+  SerialPrintRtcDateTime();
   display = new RGBDisplay();
   // setup display
   display->Setup();
@@ -134,5 +138,50 @@ void SerialTimeStampPrefix() {
   Serial.print(alarm_clock->inactivity_seconds_);
   Serial.print(F(": SRAM left: ")); Serial.print(AvailableRam());
   Serial.print(F(") - "));
+  Serial.flush();
+}
+
+void PrepareTimeDayDateArrays() {
+  // HH:MM
+  snprintf(new_display_data_.time_HHMM, kHHMM_ArraySize, "%d:%02d", rtc->hour(), rtc->minute());
+  // :SS
+  snprintf(new_display_data_.time_SS, kSS_ArraySize, ":%02d", rtc->second());
+  if(rtc->hourModeAndAmPm() == 0)
+    new_display_data_._12_hour_mode = false;
+  else if(rtc->hourModeAndAmPm() == 1) {
+    new_display_data_._12_hour_mode = true;
+    new_display_data_.pm_not_am = false;
+  }
+  else {
+    new_display_data_._12_hour_mode = true;
+    new_display_data_.pm_not_am = true;
+  }
+  // Mon dd Day
+  snprintf(new_display_data_.date_str, kDateArraySize, "%s  %d  %s", kDaysTable_[rtc->dayOfWeek() - 1], rtc->day(), kMonthsTable[rtc->month() - 1]);
+  if(alarm_clock->alarm_ON_)
+    snprintf(new_display_data_.alarm_str, kAlarmArraySize, "%d:%02d %s", alarm_clock->alarm_hr_, alarm_clock->alarm_min_, (alarm_clock->alarm_is_AM_ ? kAmLabel : kPmLabel));
+  else
+    snprintf(new_display_data_.alarm_str, kAlarmArraySize, "%s %s", kAlarmLabel, kOffLabel);
+  new_display_data_.alarm_ON = alarm_clock->alarm_ON_;
+}
+
+void SerialPrintRtcDateTime() {
+  // full serial print time date day array
+  Serial.print(new_display_data_.time_HHMM);
+  // snprintf(timeArraySec, SS_ARR_SIZE, ":%02d", second);
+  Serial.print(new_display_data_.time_SS);
+  if (new_display_data_._12_hour_mode) {
+    Serial.print(kCharSpace);
+    if (new_display_data_.pm_not_am)
+      Serial.print(kPmLabel);
+    else
+      Serial.print(kAmLabel);
+  }
+  Serial.print(kCharSpace);
+  Serial.print(new_display_data_.date_str);
+  Serial.print(kCharSpace);
+  Serial.print(rtc->year());
+  Serial.print(kCharSpace);
+  Serial.print(new_display_data_.alarm_str);
   Serial.flush();
 }

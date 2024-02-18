@@ -105,7 +105,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
         // refresh time
         rtc->Refresh();
         // prepare date and time arrays
-        display->PrepareTimeDayDateArrays();
+        PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds_ = 0;
@@ -114,7 +114,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
     }
 
     // prepare date and time arrays
-    display->PrepareTimeDayDateArrays();
+    PrepareTimeDayDateArrays();
 
     // check for inactivity
     if(inactivity_seconds_ <= kInactivitySecondsLimit) {
@@ -133,7 +133,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
       display->DisplayTimeUpdate();
 
     // serial print RTC Date Time
-    display->SerialPrintRtcDateTime();
+    SerialPrintRtcDateTime();
     Serial.println();
 
     // second core control operations
@@ -286,7 +286,7 @@ void AlarmClock::ProcessSerialInput() {
         // refresh time
         rtc->Refresh();
         // prepare date and time arrays
-        display->PrepareTimeDayDateArrays();
+        PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds_ = 0;
@@ -307,7 +307,7 @@ void AlarmClock::ProcessSerialInput() {
         // refresh time
         rtc->Refresh();
         // prepare date and time arrays
-        display->PrepareTimeDayDateArrays();
+        PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds_ = 0;

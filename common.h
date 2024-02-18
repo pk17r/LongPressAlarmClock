@@ -28,6 +28,8 @@ extern Touchscreen* ts;
 extern int AvailableRam();
 extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();
+extern void PrepareTimeDayDateArrays();
+extern void SerialPrintRtcDateTime();
 
 // flag for display pages
 enum ScreenPage {
