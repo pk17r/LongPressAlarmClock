@@ -1,8 +1,6 @@
-#include "pin_defs.h"
 #include "rgb_display.h"
 #include "alarm_clock.h"
 #include "uRTCLib.h"
-#include <Arduino.h>
 
 // constructor
 RGBDisplay::RGBDisplay() {

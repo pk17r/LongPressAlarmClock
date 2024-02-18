@@ -1,7 +1,5 @@
 #include "touchscreen.h"
-#include "pin_defs.h"
 #include <SPI.h>
-#include <XPT2046_Touchscreen.h>
 
 bool Touchscreen::isTouched() {
   // irq touch is super fast
@@ -39,7 +37,7 @@ TouchPixel* Touchscreen::getTouchedPixel() {
       lastTouchPixel = TouchPixel{-1, -1, false};
       return &lastTouchPixel;
     }
-    
+
     // Rotate and map
     int16_t x = map(touch.x, touchscreenCal.xMin, touchscreenCal.xMax, 0, touchscreenCal.screenWidth);
     int16_t y = map(touch.y, touchscreenCal.yMin, touchscreenCal.yMax, 0, touchscreenCal.screenHeight);

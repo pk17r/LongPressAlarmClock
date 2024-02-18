@@ -1,26 +1,17 @@
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
-#include <Arduino.h>
-#include "pin_defs.h"
+#include "common.h"
 // #include "secrets.h"
-#include "WiFi.h"
-#include <HTTPClient.h>
-#include <Arduino_JSON.h>
-#include "eeprom.h"
 
 class WiFiStuff {
 
 public:
-  void setup(EEPROM* eepromPtr);
   void retrieveWiFiDetails();
   void saveWiFiDetails();
   void turn_WiFi_On();
   void turn_WiFi_Off();
   void getTodaysWeatherInfo();
-
-  // persistent data class pointer
-  EEPROM* eeprom;
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     char* wifi_ssid = MY_WIFI_SSID;

@@ -1,82 +1,7 @@
-#include "pin_defs.h"
 #include "rgb_display.h"
 #include "alarm_clock.h"
-#include <Arduino.h>
 #include "wifi_stuff.h"
-
-// void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
-//   toggler = false;
-//   elapsedMillis timer1;
-//   if(toggler) {
-//     SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
-//     digitalWrite(TFT_CS, 0);  // indicate "transfer"
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2A);              // send column span command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     SPI.transfer16(x);//     >> 8;      // send Xmin
-//     SPI.transfer16(x+w-1);// >> 8;      // send Xmax
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2B);              // send row span command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     SPI.transfer16(y);//     >> 8;      // send Ymin
-//     SPI.transfer16(y+h-1);// >> 8;      // send Ymax
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2C);              // send write command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-//     int8_t bits8 = 0;
-//     for (int16_t j = 0; j < h; j++) {
-//       for (int16_t i = 0; i < w; i++)
-//       {
-//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-//         uint16_t c = bits8 < 0 ? color : bg;   // select color
-//         tft.SPI_WRITE16(c);
-//       }
-//     }
-//     // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
-//     // digitalWrite(TFT_CS, 1); // Enable internal pull-up
-//     digitalWrite(TFT_CS, 1);                   // indicate "idle"
-//     SPI.endTransaction();
-//   }
-//   else {
-//     Serial.println("***SEE_HERE***");
-//     // make a 16 bit rgbBitmap buffer to test send time of drawRGBBitmap
-//     // int bitmapSize = w*h/8 + (w*h%8 > 0 ? 1 : 0);
-//     // for (int r = 0; r<bitmapSize; r++) {
-//     //   Serial.print(bitmap[r]);Serial.print(charSpace);
-//     // }
-//     // Serial.println();
-//     int bufferSize = w;// * h;
-//     uint16_t buffer16Bit[bufferSize];
-//     tft.startWrite();
-//     tft.setAddrWindow(x, y, w, h);
-    
-//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-//     int8_t bits8 = 0;
-//     for (int16_t j = 0; j < h; j++) {
-//       int bufi = 0;
-//       for (int16_t i = 0; i < w; i++)
-//       {
-//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-//         uint16_t c = bits8 < 0 ? color : bg;   // select color
-//         buffer16Bit[bufi] = c;
-//         bufi++;
-//         // tft.writePixels(&c, 1);
-//       }
-//       tft.writePixels(buffer16Bit, bufferSize);
-//     }
-    
-//     tft.endWrite();
-//     // alarmClock->serialTimeStampPrefix(); Serial.print(charSpace); Serial.print(timer1);
-//     // tft.drawRGBBitmap(x, y, buffer16Bit, w, h); // Copy to screen
-//     alarmClock->serialTimeStampPrefix();
-//     Serial.println("***DONE***");
-//   }
-  
-//   Serial.print(" w "); Serial.print(w);Serial.print(" h "); Serial.print(h); Serial.print(" fastDrawBitmapTime "); Serial.print(toggler); Serial.print(charSpace); Serial.println(timer1);
-
-//   toggler = !toggler;
-// }
+#include "eeprom.h"
 
 /*!
     @brief  Draw a 565 RGB image at the specified (x,y) position using monochrome 8-bit image.
@@ -127,13 +52,13 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
   uint16_t buffer16Bit[w];
   tft.startWrite();
   tft.setAddrWindow(x, y, w, h);
-  
-  int16_t byteWidth = (saveW + 7) >> 3;          // bitmap width in bytes
+
+  int16_t bitmapWidthBytes = (saveW + 7) >> 3;          // bitmap width in bytes
   int8_t bits8 = 0;
   for (int16_t j = by1; j < jLim; j++) {
     int bufi = 0;
     int16_t i = bx1;
-    uint8_t currentByte = bitmap[j * byteWidth + (i >> 3)];
+    uint8_t currentByte = bitmap[j * bitmapWidthBytes + (i >> 3)];
     uint8_t bitIndex = 7 - i % 8;
     while(1) {
       buffer16Bit[bufi] = (((currentByte >> bitIndex)  & 0x01) ? color : bg);
@@ -143,7 +68,7 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
         break;
       bitIndex = 7 - i % 8; // next bit index
       if(bitIndex == 7)  // new byte
-        currentByte = bitmap[j * byteWidth + (i >> 3)];
+        currentByte = bitmap[j * bitmapWidthBytes + (i >> 3)];
     }
     tft.writePixels(buffer16Bit, w);
   }
@@ -1254,3 +1179,77 @@ void RGBDisplay::drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
     tft.drawPixel(cx - rcos, cy - rsin, color);
   }
 }
+
+// void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+//   toggler = false;
+//   elapsedMillis timer1;
+//   if(toggler) {
+//     SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
+//     digitalWrite(TFT_CS, 0);  // indicate "transfer"
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2A);              // send column span command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     SPI.transfer16(x);//     >> 8;      // send Xmin
+//     SPI.transfer16(x+w-1);// >> 8;      // send Xmax
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2B);              // send row span command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     SPI.transfer16(y);//     >> 8;      // send Ymin
+//     SPI.transfer16(y+h-1);// >> 8;      // send Ymax
+//     digitalWrite(TFT_DC, 0);  // indicate "command"
+//     SPI.transfer(0x2C);              // send write command
+//     digitalWrite(TFT_DC, 1);  // indicate "data"
+//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
+//     int8_t bits8 = 0;
+//     for (int16_t j = 0; j < h; j++) {
+//       for (int16_t i = 0; i < w; i++)
+//       {
+//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
+//         uint16_t c = bits8 < 0 ? color : bg;   // select color
+//         tft.SPI_WRITE16(c);
+//       }
+//     }
+//     // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
+//     // digitalWrite(TFT_CS, 1); // Enable internal pull-up
+//     digitalWrite(TFT_CS, 1);                   // indicate "idle"
+//     SPI.endTransaction();
+//   }
+//   else {
+//     Serial.println("***SEE_HERE***");
+//     // make a 16 bit rgbBitmap buffer to test send time of drawRGBBitmap
+//     // int bitmapSize = w*h/8 + (w*h%8 > 0 ? 1 : 0);
+//     // for (int r = 0; r<bitmapSize; r++) {
+//     //   Serial.print(bitmap[r]);Serial.print(charSpace);
+//     // }
+//     // Serial.println();
+//     int bufferSize = w;// * h;
+//     uint16_t buffer16Bit[bufferSize];
+//     tft.startWrite();
+//     tft.setAddrWindow(x, y, w, h);
+    
+//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
+//     int8_t bits8 = 0;
+//     for (int16_t j = 0; j < h; j++) {
+//       int bufi = 0;
+//       for (int16_t i = 0; i < w; i++)
+//       {
+//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
+//         uint16_t c = bits8 < 0 ? color : bg;   // select color
+//         buffer16Bit[bufi] = c;
+//         bufi++;
+//         // tft.writePixels(&c, 1);
+//       }
+//       tft.writePixels(buffer16Bit, bufferSize);
+//     }
+    
+//     tft.endWrite();
+//     // alarmClock->serialTimeStampPrefix(); Serial.print(charSpace); Serial.print(timer1);
+//     // tft.drawRGBBitmap(x, y, buffer16Bit, w, h); // Copy to screen
+//     alarmClock->serialTimeStampPrefix();
+//     Serial.println("***DONE***");
+//   }
+  
+//   Serial.print(" w "); Serial.print(w);Serial.print(" h "); Serial.print(h); Serial.print(" fastDrawBitmapTime "); Serial.print(toggler); Serial.print(charSpace); Serial.println(timer1);
+
+//   toggler = !toggler;
+// }

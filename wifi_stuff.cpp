@@ -1,10 +1,8 @@
 #include "wifi_stuff.h"
-
-void WiFiStuff::setup(EEPROM* eepromPtr) {
-  this->eeprom = eepromPtr;
-
-  retrieveWiFiDetails();
-}
+#include "WiFi.h"
+#include <HTTPClient.h>
+#include <Arduino_JSON.h>
+#include "eeprom.h"
 
 void WiFiStuff::retrieveWiFiDetails() {
   eeprom->retrieveWiFiDetails(wifi_ssid, wifi_password);

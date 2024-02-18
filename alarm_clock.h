@@ -2,18 +2,13 @@
 #define ALARM_CLOCK_H
 
 #include "common.h"
-#include "rgb_display.h"
+#include "uRTCLib.h"
 #if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
   #include <stdio.h>
   #include "pico/stdlib.h"
   #include "hardware/timer.h"
   #include "hardware/irq.h"
 #endif
-#include "pin_defs.h"
-#include "uRTCLib.h"
-
-// forward decleration of other classes
-class WiFiStuff;
 
 class AlarmClock {
 
@@ -56,9 +51,6 @@ public:
 
   // RTC clock object for DC3231 rtc
   uRTCLib rtc;
-
-  // display object
-  // RGBDisplay* display = NULL;
 
   // secondCoreControlFlag controls idling and restarting core1 from core0
   //    0 = core is idling

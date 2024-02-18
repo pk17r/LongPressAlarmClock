@@ -1,7 +1,6 @@
-#include "hardware/sync.h"
-#include "pin_defs.h"
-#include <Arduino.h>
 #include "alarm_clock.h"
+#include "rgb_display.h"
+// #include "hardware/sync.h"
 #include "wifi_stuff.h"
 #include "eeprom.h"
 #include <PushButtonTaps.h>

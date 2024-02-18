@@ -1,7 +1,6 @@
 #ifndef TOUCHSCREEN_H
 #define TOUCHSCREEN_H
-#include "pin_defs.h"
-#include <SPI.h>
+#include "common.h"
 #include <XPT2046_Touchscreen.h>
 
 // struct declerations

@@ -1,11 +1,10 @@
-
 #include "eeprom.h"
+#include "Wire.h"
 
 EEPROM::EEPROM() {
   eeprom.set_address(0x57);
   Wire.begin();
 }
-
 
 bool EEPROM::retrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
 

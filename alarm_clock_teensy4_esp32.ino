@@ -19,6 +19,7 @@
   #include "touchscreen.h"
 #endif
 
+// modules - hardware or software
 RGBDisplay* display = NULL;   // display class object
 AlarmClock* alarmClock = NULL;  // object that controls RTC and Alarm functions
 WiFiStuff* wifiStuff = NULL;  // WiFi and Weather fetch functions
@@ -75,7 +76,7 @@ void setup() {
 
   // retrieve wifi details
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff->setup(eeprom);
+    wifiStuff->retrieveWiFiDetails();
     wifiStuff->turn_WiFi_Off();
   #endif
 

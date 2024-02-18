@@ -1,8 +1,7 @@
 #ifndef EEPROM_H
 #define EEPROM_H
 
-#include <Arduino.h>
-#include "Wire.h"
+#include "common.h"
 #include "uEEPROMLib.h"
 
 class EEPROM {

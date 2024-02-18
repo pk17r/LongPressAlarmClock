@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+// common includes
+#include <Arduino.h>
+#include "pin_defs.h"
+
 // forward decleration of other classes
 class RGBDisplay;
 class AlarmClock;
