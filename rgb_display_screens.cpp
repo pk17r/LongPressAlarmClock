@@ -3,6 +3,7 @@
 #include "wifi_stuff.h"
 #include "eeprom.h"
 #include "rtc.h"
+#include "touchscreen.h"
 
 /*!
     @brief  Draw a 565 RGB image at the specified (x,y) position using monochrome 8-bit image.
@@ -17,10 +18,10 @@
     @param  w        Width of bitmap in pixels.
     @param  h        Height of bitmap in pixels.
 */
-void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
   int16_t x2, y2;                 // Lower-right coord
-  if ((x >= TFT_WIDTH) ||            // Off-edge right
-      (y >= TFT_HEIGHT) ||           // " top
+  if ((x >= kTftWidth) ||            // Off-edge right
+      (y >= kTftHeight) ||           // " top
       ((x2 = (x + w - 1)) < 0) || // " left
       ((y2 = (y + h - 1)) < 0))
     return; // " bottom
@@ -40,10 +41,10 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
     by1 = -y;
     y = 0;
   }
-  if (x2 >= TFT_WIDTH)
-    w = TFT_WIDTH - x; // Clip right
-  if (y2 >= TFT_HEIGHT)
-    h = TFT_HEIGHT - y; // Clip bottom
+  if (x2 >= kTftWidth)
+    w = kTftWidth - x; // Clip right
+  if (y2 >= kTftHeight)
+    h = kTftHeight - y; // Clip bottom
 
   int16_t jLim = min(saveH, h + by1);
   int16_t iLim = min(saveW, w + bx1);
@@ -77,21 +78,21 @@ void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
   // Serial.print(" fastDrawBitmapTime "); Serial.print(charSpace); Serial.println(timer1);
 }
 
-void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
+void RGBDisplay::SetAlarmScreen(bool processUserInput) {
 
-  int16_t gap_x = TFT_WIDTH / 11;
-  int16_t gap_y = TFT_HEIGHT / 9;
+  int16_t gap_x = kTftWidth / 11;
+  int16_t gap_y = kTftHeight / 9;
   int16_t hr_x = gap_x / 2, min_x = 2.25*gap_x, amPm_x = 4.25*gap_x, onOff_x = 6.5*gap_x, setCancel_x = 9*gap_x;
   int16_t time_y = 6*gap_y, onSet_y = 3.5*gap_y, offCancel_y = 6.5*gap_y, inc_y = 4*gap_y, dec_y = 8*gap_y;
   int16_t incB_y = time_y - 3*gap_y, decB_y = time_y + gap_y;
-  uint16_t onFill = Display_Color_Green, offFill = Display_Color_Black, borderColor = Display_Color_Cyan;
+  uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
   uint16_t button_w = 2*gap_x, button_h = 2*gap_y;
   char onStr[] = "ON", offStr[] = "OFF", setStr[] = "Set", cancelStr[] = "X";
 
-  if(firstDraw) {
+  if(!processUserInput) {
     // make alarm set page
 
-    tft.fillScreen(Display_Backround_Color);
+    tft.fillScreen(kDisplayBackroundColor);
 
     // set title font
     tft.setFont(&Satisfy_Regular18pt7b);
@@ -99,60 +100,62 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
     char title[] = "Set Alarm";
 
     // change the text color to the background color
-    tft.setTextColor(Display_Backround_Color);
+    tft.setTextColor(kDisplayBackroundColor);
 
     int16_t title_x0, title_y0;
     uint16_t title_w, title_h;
     // get bounds of title on tft display (with background color as this causes a blink)
     tft.getTextBounds(title, 0, 0, &title_x0, &title_y0, &title_w, &title_h);
 
-    int16_t title_x = (TFT_WIDTH - title_w) / 2;
+    int16_t title_x = (kTftWidth - title_w) / 2;
     int16_t title_y = 2*gap_y;
 
     // change the text color to the Alarm color
-    tft.setTextColor(Display_Alarm_Color);
+    tft.setTextColor(kDisplayAlarmColor);
     tft.setCursor(title_x, title_y);
     tft.print(title);
 
     // font color inside
-    tft.setTextColor(Display_Color_Green);
+    tft.setTextColor(kDisplayColorGreen);
 
     // print alarm time
     tft.setCursor(hr_x, time_y);
-    tft.print(alarmClock->var1);
+    tft.print(alarm_clock->var_1_);
     tft.setCursor(min_x, time_y);
-    if(alarmClock->var2 < 10)
+    if(alarm_clock->var_2_ < 10)
       tft.print('0');
-    tft.print(alarmClock->var2);
+    tft.print(alarm_clock->var_2_);
     tft.setCursor(amPm_x, time_y);
-    if(alarmClock->var3AmPm)
-      tft.print(amLabel);
+    if(alarm_clock->var_3_AM_PM_)
+      tft.print(kAmLabel);
     else
-      tft.print(pmLabel);
+      tft.print(kPmLabel);
 
     // draw increase / dec buttons
     // hour
-    drawTriangleButton(hr_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    drawTriangleButton(hr_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(hr_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    DrawTriangleButton(hr_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
     // min
-    drawTriangleButton(min_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    drawTriangleButton(min_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(min_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    DrawTriangleButton(min_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
     // am / pm
-    drawTriangleButton(amPm_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
-    drawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
+    DrawTriangleButton(amPm_x, incB_y, gap_x, gap_y, true, borderColor, offFill);
+    DrawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
 
     // ON button
-    drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
+    DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
     // OFF button
-    drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
+    DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
     // Set button
-    drawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, Display_Color_Orange, offFill, true);
+    DrawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, kDisplayColorOrange, offFill, true);
     // Cancel button
-    drawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, Display_Color_Orange, offFill, true);
+    DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorOrange, offFill, true);
 
   }
   else {
-    // user action
+    // processUserInput
+
+    int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
 
     // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
     //    0 = no button clicked
@@ -216,68 +219,68 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
         case 6: triangle_x = amPm_x; triangle_y = decB_y; isUp = false; break;
       }
       // turn triangle On
-      drawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, onFill);
+      DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, onFill);
       // clear old values
       tft.setFont(&Satisfy_Regular18pt7b);
       tft.setCursor(triangle_x, time_y);
-      tft.setTextColor(Display_Backround_Color);
+      tft.setTextColor(kDisplayBackroundColor);
       if(userButtonClick <= 2)
-        tft.print(alarmClock->var1);
+        tft.print(alarm_clock->var_1_);
       else if(userButtonClick <= 4) {
-        if(alarmClock->var2 < 10) tft.print('0');
-        tft.print(alarmClock->var2);
+        if(alarm_clock->var_2_ < 10) tft.print('0');
+        tft.print(alarm_clock->var_2_);
       }
       else {
-        if(alarmClock->var3AmPm)
-          tft.print(amLabel);
+        if(alarm_clock->var_3_AM_PM_)
+          tft.print(kAmLabel);
         else
-          tft.print(pmLabel);
+          tft.print(kPmLabel);
       }
       // update value
       if(userButtonClick <= 2) {
         if(isUp) {  // increase hour
-          if(alarmClock->var1 < 12)
-            alarmClock->var1++;
+          if(alarm_clock->var_1_ < 12)
+            alarm_clock->var_1_++;
           else
-            alarmClock->var1 = 1;
+            alarm_clock->var_1_ = 1;
         }
         else {  // decrease hour
-          if(alarmClock->var1 > 1)
-            alarmClock->var1--;
+          if(alarm_clock->var_1_ > 1)
+            alarm_clock->var_1_--;
           else
-            alarmClock->var1 = 12;
+            alarm_clock->var_1_ = 12;
         }
       }
       else if(userButtonClick <= 4) {
         if(isUp) {  // increase min
-          if(alarmClock->var2  < 59)
-            alarmClock->var2++;
+          if(alarm_clock->var_2_  < 59)
+            alarm_clock->var_2_++;
           else
-            alarmClock->var2 = 0;
+            alarm_clock->var_2_ = 0;
         }
         else {  // decrease min
-          if(alarmClock->var2  > 0)
-            alarmClock->var2--;
+          if(alarm_clock->var_2_  > 0)
+            alarm_clock->var_2_--;
           else
-            alarmClock->var2 = 59;
+            alarm_clock->var_2_ = 59;
         }
       }
       else  // turn alarm On or Off
-        alarmClock->var3AmPm = !alarmClock->var3AmPm;
+        alarm_clock->var_3_AM_PM_ = !alarm_clock->var_3_AM_PM_;
       // print updated value
       tft.setCursor(triangle_x, time_y);
-      tft.setTextColor(Display_Color_Green);
+      tft.setTextColor(kDisplayColorGreen);
       if(userButtonClick <= 2)
-        tft.print(alarmClock->var1);
+        tft.print(alarm_clock->var_1_);
       else if(userButtonClick <= 4) {
-        if(alarmClock->var2 < 10) tft.print('0');
-        tft.print(alarmClock->var2);
+        if(alarm_clock->var_2_ < 10) tft.print('0');
+        tft.print(alarm_clock->var_2_);
       }
       else {
-        if(alarmClock->var3AmPm)
-          tft.print(amLabel);
+        if(alarm_clock->var_3_AM_PM_)
+          tft.print(kAmLabel);
         else
-          tft.print(pmLabel);
+          tft.print(kPmLabel);
       }
       // wait a little
       unsigned long waitTime = 200;
@@ -285,56 +288,56 @@ void RGBDisplay::setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y) {
         waitTime = 100;
       delay(waitTime);
       // turn triangle Off
-      drawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, offFill);
+      DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, offFill);
     }
     else if(userButtonClick == 7 || userButtonClick == 8) {
       // On or Off button pressed
-      if((userButtonClick == 7 && !alarmClock->var4OnOff) || (userButtonClick == 8 && alarmClock->var4OnOff)) {
+      if((userButtonClick == 7 && !alarm_clock->var_4_ON_OFF_) || (userButtonClick == 8 && alarm_clock->var_4_ON_OFF_)) {
         // toggle alarm
-        alarmClock->var4OnOff = !alarmClock->var4OnOff;
+        alarm_clock->var_4_ON_OFF_ = !alarm_clock->var_4_ON_OFF_;
         // draw new ON button with push effect
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, alarmClock->var4OnOff);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_OFF_);
         // draw new OFF button
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
         delay(100);
         // draw new ON button
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
       }
-      else if(userButtonClick == 7 && alarmClock->var4OnOff) {
+      else if(userButtonClick == 7 && alarm_clock->var_4_ON_OFF_) {
         // alarm is On but user pressed On button
         // show a little graphic of input taken
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, Display_Alarm_Color, offFill, alarmClock->var4OnOff);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_OFF_);
         delay(100);
-        drawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarmClock->var4OnOff);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
       }
-      else if(userButtonClick == 8 && !alarmClock->var4OnOff) {
+      else if(userButtonClick == 8 && !alarm_clock->var_4_ON_OFF_) {
         // alarm is Off but user pressed Off button
         // show a little graphic of input taken
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, Display_Alarm_Color, offFill, !alarmClock->var4OnOff);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, kDisplayAlarmColor, offFill, !alarm_clock->var_4_ON_OFF_);
         delay(100);
-        drawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarmClock->var4OnOff);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
       }
     }
     else if(userButtonClick == 9 || userButtonClick == 10) {
       // set or cancel button pressed
       if(userButtonClick == 9) {  // set button pressed
         // show a little graphic of Set Button Press
-        drawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, Display_Color_Red, offFill, true);
+        DrawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, kDisplayColorRed, offFill, true);
         // save Set Alarm Page values
-        alarmClock->saveAlarm();
+        alarm_clock->SaveAlarm();
       }
       else  // show a little graphic of Cancel button Press
-        drawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, Display_Color_Red, offFill, true);
+        DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorRed, offFill, true);
       // wait a little
       delay(100);
       // go back to main page
-      alarmClock->setPage(alarmClock->mainPage);
+      alarm_clock->SetPage(kMainPage);
     }
     
   }
 }
 
-void RGBDisplay::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
+void RGBDisplay::DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
   tft.setFont(&FreeSans12pt7b);
   tft.setTextColor((isOn ? onFill : offFill));
   int16_t title_x0, title_y0;
@@ -342,8 +345,8 @@ void RGBDisplay::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* 
   // get bounds of title on tft display (with background color as this causes a blink)
   tft.getTextBounds(label, x, y + h, &title_x0, &title_y0, &title_w, &title_h);
   // make button
-  tft.fillRoundRect(x, y, w, h, RADIUS_BUTTON_ROUND_RECT, (isOn ? onFill : offFill));
-  tft.drawRoundRect(x, y, w, h, RADIUS_BUTTON_ROUND_RECT, borderColor);
+  tft.fillRoundRect(x, y, w, h, kRadiusButtonRoundRect, (isOn ? onFill : offFill));
+  tft.drawRoundRect(x, y, w, h, kRadiusButtonRoundRect, borderColor);
   tft.setTextColor((isOn ? offFill : onFill));
   title_x0 = x + (w - title_w) / 2;
   title_y0 = y + h / 2 + title_h / 2;
@@ -351,7 +354,7 @@ void RGBDisplay::drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* 
   tft.print(label);
 }
 
-void RGBDisplay::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor) {
+void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor) {
   int16_t x1, y1, x2, y2, x3, y3;
   if(isUp) {
     x1 = x + w / 2;
@@ -374,22 +377,22 @@ void RGBDisplay::drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-void RGBDisplay::settingsPage() {
+void RGBDisplay::SettingsPage() {
 
-  tft.fillScreen(Display_Backround_Color);
-  tft.setTextColor(Display_Color_Yellow);
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeSans12pt7b);
   tft.setCursor(10, 20);
   tft.print("WiFi:");
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
   tft.print("ssid: ");
-  tft.print(wifiStuff->wifi_ssid);
+  tft.print(wifi_stuff->wifi_ssid_);
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= eeprom->WIFI_SSID_PASSWORD_LENGTH_MAX) {
-    char c = *(wifiStuff->wifi_password + i);
+  while(i <= eeprom->kWifiSsidPasswordLengthMax) {
+    char c = *(wifi_stuff->wifi_password_ + i);
     if(c == '\0')
      break;
     if(i % 4 == 0)
@@ -399,27 +402,27 @@ void RGBDisplay::settingsPage() {
     i++;
   }
   // draw settings gear to edit WiFi details
-  tft.drawBitmap(SETTINGS_GEAR_X, 10, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
+  tft.drawBitmap(kSettingsGearX1, 10, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
 
 
   // Cancel button
   char cancelStr[] = "X";
-  drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, cancelStr, Display_Color_Cyan, Display_Color_Orange, Display_Color_Black, true);
+  DrawButton(kSettingsGearX1, kSettingsPageBackButtonY1, kSettingsGearWidth, kSettingsGearHeight, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
-void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
+void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
   int16_t title_x0 = 30, title_y0 = 50;
   int16_t s_x0 = 215, s_y0 = title_y0 + 48;
   
   if(firstTime) {
 
-    tft.fillScreen(Display_Backround_Color);
+    tft.fillScreen(kDisplayBackroundColor);
     tft.setFont(&Satisfy_Regular24pt7b);
-    tft.setTextColor(Display_Color_Yellow);
+    tft.setTextColor(kDisplayColorYellow);
     tft.setCursor(title_x0, title_y0);
     tft.print("WAKE UP!");
-    tft.setTextColor(Display_Color_Cyan);
+    tft.setTextColor(kDisplayColorCyan);
     char press_button_text1[] = "To turn off Alarm,";
     char press_button_text2[] = "press button for:";
     tft.setFont(&FreeMono9pt7b);
@@ -431,21 +434,21 @@ void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     // show today's date
     tft.setCursor(20, s_y0 + 35);
     tft.setFont(&Satisfy_Regular18pt7b);
-    tft.setTextColor(Display_Date_Color);
-    tft.print(newDisplayData.dateStr);
+    tft.setTextColor(kDisplayDateColor);
+    tft.print(new_display_data_.date_str);
 
     // show today's weather
-    if(wifiStuff->gotWeatherInfo) {
+    if(wifi_stuff->got_weather_info_) {
       tft.setFont(&FreeMono9pt7b);
       tft.setCursor(20, s_y0 + 65);
-      tft.setTextColor(Display_Color_Orange);
-      tft.print(wifiStuff->weather_main); tft.print(" : "); tft.print(wifiStuff->weather_description);
+      tft.setTextColor(kDisplayColorOrange);
+      tft.print(wifi_stuff->weather_main_); tft.print(" : "); tft.print(wifi_stuff->weather_description_);
       tft.setCursor(20, s_y0 + 85);
-      tft.print("Temp : "); tft.print(wifiStuff->weather_temp); tft.print("F ("); tft.print(wifiStuff->weather_temp_max); tft.print("/"); tft.print(wifiStuff->weather_temp_min); tft.print(")");
+      tft.print("Temp : "); tft.print(wifi_stuff->weather_temp_); tft.print("F ("); tft.print(wifi_stuff->weather_temp_max_); tft.print("/"); tft.print(wifi_stuff->weather_temp_min_); tft.print(")");
       tft.setCursor(20, s_y0 + 105);
-      tft.print("Wind Speed : "); tft.print(wifiStuff->weather_wind_speed); tft.print("m/s");
+      tft.print("Wind Speed : "); tft.print(wifi_stuff->weather_wind_speed_); tft.print("m/s");
       tft.setCursor(20, s_y0 + 125);
-      tft.print("Humidity : "); tft.print(wifiStuff->weather_humidity); tft.print("%");
+      tft.print("Humidity : "); tft.print(wifi_stuff->weather_humidity_); tft.print("%");
     }
   }
 
@@ -459,11 +462,11 @@ void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
   timer_str[charIndex] = '\0';
 
   // fill rect
-  tft.fillRect(s_x0 - 5, s_y0 - 40, 80, 46, Display_Backround_Color);
+  tft.fillRect(s_x0 - 5, s_y0 - 40, 80, 46, kDisplayBackroundColor);
 
   // set font
   tft.setFont(&Satisfy_Regular24pt7b);
-  tft.setTextColor(Display_Color_Yellow);
+  tft.setTextColor(kDisplayColorYellow);
 
   // home the cursor
   // uint16_t h = 0, w = 0;
@@ -474,23 +477,23 @@ void RGBDisplay::alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
   tft.print(timer_str);
 }
 
-void RGBDisplay::screensaver() {
+void RGBDisplay::Screensaver() {
   // elapsedMillis timer1;
   const int16_t GAP_BAND = 5, GAP_BAND_RIGHT = 30;
-  if(refreshScreensaverCanvas) {
+  if(refresh_screensaver_canvas_) {
 
     // delete created canvas and null the pointer
-    if(myCanvas != NULL) {
-      delete myCanvas;
-      myCanvas = NULL;
+    if(my_canvas_ != NULL) {
+      delete my_canvas_;
+      my_canvas_ = NULL;
       // myCanvas.reset(nullptr);
     }
     // alarmClock->serialTimeStampPrefix(); Serial.println("After deleting myCanvas."); Serial.flush();
 
     // get bounds of HH:MM text on screen
     tft.setFont(&ComingSoon_Regular70pt7b);
-    tft.setTextColor(Display_Backround_Color);
-    tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+    tft.setTextColor(kDisplayBackroundColor);
+    tft.getTextBounds(new_display_data_.time_HHMM, 0, 0, &gap_right_x_, &gap_up_y_, &tft_HHMM_w_, &tft_HHMM_h_);
 
     // get bounds of date string
     uint16_t date_h = 0, date_w = 0;
@@ -499,59 +502,59 @@ void RGBDisplay::screensaver() {
       tft.setFont(&Satisfy_Regular24pt7b);
     else
       tft.setFont(&Satisfy_Regular18pt7b);
-    tft.getTextBounds(newDisplayData.dateStr, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
+    tft.getTextBounds(new_display_data_.date_str, 0, 0, &date_gap_x, &date_gap_y, &date_w, &date_h);
     
     int16_t date_x0 = GAP_BAND - date_gap_x;
-    int16_t alarm_icon_w = (newDisplayData._alarmOn ? BELL_SMALL_W : BELL_FALLEN_SMALL_W);
-    int16_t alarm_icon_h = (newDisplayData._alarmOn ? BELL_SMALL_H : BELL_FALLEN_SMALL_H);
+    int16_t alarm_icon_w = (new_display_data_.alarm_ON ? kBellSmallWidth : kBellFallenSmallWidth);
+    int16_t alarm_icon_h = (new_display_data_.alarm_ON ? kBellSmallHeight : kBellFallenSmallHeight);
     uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
-    screensaver_w = max(tft_HHMM_w + 5 * GAP_BAND, date_row_w + 5 * GAP_BAND);
-    screensaver_h = tft_HHMM_h + max(date_h, alarm_icon_h) + 3*GAP_BAND;
+    screensaver_w_ = max(tft_HHMM_w_ + 5 * GAP_BAND, date_row_w + 5 * GAP_BAND);
+    screensaver_h_ = tft_HHMM_h_ + max(date_h, alarm_icon_h) + 3*GAP_BAND;
     // middle both rows
-    tft_HHMM_x0 = (screensaver_w - tft_HHMM_w) / 2 - gap_right_x;
-    date_x0 = (screensaver_w - date_row_w) / 2 - date_gap_x;
+    tft_HHMM_x0_ = (screensaver_w_ - tft_HHMM_w_) / 2 - gap_right_x_;
+    date_x0 = (screensaver_w_ - date_row_w) / 2 - date_gap_x;
     
     // create canvas
     // myCanvas = new GFXcanvas16(screensaver_w, screensaver_h);
-    myCanvas = new GFXcanvas1(screensaver_w, screensaver_h);
+    my_canvas_ = new GFXcanvas1(screensaver_w_, screensaver_h_);
 
     // alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas."); Serial.flush();
 
-    myCanvas->setTextWrap(false);
-    myCanvas->fillScreen(Display_Backround_Color);
+    my_canvas_->setTextWrap(false);
+    my_canvas_->fillScreen(kDisplayBackroundColor);
 
     // alarmClock->serialTimeStampPrefix(); Serial.println("After clearing canvas."); Serial.flush();
 
     // picknew random color
-    pickNewRandomColor();
-    uint16_t randomColor = colorPickerWheelBright[currentRandomColorIndex];
+    PickNewRandomColor();
+    uint16_t randomColor = kColorPickerWheel[current_random_color_index_];
 
     // print HH:MM
-    myCanvas->setFont(&ComingSoon_Regular70pt7b);
-    myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(tft_HHMM_x0 + GAP_BAND, GAP_BAND - gap_up_y);
-    myCanvas->print(newDisplayData.timeHHMM);
+    my_canvas_->setFont(&ComingSoon_Regular70pt7b);
+    my_canvas_->setTextColor(randomColor);
+    my_canvas_->setCursor(tft_HHMM_x0_ + GAP_BAND, GAP_BAND - gap_up_y_);
+    my_canvas_->print(new_display_data_.time_HHMM);
 
     // print date string
     if(rtc->hour() >= 10)
-      myCanvas->setFont(&Satisfy_Regular24pt7b);
+      my_canvas_->setFont(&Satisfy_Regular24pt7b);
     else
-      myCanvas->setFont(&Satisfy_Regular18pt7b);
-    myCanvas->setTextColor(randomColor);
-    myCanvas->setCursor(date_x0 + GAP_BAND, screensaver_h - 3 * GAP_BAND);
-    myCanvas->print(newDisplayData.dateStr);
+      my_canvas_->setFont(&Satisfy_Regular18pt7b);
+    my_canvas_->setTextColor(randomColor);
+    my_canvas_->setCursor(date_x0 + GAP_BAND, screensaver_h_ - 3 * GAP_BAND);
+    my_canvas_->print(new_display_data_.date_str);
 
     // draw bell
-    myCanvas->drawBitmap(myCanvas->getCursorX() + 2*GAP_BAND, screensaver_h - alarm_icon_h - GAP_BAND, (newDisplayData._alarmOn ? bell_small_bitmap : bell_fallen_small_bitmap), alarm_icon_w, alarm_icon_h, randomColor);
+    my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
 
     // get visual bounds of created canvas and time string
     // myCanvas->drawRect(tft_HHMM_x0 + GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
     // myCanvas->drawRect(date_x0 + GAP_BAND, screensaver_h + date_gap_y - 2 * GAP_BAND, date_row_w, date_h, Display_Color_Cyan);  // date row border
-    if(showColoredEdgeScreensaver)
-      myCanvas->drawRect(0,0, screensaver_w, screensaver_h, Display_Color_White);  // canvas border
+    if(show_colored_edge_screensaver_)
+      my_canvas_->drawRect(0,0, screensaver_w_, screensaver_h_, kDisplayColorWhite);  // canvas border
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
-    refreshScreensaverCanvas = false;
+    refresh_screensaver_canvas_ = false;
 
     // alarmClock->serialTimeStampPrefix(); Serial.println("After completing canvas."); Serial.flush();
   }
@@ -559,42 +562,42 @@ void RGBDisplay::screensaver() {
 
     // move the time text on screen
     const int16_t adder = 1;
-    screensaver_x1 += (screensaverMoveRight ? adder : -adder);
-    screensaver_y1 += (screensaverMoveDown ? adder : -adder);
+    screensaver_x1_ += (screensaver_move_right_ ? adder : -adder);
+    screensaver_y1_ += (screensaver_move_down_ ? adder : -adder);
 
     // set direction on hitting any edge
     // left and right edge - only change direction
-    if(screensaver_x1 + 2* GAP_BAND <= 0) {   // left edge
-      if(!screensaverMoveRight) {
-        screensaverMoveRight = true;
+    if(screensaver_x1_ + 2* GAP_BAND <= 0) {   // left edge
+      if(!screensaver_move_right_) {
+        screensaver_move_right_ = true;
         if(rtc->hour() < 10)
-          refreshScreensaverCanvas = true;
+          refresh_screensaver_canvas_ = true;
       }
     }
-    else if(screensaver_x1 + screensaver_w - 2 * GAP_BAND >= TFT_WIDTH) {    // right edge
-      if(!flyScreensaverHorizontally) {
-        if(screensaverMoveRight) {
-          screensaverMoveRight = false;
+    else if(screensaver_x1_ + screensaver_w_ - 2 * GAP_BAND >= kTftWidth) {    // right edge
+      if(!fly_screensaver_horizontally_) {
+        if(screensaver_move_right_) {
+          screensaver_move_right_ = false;
           if(rtc->hour() < 10)
-            refreshScreensaverCanvas = true;
+            refresh_screensaver_canvas_ = true;
         }
       }
       else {  // fly through right edge and apprear back on left edge
-        if(screensaver_x1 > TFT_WIDTH)
-          screensaver_x1 = - TFT_WIDTH;
+        if(screensaver_x1_ > kTftWidth)
+          screensaver_x1_ = - kTftWidth;
       }
     }
     // top and bottom edge - when hit change color as well
-    if(screensaver_y1 + GAP_BAND <= 0)  {   // top edge
-      if(!screensaverMoveDown) {
-        screensaverMoveDown = true;
-        refreshScreensaverCanvas = true;
+    if(screensaver_y1_ + GAP_BAND <= 0)  {   // top edge
+      if(!screensaver_move_down_) {
+        screensaver_move_down_ = true;
+        refresh_screensaver_canvas_ = true;
       }
     }
-    else if(screensaver_y1 + screensaver_h - GAP_BAND >= TFT_HEIGHT)  {   // bottom edge
-      if(screensaverMoveDown) {
-        screensaverMoveDown = false;
-        refreshScreensaverCanvas = true;
+    else if(screensaver_y1_ + screensaver_h_ - GAP_BAND >= kTftHeight)  {   // bottom edge
+      if(screensaver_move_down_) {
+        screensaver_move_down_ = false;
+        refresh_screensaver_canvas_ = true;
       }
     }
   }
@@ -603,24 +606,24 @@ void RGBDisplay::screensaver() {
   // unsigned long time1 = timer1; timer1 = 0;
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
-  fastDrawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color);
+  FastDrawBitmap(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
   // unsigned long time2 = timer1;
   // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
 }
 
-void RGBDisplay::pickNewRandomColor() {
-  int newIndex = currentRandomColorIndex;
-  while(newIndex == currentRandomColorIndex)
-    newIndex = random(0, COLOR_PICKER_WHEEL_SIZE - 1);
-  currentRandomColorIndex = newIndex;
+void RGBDisplay::PickNewRandomColor() {
+  int newIndex = current_random_color_index_;
+  while(newIndex == current_random_color_index_)
+    newIndex = random(0, kColorPickerWheelSize - 1);
+  current_random_color_index_ = newIndex;
   // Serial.println(currentRandomColorIndex);
 }
 
-void RGBDisplay::displayTimeUpdate() {
+void RGBDisplay::DisplayTimeUpdate() {
 
-  bool isThisTheFirstTime = strcmp(displayedData.timeSS, "") == 0;
-  if(redrawDisplay) {
-    tft.fillScreen(Display_Backround_Color);
+  bool isThisTheFirstTime = strcmp(displayed_data_.time_SS, "") == 0;
+  if(redraw_display_) {
+    tft.fillScreen(kDisplayBackroundColor);
     isThisTheFirstTime = true;
   }
 
@@ -631,87 +634,87 @@ void RGBDisplay::displayTimeUpdate() {
   if(1) {   // CODE USES CANVAS AND ALWAYS PUTS HH:MM:SS AmPm on it every second
 
     // delete canvas if it exists
-    if(myCanvas != NULL) {
-      delete myCanvas;
-      myCanvas = NULL;
+    if(my_canvas_ != NULL) {
+      delete my_canvas_;
+      my_canvas_ = NULL;
       // myCanvas.reset(nullptr);
     }
 
     // create new canvas for time row
     // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6));
-    myCanvas = new GFXcanvas1(TFT_WIDTH, TIME_ROW_Y0 + 6);
-    myCanvas->fillScreen(Display_Backround_Color);
-    myCanvas->setTextWrap(false);
+    my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
+    my_canvas_->fillScreen(kDisplayBackroundColor);
+    my_canvas_->setTextWrap(false);
 
     // HH:MM
 
     // set font
-    myCanvas->setFont(&FreeSansBold48pt7b);
+    my_canvas_->setFont(&FreeSansBold48pt7b);
 
     // home the cursor
-    myCanvas->setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
+    my_canvas_->setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
 
     // change the text color to foreground color
-    myCanvas->setTextColor(Display_Time_Color);
+    my_canvas_->setTextColor(kDisplayTimeColor);
 
     // draw the new time value
-    myCanvas->print(newDisplayData.timeHHMM);
+    my_canvas_->print(new_display_data_.time_HHMM);
     // tft.setTextSize(1);
     // delay(2000);
 
     // and remember the new value
-    strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
+    strcpy(displayed_data_.time_HHMM, new_display_data_.time_HHMM);
 
 
     // AM/PM
 
-    int16_t x0_pos = myCanvas->getCursorX();
+    int16_t x0_pos = my_canvas_->getCursorX();
 
     // set font
-    myCanvas->setFont(&FreeSans18pt7b);
+    my_canvas_->setFont(&FreeSans18pt7b);
 
     // draw new AM/PM
-    if(newDisplayData._12hourMode) {
+    if(new_display_data_._12_hour_mode) {
 
       // home the cursor
-      myCanvas->setCursor(x0_pos + DISPLAY_TEXT_GAP, AM_PM_ROW_Y0);
+      my_canvas_->setCursor(x0_pos + kDisplayTextGap, kAM_PM_row_Y0);
       // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
       // draw the new time value
-      if(newDisplayData._pmNotAm)
-        myCanvas->print(pmLabel);
+      if(new_display_data_.pm_not_am)
+        my_canvas_->print(kPmLabel);
       else
-        myCanvas->print(amLabel);
+        my_canvas_->print(kAmLabel);
     }
 
     // and remember the new value
-    displayedData._12hourMode = newDisplayData._12hourMode;
-    displayedData._pmNotAm = newDisplayData._pmNotAm;
+    displayed_data_._12_hour_mode = new_display_data_._12_hour_mode;
+    displayed_data_.pm_not_am = new_display_data_.pm_not_am;
 
 
     // :SS
 
     // home the cursor
-    myCanvas->setCursor(x0_pos + DISPLAY_TEXT_GAP, TIME_ROW_Y0);
+    my_canvas_->setCursor(x0_pos + kDisplayTextGap, kTimeRowY0);
 
     // draw the new time value
-    myCanvas->print(newDisplayData.timeSS);
+    my_canvas_->print(new_display_data_.time_SS);
 
     // and remember the new value
-    strcpy(displayedData.timeSS, newDisplayData.timeSS);
+    strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
 
     // draw canvas to tft   fastDrawBitmap
     // elapsedMillis time1;
     // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
-    fastDrawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
+    FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     // tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
     // unsigned long timeA = time1;
     // Serial.println();
     // Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
 
     // delete created canvas and null the pointer
-    delete myCanvas;
-    myCanvas = NULL;
+    delete my_canvas_;
+    my_canvas_ = NULL;
     // myCanvas.reset(nullptr);
 
   }
@@ -722,11 +725,11 @@ void RGBDisplay::displayTimeUpdate() {
     if(rtc->second() == 0) {
       // canvasPtr = GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h);
       // canvasPtr->fillScreen(Display_Backround_Color);
-      tft.fillRect(0, 0, TFT_WIDTH, TIME_ROW_Y0 + gap_up_y + tft_HHMM_h, Display_Backround_Color);
+      tft.fillRect(0, 0, kTftWidth, kTimeRowY0 + gap_up_y_ + tft_HHMM_h_, kDisplayBackroundColor);
     }
 
     // HH:MM string and AM/PM string
-    if (rtc->second() == 0 || strcmp(newDisplayData.timeHHMM, displayedData.timeHHMM) != 0 || redrawDisplay) {
+    if (rtc->second() == 0 || strcmp(new_display_data_.time_HHMM, displayed_data_.time_HHMM) != 0 || redraw_display_) {
 
       // HH:MM
 
@@ -735,40 +738,40 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setFont(&FreeSansBold48pt7b);
 
       // change the text color to the background color
-      tft.setTextColor(Display_Backround_Color);
+      tft.setTextColor(kDisplayBackroundColor);
 
       // clear old time if it was there
       if(rtc->second() != 0 && !isThisTheFirstTime) {
         // home the cursor to currently displayed text location
         if(rtc->hour() == 10 && rtc->minute() == 0 && rtc->second() == 0)  // handle special case of moving from single digit hour to 2 digit hour while clearing old value
-          tft.setCursor(TIME_ROW_X0 + SINGLE_DIGIT_HOUR_GAP, TIME_ROW_Y0);
+          tft.setCursor(kTimeRowX0 + SINGLE_DIGIT_HOUR_GAP, kTimeRowY0);
         else
-          tft.setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
+          tft.setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
 
         // redraw the old value to erase
-        tft.print(displayedData.timeHHMM);
+        tft.print(displayed_data_.time_HHMM);
         // tft.drawRect(tft_HHMM_x0 + gap_right_x, tft_HHMM_y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
       }
 
       // get bounds of new HH:MM string on tft display (with background color as this causes a blink)
-      tft.getTextBounds(newDisplayData.timeHHMM, 0, 0, &gap_right_x, &gap_up_y, &tft_HHMM_w, &tft_HHMM_h);
+      tft.getTextBounds(new_display_data_.time_HHMM, 0, 0, &gap_right_x_, &gap_up_y_, &tft_HHMM_w_, &tft_HHMM_h_);
       // Serial.print("gap_right_x "); Serial.print(gap_right_x); Serial.print(" gap_up_y "); Serial.print(gap_up_y); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
 
       // home the cursor
-      tft.setCursor(TIME_ROW_X0 + hh_gap_x, TIME_ROW_Y0);
+      tft.setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
       // Serial.print("X0 "); Serial.print(TIME_ROW_X0); Serial.print(" Y0 "); Serial.print(TIME_ROW_Y0); Serial.print(" w "); Serial.print(tft_HHMM_w); Serial.print(" h "); Serial.println(tft_HHMM_h); 
       // tft.drawRect(TIME_ROW_X0 + gap_right_x, TIME_ROW_Y0 + gap_up_y, tft_HHMM_w, tft_HHMM_h, Display_Color_White);
 
       // change the text color to foreground color
-      tft.setTextColor(Display_Time_Color);
+      tft.setTextColor(kDisplayTimeColor);
 
       // draw the new time value
-      tft.print(newDisplayData.timeHHMM);
+      tft.print(new_display_data_.time_HHMM);
       // tft.setTextSize(1);
       // delay(2000);
 
       // and remember the new value
-      strcpy(displayedData.timeHHMM, newDisplayData.timeHHMM);
+      strcpy(displayed_data_.time_HHMM, new_display_data_.time_HHMM);
 
       // AM/PM
 
@@ -776,267 +779,268 @@ void RGBDisplay::displayTimeUpdate() {
       tft.setFont(&FreeSans18pt7b);
 
       // clear old AM/PM
-      if(rtc->second() != 0 && !isThisTheFirstTime && displayedData._12hourMode) {
+      if(rtc->second() != 0 && !isThisTheFirstTime && displayed_data_._12_hour_mode) {
         // home the cursor
-        tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
+        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
 
         // change the text color to the background color
-        tft.setTextColor(Display_Backround_Color);
+        tft.setTextColor(kDisplayBackroundColor);
 
         // redraw the old value to erase
-        if(displayedData._pmNotAm)
-          tft.print(pmLabel);
+        if(displayed_data_.pm_not_am)
+          tft.print(kPmLabel);
         else
-          tft.print(amLabel);
+          tft.print(kAmLabel);
       }
 
       // draw new AM/PM
-      if(newDisplayData._12hourMode) {
+      if(new_display_data_._12_hour_mode) {
         // set test location of Am/Pm
-        tft_AmPm_x0 = TIME_ROW_X0 + hh_gap_x + gap_right_x + tft_HHMM_w + 2 * DISPLAY_TEXT_GAP;
-        tft_AmPm_y0 = TIME_ROW_Y0 + gap_up_y / 2;
+        tft_AmPm_x0_ = kTimeRowX0 + hh_gap_x + gap_right_x_ + tft_HHMM_w_ + 2 * kDisplayTextGap;
+        tft_AmPm_y0_ = kTimeRowY0 + gap_up_y_ / 2;
 
         // home the cursor
-        tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
+        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
         // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
 
         // change the text color to the background color
-        tft.setTextColor(Display_Backround_Color);
+        tft.setTextColor(kDisplayBackroundColor);
 
         // get bounds of new AM/PM string on tft display (with background color as this causes a blink)
         int16_t tft_AmPm_x1, tft_AmPm_y1;
         uint16_t tft_AmPm_w, tft_AmPm_h;
-        tft.getTextBounds((newDisplayData._pmNotAm ? pmLabel : amLabel), tft.getCursorX(), tft.getCursorY(), &tft_AmPm_x1, &tft_AmPm_y1, &tft_AmPm_w, &tft_AmPm_h);
+        tft.getTextBounds((new_display_data_.pm_not_am ? kPmLabel : kAmLabel), tft.getCursorX(), tft.getCursorY(), &tft_AmPm_x1, &tft_AmPm_y1, &tft_AmPm_w, &tft_AmPm_h);
         // Serial.print("AmPm_x1 "); Serial.print(tft_AmPm_x1); Serial.print(" y1 "); Serial.print(tft_AmPm_y1); Serial.print(" w "); Serial.print(tft_AmPm_w); Serial.print(" h "); Serial.println(tft_AmPm_h); 
 
         // calculate tft_AmPm_y0 to align top with HH:MM
-        tft_AmPm_y0 -= tft_AmPm_y1 - TIME_ROW_Y0 - gap_up_y;
+        tft_AmPm_y0_ -= tft_AmPm_y1 - kTimeRowY0 - gap_up_y_;
         // Serial.print("tft_AmPm_y0 "); Serial.println(tft_AmPm_y0);
 
         // home the cursor
-        tft.setCursor(tft_AmPm_x0, tft_AmPm_y0);
+        tft.setCursor(tft_AmPm_x0_, tft_AmPm_y0_);
 
         // change the text color to foreground color
-        tft.setTextColor(Display_Time_Color);
+        tft.setTextColor(kDisplayTimeColor);
 
         // draw the new time value
-        if(newDisplayData._pmNotAm)
-          tft.print(pmLabel);
+        if(new_display_data_.pm_not_am)
+          tft.print(kPmLabel);
         else
-          tft.print(amLabel);
+          tft.print(kAmLabel);
       }
 
       // and remember the new value
-      displayedData._12hourMode = newDisplayData._12hourMode;
-      displayedData._pmNotAm = newDisplayData._pmNotAm;
+      displayed_data_._12_hour_mode = new_display_data_._12_hour_mode;
+      displayed_data_.pm_not_am = new_display_data_.pm_not_am;
     }
 
     // :SS string
-    if (rtc->second() == 0 || strcmp(newDisplayData.timeSS, displayedData.timeSS) != 0 || redrawDisplay) {
+    if (rtc->second() == 0 || strcmp(new_display_data_.time_SS, displayed_data_.time_SS) != 0 || redraw_display_) {
       // set font
       tft.setFont(&FreeSans24pt7b);
 
       // clear old seconds
       if(rtc->second() != 0 && !isThisTheFirstTime) {
         // change the text color to the background color
-        tft.setTextColor(Display_Backround_Color);
+        tft.setTextColor(kDisplayBackroundColor);
 
         // home the cursor
-        tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
+        tft.setCursor(tft_SS_x0_, kTimeRowY0);
 
         // change the text color to the background color
-        tft.setTextColor(Display_Backround_Color);
+        tft.setTextColor(kDisplayBackroundColor);
 
         // redraw the old value to erase
-        tft.print(displayedData.timeSS);
+        tft.print(displayed_data_.time_SS);
       }
 
       // fill new home values
-      tft_SS_x0 = TIME_ROW_X0 + hh_gap_x + gap_right_x + tft_HHMM_w + DISPLAY_TEXT_GAP;
+      tft_SS_x0_ = kTimeRowX0 + hh_gap_x + gap_right_x_ + tft_HHMM_w_ + kDisplayTextGap;
 
       // home the cursor
-      tft.setCursor(tft_SS_x0, TIME_ROW_Y0);
+      tft.setCursor(tft_SS_x0_, kTimeRowY0);
 
       // change the text color to foreground color
-      tft.setTextColor(Display_Time_Color);
+      tft.setTextColor(kDisplayTimeColor);
 
       // draw the new time value
-      tft.print(newDisplayData.timeSS);
+      tft.print(new_display_data_.time_SS);
 
       // and remember the new value
-      strcpy(displayedData.timeSS, newDisplayData.timeSS);
+      strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
     }
   }
 
   // date string center aligned
-  if (strcmp(newDisplayData.dateStr, displayedData.dateStr) != 0 || redrawDisplay) {
+  if (strcmp(new_display_data_.date_str, displayed_data_.date_str) != 0 || redraw_display_) {
     // set font
     tft.setFont(&Satisfy_Regular24pt7b);
 
     // change the text color to the background color
-    tft.setTextColor(Display_Backround_Color);
+    tft.setTextColor(kDisplayBackroundColor);
 
     // clear old data
     if(!isThisTheFirstTime) {
       // yes! home the cursor
-      tft.setCursor(date_row_x0, DATE_ROW_Y0);
+      tft.setCursor(date_row_x0_, kDateRow_Y0);
 
       // redraw the old value to erase
-      tft.print(displayedData.dateStr);
+      tft.print(displayed_data_.date_str);
     }
 
     // home the cursor
-    tft.setCursor(date_row_x0, DATE_ROW_Y0);
+    tft.setCursor(date_row_x0_, kDateRow_Y0);
 
     // record date_row_w to calculate center aligned date_row_x0 value
     int16_t date_row_y1;
     uint16_t date_row_w, date_row_h;
     // get bounds of new dateStr on tft display (with background color as this causes a blink)
-    tft.getTextBounds(newDisplayData.dateStr, tft.getCursorX(), tft.getCursorY(), &date_row_x0, &date_row_y1, &date_row_w, &date_row_h);
-    date_row_x0 = (SETTINGS_GEAR_X - date_row_w) / 2;
+    tft.getTextBounds(new_display_data_.date_str, tft.getCursorX(), tft.getCursorY(), &date_row_x0_, &date_row_y1, &date_row_w, &date_row_h);
+    date_row_x0_ = (kSettingsGearX1 - date_row_w) / 2;
 
     // home the cursor
-    tft.setCursor(date_row_x0, DATE_ROW_Y0);
+    tft.setCursor(date_row_x0_, kDateRow_Y0);
 
     // change the text color to foreground color
-    tft.setTextColor(Display_Date_Color);
+    tft.setTextColor(kDisplayDateColor);
 
     // draw the new dateStr value
-    tft.print(newDisplayData.dateStr);
+    tft.print(new_display_data_.date_str);
 
     // draw settings gear
-    tft.drawBitmap(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, settings_gear_bitmap, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RGB565_Sandy_brown); // Copy to screen
+    tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
 
     // and remember the new value
-    strcpy(displayedData.dateStr, newDisplayData.dateStr);
+    strcpy(displayed_data_.date_str, new_display_data_.date_str);
   }
 
   // alarm string center aligned
-  if (strcmp(newDisplayData.alarmStr, displayedData.alarmStr) != 0 || newDisplayData._alarmOn != displayedData._alarmOn || redrawDisplay) {
+  if (strcmp(new_display_data_.alarm_str, displayed_data_.alarm_str) != 0 || new_display_data_.alarm_ON != displayed_data_.alarm_ON || redraw_display_) {
     // set font
     tft.setFont(&Satisfy_Regular24pt7b);
 
     int16_t alarm_icon_w, alarm_icon_h;
 
     // change the text color to the background color
-    tft.setTextColor(Display_Backround_Color);
+    tft.setTextColor(kDisplayBackroundColor);
 
     // clear old data
     if(!isThisTheFirstTime) {
       // yes! home the cursor
-      tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
+      tft.setCursor(alarm_row_x0_, kAlarmRowY0);
 
       // redraw the old value to erase
-      tft.print(displayedData.alarmStr);
+      tft.print(displayed_data_.alarm_str);
 
-      if(displayedData._alarmOn) {
-        alarm_icon_w = BELL_W;
-        alarm_icon_h = BELL_H;
+      if(displayed_data_.alarm_ON) {
+        alarm_icon_w = kBellWidth;
+        alarm_icon_h = kBellHeight;
       }
       else {
-        alarm_icon_w = BELL_FALLEN_W;
-        alarm_icon_h = BELL_FALLEN_H;
+        alarm_icon_w = kBellFallenWidth;
+        alarm_icon_h = kBellFallenHeight;
       }
 
       // erase bell
-      tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (displayedData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Backround_Color);
+      tft.drawBitmap(alarm_icon_x0_, alarm_icon_y0_, (displayed_data_.alarm_ON ? kBellBitmap : kBellFallenBitmap), alarm_icon_w, alarm_icon_h, kDisplayBackroundColor);
     }
 
     //  Redraw new alarm data
 
-    if(newDisplayData._alarmOn) {
-      alarm_icon_w = BELL_W;
-      alarm_icon_h = BELL_H;
+    if(new_display_data_.alarm_ON) {
+      alarm_icon_w = kBellWidth;
+      alarm_icon_h = kBellHeight;
     }
     else {
-      alarm_icon_w = BELL_FALLEN_W;
-      alarm_icon_h = BELL_FALLEN_H;
+      alarm_icon_w = kBellFallenWidth;
+      alarm_icon_h = kBellFallenHeight;
     }
 
     // home the cursor
-    tft.setCursor(alarm_icon_x0, ALARM_ROW_Y0);
+    tft.setCursor(alarm_icon_x0_, kAlarmRowY0);
 
     // record alarm_row_w to calculate center aligned alarm_row_x0 value
     int16_t alarm_row_y1;
     uint16_t alarm_row_w, alarm_row_h;
     // get bounds of new alarmStr on tft display (with background color as this causes a blink)
-    tft.getTextBounds(newDisplayData.alarmStr, tft.getCursorX(), tft.getCursorY(), &alarm_row_x0, &alarm_row_y1, &alarm_row_w, &alarm_row_h);
+    tft.getTextBounds(new_display_data_.alarm_str, tft.getCursorX(), tft.getCursorY(), &alarm_row_x0_, &alarm_row_y1, &alarm_row_w, &alarm_row_h);
     uint16_t graphic_width = alarm_icon_w + alarm_row_w;
     // three equal length gaps on left center and right of graphic
-    uint16_t equal_gaps = (TFT_WIDTH - graphic_width) / 3;
-    alarm_row_x0 = equal_gaps + alarm_icon_w + equal_gaps;
-    alarm_icon_x0 = equal_gaps;
+    uint16_t equal_gaps = (kTftWidth - graphic_width) / 3;
+    alarm_row_x0_ = equal_gaps + alarm_icon_w + equal_gaps;
+    alarm_icon_x0_ = equal_gaps;
     // align bell at bottom of screen
-    alarm_icon_y0 = TFT_HEIGHT - alarm_icon_h;
+    alarm_icon_y0_ = kTftHeight - alarm_icon_h;
 
     // home the cursor
-    tft.setCursor(alarm_row_x0, ALARM_ROW_Y0);
+    tft.setCursor(alarm_row_x0_, kAlarmRowY0);
 
     // change the text color to foreground color
-    tft.setTextColor(Display_Alarm_Color);
+    tft.setTextColor(kDisplayAlarmColor);
 
     // draw the new alarmStr value
-    tft.print(newDisplayData.alarmStr);
+    tft.print(new_display_data_.alarm_str);
 
     // draw bell
-    tft.drawBitmap(alarm_icon_x0, alarm_icon_y0, (newDisplayData._alarmOn ? bell_bitmap : bell_fallen_bitmap), alarm_icon_w, alarm_icon_h, Display_Alarm_Color);
+    tft.drawBitmap(alarm_icon_x0_, alarm_icon_y0_, (new_display_data_.alarm_ON ? kBellBitmap : kBellFallenBitmap), alarm_icon_w, alarm_icon_h, kDisplayAlarmColor);
 
     // and remember the new value
-    strcpy(displayedData.alarmStr, newDisplayData.alarmStr);
-    displayedData._alarmOn = newDisplayData._alarmOn;
+    strcpy(displayed_data_.alarm_str, new_display_data_.alarm_str);
+    displayed_data_.alarm_ON = new_display_data_.alarm_ON;
   }
 
-  redrawDisplay = false;
+  redraw_display_ = false;
 }
 
-int RGBDisplay::classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y) {
-  int returnVal = -1;
+ScreenPage RGBDisplay::ClassifyMainPageTouchInput() {
+  int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
+  ScreenPage returnVal = kNoPageSelected;
 
   // main page touch input
-  if(alarmClock->currentPage == alarmClock->mainPage) {
+  if(current_page == kMainPage) {
     // if settings gear is touched
-    if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= SETTINGS_GEAR_Y && ts_y <= SETTINGS_GEAR_Y + SETTINGS_GEAR_H) {
-      tft.drawRoundRect(SETTINGS_GEAR_X, SETTINGS_GEAR_Y, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
+    if(ts_x >= kSettingsGearX1 && ts_x <= kSettingsGearX1 + kSettingsGearWidth && ts_y >= kSettingsGearY1 && ts_y <= kSettingsGearY1 + kSettingsGearHeight) {
+      tft.drawRoundRect(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, kRadiusButtonRoundRect, kDisplayColorCyan);
       delay(100);
-      return alarmClock->settingsPage;
+      return kSettingsPage;
     }
 
     // alarm area
-    if(ts_y >= ALARM_ROW_Y1) {
-      tft.drawRoundRect(0, ALARM_ROW_Y1, TFT_WIDTH, TFT_HEIGHT - ALARM_ROW_Y1, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
+    if(ts_y >= kAlarmRowY1) {
+      tft.drawRoundRect(0, kAlarmRowY1, kTftWidth, kTftHeight - kAlarmRowY1, kRadiusButtonRoundRect, kDisplayColorCyan);
       delay(100);
-      return alarmClock->alarmSetPage;
+      return kAlarmSetPage;
     }
   }
-  else if(alarmClock->currentPage == alarmClock->settingsPage) {
+  else if(current_page == kSettingsPage) {
 
     // edit wifi details button
-    if(ts_x >= SETTINGS_GEAR_X && ts_x <= SETTINGS_GEAR_X + SETTINGS_GEAR_W && ts_y >= 10 && ts_y <= 10 + SETTINGS_GEAR_H) {
-      tft.drawRoundRect(SETTINGS_GEAR_X, 10, SETTINGS_GEAR_W, SETTINGS_GEAR_H, RADIUS_BUTTON_ROUND_RECT, Display_Color_Cyan);
+    if(ts_x >= kSettingsGearX1 && ts_x <= kSettingsGearX1 + kSettingsGearWidth && ts_y >= 10 && ts_y <= 10 + kSettingsGearHeight) {
+      tft.drawRoundRect(kSettingsGearX1, 10, kSettingsGearWidth, kSettingsGearHeight, kRadiusButtonRoundRect, kDisplayColorCyan);
       delay(100);
-      return alarmClock->settingsPage;
+      return kSettingsPage;
     }
 
     // cancel button
-    if(ts_x >= SETTINGS_GEAR_X && ts_y >= SETTINGS_PAGE_BACK_BUTTON_Y1) {
+    if(ts_x >= kSettingsGearX1 && ts_y >= kSettingsPageBackButtonY1) {
       // show a little graphic of Cancel button Press
       char cancelStr[] = "X";
-      drawButton(SETTINGS_GEAR_X, SETTINGS_PAGE_BACK_BUTTON_Y1, SETTINGS_GEAR_W, SETTINGS_GEAR_H, cancelStr, Display_Color_Cyan, Display_Color_Red, Display_Color_Black, true);
+      DrawButton(kSettingsGearX1, kSettingsPageBackButtonY1, kSettingsGearWidth, kSettingsGearHeight, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
-      return alarmClock->mainPage;
+      return kMainPage;
     }
   }
 
   return returnVal;
 }
 
-void RGBDisplay::goodMorningScreen() {
-  tft.fillScreen(Display_Color_Black);
+void RGBDisplay::GoodMorningScreen() {
+  tft.fillScreen(kDisplayColorBlack);
   // set font
   tft.setFont(&FreeSansBold24pt7b);
 
   // change the text color to the background color
-  tft.setTextColor(Display_Color_Green);
+  tft.setTextColor(kDisplayColorGreen);
 
   // yes! home the cursor
   tft.setCursor(80, 40);
@@ -1052,18 +1056,18 @@ void RGBDisplay::goodMorningScreen() {
   
   unsigned int startTime = millis();
   while(millis() - startTime < 5000)
-    drawSun(x0, y0, edge);
+    DrawSun(x0, y0, edge);
 
-  tft.fillScreen(Display_Color_Black);
-  alarmClock->refreshRtcTime = true;
-  redrawDisplay = true;
+  tft.fillScreen(kDisplayColorBlack);
+  alarm_clock->refresh_rtc_time_ = true;
+  redraw_display_ = true;
 }
 
 /* draw Sun
  * 
  * params: top left corner 'x0' and 'y0', square edge length of graphic 'edge'
  */ 
-void RGBDisplay::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
+void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge) {
 
   // set dimensions of sun and rays
 
@@ -1081,8 +1085,8 @@ void RGBDisplay::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
   uint8_t rn = 12;
 
   // color
-  uint16_t color = Display_Color_Yellow;
-  uint16_t background = Display_Color_Black;
+  uint16_t color = kDisplayColorYellow;
+  uint16_t background = kDisplayColorBlack;
 
   int16_t variation_prev = 0;
 
@@ -1116,19 +1120,19 @@ void RGBDisplay::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
     // Serial.println(variation);
     int16_t r_variable = rr + variation;
     // draw rays
-    drawRays(cx, cy, r_variable, rl, rw, rn, i, color);
+    DrawRays(cx, cy, r_variable, rl, rw, rn, i, color);
     // increase sun size
     // tft.drawCircle(cx, cy, sr + variation, color);
-    drawDenseCircle(cx, cy, sr + variation, color);
+    DrawDenseCircle(cx, cy, sr + variation, color);
     // show for sometime
     delay(30);
 
     // undraw rays
-    drawRays(cx, cy, r_variable, rl, rw, rn, i, background);
+    DrawRays(cx, cy, r_variable, rl, rw, rn, i, background);
     // reduce sun size
     if(variation < variation_prev){
       // tft.drawCircle(cx, cy, sr + variation_prev, background);
-      drawDenseCircle(cx, cy, sr + variation_prev + 1, background);
+      DrawDenseCircle(cx, cy, sr + variation_prev + 1, background);
     }
     // delay(1000);
     variation_prev = variation;
@@ -1139,7 +1143,7 @@ void RGBDisplay::drawSun(int16_t x0, int16_t y0, uint16_t edge) {
  * 
  * params: center cx, cy; inner radius of rays rr, length of rays rl, width of rays rw, number of rays rn, start angle degStart, color
  */ 
-void RGBDisplay::drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color) {
+void RGBDisplay::DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color) {
   // rays
   for(uint8_t i = 0; i < rn; i++) {
     // find coordinates of two triangles for each ray and use fillTriangle function to draw rays
@@ -1162,7 +1166,7 @@ void RGBDisplay::drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, in
 /* drawDenseCircle
  * densely pack a circle's circumference
  */
-void RGBDisplay::drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color) {
+void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color) {
   // calculate angular resolution required
   // r*dTheta = 0.5
   double dTheta = 0.5 / static_cast<double>(r);

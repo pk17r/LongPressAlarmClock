@@ -7,37 +7,36 @@
 class WiFiStuff {
 
 public:
-  WiFiStuff() { retrieveWiFiDetails(); turn_WiFi_Off(); }
-  void retrieveWiFiDetails();
-  void saveWiFiDetails();
-  void turn_WiFi_On();
-  void turn_WiFi_Off();
-  void getTodaysWeatherInfo();
+  WiFiStuff() { RetrieveWiFiDetails(); TurnWiFiOff(); }
+  void RetrieveWiFiDetails();
+  void SaveWiFiDetails();
+  void TurnWiFiOn();
+  void TurnWiFiOff();
+  void GetTodaysWeatherInfo();
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
-    char* wifi_ssid = MY_WIFI_SSID;
+    char* wifi_ssid_ = MY_WIFI_SSID;
   #else
-    char* wifi_ssid = NULL;
+    char* wifi_ssid_ = NULL;
   #endif
   #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
-    char* wifi_password = MY_WIFI_PASSWD;
+    char* wifi_password_ = MY_WIFI_PASSWD;
   #else
-    char* wifi_password = NULL;
+    char* wifi_password_ = NULL;
   #endif
 
   // weather information
-  char* weather_main = NULL;
-  char* weather_description = NULL;
-  char* weather_temp = NULL;
-  char* weather_temp_max = NULL;
-  char* weather_temp_min = NULL;
-  char* weather_wind_speed = NULL;
-  char* weather_humidity = NULL;
+  char* weather_main_ = NULL;
+  char* weather_description_ = NULL;
+  char* weather_temp_ = NULL;
+  char* weather_temp_max_ = NULL;
+  char* weather_temp_min_ = NULL;
+  char* weather_wind_speed_ = NULL;
+  char* weather_humidity_ = NULL;
 
-  bool gotWeatherInfo = false;
+  bool got_weather_info_ = false;   // whether weather information has been pulled
 
-  bool tempInCnotF = false;
-
+  bool temp_in_C_not_F_ = false;
 
 // PRIVATE VARIABLES
 private:

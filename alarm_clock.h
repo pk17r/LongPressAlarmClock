@@ -13,28 +13,18 @@ class AlarmClock {
 
 public:
 
-  // current page on display
-  enum ScreenPage {
-    mainPage,
-    screensaverPage,
-    alarmSetPage,
-    alarmTriggeredPage,
-    timeSetPage,
-    settingsPage,
-     } currentPage;
-
 // FUNCTIONS
 
   // function declerations
-  void setup();
-  void updateTimePriorityLoop();
-  void nonPriorityTasksLoop();
-  void retrieveAlarmSettings();
-  void saveAlarm();
-  bool timeToStartAlarm();
-  void buzzAlarmFn();
-  void processSerialInput();
-  void setPage(ScreenPage page);
+  void Setup();
+  void UpdateTimePriorityLoop();
+  void NonPriorityTasksLoop();
+  void RetrieveAlarmSettings();
+  void SaveAlarm();
+  bool TimeToStartAlarm();
+  void BuzzAlarmFn();
+  void ProcessSerialInput();
+  void SetPage(ScreenPage page);
   // #if defined(MCU_IS_ESP32)
   // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
   // void putEsp32ToLightSleep();
@@ -47,64 +37,60 @@ public:
   //    1 = resume the other core from core0
   //    2 = core is running some operation
   //    3 = core is done processing and can be idled
-  volatile byte secondCoreControlFlag = 0;
+  volatile byte second_core_control_flag_ = 0;
 
   // flag to refresh RTC time from RTC HW
-  bool refreshRtcTime = false;
+  bool refresh_rtc_time_ = false;
 
   // counter to note user inactivity seconds
-  uint8_t inactivitySeconds = 0;
-  const uint8_t INACTIVITY_SECONDS_LIM = 120;
-
-  // location of Alarm 
-  const int16_t alarmScreenAreaMainPageY = 160;
-
-  // flag to set alarm On or Off
-  bool alarmOn = true;
+  uint8_t inactivity_seconds_ = 0;
+  const uint8_t kInactivitySecondsLimit = 120;
 
   // alarm time
-  uint8_t alarmHr = 7;
-  uint8_t alarmMin = 0;
-  bool alarmIsAm = true;
+  uint8_t alarm_hr_ = 7;
+  uint8_t alarm_min_ = 0;
+  bool alarm_is_AM_ = true;
+  bool alarm_ON_ = true;    // flag to set alarm On or Off
 
   // Alarm constants
-  const uint8_t ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS = 25;
-  const unsigned long ALARM_MAX_ON_TIME_MS = 120*1000;
+  const uint8_t kAlarmEndButtonPressAndHoldSeconds = 25;
+  const unsigned long kAlarmMaxON_TimeMs = 120*1000;
 
   // Set Screen variables
-  uint8_t var1 = alarmHr;
-  uint8_t var2 = alarmMin;
-  bool var3AmPm = alarmIsAm;
-  bool var4OnOff = alarmOn;
+  uint8_t var_1_ = alarm_hr_;
+  uint8_t var_2_ = alarm_min_;
+  bool var_3_AM_PM_ = alarm_is_AM_;
+  bool var_4_ON_OFF_ = alarm_ON_;
 
 
 // PRIVATE FUNCTIONS AND VARIABLES / CONSTANTS
+
 private:
 
   // buzzer functions
-  void setupBuzzerTimer();
+  void SetupBuzzerTimer();
   #if defined(MCU_IS_ESP32)
-    void IRAM_ATTR passiveBuzzerTimerISR();
+    void IRAM_ATTR PassiveBuzzerTimerISR();
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    static bool passiveBuzzerTimerISR(struct repeating_timer *t);
+    static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
   #endif
-  void buzzer_enable();
-  void buzzer_disable();
-  void deallocateBuzzerTimer();
+  void BuzzerEnable();
+  void BuzzerDisable();
+  void DeallocateBuzzerTimer();
 
   // Hardware Timer
   #if defined(MCU_IS_ESP32)
-    hw_timer_t *passiveBuzzerTimerPtr = NULL;
+    hw_timer_t *passive_buzzer_timer_ptr_ = NULL;
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    struct repeating_timer *passiveBuzzerTimerPtr = NULL;
+    struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
   #endif
 
-  const int BUZZER_FREQUENCY = 2048;
-  static inline const unsigned long BEEP_LENGTH_MS = 800;
+  const int kBuzzerFrequency = 2048;
+  static inline const unsigned long kBeepLengthMs = 800;
 
-  static inline bool _buzzerSquareWaveToggle = false;
-  static inline bool _beepToggle = false;
-  static inline unsigned long _beepStartTimeMs = 0;
+  static inline bool buzzer_square_wave_toggle_ = false;
+  static inline bool beep_toggle_ = false;
+  static inline unsigned long beep_start_time_ms_ = 0;
 
 };
 

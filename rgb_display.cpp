@@ -4,37 +4,37 @@
 
 // constructor
 RGBDisplay::RGBDisplay() {
-  newDisplayData.timeHHMM = new char[HHMM_ARR_SIZE];
-  newDisplayData.timeSS = new char[SS_ARR_SIZE];
-  newDisplayData.dateStr = new char[DATE_ARR_SIZE];
-  newDisplayData.alarmStr = new char[ALARM_ARR_SIZE];
-  displayedData.timeHHMM = new char[HHMM_ARR_SIZE];
-  displayedData.timeSS = new char[SS_ARR_SIZE];
-  displayedData.dateStr = new char[DATE_ARR_SIZE];
-  displayedData.alarmStr = new char[ALARM_ARR_SIZE];
-  newDisplayData.timeHHMM[0] = '\0';
-  newDisplayData.timeSS[0] = '\0';
-  newDisplayData.dateStr[0] = '\0';
-  newDisplayData.alarmStr[0] = '\0';
-  displayedData.timeHHMM[0] = '\0';
-  displayedData.timeSS[0] = '\0';
-  displayedData.dateStr[0] = '\0';
-  displayedData.alarmStr[0] = '\0';
+  new_display_data_.time_HHMM = new char[kHHMM_ArraySize];
+  new_display_data_.time_SS = new char[kSS_ArraySize];
+  new_display_data_.date_str = new char[kDateArraySize];
+  new_display_data_.alarm_str = new char[kAlarmArraySize];
+  displayed_data_.time_HHMM = new char[kHHMM_ArraySize];
+  displayed_data_.time_SS = new char[kSS_ArraySize];
+  displayed_data_.date_str = new char[kDateArraySize];
+  displayed_data_.alarm_str = new char[kAlarmArraySize];
+  new_display_data_.time_HHMM[0] = '\0';
+  new_display_data_.time_SS[0] = '\0';
+  new_display_data_.date_str[0] = '\0';
+  new_display_data_.alarm_str[0] = '\0';
+  displayed_data_.time_HHMM[0] = '\0';
+  displayed_data_.time_SS[0] = '\0';
+  displayed_data_.date_str[0] = '\0';
+  displayed_data_.alarm_str[0] = '\0';
 };
 
 // destructor
 RGBDisplay::~RGBDisplay() {
-  delete newDisplayData.timeHHMM;
-  delete newDisplayData.timeSS;
-  delete newDisplayData.dateStr;
-  delete newDisplayData.alarmStr;
-  delete displayedData.timeHHMM;
-  delete displayedData.timeSS;
-  delete displayedData.dateStr;
-  delete displayedData.alarmStr;
+  delete new_display_data_.time_HHMM;
+  delete new_display_data_.time_SS;
+  delete new_display_data_.date_str;
+  delete new_display_data_.alarm_str;
+  delete displayed_data_.time_HHMM;
+  delete displayed_data_.time_SS;
+  delete displayed_data_.date_str;
+  delete displayed_data_.alarm_str;
 }
 
-void RGBDisplay::setup() {
+void RGBDisplay::Setup() {
 
   /* INITIALIZE DISPLAYS */
 
@@ -46,7 +46,7 @@ void RGBDisplay::setup() {
   // OR use this initializer (uncomment) if using a 2.0" 320x240 TFT:
   // tft.init(TFT_HEIGHT, TFT_WIDTH);           // Init ST7789 320x240
   uint32_t SPI_Speed = 80000000;
-  tft.init(TFT_HEIGHT, TFT_WIDTH);           // Init ST7789 320x240
+  tft.init(kTftHeight, kTftWidth);           // Init ST7789 320x240
   tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
   // make display landscape orientation
@@ -87,124 +87,124 @@ void RGBDisplay::setup() {
   // tft.setSPISpeed(80000000);
 
   // clear screen
-  tft.fillScreen(Display_Color_Black);
+  tft.fillScreen(kDisplayColorBlack);
   tft.setTextWrap(false);
 
   unsigned long seed = (((((rtc->year()) * 12 + rtc->month()) * 30 + rtc->day()) * 24 + rtc->hour()) * 60 + rtc->minute()) * 60 + rtc->second();
   randomSeed(seed);
 
   // prepare date and time arrays and serial print RTC Date Time
-  display->prepareTimeDayDateArrays();
+  display->PrepareTimeDayDateArrays();
 
   // serial print RTC Date Time
-  display->serialPrintRtcDateTime();
+  display->SerialPrintRtcDateTime();
 
   // update TFT display
-  display->displayTimeUpdate();
+  display->DisplayTimeUpdate();
 
   // set display brightness based on time of day
-  display->checkTimeAndSetBrightness();
+  display->CheckTimeAndSetBrightness();
 
   Serial.println(F("Display Initialized"));
 }
 
 // set display brightness function
-void RGBDisplay::setBrightness(int brightness) {
+void RGBDisplay::SetBrightness(int brightness) {
   analogWrite(TFT_BL, brightness);
-  Serial.print(F("Display Brightness set to ")); Serial.print(brightness); Serial.print(charSpace);
-  current_brightness = brightness;
-  showColoredEdgeScreensaver = (brightness >= EVENING_BRIGHTNESS);
+  Serial.print(F("Display Brightness set to ")); Serial.print(brightness); Serial.print(kCharSpace);
+  current_brightness_ = brightness;
+  show_colored_edge_screensaver_ = (brightness >= kEveningBrightness);
 }
 
-void RGBDisplay::setMaxBrightness() {
-  if(current_brightness != MAX_BRIGHTNESS)
-    setBrightness(MAX_BRIGHTNESS);
+void RGBDisplay::SetMaxBrightness() {
+  if(current_brightness_ != kMaxBrightness)
+    SetBrightness(kMaxBrightness);
 }
 
-void RGBDisplay::checkTimeAndSetBrightness() {
+void RGBDisplay::CheckTimeAndSetBrightness() {
   if (rtc->hourModeAndAmPm() == 1) {  // 12hr AM
     if (rtc->hour() < 6 || rtc->hour() == 12)
-      setBrightness(NIGHT_BRIGHTNESS);
+      SetBrightness(kNightBrightness);
     else
-      setBrightness(DAY_BRIGHTNESS);
+      SetBrightness(kDayBrightness);
   } else if (rtc->hourModeAndAmPm() == 2) {  // 12hr PM
     if (rtc->hour() > 10 && rtc->hour() != 12)
-      setBrightness(NIGHT_BRIGHTNESS);
+      SetBrightness(kNightBrightness);
     else if(rtc->hour() >= 6)
-      setBrightness(EVENING_BRIGHTNESS);
+      SetBrightness(kEveningBrightness);
     else
-      setBrightness(DAY_BRIGHTNESS);
+      SetBrightness(kDayBrightness);
   } else if (rtc->hourModeAndAmPm() == 0) {  // 24hr
     if (rtc->hour() > 21 || rtc->hour() < 7)
-      setBrightness(NIGHT_BRIGHTNESS);
+      SetBrightness(kNightBrightness);
     else if(rtc->hour() > 18)
-      setBrightness(EVENING_BRIGHTNESS);
+      SetBrightness(kEveningBrightness);
     else
-      setBrightness(DAY_BRIGHTNESS);
+      SetBrightness(kDayBrightness);
   }
 }
 
-void RGBDisplay::updateSecondsOnTimeStrArr(uint8_t second) {
-  snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", second);
+void RGBDisplay::UpdateSecondsOnTimeStrArr(uint8_t second) {
+  snprintf(new_display_data_.time_SS, kSS_ArraySize, ":%02d", second);
 }
 
-void RGBDisplay::screensaverControl(bool turnOn) {
-  if(!turnOn && myCanvas != NULL) {
+void RGBDisplay::ScreensaverControl(bool turnOn) {
+  if(!turnOn && my_canvas_ != NULL) {
     // delete screensaverCanvas;
-    delete myCanvas;
-    myCanvas = NULL;
+    delete my_canvas_;
+    my_canvas_ = NULL;
   }
   else
-    refreshScreensaverCanvas = true;
+    refresh_screensaver_canvas_ = true;
   // clear screen
-  tft.fillScreen(Display_Color_Black);
-  screensaver_x1 = 0;
-  screensaver_y1 = 20;
-  redrawDisplay = true;
-  prepareTimeDayDateArrays();
+  tft.fillScreen(kDisplayColorBlack);
+  screensaver_x1_ = 0;
+  screensaver_y1_ = 20;
+  redraw_display_ = true;
+  PrepareTimeDayDateArrays();
 }
 
-void RGBDisplay::prepareTimeDayDateArrays() {
+void RGBDisplay::PrepareTimeDayDateArrays() {
   // HH:MM
-  snprintf(newDisplayData.timeHHMM, HHMM_ARR_SIZE, "%d:%02d", rtc->hour(), rtc->minute());
+  snprintf(new_display_data_.time_HHMM, kHHMM_ArraySize, "%d:%02d", rtc->hour(), rtc->minute());
   // :SS
-  snprintf(newDisplayData.timeSS, SS_ARR_SIZE, ":%02d", rtc->second());
+  snprintf(new_display_data_.time_SS, kSS_ArraySize, ":%02d", rtc->second());
   if(rtc->hourModeAndAmPm() == 0)
-    newDisplayData._12hourMode = false;
+    new_display_data_._12_hour_mode = false;
   else if(rtc->hourModeAndAmPm() == 1) {
-    newDisplayData._12hourMode = true;
-    newDisplayData._pmNotAm = false;
+    new_display_data_._12_hour_mode = true;
+    new_display_data_.pm_not_am = false;
   }
   else {
-    newDisplayData._12hourMode = true;
-    newDisplayData._pmNotAm = true;
+    new_display_data_._12_hour_mode = true;
+    new_display_data_.pm_not_am = true;
   }
   // Mon dd Day
-  snprintf(newDisplayData.dateStr, DATE_ARR_SIZE, "%s  %d  %s", days_table[rtc->dayOfWeek() - 1], rtc->day(), months_table[rtc->month() - 1]);
-  if(alarmClock->alarmOn)
-    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%d:%02d %s", alarmClock->alarmHr, alarmClock->alarmMin, (alarmClock->alarmIsAm ? amLabel : pmLabel));
+  snprintf(new_display_data_.date_str, kDateArraySize, "%s  %d  %s", days_table_[rtc->dayOfWeek() - 1], rtc->day(), months_table[rtc->month() - 1]);
+  if(alarm_clock->alarm_ON_)
+    snprintf(new_display_data_.alarm_str, kAlarmArraySize, "%d:%02d %s", alarm_clock->alarm_hr_, alarm_clock->alarm_min_, (alarm_clock->alarm_is_AM_ ? kAmLabel : kPmLabel));
   else
-    snprintf(newDisplayData.alarmStr, ALARM_ARR_SIZE, "%s %s", alarmLabel, offLabel);
-  newDisplayData._alarmOn = alarmClock->alarmOn;
+    snprintf(new_display_data_.alarm_str, kAlarmArraySize, "%s %s", kAlarmLabel, kOffLabel);
+  new_display_data_.alarm_ON = alarm_clock->alarm_ON_;
 }
 
-void RGBDisplay::serialPrintRtcDateTime() {
+void RGBDisplay::SerialPrintRtcDateTime() {
   // full serial print time date day array
-  Serial.print(newDisplayData.timeHHMM);
+  Serial.print(new_display_data_.time_HHMM);
   // snprintf(timeArraySec, SS_ARR_SIZE, ":%02d", second);
-  Serial.print(newDisplayData.timeSS);
-  if (newDisplayData._12hourMode) {
-    Serial.print(charSpace);
-    if (newDisplayData._pmNotAm)
-      Serial.print(pmLabel);
+  Serial.print(new_display_data_.time_SS);
+  if (new_display_data_._12_hour_mode) {
+    Serial.print(kCharSpace);
+    if (new_display_data_.pm_not_am)
+      Serial.print(kPmLabel);
     else
-      Serial.print(amLabel);
+      Serial.print(kAmLabel);
   }
-  Serial.print(charSpace);
-  Serial.print(newDisplayData.dateStr);
-  Serial.print(charSpace);
+  Serial.print(kCharSpace);
+  Serial.print(new_display_data_.date_str);
+  Serial.print(kCharSpace);
   Serial.print(rtc->year());
-  Serial.print(charSpace);
-  Serial.print(newDisplayData.alarmStr);
+  Serial.print(kCharSpace);
+  Serial.print(new_display_data_.alarm_str);
   Serial.flush();
 }

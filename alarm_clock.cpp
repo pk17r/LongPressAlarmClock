@@ -10,7 +10,7 @@
 #endif
 
 // program setup function
-void AlarmClock::setup() {
+void AlarmClock::Setup() {
   
   // setup alarm clock program
 
@@ -19,146 +19,146 @@ void AlarmClock::setup() {
   digitalWrite(BUZZER_PIN, LOW);
 
   // retrieve alarm settings
-  retrieveAlarmSettings();
+  RetrieveAlarmSettings();
 }
 
 // arduino loop function - High Priority one
-void AlarmClock::updateTimePriorityLoop() {
+void AlarmClock::UpdateTimePriorityLoop() {
 
     // button pressed or touchscreen touched
-  if(pushBtn->checkButtonStatus() != 0 || ts->isTouched()) {
+  if(push_button->checkButtonStatus() != 0 || ts->IsTouched()) {
     // show instant response by turing up brightness
-    display->setMaxBrightness();
+    display->SetMaxBrightness();
 
-    if(currentPage == screensaverPage)
+    if(current_page == kScreensaverPage)
     { // turn off screensaver if on
-      setPage(mainPage);
+      SetPage(kMainPage);
     }
-    else if(currentPage == alarmSetPage)
+    else if(current_page == kAlarmSetPage)
     { // if on alarm page, then take alarm set page user inputs
-      display->setAlarmScreen(false, (ts->getTouchedPixel())->x, (ts->getTouchedPixel())->y);
+      display->SetAlarmScreen(true);
     }
-    else if(currentPage != alarmSetPage && inactivitySeconds >= 1)
+    else if(current_page != kAlarmSetPage && inactivity_seconds_ >= 1)
     { // if on main page and user clicked somewhere, get touch input
-      int userTouchRegion = display->classifyMainPageTouchInput((ts->getTouchedPixel())->x, (ts->getTouchedPixel())->y);
-      if(userTouchRegion != -1)
-        setPage((ScreenPage)userTouchRegion);
+      ScreenPage userTouchRegion = display->ClassifyMainPageTouchInput();
+      if(userTouchRegion != kNoPageSelected)
+        SetPage(userTouchRegion);
     }
-    inactivitySeconds = 0;
+    inactivity_seconds_ = 0;
   }
 
   // if user presses button, show response by turning On LED
-  if(pushBtn->buttonActiveDebounced())
+  if(push_button->buttonActiveDebounced())
     digitalWrite(LED_PIN, HIGH);
   else
     digitalWrite(LED_PIN, LOW);
 
   // process time actions every second
-  if (rtc->rtcHwSecUpdate) {
-    rtc->rtcHwSecUpdate = false;
+  if (rtc->rtc_hw_sec_update_) {
+    rtc->rtc_hw_sec_update_ = false;
     if (rtc->second() >= 60)
-      refreshRtcTime = true;
+      refresh_rtc_time_ = true;
 
     // prepare updated seconds array
-    display->updateSecondsOnTimeStrArr(rtc->second());
+    display->UpdateSecondsOnTimeStrArr(rtc->second());
 
-    serialTimeStampPrefix();
+    SerialTimeStampPrefix();
 
     // get time update
-    if (refreshRtcTime) {
-      rtc->refresh();
-      refreshRtcTime = false;
+    if (refresh_rtc_time_) {
+      rtc->Refresh();
+      refresh_rtc_time_ = false;
 
-      serialTimeStampPrefix();
+      SerialTimeStampPrefix();
 
       // if user has been inactive, then set brightness based on time of day
       // set display brightness based on time
-      if(inactivitySeconds >= INACTIVITY_SECONDS_LIM)
-        display->checkTimeAndSetBrightness();
+      if(inactivity_seconds_ >= kInactivitySecondsLimit)
+        display->CheckTimeAndSetBrightness();
 
       // if screensaver is On, then update time on it
-      if(currentPage == screensaverPage)
-        display->refreshScreensaverCanvas = true;
+      if(current_page == kScreensaverPage)
+        display->refresh_screensaver_canvas_ = true;
 
       // 5 mins before alarm time, try to get weather info
       #if defined(MCU_IS_RASPBERRY_PI_PICO_W) || defined(MCU_IS_ESP32)
 
-        if(!wifiStuff->gotWeatherInfo && secondCoreControlFlag == 0) {
+        if(!wifi_stuff->got_weather_info_ && second_core_control_flag_ == 0) {
 
-          if(alarmMin >= 5)
-            if(rtc->hour() == alarmHr && rtc->minute() == alarmMin - 5)
-              secondCoreControlFlag = 1;
-          else if(alarmHr > 1)
-            if(rtc->hour() == alarmHr - 1 && rtc->minute() == 55)
-              secondCoreControlFlag = 1;
+          if(alarm_min_ >= 5)
+            if(rtc->hour() == alarm_hr_ && rtc->minute() == alarm_min_ - 5)
+              second_core_control_flag_ = 1;
+          else if(alarm_hr_ > 1)
+            if(rtc->hour() == alarm_hr_ - 1 && rtc->minute() == 55)
+              second_core_control_flag_ = 1;
           else
             if(rtc->hour() == 12 && rtc->minute() == 55)
-              secondCoreControlFlag = 1;
+              second_core_control_flag_ = 1;
         }
 
       #endif
 
       // Activate Buzzer at Alarm Time
-      if(timeToStartAlarm() && rtc->second() < 10) {
+      if(TimeToStartAlarm() && rtc->second() < 10) {
         // go to buzz alarm function
-        buzzAlarmFn();
+        BuzzAlarmFn();
         // refresh time
-        rtc->refresh();
+        rtc->Refresh();
         // prepare date and time arrays
-        display->prepareTimeDayDateArrays();
+        display->PrepareTimeDayDateArrays();
         // set main page back
-        setPage(mainPage);
-        inactivitySeconds = 0;
-        wifiStuff->gotWeatherInfo = false;
+        SetPage(kMainPage);
+        inactivity_seconds_ = 0;
+        wifi_stuff->got_weather_info_ = false;
       }
     }
 
     // prepare date and time arrays
-    display->prepareTimeDayDateArrays();
+    display->PrepareTimeDayDateArrays();
 
     // check for inactivity
-    if(inactivitySeconds <= INACTIVITY_SECONDS_LIM) {
-      inactivitySeconds++;
-      if(inactivitySeconds >= INACTIVITY_SECONDS_LIM) {
+    if(inactivity_seconds_ <= kInactivitySecondsLimit) {
+      inactivity_seconds_++;
+      if(inactivity_seconds_ >= kInactivitySecondsLimit) {
         // set display brightness based on time
-        display->checkTimeAndSetBrightness();
+        display->CheckTimeAndSetBrightness();
         // turn screen saver On
-        if(currentPage != screensaverPage)
-          setPage(screensaverPage);
+        if(current_page != kScreensaverPage)
+          SetPage(kScreensaverPage);
       }
     }
 
     // update time on main page
-    if(currentPage == mainPage)
-      display->displayTimeUpdate();
+    if(current_page == kMainPage)
+      display->DisplayTimeUpdate();
 
     // serial print RTC Date Time
-    display->serialPrintRtcDateTime();
+    display->SerialPrintRtcDateTime();
     Serial.println();
 
     // second core control operations
-    switch(secondCoreControlFlag) {
+    switch(second_core_control_flag_) {
       case 1: // resume the other core
         // rp2040.restartCore1();
         // rp2040.resumeOtherCore();
-        secondCoreControlFlag = 2;  // core started
+        second_core_control_flag_ = 2;  // core started
         // Serial.println("Resumed core1");
         break;
       case 3: // core1 is done processing and can be idled
         // rp2040.idleOtherCore();
-        secondCoreControlFlag = 0;  // core idled
+        second_core_control_flag_ = 0;  // core idled
         // Serial.println("Idled core1");
         break;
     }
   }
 
   // make screensaver motion fast
-  if(currentPage == screensaverPage)
-    display->screensaver();
+  if(current_page == kScreensaverPage)
+    display->Screensaver();
 
   // accept user inputs
   if (Serial.available() != 0)
-    processSerialInput();
+    ProcessSerialInput();
 
 // #if defined(MCU_IS_ESP32)
 //     // if button is inactive, then go to sleep
@@ -169,85 +169,85 @@ void AlarmClock::updateTimePriorityLoop() {
 }
 
 // arduino loop function - less priority one
-void AlarmClock::nonPriorityTasksLoop() {
+void AlarmClock::NonPriorityTasksLoop() {
 
   // run the core only to do specific not time important operations
-  if (secondCoreControlFlag == 2) {
+  if (second_core_control_flag_ == 2) {
 
     // get today's weather info
-    wifiStuff->getTodaysWeatherInfo();
+    wifi_stuff->GetTodaysWeatherInfo();
 
     // try once more if did not get info
-    if(!wifiStuff->gotWeatherInfo)
-      wifiStuff->getTodaysWeatherInfo();
+    if(!wifi_stuff->got_weather_info_)
+      wifi_stuff->GetTodaysWeatherInfo();
 
     // done processing the task
     // set the core up to be idled from core0
-    secondCoreControlFlag = 3;
+    second_core_control_flag_ = 3;
   }
 
   // a delay to slow things down and not crash
   delay(1000);
 }
 
-void AlarmClock::setPage(ScreenPage page) {
+void AlarmClock::SetPage(ScreenPage page) {
   switch(page) {
-    case mainPage:
+    case kMainPage:
       // if screensaver is active then clear screensaver canvas to free memory
-      if(currentPage == screensaverPage)
-        display->screensaverControl(false);
-      currentPage = mainPage;         // new page needs to be set before any action
-      display->redrawDisplay = true;
-      display->displayTimeUpdate();
+      if(current_page == kScreensaverPage)
+        display->ScreensaverControl(false);
+      current_page = kMainPage;         // new page needs to be set before any action
+      display->redraw_display_ = true;
+      display->DisplayTimeUpdate();
       break;
-    case screensaverPage:
-      currentPage = screensaverPage;      // new page needs to be set before any action
-      display->screensaverControl(true);
+    case kScreensaverPage:
+      current_page = kScreensaverPage;      // new page needs to be set before any action
+      display->ScreensaverControl(true);
       break;
-    case alarmSetPage:
-      currentPage = alarmSetPage;     // new page needs to be set before any action
+    case kAlarmSetPage:
+      current_page = kAlarmSetPage;     // new page needs to be set before any action
       // set variables for alarm set screen
-      var1 = alarmHr;
-      var2 = alarmMin;
-      var3AmPm = alarmIsAm;
-      var4OnOff = alarmOn;
-      display->setAlarmScreen(true, 0, 0);
+      var_1_ = alarm_hr_;
+      var_2_ = alarm_min_;
+      var_3_AM_PM_ = alarm_is_AM_;
+      var_4_ON_OFF_ = alarm_ON_;
+      display->SetAlarmScreen(false);
       break;
-    case alarmTriggeredPage:
-      currentPage = alarmTriggeredPage;     // new page needs to be set before any action
-      display->alarmTriggeredScreen(true, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
-      display->setMaxBrightness();
+    case kAlarmTriggeredPage:
+      current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
+      display->AlarmTriggeredScreen(true, kAlarmEndButtonPressAndHoldSeconds);
+      display->SetMaxBrightness();
       break;
-    case settingsPage:
-      currentPage = settingsPage;     // new page needs to be set before any action
-      display->settingsPage();
-      display->setMaxBrightness();
+    case kSettingsPage:
+      current_page = kSettingsPage;     // new page needs to be set before any action
+      display->SettingsPage();
+      display->SetMaxBrightness();
       break;
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
 }
 
-void AlarmClock::retrieveAlarmSettings() {
+void AlarmClock::RetrieveAlarmSettings() {
   
-  if(!(eeprom->retrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn)))
-    saveAlarm();
+  if(!(eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_)))
+    SaveAlarm();
 }
 
-void AlarmClock::saveAlarm() {
-  alarmHr = var1;
-  alarmMin = var2;
-  alarmIsAm = var3AmPm;
-  alarmOn = var4OnOff;
+void AlarmClock::SaveAlarm() {
+  alarm_hr_ = var_1_;
+  alarm_min_ = var_2_;
+  alarm_is_AM_ = var_3_AM_PM_;
+  alarm_ON_ = var_4_ON_OFF_;
 
   // save alarm settings
-  eeprom->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
+  eeprom->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 }
 
-void AlarmClock::processSerialInput() {
+void AlarmClock::ProcessSerialInput() {
   // take user input
   char input = Serial.read();
-  serialInputFlush();
+  SerialInputFlush();
   // acceptable user input
   Serial.print(F("User input: "));
   Serial.println(input);
@@ -255,69 +255,69 @@ void AlarmClock::processSerialInput() {
   switch (input) {
     case 'a':   // toggle alarm On Off
       Serial.println(F("**** Toggle Alarm ****"));
-      alarmOn = !alarmOn;
-      Serial.print(F("alarmOn = ")); Serial.println(alarmOn);
+      alarm_ON_ = !alarm_ON_;
+      Serial.print(F("alarmOn = ")); Serial.println(alarm_ON_);
       break;
     case 'b':   // brightness
       {
         Serial.println(F("**** Set Brightness [0-255] ****"));
         while (Serial.available() == 0) {};
         int brightnessVal = Serial.parseInt();
-        serialInputFlush();
-        display->setBrightness(brightnessVal);
+        SerialInputFlush();
+        display->SetBrightness(brightnessVal);
       }
       break;
     case 'g':   // good morning
       {
-        display->goodMorningScreen();
+        display->GoodMorningScreen();
       }
       break;
     case 's':   // screensaver
       {
         Serial.println(F("**** Screensaver ****"));
-        setPage(screensaverPage);
+        SetPage(kScreensaverPage);
       }
       break;
     case 't':   // go to buzzAlarm Function
       {
         Serial.println(F("**** buzzAlarm Function ****"));
         // go to buzz alarm function
-        buzzAlarmFn();
+        BuzzAlarmFn();
         // refresh time
-        rtc->refresh();
+        rtc->Refresh();
         // prepare date and time arrays
-        display->prepareTimeDayDateArrays();
+        display->PrepareTimeDayDateArrays();
         // set main page back
-        setPage(mainPage);
-        inactivitySeconds = 0;
+        SetPage(kMainPage);
+        inactivity_seconds_ = 0;
       }
       break;
     case 'y':   // show alarm triggered screen
       {
         Serial.println(F("**** Show Alarm Triggered Screen ****"));
         // start alarm triggered page
-        setPage(alarmTriggeredPage);
+        SetPage(kAlarmTriggeredPage);
         delay(1000);
-        display->alarmTriggeredScreen(false, 24);
+        display->AlarmTriggeredScreen(false, 24);
         delay(1000);
-        display->alarmTriggeredScreen(false, 13);
+        display->AlarmTriggeredScreen(false, 13);
         delay(1000);
-        display->alarmTriggeredScreen(false, 14);
+        display->AlarmTriggeredScreen(false, 14);
         delay(1000);
         // refresh time
-        rtc->refresh();
+        rtc->Refresh();
         // prepare date and time arrays
-        display->prepareTimeDayDateArrays();
+        display->PrepareTimeDayDateArrays();
         // set main page back
-        setPage(mainPage);
-        inactivitySeconds = 0;
+        SetPage(kMainPage);
+        inactivity_seconds_ = 0;
       }
       break;
     case 'w':   // get today's weather info
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        secondCoreControlFlag = 1;
+        second_core_control_flag_ = 1;
       }
       break;
     case 'i':   // set WiFi details
@@ -333,12 +333,12 @@ void AlarmClock::processSerialInput() {
         inputStr[inputStr.length()-1] = '\0';
         Serial.println(inputStr);
         // fill wifi_ssid
-        if(wifiStuff->wifi_ssid != NULL) {
-          delete wifiStuff->wifi_ssid;
-          wifiStuff->wifi_ssid = NULL;
+        if(wifi_stuff->wifi_ssid_ != NULL) {
+          delete wifi_stuff->wifi_ssid_;
+          wifi_stuff->wifi_ssid_ = NULL;
         }
-        wifiStuff->wifi_ssid = new char[inputStr.length()];   // allocate space
-        strcpy(wifiStuff->wifi_ssid,inputStr.c_str());
+        wifi_stuff->wifi_ssid_ = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_stuff->wifi_ssid_,inputStr.c_str());
         Serial.print("PASSWORD: ");
         while(Serial.available() == 0) {
           delay(20);
@@ -348,13 +348,13 @@ void AlarmClock::processSerialInput() {
         inputStr[inputStr.length()-1] = '\0';
         Serial.println(inputStr);
         // fill wifi_ssid
-        if(wifiStuff->wifi_password != NULL) {
-          delete wifiStuff->wifi_password;
-          wifiStuff->wifi_password = NULL;
+        if(wifi_stuff->wifi_password_ != NULL) {
+          delete wifi_stuff->wifi_password_;
+          wifi_stuff->wifi_password_ = NULL;
         }
-        wifiStuff->wifi_password = new char[inputStr.length()];   // allocate space
-        strcpy(wifiStuff->wifi_password,inputStr.c_str());
-        wifiStuff->saveWiFiDetails();
+        wifi_stuff->wifi_password_ = new char[inputStr.length()];   // allocate space
+        strcpy(wifi_stuff->wifi_password_,inputStr.c_str());
+        wifi_stuff->SaveWiFiDetails();
       }
       break;
     default:
@@ -363,30 +363,30 @@ void AlarmClock::processSerialInput() {
 }
 
 // Check if alarm time is hit
-bool AlarmClock::timeToStartAlarm() {
+bool AlarmClock::TimeToStartAlarm() {
 
-  if(!alarmOn) return false;
+  if(!alarm_ON_) return false;
 
   if(rtc->hourModeAndAmPm() == 0) {
     // 24 hour clock mode
-    uint8_t alarmHr24hr = alarmHr;
-    if(alarmHr == 12) {
-      if(alarmIsAm) alarmHr24hr = 0;
+    uint8_t alarmHr24hr = alarm_hr_;
+    if(alarm_hr_ == 12) {
+      if(alarm_is_AM_) alarmHr24hr = 0;
       else alarmHr24hr = 12;
     }
     else {
-      if(!alarmIsAm) alarmHr24hr -= 12;
+      if(!alarm_is_AM_) alarmHr24hr -= 12;
     }
     // check if alarm is hit
-    if(rtc->hour() == alarmHr24hr && rtc->minute() == alarmMin)
+    if(rtc->hour() == alarmHr24hr && rtc->minute() == alarm_min_)
       return true;
     else
       return false;
   }
   else { // 12 hour mode
     // check if alarm is hit
-    if((rtc->hourModeAndAmPm() == 1 && alarmIsAm) || (rtc->hourModeAndAmPm() == 2 && !alarmIsAm)) {
-      if(rtc->hour() == alarmHr && rtc->minute() == alarmMin)
+    if((rtc->hourModeAndAmPm() == 1 && alarm_is_AM_) || (rtc->hourModeAndAmPm() == 2 && !alarm_is_AM_)) {
+      if(rtc->hour() == alarm_hr_ && rtc->minute() == alarm_min_)
         return true;
       else
         return false;
@@ -404,124 +404,124 @@ bool AlarmClock::timeToStartAlarm() {
 // restart buzzer and the alarm end counter.
 // If user does not end alarm by ALARM_MAX_ON_TIME_MS milliseconds,
 // it will end alarm on its own.
-void AlarmClock::buzzAlarmFn() {
+void AlarmClock::BuzzAlarmFn() {
   // start alarm triggered page
-  setPage(alarmTriggeredPage);
+  SetPage(kAlarmTriggeredPage);
   // setup buzzer timer
-  setupBuzzerTimer();
+  SetupBuzzerTimer();
   //start buzzer!
-  buzzer_enable();
+  BuzzerEnable();
   bool alarmStopped = false, buzzerPausedByUser = false;
   unsigned long alarmStartTimeMs = millis();
-  int buttonPressSecondsCounter = ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS;
+  int buttonPressSecondsCounter = kAlarmEndButtonPressAndHoldSeconds;
   while(!alarmStopped) {
     // if user presses button then pauze buzzer and start alarm end countdown!
-    if(pushBtn->buttonActiveDebounced()) {
+    if(push_button->buttonActiveDebounced()) {
       if(!buzzerPausedByUser) {
-        buzzer_disable();
+        BuzzerDisable();
         buzzerPausedByUser = true;
       }
       unsigned long buttonPressStartTimeMs = millis(); //note time of button press
       // while button is pressed, display seconds countdown
-      while(pushBtn->buttonActiveDebounced() && !alarmStopped) {
+      while(push_button->buttonActiveDebounced() && !alarmStopped) {
         // display countdown to alarm off
-        if(ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
+        if(kAlarmEndButtonPressAndHoldSeconds - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;
-          display->alarmTriggeredScreen(false, buttonPressSecondsCounter);
+          display->AlarmTriggeredScreen(false, buttonPressSecondsCounter);
         }
         // end alarm after holding button for ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS
-        if(millis() - buttonPressStartTimeMs > ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS * 1000) {
+        if(millis() - buttonPressStartTimeMs > kAlarmEndButtonPressAndHoldSeconds * 1000) {
           alarmStopped = true;
           // good morning screen! :)
-          display->goodMorningScreen();
+          display->GoodMorningScreen();
         }
       }
     }
     // activate buzzer if button is not pressed by user
-    if(!pushBtn->buttonActiveDebounced() && !alarmStopped) {
+    if(!push_button->buttonActiveDebounced() && !alarmStopped) {
       if(buzzerPausedByUser) {
-        buzzer_enable();
+        BuzzerEnable();
         buzzerPausedByUser = false;
       }
       // if user lifts button press before alarm end then reset counter and re-display alarm-On screen
-      if(buttonPressSecondsCounter != ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS) {
+      if(buttonPressSecondsCounter != kAlarmEndButtonPressAndHoldSeconds) {
         // display Alarm On screen with seconds user needs to press and hold button to end alarm
-        buttonPressSecondsCounter = ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS;
-        display->alarmTriggeredScreen(false, ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS);
+        buttonPressSecondsCounter = kAlarmEndButtonPressAndHoldSeconds;
+        display->AlarmTriggeredScreen(false, kAlarmEndButtonPressAndHoldSeconds);
       }
     }
     // if user did not stop alarm within ALARM_MAX_ON_TIME_MS, make sure to stop buzzer
-    if(millis() - alarmStartTimeMs > ALARM_MAX_ON_TIME_MS) {
-      buzzer_disable();
+    if(millis() - alarmStartTimeMs > kAlarmMaxON_TimeMs) {
+      BuzzerDisable();
       alarmStopped = true;
     }
   }
-  deallocateBuzzerTimer();
+  DeallocateBuzzerTimer();
 }
 
 // Passive Buzzer Timer Interrupt Service Routine
 #if defined(MCU_IS_ESP32)
-void IRAM_ATTR AlarmClock::passiveBuzzerTimerISR() {
+void IRAM_ATTR AlarmClock::PassiveBuzzerTimerISR() {
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-bool AlarmClock::passiveBuzzerTimerISR(struct repeating_timer *t) {
+bool AlarmClock::PassiveBuzzerTimerISR(struct repeating_timer *t) {
 #endif
-  // passiveBuzzerTimerISR() function
-  if(millis() - _beepStartTimeMs > BEEP_LENGTH_MS) {
-    _beepToggle = !_beepToggle;
-    _beepStartTimeMs = millis();
-    digitalWrite(LED_PIN, _beepToggle);
+  // PassiveBuzzerTimerISR() function
+  if(millis() - beep_start_time_ms_ > kBeepLengthMs) {
+    beep_toggle_ = !beep_toggle_;
+    beep_start_time_ms_ = millis();
+    digitalWrite(LED_PIN, beep_toggle_);
   }
-  _buzzerSquareWaveToggle = !_buzzerSquareWaveToggle;
-  digitalWrite(BUZZER_PIN, _buzzerSquareWaveToggle && _beepToggle);
+  buzzer_square_wave_toggle_ = !buzzer_square_wave_toggle_;
+  digitalWrite(BUZZER_PIN, buzzer_square_wave_toggle_ && beep_toggle_);
 
   #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
     return true;
   #endif
 }
 
-void AlarmClock::buzzer_enable() {
+void AlarmClock::BuzzerEnable() {
   // Timer Enable
   #if defined(MCU_IS_ESP32)
-    timerAlarmEnable(passiveBuzzerTimerPtr);
+    timerAlarmEnable(passive_buzzer_timer_ptr_);
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    int64_t delay_us = 1000000 / (BUZZER_FREQUENCY * 2);
-    add_repeating_timer_us(delay_us, passiveBuzzerTimerISR, NULL, passiveBuzzerTimerPtr);
+    int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
+    add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
   #endif
 }
 
-void AlarmClock::buzzer_disable() {
+void AlarmClock::BuzzerDisable() {
   // Timer Disable
   #if defined(MCU_IS_ESP32)
-    timerAlarmDisable(passiveBuzzerTimerPtr);
+    timerAlarmDisable(passive_buzzer_timer_ptr_);
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    cancel_repeating_timer(passiveBuzzerTimerPtr);
+    cancel_repeating_timer(passive_buzzer_timer_ptr_);
   #endif
   digitalWrite(BUZZER_PIN, LOW);
   digitalWrite(LED_PIN, LOW);
-  _buzzerSquareWaveToggle = false;
-  _beepToggle = false;
+  buzzer_square_wave_toggle_ = false;
+  beep_toggle_ = false;
 }
 
-void AlarmClock::setupBuzzerTimer() {
+void AlarmClock::SetupBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
-    passiveBuzzerTimerPtr = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
-    timerAttachInterrupt(passiveBuzzerTimerPtr, &passiveBuzzerTimerISR, true);    //attach ISR to timer
-    timerAlarmWrite(passiveBuzzerTimerPtr, 1000000 / (BUZZER_FREQUENCY * 2), true);
+    passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
+    timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
+    timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (BUZZER_FREQUENCY * 2), true);
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    passiveBuzzerTimerPtr = new struct repeating_timer;
+    passive_buzzer_timer_ptr_ = new struct repeating_timer;
   #endif
 
   Serial.println(F("Timer setup successful!"));
 }
 
-void AlarmClock::deallocateBuzzerTimer() {
+void AlarmClock::DeallocateBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
-    passiveBuzzerTimerPtr = NULL;
+    passive_buzzer_timer_ptr_ = NULL;
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    delete passiveBuzzerTimerPtr;
-    passiveBuzzerTimerPtr = NULL;
+    delete passive_buzzer_timer_ptr_;
+    passive_buzzer_timer_ptr_ = NULL;
   #endif
 
   Serial.println(F("Buzzer Timer deallocated."));

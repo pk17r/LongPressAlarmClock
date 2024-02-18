@@ -9,27 +9,27 @@
 
 ***************************************************************************/
 #include "common.h"
-#include "rtc.h"
-#include "rgb_display.h"
-#include "alarm_clock.h"
+#include <PushButtonTaps.h>
+#include "eeprom.h"
 #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
   #include "wifi_stuff.h"
 #endif
-#include "eeprom.h"
-#include <PushButtonTaps.h>
+#include "rtc.h"
+#include "alarm_clock.h"
+#include "rgb_display.h"
 #if defined(TOUCHSCREEN_IS_XPT2046)
   #include "touchscreen.h"
 #endif
 
 // modules - hardware or software
-RTC* rtc = NULL;  // ptr to class object containing RTC HW ** Initialization Order 1
-EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object ** Initialization Order 4
-RGBDisplay* display = NULL;   // ptr to display class object that manages the display ** Initialization Order 2
-AlarmClock* alarmClock = NULL;  // ptr to alarm clock class object that controls Alarm functions ** Initialization Order 3
-WiFiStuff* wifiStuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions ** Initialization Order 5
-PushButtonTaps* pushBtn = NULL;   // Push Button object ** Initialization Order 6
+PushButtonTaps* push_button = NULL;   // Push Button object
+EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object
+WiFiStuff* wifi_stuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions
+RTC* rtc = NULL;  // ptr to class object containing RTC HW
+AlarmClock* alarm_clock = NULL;  // ptr to alarm clock class object that controls Alarm functions
+RGBDisplay* display = NULL;   // ptr to display class object that manages the display
 #if defined(TOUCHSCREEN_IS_XPT2046)
-  Touchscreen* ts = NULL;         // Touchscreen class object ** Initialization Order 7
+  Touchscreen* ts = NULL;         // Touchscreen class object
 #endif
 
 void setup() {
@@ -57,28 +57,29 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
 
   // initialize push button
-  pushBtn = new PushButtonTaps(BUTTON_PIN);
+  push_button = new PushButtonTaps(BUTTON_PIN);
 
   // initialize modules
   eeprom = new EEPROM();
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff = new WiFiStuff();
+    wifi_stuff = new WiFiStuff();
   #endif
   rtc = new RTC();
-  alarmClock = new AlarmClock();
+  alarm_clock = new AlarmClock();
   // setup alarm clock
-  alarmClock->setup();
+  alarm_clock->Setup();
   display = new RGBDisplay();
   // setup display
-  display->setup();
+  display->Setup();
   ts = new Touchscreen();
+
   // restart the other core
   // rp2040.restartCore1();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  alarmClock->updateTimePriorityLoop();
+  alarm_clock->UpdateTimePriorityLoop();
 }
 
 void setup1() {
@@ -87,21 +88,27 @@ void setup1() {
 
 void loop1() {
   // put your main code here, to run repeatedly:
-  alarmClock->nonPriorityTasksLoop();
+  alarm_clock->NonPriorityTasksLoop();
 }
 
 
-// GLOBAL FUNCTIONS
+// GLOBAL VARIABLES AND FUNCTIONS
+
+// current page on display
+ScreenPage current_page = kMainPage;
+
+// seconds flag triggered by interrupt
+// static volatile bool rtcHwSecUpdate = false;
 
 extern "C" char* sbrk(int incr);
 
 // Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
-int availableRam() {
+int AvailableRam() {
   char top;
   return &top - reinterpret_cast<char*>(sbrk(0));
 }
 
-void serialInputFlush() {
+void SerialInputFlush() {
   while (true) {
     delay(20);  // give data a chance to arrive
     if (Serial.available()) {
@@ -114,15 +121,15 @@ void serialInputFlush() {
   }
 }
 
-void serialTimeStampPrefix() {
+void SerialTimeStampPrefix() {
   Serial.print(F("(s"));
   if(rtc->second() < 10) Serial.print('0');
   Serial.print(rtc->second());
   Serial.print(F(":i"));
-  if(alarmClock->inactivitySeconds < 100) Serial.print('0');
-  if(alarmClock->inactivitySeconds < 10) Serial.print('0');
-  Serial.print(alarmClock->inactivitySeconds);
-  Serial.print(F(": SRAM left: ")); Serial.print(availableRam());
+  if(alarm_clock->inactivity_seconds_ < 100) Serial.print('0');
+  if(alarm_clock->inactivity_seconds_ < 10) Serial.print('0');
+  Serial.print(alarm_clock->inactivity_seconds_);
+  Serial.print(F(": SRAM left: ")); Serial.print(AvailableRam());
   Serial.print(F(") - "));
   Serial.flush();
 }

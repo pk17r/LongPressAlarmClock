@@ -8,23 +8,21 @@ class RTC {
 
 public:
 
-  // seconds flag triggered by interrupt
-  static inline volatile bool rtcHwSecUpdate = false;
+  RTC();  // constructor
 
-  // constructor
-  RTC();
+  static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
 
   // to update rtc's time and date
-  void setRtcTimeAndDate();
+  void SetRtcTimeAndDate();
 
-  void refresh();
+  void Refresh();
 
-  uint8_t second() { return _second; }
-  uint8_t minute() { return rtcHw.minute(); }
-  uint8_t hour() { return rtcHw.hour(); }
-  uint8_t day() { return rtcHw.day(); }
-  uint8_t month() { return rtcHw.month(); }
-  uint16_t year() { return rtcHw.year() + 2000; }
+  uint8_t second() { return second_; }
+  uint8_t minute() { return rtc_hw_.minute(); }
+  uint8_t hour() { return rtc_hw_.hour(); }
+  uint8_t day() { return rtc_hw_.day(); }
+  uint8_t month() { return rtc_hw_.month(); }
+  uint16_t year() { return rtc_hw_.year() + 2000; }
   /**
   * \brief Returns actual Day Of Week
   *
@@ -37,7 +35,7 @@ public:
   *   - #URTCLIB_WEEKDAY_FRIDAY = 6
   *   - #URTCLIB_WEEKDAY_SATURDAY = 7
   */
-  uint8_t dayOfWeek() { return rtcHw.dayOfWeek(); }
+  uint8_t dayOfWeek() { return rtc_hw_.dayOfWeek(); }
   /**
   * \brief Returns whether clock is in 12 or 24 hour mode
   * and AM or PM if in 12 hour mode
@@ -47,26 +45,26 @@ public:
   *
   * @return byte with value 0, 1 or 2
   */
-  uint8_t hourModeAndAmPm() { return rtcHw.hourModeAndAmPm(); }
+  uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
 
 
 private:
 
   // RTC clock object for DC3231 rtc
-  uRTCLib rtcHw;
+  uRTCLib rtc_hw_;
 
   // seconds counter to track RTC HW seconds, without
   // bothering it with I2C calls all the time.
   // we'll refresh RTC time everytime second reaches 60
   // All other parameters of RTC will not change at any other time
   // at 60 seconds, we'll update the time row
-  static inline uint8_t _second = 0;
+  static inline uint8_t second_ = 0;
 
   // setup DS3231 rtc for the first time, no problem doing it again
-  void firstTimeRtcSetup();
+  void FirstTimeRtcSetup();
 
   // clock seconds interrupt ISR
-  static void secondsUpdateInterruptISR();
+  static void SecondsUpdateInterruptISR();
 
 
 

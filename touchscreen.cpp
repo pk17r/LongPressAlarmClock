@@ -3,59 +3,59 @@
 #include "rgb_display.h"
 
 Touchscreen::Touchscreen() {
-  touchscreenObj.begin(SPI);
-  touchscreenObj.setRotation(1);
-  touchscreenCal = TouchCalibration{220, 3800, 280, 3830, display->TFT_WIDTH, display->TFT_HEIGHT};
+  touchscreen_object_.begin(SPI);
+  touchscreen_object_.setRotation(1);
+  touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, display->kTftWidth, display->kTftHeight};
 }
 
-bool Touchscreen::isTouched() {
+bool Touchscreen::IsTouched() {
   // irq touch is super fast
-  if(!touchscreenObj.tirqTouched())
+  if(!touchscreen_object_.tirqTouched())
     return false;
   // when irq touch is triggered, it takes a few hundred milliseconds to turn off
   // during this time we will poll touch screen pressure using SPI to know if touchscreen is pressed or not
-  if(millis() - lastPolledMillis <= POLLING_GAP_MS) {
-    return lastTouchPixel.isTouched;
+  if(millis() - last_polled_millis_ <= kPollingGapMs) {
+    return last_touch_Pixel_.is_touched;
   }
   else {
-    getTouchedPixel();
-    return lastTouchPixel.isTouched;
+    GetTouchedPixel();
+    return last_touch_Pixel_.is_touched;
   }
 }
 
-TouchPixel* Touchscreen::getTouchedPixel() {
-  if(millis() - lastPolledMillis <= POLLING_GAP_MS) {
+TouchPixel* Touchscreen::GetTouchedPixel() {
+  if(millis() - last_polled_millis_ <= kPollingGapMs) {
     // return last touch point
   }
   else {
     // note polling time
-    lastPolledMillis = millis();
+    last_polled_millis_ = millis();
 
     // get touch point from XPT2046
-    TS_Point touch = touchscreenObj.getPoint();
+    TS_Point touch = touchscreen_object_.getPoint();
 
     if(touch.z < 100) {
-      lastTouchPixel = TouchPixel{-1, -1, false};
-      return &lastTouchPixel;
+      last_touch_Pixel_ = TouchPixel{-1, -1, false};
+      return &last_touch_Pixel_;
     }
 
     // Rotate and map
-    int16_t x = map(touch.x, touchscreenCal.xMin, touchscreenCal.xMax, 0, touchscreenCal.screenWidth);
-    int16_t y = map(touch.y, touchscreenCal.yMin, touchscreenCal.yMax, 0, touchscreenCal.screenHeight);
+    int16_t x = map(touch.x, touchscreen_calibration_.xMin, touchscreen_calibration_.xMax, 0, touchscreen_calibration_.screen_width);
+    int16_t y = map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
 
-    if (x > touchscreenCal.screenWidth){
-        x = touchscreenCal.screenWidth;
+    if (x > touchscreen_calibration_.screen_width){
+        x = touchscreen_calibration_.screen_width;
     }
     if (x < 0) {
         x = 0;
     }
-    if (y > touchscreenCal.screenHeight) {
-        y = touchscreenCal.screenHeight;
+    if (y > touchscreen_calibration_.screen_height) {
+        y = touchscreen_calibration_.screen_height;
     }
     if (y < 0) {
         y = 0;
     }
-    lastTouchPixel = TouchPixel{x, y, true};
+    last_touch_Pixel_ = TouchPixel{x, y, true};
   }
-  return &lastTouchPixel;
+  return &last_touch_Pixel_;
 }

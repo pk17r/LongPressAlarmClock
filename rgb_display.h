@@ -37,23 +37,23 @@ public:
   ~RGBDisplay();
 
   // screens
-  void displayTimeUpdate();
-  void screensaver();
-  void goodMorningScreen();
-  void setAlarmScreen(bool firstDraw, int16_t ts_x, int16_t ts_y);
-  void alarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter);
-  void settingsPage();
+  void DisplayTimeUpdate();
+  void Screensaver();
+  void GoodMorningScreen();
+  void SetAlarmScreen(bool process_user_input);
+  void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
+  void SettingsPage();
 
   // functions
-  void setup();
-  void setBrightness(int brightness);
-  void setMaxBrightness();
-  void checkTimeAndSetBrightness();
-  void screensaverControl(bool turnOn);
-  void prepareTimeDayDateArrays();
-  void serialPrintRtcDateTime();
-  void updateSecondsOnTimeStrArr(uint8_t second);
-  int classifyMainPageTouchInput(int16_t ts_x, int16_t ts_y);
+  void Setup();
+  void SetBrightness(int brightness);
+  void SetMaxBrightness();
+  void CheckTimeAndSetBrightness();
+  void ScreensaverControl(bool turnOn);
+  void PrepareTimeDayDateArrays();
+  void SerialPrintRtcDateTime();
+  void UpdateSecondsOnTimeStrArr(uint8_t second);
+  ScreenPage ClassifyMainPageTouchInput();
 
 // PUBLIC VARIABLES
 
@@ -72,13 +72,13 @@ public:
   #endif
 
   // redraw full display flag
-  bool redrawDisplay = false;
+  bool redraw_display_ = false;
 
   // refresh screensaver canvas
-  bool refreshScreensaverCanvas = true;
+  bool refresh_screensaver_canvas_ = true;
 
   // tft dimensions
-  const uint16_t TFT_WIDTH = 320, TFT_HEIGHT = 240;
+  const uint16_t kTftWidth = 320, kTftHeight = 240;
   // SPISettings settingsA(80000000, MSBFIRST, SPI_MODE0);
 
 
@@ -86,79 +86,79 @@ private:
 
 // PRIVATE FUNCTIONS
 
-  void drawSun(int16_t x0, int16_t y0, uint16_t edge);
-  void drawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
-  void drawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
-  void pickNewRandomColor();  // for screensaver
-  void drawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
-  void drawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
-  void fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+  void DrawSun(int16_t x0, int16_t y0, uint16_t edge);
+  void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
+  void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
+  void PickNewRandomColor();  // for screensaver
+  void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
+  void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
+  void FastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
 
 // PRIVATE VARIABLES
 
   // current screen brightness
-  int current_brightness = 0;
+  int current_brightness_ = 0;
 
   // screensaver
-  bool screensaverMoveDown = true, screensaverMoveRight = true;
-  int currentRandomColorIndex = 0;
-  GFXcanvas1* myCanvas = NULL;
-  bool showColoredEdgeScreensaver = true;
-  bool flyScreensaverHorizontally = false;
+  bool screensaver_move_down_ = true, screensaver_move_right_ = true;
+  int current_random_color_index_ = 0;
+  GFXcanvas1* my_canvas_ = NULL;
+  bool show_colored_edge_screensaver_ = true;
+  bool fly_screensaver_horizontally_ = false;
 
   // location of various display text strings
-  int16_t gap_right_x = 0, gap_up_y = 0;
-  int16_t tft_HHMM_x0 = TIME_ROW_X0, tft_HHMM_y0 = 2 * TIME_ROW_Y0;
-  uint16_t tft_HHMM_w = 0, tft_HHMM_h = 0;
-  int16_t screensaver_x1 = 0, screensaver_y1 = 0;
-  uint16_t screensaver_w = 0, screensaver_h = 0;
-  int16_t tft_AmPm_x0 = 0, tft_AmPm_y0 = 0;
-  int16_t tft_SS_x0 = 0;
-  int16_t date_row_x0 = 0;
-  int16_t alarm_row_x0 = 0;
-  int16_t alarm_icon_x0 = 0, alarm_icon_y0 = 0;
+  int16_t gap_right_x_ = 0, gap_up_y_ = 0;
+  int16_t tft_HHMM_x0_ = kTimeRowX0, tft_HHMM_y0_ = 2 * kTimeRowY0;
+  uint16_t tft_HHMM_w_ = 0, tft_HHMM_h_ = 0;
+  int16_t screensaver_x1_ = 0, screensaver_y1_ = 0;
+  uint16_t screensaver_w_ = 0, screensaver_h_ = 0;
+  int16_t tft_AmPm_x0_ = 0, tft_AmPm_y0_ = 0;
+  int16_t tft_SS_x0_ = 0;
+  int16_t date_row_x0_ = 0;
+  int16_t alarm_row_x0_ = 0;
+  int16_t alarm_icon_x0_ = 0, alarm_icon_y0_ = 0;
 
   // Display Visible Data Struct
-  const int HHMM_ARR_SIZE = 6, SS_ARR_SIZE = 4, DATE_ARR_SIZE = 13, ALARM_ARR_SIZE = 10;
-  struct displayData {
-    char* timeHHMM;
-    char* timeSS;
-    char* dateStr;
-    char* alarmStr;
-    bool _12hourMode;
-    bool _pmNotAm;
-    bool _alarmOn;
-  } newDisplayData, displayedData;
+  const int kHHMM_ArraySize = 6, kSS_ArraySize = 4, kDateArraySize = 13, kAlarmArraySize = 10;
+  struct DisplayData {
+    char* time_HHMM;
+    char* time_SS;
+    char* date_str;
+    char* alarm_str;
+    bool _12_hour_mode;
+    bool pm_not_am;
+    bool alarm_ON;
+  } new_display_data_, displayed_data_;
 
 
 // PRIVATE CONSTANTS
   
   // display brightness constants
-  const int NIGHT_BRIGHTNESS = 1;
-  const int EVENING_BRIGHTNESS = 100;
-  const int DAY_BRIGHTNESS = 150;
-  const int MAX_BRIGHTNESS = 255;
+  const int kNightBrightness = 1;
+  const int kEveningBrightness = 100;
+  const int kDayBrightness = 150;
+  const int kMaxBrightness = 255;
 
   // user defined locations of various text strings on display
-  const int16_t TIME_ROW_X0 = 10, TIME_ROW_Y0 = 80, AM_PM_ROW_Y0 = 45;
-  const int16_t DISPLAY_TEXT_GAP = 5;
-  const int16_t DATE_ROW_Y0 = 140;
-  const int16_t ALARM_ROW_Y0 = 210, ALARM_ROW_Y1 = 160;
-  const int16_t SETTINGS_PAGE_BACK_BUTTON_Y1 = TFT_HEIGHT - 50;
-  const int16_t RADIUS_BUTTON_ROUND_RECT = 5;
+  const int16_t kTimeRowX0 = 10, kTimeRowY0 = 80, kAM_PM_row_Y0 = 45;
+  const int16_t kDisplayTextGap = 5;
+  const int16_t kDateRow_Y0 = 140;
+  const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
+  const int16_t kSettingsPageBackButtonY1 = kTftHeight - 50;
+  const int16_t kRadiusButtonRoundRect = 5;
 
   // day arrays
   #define DAY_ARR_SIZE 4
-  const char day_Sun[DAY_ARR_SIZE] = "Sun";
-  const char day_Mon[DAY_ARR_SIZE] = "Mon";
-  const char day_Tue[DAY_ARR_SIZE] = "Tue";
-  const char day_Wed[DAY_ARR_SIZE] = "Wed";
-  const char day_Thu[DAY_ARR_SIZE] = "Thu";
-  const char day_Fri[DAY_ARR_SIZE] = "Fri";
-  const char day_Sat[DAY_ARR_SIZE] = "Sat";
+  const char kDaySun[DAY_ARR_SIZE] = "Sun";
+  const char kDayMon[DAY_ARR_SIZE] = "Mon";
+  const char kDayTue[DAY_ARR_SIZE] = "Tue";
+  const char kDayWed[DAY_ARR_SIZE] = "Wed";
+  const char kDayThu[DAY_ARR_SIZE] = "Thu";
+  const char kDayFri[DAY_ARR_SIZE] = "Fri";
+  const char kDaySat[DAY_ARR_SIZE] = "Sat";
 
   // Then set up a table to refer to your strings.
-  const char *const days_table[7] = { day_Sun, day_Mon, day_Tue, day_Wed, day_Thu, day_Fri, day_Sat };
+  const char *const days_table_[7] = { kDaySun, kDayMon, kDayTue, kDayWed, kDayThu, kDayFri, kDaySat };
 
   // day arrays
   #define MONTH_ARR_SIZE 4
@@ -178,19 +178,19 @@ private:
   // Then set up a table to refer to your strings.
   const char *const months_table[12] = { month_Jan, month_Feb, month_Mar, month_Apr, month_May, month_Jun, month_Jul, month_Aug, month_Sep, month_Oct, month_Nov, month_Dec };
 
-  const char amLabel[3] = "AM", pmLabel[3] = "PM", offLabel[4] = "Off", alarmLabel[6] = "Alarm";
-  const char charSpace = ' ';
+  const char kAmLabel[3] = "AM", kPmLabel[3] = "PM", kOffLabel[4] = "Off", kAlarmLabel[6] = "Alarm";
+  const char kCharSpace = ' ';
 
   // color definitions
-  const uint16_t  Display_Color_Black        = 0x0000;
-  const uint16_t  Display_Color_Blue         = 0x001F;
-  const uint16_t  Display_Color_Red          = 0xF800;
-  const uint16_t  Display_Color_Orange       = 0xfca0;
-  const uint16_t  Display_Color_Green        = 0x07E0;
-  const uint16_t  Display_Color_Cyan         = 0x07FF;
-  const uint16_t  Display_Color_Magenta      = 0xF81F;
-  const uint16_t  Display_Color_Yellow       = 0xFFE0;
-  const uint16_t  Display_Color_White        = 0xFFFF;
+  const uint16_t  kDisplayColorBlack        = 0x0000;
+  const uint16_t  kDisplayColorBlue         = 0x001F;
+  const uint16_t  kDisplayColorRed          = 0xF800;
+  const uint16_t  kDisplayColorOrange       = 0xfca0;
+  const uint16_t  kDisplayColorGreen        = 0x07E0;
+  const uint16_t  kDisplayColorCyan         = 0x07FF;
+  const uint16_t  kDisplayColorMagenta      = 0xF81F;
+  const uint16_t  kDisplayColorYellow       = 0xFFE0;
+  const uint16_t  kDisplayColorWhite        = 0xFFFF;
 
   // https://github.com/newdigate/rgb565_colors
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
@@ -227,21 +227,21 @@ private:
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
 
-  constexpr static uint8_t COLOR_PICKER_WHEEL_SIZE = 33;
-  const uint16_t colorPickerWheelBright[COLOR_PICKER_WHEEL_SIZE] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
+  constexpr static uint8_t kColorPickerWheelSize = 33;
+  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
 
   // The colors we actually want to use
-  const uint16_t        Display_Time_Color         = Display_Color_Yellow;
-  const uint16_t        Display_Date_Color         = Display_Color_Green;
-  const uint16_t        Display_Alarm_Color        = Display_Color_Cyan;
-  const uint16_t        Display_Backround_Color    = Display_Color_Black;
+  const uint16_t        kDisplayTimeColor         = kDisplayColorYellow;
+  const uint16_t        kDisplayDateColor         = kDisplayColorGreen;
+  const uint16_t        kDisplayAlarmColor        = kDisplayColorCyan;
+  const uint16_t        kDisplayBackroundColor    = kDisplayColorBlack;
 
   // BIG BELL ICONS
 
-  const uint8_t BELL_W = 114, BELL_H = 75;
+  const uint8_t kBellWidth = 114, kBellHeight = 75;
   // 'bell_114x75, 114x75px
   // convert image into binary monochrome using https://javl.github.io/image2cpp/
-  const unsigned char bell_bitmap[1125] = {
+  const unsigned char kBellBitmap[1125] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x3f, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -315,9 +315,9 @@ private:
     0x00, 0x00, 0x00, 0x00, 0x00
   };
 
-  const uint8_t BELL_FALLEN_W = 75, BELL_FALLEN_H = 71;
+  const uint8_t kBellFallenWidth = 75, kBellFallenHeight = 71;
   // 'bell_fallen_75x71, 75x71px
-  const unsigned char bell_fallen_bitmap[710] = {
+  const unsigned char kBellFallenBitmap[710] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x1f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xc0, 0x00, 
@@ -367,9 +367,9 @@ private:
 
   // SMALL BELL ICONS
 
-  const uint8_t BELL_SMALL_W = 70, BELL_SMALL_H = 46;
+  const uint8_t kBellSmallWidth = 70, kBellSmallHeight = 46;
   // 'bell_114x75', 70x46px
-  const unsigned char bell_small_bitmap [414] = {
+  const unsigned char kBellSmallBitmap [414] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf8, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0xff,
     0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -398,9 +398,9 @@ private:
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
 
-  const uint8_t BELL_FALLEN_SMALL_W = 49, BELL_FALLEN_SMALL_H = 46;
+  const uint8_t kBellFallenSmallWidth = 49, kBellFallenSmallHeight = 46;
   // 'bell_fallen_75x71', 49x46px
-  const unsigned char bell_fallen_small_bitmap [322] = {
+  const unsigned char kBellFallenSmallBitmap [322] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f,
     0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xc0, 0x00,
@@ -424,10 +424,10 @@ private:
     0x00, 0x00
   };
 
-  const uint8_t SETTINGS_GEAR_W = 40, SETTINGS_GEAR_H = 40;
-  const int16_t SETTINGS_GEAR_X = TFT_WIDTH - SETTINGS_GEAR_W - 10, SETTINGS_GEAR_Y = DATE_ROW_Y0 - SETTINGS_GEAR_H + 5;
+  const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
+  const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
   // 'gear-settings-1-48', 40x40px
-  const unsigned char settings_gear_bitmap[200] = {
+  const unsigned char kSettingsGearBitmap[200] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x00, 
     0x01, 0xff, 0x00, 0x00, 0x00, 0x01, 0xc3, 0x00, 0x00, 0x00, 0x01, 0x83, 0x80, 0x00, 0x00, 0x01, 
     0x83, 0x80, 0x00, 0x00, 0x03, 0x81, 0x80, 0x00, 0x07, 0x0f, 0x81, 0xe1, 0xe0, 0x0f, 0xff, 0x00, 
