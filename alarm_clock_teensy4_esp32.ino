@@ -23,9 +23,9 @@
 
 // modules - hardware or software
 RTC* rtc = NULL;  // ptr to class object containing RTC HW ** Initialization Order 1
+EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object ** Initialization Order 4
 RGBDisplay* display = NULL;   // ptr to display class object that manages the display ** Initialization Order 2
 AlarmClock* alarmClock = NULL;  // ptr to alarm clock class object that controls Alarm functions ** Initialization Order 3
-EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object ** Initialization Order 4
 WiFiStuff* wifiStuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions ** Initialization Order 5
 PushButtonTaps* pushBtn = NULL;   // Push Button object ** Initialization Order 6
 #if defined(TOUCHSCREEN_IS_XPT2046)
@@ -52,12 +52,16 @@ void setup() {
   pinMode(TS_CS_PIN, OUTPUT);
   digitalWrite(TS_CS_PIN, HIGH);
 
+  // LED Pin
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
+
   // initialize modules
   rtc = new RTC();
+  eeprom = new EEPROM();
   alarmClock = new AlarmClock();
   display = new RGBDisplay();
   ts = new Touchscreen();
-  eeprom = new EEPROM();
   #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
     wifiStuff = new WiFiStuff();
   #endif
@@ -69,12 +73,6 @@ void setup() {
   #if defined(TOUCHSCREEN_IS_XPT2046)
     // touchscreen setup and calibration
     ts->setupAndCalibrate(220, 3800, 280, 3830, 320, 240);
-  #endif
-
-  // retrieve wifi details
-  #if defined(MCU_IS_ESP32) || defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    wifiStuff->retrieveWiFiDetails();
-    wifiStuff->turn_WiFi_Off();
   #endif
 
   // setup display

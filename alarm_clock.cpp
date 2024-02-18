@@ -14,10 +14,6 @@ void AlarmClock::setup() {
   
   // setup alarm clock program
 
-  // LED
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
-
   // initialize buzzer
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);

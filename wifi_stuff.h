@@ -7,6 +7,7 @@
 class WiFiStuff {
 
 public:
+  WiFiStuff() { retrieveWiFiDetails(); turn_WiFi_Off(); }
   void retrieveWiFiDetails();
   void saveWiFiDetails();
   void turn_WiFi_On();
