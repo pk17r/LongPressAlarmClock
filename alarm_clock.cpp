@@ -38,13 +38,13 @@ void AlarmClock::UpdateTimePriorityLoop() {
     { // if on alarm page, then take alarm set page user inputs
       display->SetAlarmScreen(true);
     }
-    else if(current_page != kAlarmSetPage && inactivity_seconds_ >= 1)
+    else if(current_page != kAlarmSetPage && inactivity_seconds >= 1)
     { // if on main page and user clicked somewhere, get touch input
       ScreenPage userTouchRegion = display->ClassifyMainPageTouchInput();
       if(userTouchRegion != kNoPageSelected)
         SetPage(userTouchRegion);
     }
-    inactivity_seconds_ = 0;
+    inactivity_seconds = 0;
   }
 
   // if user presses button, show response by turning On LED
@@ -73,7 +73,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
 
       // if user has been inactive, then set brightness based on time of day
       // set display brightness based on time
-      if(inactivity_seconds_ >= kInactivitySecondsLimit)
+      if(inactivity_seconds >= kInactivitySecondsLimit)
         display->CheckTimeAndSetBrightness();
 
       // if screensaver is On, then update time on it
@@ -108,7 +108,7 @@ void AlarmClock::UpdateTimePriorityLoop() {
         PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
-        inactivity_seconds_ = 0;
+        inactivity_seconds = 0;
         wifi_stuff->got_weather_info_ = false;
       }
     }
@@ -117,9 +117,9 @@ void AlarmClock::UpdateTimePriorityLoop() {
     PrepareTimeDayDateArrays();
 
     // check for inactivity
-    if(inactivity_seconds_ <= kInactivitySecondsLimit) {
-      inactivity_seconds_++;
-      if(inactivity_seconds_ >= kInactivitySecondsLimit) {
+    if(inactivity_seconds <= kInactivitySecondsLimit) {
+      inactivity_seconds++;
+      if(inactivity_seconds >= kInactivitySecondsLimit) {
         // set display brightness based on time
         display->CheckTimeAndSetBrightness();
         // turn screen saver On
@@ -289,7 +289,7 @@ void AlarmClock::ProcessSerialInput() {
         PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
-        inactivity_seconds_ = 0;
+        inactivity_seconds = 0;
       }
       break;
     case 'y':   // show alarm triggered screen
@@ -310,7 +310,7 @@ void AlarmClock::ProcessSerialInput() {
         PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
-        inactivity_seconds_ = 0;
+        inactivity_seconds = 0;
       }
       break;
     case 'w':   // get today's weather info

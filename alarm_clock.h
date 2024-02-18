@@ -42,10 +42,6 @@ public:
   // flag to refresh RTC time from RTC HW
   bool refresh_rtc_time_ = false;
 
-  // counter to note user inactivity seconds
-  uint8_t inactivity_seconds_ = 0;
-  const uint8_t kInactivitySecondsLimit = 120;
-
   // alarm time
   uint8_t alarm_hr_ = 7;
   uint8_t alarm_min_ = 0;
@@ -68,6 +64,7 @@ public:
 private:
 
   // buzzer functions
+  // buzzer used is a passive buzzer which is run using timers
   void SetupBuzzerTimer();
   #if defined(MCU_IS_ESP32)
     void IRAM_ATTR PassiveBuzzerTimerISR();

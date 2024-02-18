@@ -6,7 +6,7 @@
 #include "pin_defs.h"
 #include "general_constants.h"
 
-// forward decleration of other classes
+// forward decleration of classes
 class RTC;
 class RGBDisplay;
 class AlarmClock;
@@ -24,12 +24,8 @@ extern EEPROM* eeprom;
 extern PushButtonTaps* push_button;
 extern Touchscreen* ts;
 
-// extern all global functions
-extern int AvailableRam();
-extern void SerialInputFlush();
-extern void SerialTimeStampPrefix();
-extern void PrepareTimeDayDateArrays();
-extern void SerialPrintRtcDateTime();
+// counter to note user inactivity seconds
+extern uint8_t inactivity_seconds;
 
 // flag for display pages
 enum ScreenPage {
@@ -47,18 +43,25 @@ extern ScreenPage current_page;
 
 // display time data in char arrays
 struct DisplayData {
-    char time_HHMM[kHHMM_ArraySize];
-    char time_SS[kSS_ArraySize];
-    char date_str[kDateArraySize];
-    char alarm_str[kAlarmArraySize];
-    bool _12_hour_mode;
-    bool pm_not_am;
-    bool alarm_ON;
+  char time_HHMM[kHHMM_ArraySize];
+  char time_SS[kSS_ArraySize];
+  char date_str[kDateArraySize];
+  char alarm_str[kAlarmArraySize];
+  bool _12_hour_mode;
+  bool pm_not_am;
+  bool alarm_ON;
   };
 
 // Display Visible Data Struct
 extern DisplayData new_display_data_, displayed_data_;
 
+
+// extern all global functions
+extern int AvailableRam();
+extern void SerialInputFlush();
+extern void SerialTimeStampPrefix();
+extern void PrepareTimeDayDateArrays();
+extern void SerialPrintRtcDateTime();
 
 
 #endif // COMMON_H

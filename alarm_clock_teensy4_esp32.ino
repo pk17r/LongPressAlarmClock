@@ -98,7 +98,10 @@ void loop1() {
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
-// Display Visible Data Struct
+// counter to note user inactivity seconds
+uint8_t inactivity_seconds = 0;
+
+// Display Visible Data Structure variables
 DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_data_ { "", "", "", "", true, false, true };
 
 // current page on display
@@ -108,7 +111,6 @@ ScreenPage current_page = kMainPage;
 // static volatile bool rtcHwSecUpdate = false;
 
 extern "C" char* sbrk(int incr);
-
 // Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
 int AvailableRam() {
   char top;
@@ -133,9 +135,9 @@ void SerialTimeStampPrefix() {
   if(rtc->second() < 10) Serial.print(kCharZero);
   Serial.print(rtc->second());
   Serial.print(F(":i"));
-  if(alarm_clock->inactivity_seconds_ < 100) Serial.print(kCharZero);
-  if(alarm_clock->inactivity_seconds_ < 10) Serial.print(kCharZero);
-  Serial.print(alarm_clock->inactivity_seconds_);
+  if(inactivity_seconds < 100) Serial.print(kCharZero);
+  if(inactivity_seconds < 10) Serial.print(kCharZero);
+  Serial.print(inactivity_seconds);
   Serial.print(F(": SRAM left: ")); Serial.print(AvailableRam());
   Serial.print(F(") - "));
   Serial.flush();
