@@ -31,7 +31,6 @@ public:
   void nonPriorityTasksLoop();
   void retrieveAlarmSettings();
   void saveAlarm();
-  void serialTimeStampPrefix();
   bool timeToStartAlarm();
   void buzzAlarmFn();
   void processSerialInput();

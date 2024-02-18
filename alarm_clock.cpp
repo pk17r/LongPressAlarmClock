@@ -248,21 +248,10 @@ void AlarmClock::saveAlarm() {
   eeprom->saveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
 }
 
-void AlarmClock::serialTimeStampPrefix() {
-  Serial.print(F("(s"));
-  if(rtc->second() < 10) Serial.print('0');
-  Serial.print(rtc->second());
-  Serial.print(F(":i"));
-  Serial.print(inactivitySeconds);
-  Serial.print(F(": SRAM left: ")); Serial.print(freeRam());
-  Serial.print(F(") - "));
-  Serial.flush();
-}
-
 void AlarmClock::processSerialInput() {
   // take user input
   char input = Serial.read();
-  serial_input_flush();
+  serialInputFlush();
   // acceptable user input
   Serial.print(F("User input: "));
   Serial.println(input);
@@ -278,7 +267,7 @@ void AlarmClock::processSerialInput() {
         Serial.println(F("**** Set Brightness [0-255] ****"));
         while (Serial.available() == 0) {};
         int brightnessVal = Serial.parseInt();
-        serial_input_flush();
+        serialInputFlush();
         display->setBrightness(brightnessVal);
       }
       break;

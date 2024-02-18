@@ -8,6 +8,7 @@
   Prashant Kumar
 
 ***************************************************************************/
+#include "common.h"
 #include "rtc.h"
 #include "rgb_display.h"
 #include "alarm_clock.h"
@@ -30,14 +31,6 @@ PushButtonTaps pushBtn;   // Push Button object ** Initialization Order 6
 #if defined(TOUCHSCREEN_IS_XPT2046)
   Touchscreen ts;         // Touchscreen class object ** Initialization Order 7
 #endif
-
-extern "C" char* sbrk(int incr);
-
-// Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
-int freeRam() {
-  char top;
-  return &top - reinterpret_cast<char*>(sbrk(0));
-}
 
 void setup() {
 
@@ -107,7 +100,18 @@ void loop1() {
   alarmClock->nonPriorityTasksLoop();
 }
 
-void serial_input_flush() {
+
+// GLOBAL FUNCTIONS
+
+extern "C" char* sbrk(int incr);
+
+// Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
+int availableRam() {
+  char top;
+  return &top - reinterpret_cast<char*>(sbrk(0));
+}
+
+void serialInputFlush() {
   while (true) {
     delay(20);  // give data a chance to arrive
     if (Serial.available()) {
@@ -118,4 +122,17 @@ void serial_input_flush() {
     } else
       break;  // nothing arrived for 20 ms
   }
+}
+
+void serialTimeStampPrefix() {
+  Serial.print(F("(s"));
+  if(rtc->second() < 10) Serial.print('0');
+  Serial.print(rtc->second());
+  Serial.print(F(":i"));
+  if(alarmClock->inactivitySeconds < 100) Serial.print('0');
+  if(alarmClock->inactivitySeconds < 10) Serial.print('0');
+  Serial.print(alarmClock->inactivitySeconds);
+  Serial.print(F(": SRAM left: ")); Serial.print(availableRam());
+  Serial.print(F(") - "));
+  Serial.flush();
 }

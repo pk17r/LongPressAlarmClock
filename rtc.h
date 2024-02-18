@@ -24,18 +24,18 @@ public:
   uint8_t hour() { return rtcHw.hour(); }
   uint8_t day() { return rtcHw.day(); }
   uint8_t month() { return rtcHw.month(); }
-  uint8_t year() { return rtcHw.year() + 2000; }
+  uint16_t year() { return rtcHw.year() + 2000; }
   /**
   * \brief Returns actual Day Of Week
   *
   * @return Current stored Day Of Week
-  *   - #URTCLIB_WEEKDAY_SUNDAY
-  *   - #URTCLIB_WEEKDAY_MONDAY
-  *   - #URTCLIB_WEEKDAY_TUESDAY
-  *   - #URTCLIB_WEEKDAY_WEDNESDAY
-  *   - #URTCLIB_WEEKDAY_THURSDAY
-  *   - #URTCLIB_WEEKDAY_FRIDAY
-  *   - #URTCLIB_WEEKDAY_SATURDAY
+  *   - #URTCLIB_WEEKDAY_SUNDAY = 1
+  *   - #URTCLIB_WEEKDAY_MONDAY = 2
+  *   - #URTCLIB_WEEKDAY_TUESDAY = 3
+  *   - #URTCLIB_WEEKDAY_WEDNESDAY = 4
+  *   - #URTCLIB_WEEKDAY_THURSDAY = 5
+  *   - #URTCLIB_WEEKDAY_FRIDAY = 6
+  *   - #URTCLIB_WEEKDAY_SATURDAY = 7
   */
   uint8_t dayOfWeek() { return rtcHw.dayOfWeek(); }
   /**

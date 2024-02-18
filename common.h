@@ -24,7 +24,8 @@ extern PushButtonTaps pushBtn;
 extern Touchscreen ts;
 
 // extern all global functions
-extern int freeRam();
-extern void serial_input_flush();
+extern int availableRam();
+extern void serialInputFlush();
+extern void serialTimeStampPrefix();
 
 #endif // COMMON_H

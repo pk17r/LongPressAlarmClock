@@ -1,3 +1,4 @@
+#include "uRTCLib.h"
 #include "rtc.h"
 
 // RTC constructor
@@ -32,10 +33,6 @@ RTC::RTC() {
   else
     Serial.println(F("Oscillator will use VBAT if VCC cuts off."));
 
-  // we won't use RTC for alarm
-  rtcHw.alarmDisable(URTCLIB_ALARM_1);
-  rtcHw.alarmDisable(URTCLIB_ALARM_2);
-
   // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
   _second = rtcHw.second() + 2;
 
@@ -49,32 +46,49 @@ RTC::RTC() {
 
 // setup DS3231 rtc for the first time, no problem doing it again
 void RTC::firstTimeRtcSetup() {
-  // Set Oscillator to use VBAT when VCC turns off
-  if(rtcHw.enableBattery())
-    Serial.println(F("Enable Battery Success"));
-  else
-    Serial.println(F("Enable Battery UNSUCCESSFUL!"));
+  // Set Oscillator to use VBAT when VCC turns off if not set
+  if(!rtcHw.getEOSCFlag()) {
+    if(rtcHw.enableBattery())
+      Serial.println(F("Enable Battery Success"));
+    else
+      Serial.println(F("Enable Battery UNSUCCESSFUL!"));
+  }
 
-  // disable SQ wave out
-  rtcHw.disable32KOut();
-  Serial.println(F("disable32KOut() done"));
+  // disable 32K Pin Sq Wave out if on
+  if(rtcHw.status32KOut()) {
+    rtcHw.disable32KOut();
+    Serial.println(F("disable32KOut() done"));
+  }
 
-  // stop sq wave on sqw pin
-  rtcHw.sqwgSetMode(URTCLIB_SQWG_OFF_1);
-  Serial.println(F("stop sq wave on sqw pin. Mode set: URTCLIB_SQWG_OFF_1"));
+  // disable Sqw Pin Wave out if on
+  if(rtcHw.sqwgMode() != URTCLIB_SQWG_OFF_1) {
+    rtcHw.sqwgSetMode(URTCLIB_SQWG_OFF_1);
+    Serial.println(F("stop sq wave on sqw pin. Mode set: URTCLIB_SQWG_OFF_1"));
+  }
 
-  // clear alarms flags
-  rtcHw.alarmClearFlag(URTCLIB_ALARM_1);
-  rtcHw.alarmClearFlag(URTCLIB_ALARM_2);
-  Serial.println(F("alarmClearFlag() done"));
+  // clear alarms flags if any
+  if(rtcHw.alarmTriggered(URTCLIB_ALARM_1)) {
+    rtcHw.alarmClearFlag(URTCLIB_ALARM_1);
+    Serial.println(F("URTCLIB_ALARM_1 alarm flag cleared."));
+  }
+  if(rtcHw.alarmTriggered(URTCLIB_ALARM_2)) {
+    rtcHw.alarmClearFlag(URTCLIB_ALARM_2);
+    Serial.println(F("URTCLIB_ALARM_2 alarm flag cleared."));
+  }
 
-  // disable alarms
-  rtcHw.alarmDisable(URTCLIB_ALARM_1);
-  rtcHw.alarmDisable(URTCLIB_ALARM_2);
-  Serial.println(F("alarmDisable() done"));
+  // we won't use RTC for alarm, disable if enabled
+  if(rtcHw.alarmMode(URTCLIB_ALARM_1) != URTCLIB_ALARM_TYPE_1_NONE) {
+    rtcHw.alarmDisable(URTCLIB_ALARM_1);
+    Serial.println(F("URTCLIB_ALARM_1 disabled."));
+  }
+  if(rtcHw.alarmMode(URTCLIB_ALARM_2) != URTCLIB_ALARM_TYPE_2_NONE) {
+    rtcHw.alarmDisable(URTCLIB_ALARM_2);
+    Serial.println(F("URTCLIB_ALARM_2 disabled."));
+  }
 
-  // set rtcHw in 12 hour mode
-  rtcHw.set_12hour_mode(true);
+  // set rtcHw in 12 hour mode if not already
+  if(rtcHw.hourModeAndAmPm() == 0)
+    rtcHw.set_12hour_mode(true);
 }
 
 void RTC::refresh() {
@@ -117,5 +131,5 @@ void RTC::setRtcTimeAndDate() {
   rtcHw.set(0, 30, 2, 6, 26, 1, 24);
   //  RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   Serial.println(F("Time set"));
-  serial_input_flush();
+  serialInputFlush();
 }
