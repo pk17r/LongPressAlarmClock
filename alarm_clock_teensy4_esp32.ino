@@ -28,6 +28,11 @@ AlarmClock* alarm_clock = NULL;  // ptr to alarm clock class object that control
 RGBDisplay* display = NULL;   // ptr to display class object that manages the display
 Touchscreen* ts = NULL;         // Touchscreen class object
 
+// LOCAL PROGRAM VARIABLES
+
+// counter to note when time is not being updated, thereafter reboot system
+unsigned long last_seconds_update_millis = 0;
+
 // setup core0
 void setup() {
 
@@ -108,7 +113,7 @@ void loop() {
   else
     digitalWrite(LED_PIN, LOW);
 
-  // new second!
+  // new second! Update Time!
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
@@ -196,15 +201,24 @@ void loop() {
     //     // Serial.println("Idled core1");
     //     break;
     // }
+
+    // counter to note when time is not being updated, thereafter reboot system. Needs to be at end of seconds update control
+    last_seconds_update_millis = millis();
   }
 
   // make screensaver motion fast
   if(current_page == kScreensaverPage)
     display->Screensaver();
 
-  // accept user inputs
+  // accept user serial inputs
   if (Serial.available() != 0)
     ProcessSerialInput();
+
+  // check if time is not being updated, then reset system
+  if(millis() - last_seconds_update_millis > 3000) {
+    Serial.println(); Serial.println("**** Time Stuck. Rebooting! ****"); Serial.println(); Serial.flush();
+    rp2040.reboot();
+  }
 
   // #if defined(MCU_IS_ESP32)
   //     // if button is inactive, then go to sleep
@@ -239,6 +253,12 @@ void loop1() {
         // try once more if did not get info
         wifi_stuff->GetTimeFromNtpServer();
       }
+    }
+    else if(second_core_task == kConnectWiFi) {
+      wifi_stuff->TurnWiFiOn();
+    }
+    else if(second_core_task == kDisconnectWiFi) {
+      wifi_stuff->TurnWiFiOff();
     }
 
     // done processing the task
@@ -457,6 +477,7 @@ void ProcessSerialInput() {
       break;
     case 'o' :  // On Screen User Text Input
       {
+        Serial.println(F("**** On Screen User Text Input ****"));
         SetPage(kSettingsPage);
         // user input string
         char label[] = "SSID";
@@ -465,6 +486,18 @@ void ProcessSerialInput() {
         display->GetUserOnScreenTextInput(label, returnText);
         Serial.print("User Input :"); Serial.println(returnText);
         SetPage(kSettingsPage);
+      }
+      break;
+    case 'c' :  // connect to WiFi
+      {
+        Serial.println(F("**** Connect to WiFi ****"));
+        second_core_task = kConnectWiFi;
+      }
+      break;
+    case 'd' :  // disconnect WiFi
+      {
+        Serial.println(F("**** Disconnect WiFi ****"));
+        second_core_task = kDisconnectWiFi;
       }
       break;
     default:

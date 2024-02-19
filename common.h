@@ -46,6 +46,8 @@ enum SecondCoreTask {
   kNoTask = 0,
   kGetWeatherInfo ,
   kUpdateTimeFromNtpServer,
+  kConnectWiFi,
+  kDisconnectWiFi,
   kTaskCompleted
   };
 
