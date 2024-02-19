@@ -39,7 +39,7 @@ public:
   void SetAlarmScreen(bool process_user_input);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void SettingsPage();
-  void GetUserOnScreenTextInput(char* return_text);
+  void GetUserOnScreenTextInput(char* label, char* return_text);
 
   // functions
   void Setup();
@@ -83,14 +83,14 @@ private:
   void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void PickNewRandomColor();  // for screensaver
-  void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
+  void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
-  void MakeKeyboard(const char type[][13]);
+  void MakeKeyboard(const char type[][13], char* label);
   void DrawKeyboardButton(int x, int y, int w, int h);
   byte IsTouchWithin(int x, int y, int w, int h);
-  void GetKeyboardPress(char * textBuffer, char * textReturn);
+  bool GetKeyboardPress(char * textBuffer, char* label, char * textReturn);
 
 
 // PRIVATE VARIABLES
@@ -131,8 +131,9 @@ private:
   const int16_t kDisplayTextGap = 5;
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
-  const int16_t kSettingsPageBackButtonY1 = kTftHeight - 50;
   const int16_t kRadiusButtonRoundRect = 5;
+  const char cancelStr[2] = "X";
+  const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
 
   // color definitions
   const uint16_t  kDisplayColorBlack        = 0x0000;
@@ -427,6 +428,7 @@ private:
   };
 
   const int16_t kTextAreaHeight = 100;
+  
 
 };
 

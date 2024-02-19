@@ -87,7 +87,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
   int16_t incB_y = time_y - 3*gap_y, decB_y = time_y + gap_y;
   uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
   uint16_t button_w = 2*gap_x, button_h = 2*gap_y;
-  char onStr[] = "ON", offStr[] = "OFF", setStr[] = "Set", cancelStr[] = "X";
+  const char onStr[] = "ON", offStr[] = "OFF", setStr[] = "Set";
 
   if(!processUserInput) {
     // make alarm set page
@@ -337,7 +337,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
   }
 }
 
-void RGBDisplay::DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
+void RGBDisplay::DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
   tft.setFont(&FreeSans12pt7b);
   tft.setTextColor((isOn ? onFill : offFill));
   int16_t title_x0, title_y0;
@@ -406,8 +406,7 @@ void RGBDisplay::SettingsPage() {
 
 
   // Cancel button
-  char cancelStr[] = "X";
-  DrawButton(kSettingsGearX1, kSettingsPageBackButtonY1, kSettingsGearWidth, kSettingsGearHeight, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
@@ -1042,10 +1041,9 @@ ScreenPage RGBDisplay::ClassifyMainPageTouchInput() {
     }
 
     // cancel button
-    if(ts_x >= kSettingsGearX1 && ts_y >= kSettingsPageBackButtonY1) {
+    if(ts_x >= kCancelButtonX1 && ts_y >= kCancelButtonY1) {
       // show a little graphic of Cancel button Press
-      char cancelStr[] = "X";
-      DrawButton(kSettingsGearX1, kSettingsPageBackButtonY1, kSettingsGearWidth, kSettingsGearHeight, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kMainPage;
     }
@@ -1205,8 +1203,14 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
 }
 
 // make keyboard on screen
-void RGBDisplay::MakeKeyboard(const char type[][13]) {
+void RGBDisplay::MakeKeyboard(const char type[][13], char* label) {
   tft.setTextSize(2);
+  // heading label
+  tft.setCursor(9, 10);
+  tft.setTextColor(kTextRegularColor, kDisplayBackroundColor);
+  tft.print(F("Enter ")); tft.print(label); tft.print(F(":"));
+
+  // keys
   tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
   for (int y = 0; y < 3; y++)
   {
@@ -1246,6 +1250,11 @@ void RGBDisplay::MakeKeyboard(const char type[][13]) {
   DrawKeyboardButton(47, kTextAreaHeight + 90, 140, 25);
   tft.setCursor(65, kTextAreaHeight + 95);
   tft.print(F("SPACE BAR"));
+
+  // Cancel button
+  DrawKeyboardButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize);
+  tft.setCursor(kCancelButtonX1 + 15, kCancelButtonY1 + 10);
+  tft.print(F("X"));
 }
 
 // helper function for MakeKeyboard
@@ -1266,13 +1275,19 @@ byte RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
 }
 
 // get keyboard presses on keyboard made by MakeKeyboard
-void RGBDisplay::GetKeyboardPress(char * textBuffer, char * textReturn) {
+bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textReturn) {
   char key = 0;
   static bool shift = true, special = false, back = false, lastSp = false, lastSh = false;
   static char bufIndex = 0;
 
   if (ts->IsTouched())
   {
+    // check if cancel button is pressed
+    if (IsTouchWithin(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize))
+    {
+      return true;
+    }
+
     //ShiftKey
     if (IsTouchWithin(5, kTextAreaHeight + 60, 30, 25))
     {
@@ -1294,12 +1309,12 @@ void RGBDisplay::GetKeyboardPress(char * textBuffer, char * textReturn) {
         if (shift)
         {
           tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_SymKeys);
+          MakeKeyboard(Mobile_SymKeys, label);
         }
         else
         {
           tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_NumKeys);
+          MakeKeyboard(Mobile_NumKeys, label);
         }
       }
       else
@@ -1307,13 +1322,13 @@ void RGBDisplay::GetKeyboardPress(char * textBuffer, char * textReturn) {
         if (shift)
         {
           tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_KB_Capitals);
+          MakeKeyboard(Mobile_KB_Capitals, label);
           tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
         }
         else
         {
           tft.fillScreen(kDisplayBackroundColor);
-          MakeKeyboard(Mobile_KB_Smalls);
+          MakeKeyboard(Mobile_KB_Smalls, label);
           tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
         }
       }
@@ -1421,29 +1436,34 @@ void RGBDisplay::GetKeyboardPress(char * textBuffer, char * textReturn) {
   tft.setCursor(15, kTextAreaHeight - 30);
   tft.print(textBuffer);
   // Serial.println(textBuffer);
+  return false;
 }
 
 // get user text input from on-screen keyboard
-void RGBDisplay::GetUserOnScreenTextInput(char* return_text) {
+void RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
   tft.fillScreen(kDisplayBackroundColor);
-  MakeKeyboard(Mobile_KB_Capitals);
+  tft.setFont(NULL);
+
+  MakeKeyboard(Mobile_KB_Capitals, label);
   // buffer for user input
-  char user_input_buffer[kWifiSsidPasswordLengthMax + 1];
+  char user_input_buffer[kWifiSsidPasswordLengthMax + 1] = "";
 
   // get user input
   while(1) {
     // See if there's any  touch data for us
-    GetKeyboardPress(user_input_buffer, return_text);
+    if(GetKeyboardPress(user_input_buffer, label, return_text))
+      break;
     
     //print the text
-    tft.setCursor(0,10);
+    tft.setCursor(10,30);
     tft.println(return_text);
-    Serial.println(return_text);
     if(strcmp(return_text, "") != 0) {
-      delay(1000);
+      Serial.println(return_text);
+      delay(2000);
       break;
     }
   }
+  tft.setTextSize(1);
 }
 
 // void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
