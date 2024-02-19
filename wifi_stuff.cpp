@@ -3,6 +3,8 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include "eeprom.h"
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 
 void WiFiStuff::RetrieveWiFiDetails() {
   eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
@@ -138,6 +140,8 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       Serial.print("weather_temp_min "); Serial.println(weather_temp_min_);
       Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed_);
       Serial.print("weather_humidity "); Serial.println(weather_humidity_);
+
+      GetTimeUpdate();
     }
   }
   else {
@@ -146,4 +150,104 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // turn off WiFi
   TurnWiFiOff();
+}
+
+void WiFiStuff::GetTimeUpdate() {
+  const char* NTP_SERVER = "pool.ntp.org";
+  const long  GMT_OFFSET_SEC = -8*60*60;
+  const int   DAYLIGHT_OFFSET_SEC = 60*60;
+
+  // Define an NTP Client object
+  WiFiUDP udpSocket;
+  NTPClient ntpClient(udpSocket, NTP_SERVER, GMT_OFFSET_SEC);
+
+  ntpClient.begin();
+  ntpClient.update();
+
+  unsigned long epoch_since_1970 = ntpClient.getEpochTime();
+  int hours = ntpClient.getHours();
+  int minutes = ntpClient.getMinutes();
+  int seconds = ntpClient.getSeconds();
+  int dayOfWeekSunday0 = ntpClient.getDay();
+
+  ntpClient.end();
+
+  Serial.println("TIME FROM NTP SERVER:");
+  Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.print(seconds); Serial.print("  DoW: "); Serial.print(kDaysTable_[dayOfWeekSunday0]); Serial.print("  EpochTime: "); Serial.println(epoch_since_1970);
+
+  ConvertEpochIntoDate(epoch_since_1970);
+
+  // // test
+  // Serial.println();
+  // Serial.print("Test Date:  8/20/2024   "); ConvertEpochIntoDate(1724195000);
+  // Serial.print("Test Date:  10/20/2024   "); ConvertEpochIntoDate(1729385200);
+  // Serial.print("Test Date:  10/10/2029   "); ConvertEpochIntoDate(1886367800);
+  // Serial.print("Test Date:  3/1/2036   "); ConvertEpochIntoDate(2087942600);
+  // Serial.print("Test Date:  12/31/2024   "); ConvertEpochIntoDate(1735603400);
+  // Serial.print("Test Date:  1/1/2025   "); ConvertEpochIntoDate(1735689800);
+  // Serial.print("Test Date:  1/31/2025   "); ConvertEpochIntoDate(1738281800);
+  // Serial.print("Test Date:  3/1/2028   "); ConvertEpochIntoDate(1835481800);
+
+}
+
+void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970) {
+
+  unsigned long epoch_Jan_1_2023_12_AM = 1704067200;
+  float day = static_cast<float>(epoch_since_1970 - epoch_Jan_1_2023_12_AM) / (24*60*60);
+  int year = 2024, monthJan0 = 0;
+  // calculate year
+  while(1) {
+    if(day - 365 - (year % 4 == 0 ? 1 : 0) < 0)
+      break;
+    day -= 365 + (year % 4 == 0 ? 1 : 0);
+    year++;
+  }
+  // calculate month
+  // jan
+  if(day - 31 > 0) {
+    monthJan0++; day -= 31;
+    // feb
+    if(day - 28 - (year % 4 == 0 ? 1 : 0) > 0) {
+      monthJan0++; day -= 28 + (year % 4 == 0 ? 1 : 0);
+      // march
+      if(day - 31 > 0) {
+        monthJan0++; day -= 31;
+        // apr
+        if(day - 30 > 0) {
+          monthJan0++; day -= 30;
+          // may
+          if(day - 31 > 0) {
+            monthJan0++; day -= 31;
+            // jun
+            if(day - 30 > 0) {
+              monthJan0++; day -= 30;
+              // jul
+              if(day - 31 > 0) {
+                monthJan0++; day -= 31;
+                // aug
+                if(day - 31 > 0) {
+                  monthJan0++; day -= 31;
+                  // sep
+                  if(day - 30 > 0) {
+                    monthJan0++; day -= 30;
+                    // oct
+                    if(day - 31 > 0) {
+                      monthJan0++; day -= 31;
+                      // nov
+                      if(day - 30 > 0) {
+                        monthJan0++; day -= 30;
+                        // dec
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  int today = ceil(day);
+  Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(day,2); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
 }
