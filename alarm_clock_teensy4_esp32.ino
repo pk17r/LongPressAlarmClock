@@ -226,6 +226,14 @@ void loop1() {
         wifi_stuff->GetTimeFromNtpServer();
       }
     }
+    else if(second_core_task == kOnScreenTextInput) {
+      // user input string
+      char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+      // get user input from screen
+      display->GetUserOnScreenTextInput(returnText);
+      Serial.print("User Input :"); Serial.println(returnText);
+      SetPage(kSettingsPage);
+    }
 
     // done processing the task
     // set the core up to be idled from core0
@@ -441,6 +449,9 @@ void ProcessSerialInput() {
         second_core_task = kUpdateTimeFromNtpServer;
       }
       break;
+    case 'o' :  // On Screen User Text Input
+      SetPage(kSettingsPage);
+      second_core_task = kOnScreenTextInput;
     default:
       Serial.println(F("Unrecognized user input"));
   }

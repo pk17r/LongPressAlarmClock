@@ -13,8 +13,6 @@ public:
   void RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password);
   void SaveWiFiDetails(char* wifi_ssid, char* wifi_password);
 
-  const unsigned int kWifiSsidPasswordLengthMax = 32;
-
 private:
 
   // uEEPROMLib eeprom for AT24C32 EEPROM

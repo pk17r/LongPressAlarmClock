@@ -41,6 +41,6 @@ const char *const kMonthsTable[12] = { kMonthJan, kMonthFeb, kMonthMar, kMonthAp
 const char kAmLabel[3] = "AM", kPmLabel[3] = "PM", kOffLabel[4] = "Off", kAlarmLabel[6] = "Alarm";
 const char kCharSpace = ' ', kCharZero = '0';
 
-
+const unsigned int kWifiSsidPasswordLengthMax = 32;
 
 #endif  // GENERAL_CONSTANTS_H

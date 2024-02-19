@@ -23,6 +23,7 @@
 #include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
 #include <elapsedMillis.h>
+#include <avr/pgmspace.h>
 
 
 class RGBDisplay {
@@ -38,6 +39,7 @@ public:
   void SetAlarmScreen(bool process_user_input);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void SettingsPage();
+  void GetUserOnScreenTextInput(char* return_text);
 
   // functions
   void Setup();
@@ -84,6 +86,12 @@ private:
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+  // keyboard functions
+  void MakeKeyboard(const char type[][13]);
+  void DrawKeyboardButton(int x, int y, int w, int h);
+  byte IsTouchWithin(int x, int y, int w, int h);
+  void GetKeyboardPress(char * textBuffer, char * textReturn);
+
 
 // PRIVATE VARIABLES
 
@@ -136,7 +144,7 @@ private:
   const uint16_t  kDisplayColorMagenta      = 0xF81F;
   const uint16_t  kDisplayColorYellow       = 0xFFE0;
   const uint16_t  kDisplayColorWhite        = 0xFFFF;
-
+  
   // https://github.com/newdigate/rgb565_colors
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue
   #define RGB565_Light_sky_blue                                              		0x867E         // Light Sky Blue                          	#87CEFA			https://en.wikipedia.org/wiki/Shades_of_azure#Light_sky_blue
@@ -180,6 +188,10 @@ private:
   const uint16_t        kDisplayDateColor         = kDisplayColorGreen;
   const uint16_t        kDisplayAlarmColor        = kDisplayColorCyan;
   const uint16_t        kDisplayBackroundColor    = kDisplayColorBlack;
+  // keyboard colors
+  const uint16_t  kTextRegularColor          = kDisplayColorWhite;
+  const uint16_t  kTextHighLightColor        = kDisplayBackroundColor;
+  const uint16_t  kKeyboardButtonFillColor   = kDisplayColorRed;
 
   // BIG BELL ICONS
 
@@ -387,6 +399,34 @@ private:
     0x01, 0x83, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x00, 0x00, 0x01, 0xff, 0x00, 0x00, 0x00, 0x00, 
     0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
   };
+
+  // KEYBOARD
+
+  const char Mobile_KB_Capitals[3][13] PROGMEM = {
+    {0, 13, 10, 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'},
+    {1, 12, 9, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'},
+    {3, 10, 7, 'Z', 'X', 'C', 'V', 'B', 'N', 'M'},
+  };
+
+  const char Mobile_KB_Smalls[3][13] PROGMEM = {
+    {0, 13, 10, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
+    {1, 12, 9, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'},
+    {3, 10, 7, 'z', 'x', 'c', 'v', 'b', 'n', 'm'},
+  };
+
+  const char Mobile_NumKeys[3][13] PROGMEM = {
+    {0, 13, 10, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'},
+    {0, 13, 10, '-', '/', ':', ';', '(', ')', '$', '&', '@', '"'},
+    {5, 8, 5, '.', ',', '?', '!', '\''}
+  };
+
+  const char Mobile_SymKeys[3][13] PROGMEM = {
+    {0, 13, 10, '[', ']', '{', '}', '#', '%', '^', '*', '+', '='},
+    {4, 9, 6, '_', '\\', '|', '~', '<', '>'}, //4
+    {5, 8, 5, '.', ',', '?', '!', '\''}
+  };
+
+  const int16_t kTextAreaHeight = 100;
 
 };
 

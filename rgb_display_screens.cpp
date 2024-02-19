@@ -391,7 +391,7 @@ void RGBDisplay::SettingsPage() {
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
-  while(i <= eeprom->kWifiSsidPasswordLengthMax) {
+  while(i <= kWifiSsidPasswordLengthMax) {
     char c = *(wifi_stuff->wifi_password_ + i);
     if(c == '\0')
      break;
@@ -1201,6 +1201,248 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
     tft.drawPixel(cx - rcos, cy + rsin, color);
     tft.drawPixel(cx + rcos, cy - rsin, color);
     tft.drawPixel(cx - rcos, cy - rsin, color);
+  }
+}
+
+// make keyboard on screen
+void RGBDisplay::MakeKeyboard(const char type[][13]) {
+  tft.setTextSize(2);
+  tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+  for (int y = 0; y < 3; y++)
+  {
+    int ShiftRight = 10 * pgm_read_byte(&(type[y][0]));
+    for (int x = 3; x < 13; x++)
+    {
+      if (x >= pgm_read_byte(&(type[y][1]))) break;
+
+      DrawKeyboardButton(8 + (23 * (x - 3)) + ShiftRight, kTextAreaHeight + (30 * y), 20,25); // this will draw the button on the screen by so many pixels
+      tft.setCursor(12 + (23 * (x - 3)) + ShiftRight, kTextAreaHeight+5 + (30 * y));
+      tft.print(char(pgm_read_byte(&(type[y][x]))));
+    }
+  }
+  //ShiftKey
+  DrawKeyboardButton(5, kTextAreaHeight + 60, 30, 25);
+  tft.setTextColor(kTextHighLightColor, kKeyboardButtonFillColor);
+  tft.setCursor(15, kTextAreaHeight + 65);
+  tft.print('^');
+
+  //Special Characters
+  DrawKeyboardButton(5, kTextAreaHeight + 90, 30, 25);
+  tft.setCursor(9, kTextAreaHeight + 95);
+  tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+  tft.print(F("SP"));
+
+  //BackSpace
+  DrawKeyboardButton(200, kTextAreaHeight + 60, 30, 25);
+  tft.setCursor(204, kTextAreaHeight + 65);
+  tft.print(F("BS"));
+
+  //Return
+  DrawKeyboardButton(200, kTextAreaHeight + 90, 30, 25);
+  tft.setCursor(204, kTextAreaHeight + 95);
+  tft.print(F("RT"));
+
+  //Spacebar
+  DrawKeyboardButton(47, kTextAreaHeight + 90, 140, 25);
+  tft.setCursor(65, kTextAreaHeight + 95);
+  tft.print(F("SPACE BAR"));
+}
+
+// helper function for MakeKeyboard
+void RGBDisplay::DrawKeyboardButton(int x, int y, int w, int h) {
+  // grey
+  tft.fillRoundRect(x - 3, y + 3, w, h, 3, 0x8888); //Button Shading
+
+  // white
+  tft.fillRoundRect(x, y, w, h, 3, 0xffff);// outter button color
+
+  //red
+  tft.fillRoundRect(x + 1, y + 1, w - 1 * 2, h - 1 * 2, 3, kKeyboardButtonFillColor); //inner button color
+}
+
+byte RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
+  // tft.fillCircle(X, Y, 2, 0x0FF0);
+  return ((((ts->GetTouchedPixel())->x>=x)&&((ts->GetTouchedPixel())->x<=x + w)) & (((ts->GetTouchedPixel())->y>=y)&&((ts->GetTouchedPixel())->y<=y + h)));
+}
+
+// get keyboard presses on keyboard made by MakeKeyboard
+void RGBDisplay::GetKeyboardPress(char * textBuffer, char * textReturn) {
+  char key = 0;
+  static bool shift = true, special = false, back = false, lastSp = false, lastSh = false;
+  static char bufIndex = 0;
+
+  if (ts->IsTouched())
+  {
+    //ShiftKey
+    if (IsTouchWithin(5, kTextAreaHeight + 60, 30, 25))
+    {
+      shift = !shift;
+      delay(200);
+    }
+
+    //Special Characters
+    if (IsTouchWithin(5, kTextAreaHeight + 90, 30, 25))
+    {
+      special = !special;
+      delay(200);
+    }
+
+    if (special != lastSp || shift != lastSh)
+    {
+      if (special)
+      {
+        if (shift)
+        {
+          tft.fillScreen(kDisplayBackroundColor);
+          MakeKeyboard(Mobile_SymKeys);
+        }
+        else
+        {
+          tft.fillScreen(kDisplayBackroundColor);
+          MakeKeyboard(Mobile_NumKeys);
+        }
+      }
+      else
+      {
+        if (shift)
+        {
+          tft.fillScreen(kDisplayBackroundColor);
+          MakeKeyboard(Mobile_KB_Capitals);
+          tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+        }
+        else
+        {
+          tft.fillScreen(kDisplayBackroundColor);
+          MakeKeyboard(Mobile_KB_Smalls);
+          tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+        }
+      }
+
+      if (special)
+        tft.setTextColor(kTextHighLightColor, kKeyboardButtonFillColor);
+      else
+        tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+
+      tft.setCursor(9, kTextAreaHeight + 95);
+      tft.print(F("SP"));
+
+      if (shift)
+        tft.setTextColor(kTextHighLightColor, kKeyboardButtonFillColor);
+      else
+        tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+
+      tft.setCursor(15, kTextAreaHeight + 65);
+      tft.print('^');
+
+      lastSh = shift;
+
+      lastSp = special;
+      lastSh = shift;
+    }
+
+    for (int y = 0; y < 3; y++)
+    {
+      int ShiftRight;
+      if (special)
+      {
+        if (shift)
+          ShiftRight = 10 * pgm_read_byte(&(Mobile_SymKeys[y][0]));
+        else
+          ShiftRight = 10 * pgm_read_byte(&(Mobile_NumKeys[y][0]));
+      }
+      else
+      {
+        if (shift)
+          ShiftRight = 10 * pgm_read_byte(&(Mobile_KB_Capitals[y][0]));
+        else
+          ShiftRight = 10 * pgm_read_byte(&(Mobile_KB_Smalls[y][0]));
+      }
+
+      for (int x = 3; x < 13; x++)
+      {
+        if (x >=  (special ? (shift ? pgm_read_byte(&(Mobile_SymKeys[y][1])) : pgm_read_byte(&(Mobile_NumKeys[y][1]))) : pgm_read_byte(&(Mobile_KB_Capitals[y][1])) )) break;
+
+        if (IsTouchWithin(8 + (23 * (x - 3)) + ShiftRight, kTextAreaHeight + (30 * y), 20,25)) // this will draw the button on the screen by so many pixels
+        {
+          if (bufIndex < (kWifiSsidPasswordLengthMax))
+          {
+            delay(200);
+
+            if (special)
+            {
+              if (shift)
+                textBuffer[bufIndex] = pgm_read_byte(&(Mobile_SymKeys[y][x]));
+              else
+                textBuffer[bufIndex] = pgm_read_byte(&(Mobile_NumKeys[y][x]));
+            }
+            else
+              textBuffer[bufIndex] = (pgm_read_byte(&(Mobile_KB_Capitals[y][x])) + (shift ? 0 : ('a' - 'A')));
+
+            bufIndex++;
+          }
+          break;
+        }
+      }
+    }
+
+    //Spacebar
+    if (IsTouchWithin(47, kTextAreaHeight + 90, 140, 25))
+    {
+      textBuffer[bufIndex++] = ' ';
+      delay(200);
+    }
+
+    //BackSpace
+    if (IsTouchWithin(200, kTextAreaHeight + 60, 30, 25))
+    {
+      if ((bufIndex) > 0)
+        bufIndex--;
+      textBuffer[bufIndex] = 0;
+      // clear writing pad
+      tft.fillRect(15, kTextAreaHeight - 30, tft.width() - 40, 20, kDisplayBackroundColor);
+      delay(200);
+    }
+
+    //Return
+    if (IsTouchWithin(200, kTextAreaHeight + 90, 30, 25))
+    {
+      // Serial.println(textBuffer);
+      strcpy(textReturn, textBuffer);
+      while (bufIndex > 0)
+      {
+        bufIndex--;
+        textBuffer[bufIndex] = 0;
+      }
+      // clear writing pad
+      tft.fillRect(15, kTextAreaHeight - 30, tft.width() - 40, 20, kDisplayBackroundColor);
+    }
+  }
+  tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
+  tft.setCursor(15, kTextAreaHeight - 30);
+  tft.print(textBuffer);
+  // Serial.println(textBuffer);
+}
+
+// get user text input from on-screen keyboard
+void RGBDisplay::GetUserOnScreenTextInput(char* return_text) {
+  tft.fillScreen(kDisplayBackroundColor);
+  MakeKeyboard(Mobile_KB_Capitals);
+  // buffer for user input
+  char user_input_buffer[kWifiSsidPasswordLengthMax + 1];
+
+  // get user input
+  while(1) {
+    // See if there's any  touch data for us
+    GetKeyboardPress(user_input_buffer, return_text);
+    
+    //print the text
+    tft.setCursor(0,10);
+    tft.println(return_text);
+    Serial.println(return_text);
+    if(strcmp(return_text, "") != 0) {
+      delay(1000);
+      break;
+    }
   }
 }
 
