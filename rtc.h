@@ -16,8 +16,6 @@ public:
   // to update rtc's time and date
   void SetRtcTimeAndDate();
 
-  void Refresh();
-
   uint8_t second() { return second_; }
   uint8_t minute() { return rtc_hw_.minute(); }
   uint8_t hour() { return rtc_hw_.hour(); }
@@ -47,6 +45,12 @@ public:
   * @return byte with value 0, 1 or 2
   */
   uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
+
+
+protected:
+
+  // protected function to refresh time from RTC HW and do basic power failure checks
+  void Refresh();
 
 
 private:

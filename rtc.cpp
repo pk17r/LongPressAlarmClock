@@ -13,7 +13,7 @@ RTC::RTC() {
   rtc_hw_.set_model(URTCLIB_MODEL_DS3231);
 
   // get data from DS3231 HW
-  rtc_hw_.refresh();
+  Refresh();
 
   // setup DS3231 rtc for the first time, no problem doing it again
   FirstTimeRtcSetup();
@@ -33,8 +33,8 @@ RTC::RTC() {
   else
     Serial.println(F("Oscillator will use VBAT if VCC cuts off."));
 
-  // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
-  second_ = rtc_hw_.second() + 2;
+  // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
+  // second_ = rtc_hw_.second() + 2;
 
   // seconds interrupt pin
   pinMode(SQW_INT_PIN, INPUT_PULLUP);
@@ -91,6 +91,7 @@ void RTC::FirstTimeRtcSetup() {
     rtc_hw_.set_12hour_mode(true);
 }
 
+// protected function to refresh time from RTC HW and do basic power failure checks
 void RTC::Refresh() {
 
   // refresh time in class object from RTC HW
@@ -119,8 +120,10 @@ void RTC::SecondsUpdateInterruptISR() {
   // a flag for others that time has updated!
   rtc_hw_sec_update_ = true;
 
-  if(second_ >= 60)
+  if(second_ >= 60) {
+    rtc->Refresh();
     rtc_hw_min_update_ = true;
+  }
 }
 
 // to update rtcHw's time and date

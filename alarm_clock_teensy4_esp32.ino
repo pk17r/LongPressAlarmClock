@@ -40,7 +40,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(100);
-  // while(!Serial) { delay(20); };
+  while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
 
   // make all SPI CS pins high
@@ -80,7 +80,7 @@ void setup() {
 
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
-  // if button pressed or touchscreen touched
+  // check if button pressed or touchscreen touched
   if(push_button->checkButtonStatus() != 0 || ts->IsTouched()) {
     // show instant response by turing up brightness
     display->SetMaxBrightness();
@@ -102,13 +102,13 @@ void loop() {
     inactivity_seconds = 0;
   }
 
-  // if user presses button, show response by turning On LED
+  // if user presses button, show instant response by turning On LED
   if(push_button->buttonActiveDebounced())
     digitalWrite(LED_PIN, HIGH);
   else
     digitalWrite(LED_PIN, LOW);
 
-  // process time actions every second
+  // new second!
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
@@ -117,18 +117,19 @@ void loop() {
 
     SerialTimeStampPrefix();
 
-    // get time update on new minute
+    // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
 
-      rtc->Refresh();
-
-      SerialTimeStampPrefix();
-
-      // if user has been inactive, then set brightness based on time of day
-      // set display brightness based on time
-      if(inactivity_seconds >= kInactivitySecondsLimit)
-        display->CheckTimeAndSetBrightness();
+      // Activate Buzzer if Alarm Time has arrived
+      if(alarm_clock->MinutesToAlarm() == 0) {
+        // go to buzz alarm function and show alarm triggered screen!
+        alarm_clock->BuzzAlarmFn();
+        // returned from Alarm Triggered Screen and Good Morning Screen
+        // set main page
+        SetPage(kMainPage);
+        inactivity_seconds = 0;
+      }
 
       // if screensaver is On, then update time on it
       if(current_page == kScreensaverPage)
@@ -151,28 +152,15 @@ void loop() {
 
       #endif
 
-      // Activate Buzzer at Alarm Time
-      if(alarm_clock->MinutesToAlarm() == 0) {
-        // go to buzz alarm function
-        alarm_clock->BuzzAlarmFn();
-        // returned from Alarm Triggered Screen and Good Morning Screen
-        // refresh time
-        rtc->Refresh();
-        // prepare date and time arrays
-        PrepareTimeDayDateArrays();
-        // set main page back
-        SetPage(kMainPage);
-        inactivity_seconds = 0;
-      }
     }
 
     // prepare date and time arrays
     PrepareTimeDayDateArrays();
 
     // check for inactivity
-    if(inactivity_seconds <= kInactivitySecondsLimit) {
+    if(inactivity_seconds < kInactivitySecondsLimit) {
       inactivity_seconds++;
-      if(inactivity_seconds >= kInactivitySecondsLimit) {
+      if(inactivity_seconds == kInactivitySecondsLimit) {
         // set display brightness based on time
         display->CheckTimeAndSetBrightness();
         // turn screen saver On
@@ -386,10 +374,6 @@ void ProcessSerialInput() {
         Serial.println(F("**** buzzAlarm Function ****"));
         // go to buzz alarm function
         alarm_clock->BuzzAlarmFn();
-        // refresh time
-        rtc->Refresh();
-        // prepare date and time arrays
-        PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds = 0;
@@ -407,10 +391,6 @@ void ProcessSerialInput() {
         delay(1000);
         display->AlarmTriggeredScreen(false, 14);
         delay(1000);
-        // refresh time
-        rtc->Refresh();
-        // prepare date and time arrays
-        PrepareTimeDayDateArrays();
         // set main page back
         SetPage(kMainPage);
         inactivity_seconds = 0;
