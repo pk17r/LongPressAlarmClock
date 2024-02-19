@@ -553,6 +553,16 @@ void RGBDisplay::Screensaver() {
     if(show_colored_edge_screensaver_)
       my_canvas_->drawRect(0,0, screensaver_w_, screensaver_h_, kDisplayColorWhite);  // canvas border
 
+    if(rtc->year() < 2024) {
+      // RTC Time is not Set!
+      my_canvas_->fillRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayBackroundColor);
+      my_canvas_->drawRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayTimeColor);
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.7);
+      my_canvas_->setTextColor(kDisplayTimeColor);
+      my_canvas_->setFont(&FreeSans18pt7b);
+      my_canvas_->print("RTC Time Not Set!");
+    }
+
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
     refresh_screensaver_canvas_ = false;
 
@@ -702,6 +712,16 @@ void RGBDisplay::DisplayTimeUpdate() {
 
     // and remember the new value
     strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
+
+    if(rtc->year() < 2024) {
+      // RTC Time is not Set!
+      my_canvas_->fillRect(0, 0, kTftWidth, kTimeRowY0, kDisplayBackroundColor);
+      my_canvas_->drawRect(0, 0, kTftWidth, kTimeRowY0, kDisplayTimeColor);
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.7);
+      my_canvas_->setTextColor(kDisplayTimeColor);
+      my_canvas_->setFont(&FreeSans18pt7b);
+      my_canvas_->print("RTC Time Not Set!");
+    }
 
     // draw canvas to tft   fastDrawBitmap
     // elapsedMillis time1;
