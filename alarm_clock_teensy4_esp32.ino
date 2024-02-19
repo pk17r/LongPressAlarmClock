@@ -114,12 +114,19 @@ void loop() {
 
     SerialTimeStampPrefix();
 
+    // if time is lost because of power failure
+    if(rtc->year() < 2024 && second_core_task == kNoTask) {
+      Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
+      // update time from NTP server
+      second_core_task = kUpdateTimeFromNtpServer;
+    }
+
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
 
       // Activate Buzzer if Alarm Time has arrived
-      if(alarm_clock->MinutesToAlarm() == 0) {
+      if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
         // go to buzz alarm function and show alarm triggered screen!
         alarm_clock->BuzzAlarmFn();
         // returned from Alarm Triggered Screen and Good Morning Screen
@@ -139,6 +146,13 @@ void loop() {
             second_core_task = kGetWeatherInfo;
         }
       #endif
+
+      // auto update time at 2AM every morning
+      if(rtc->hour() == 2 && rtc->minute() == 0 && second_core_task == kNoTask) {
+        Serial.println(F("Auto Update RTC HW Time from NTP Server"));
+        // update time from NTP server
+        second_core_task = kUpdateTimeFromNtpServer;
+      }
 
     }
 

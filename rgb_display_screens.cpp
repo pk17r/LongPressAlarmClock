@@ -556,10 +556,12 @@ void RGBDisplay::Screensaver() {
       // RTC Time is not Set!
       my_canvas_->fillRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayBackroundColor);
       my_canvas_->drawRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayTimeColor);
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.7);
-      my_canvas_->setTextColor(kDisplayTimeColor);
       my_canvas_->setFont(&FreeSans18pt7b);
-      my_canvas_->print("RTC Time Not Set!");
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.5 - 5);
+      my_canvas_->print("Clock Power Lost!");
+      my_canvas_->setFont(&FreeSans12pt7b);
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 - 10);
+      my_canvas_->print("Fetching Time using WiFi..");
     }
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
@@ -716,10 +718,13 @@ void RGBDisplay::DisplayTimeUpdate() {
       // RTC Time is not Set!
       my_canvas_->fillRect(0, 0, kTftWidth, kTimeRowY0, kDisplayBackroundColor);
       my_canvas_->drawRect(0, 0, kTftWidth, kTimeRowY0, kDisplayTimeColor);
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.7);
       my_canvas_->setTextColor(kDisplayTimeColor);
       my_canvas_->setFont(&FreeSans18pt7b);
-      my_canvas_->print("RTC Time Not Set!");
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 0.5 - 5);
+      my_canvas_->print("Clock Power Lost!");
+      my_canvas_->setFont(&FreeSans12pt7b);
+      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 - 10);
+      my_canvas_->print("Fetching Time using WiFi..");
     }
 
     // draw canvas to tft   fastDrawBitmap
