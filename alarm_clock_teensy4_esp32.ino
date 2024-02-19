@@ -134,16 +134,9 @@ void loop() {
 
       // 5 mins before alarm time, try to get weather info
       #if defined(WIFI_IS_USED)
-        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000) && second_core_control_flag == 0) {
-          if(wifi_stuff->got_weather_info_time_ms == 0)
-            second_core_control_flag = 1;
-          else if(millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000)
-            second_core_control_flag = 1;
-          else if(alarm_clock->MinutesToAlarm() == 5) // get updated weather info 5 minutes before alarm time
-            second_core_control_flag = 1;
-
-          if(second_core_control_flag == 1)
-            Serial.println("Time to update weather info!");
+        if((second_core_task == kNoTask) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
+            // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
+            second_core_task = kGetWeatherInfo;
         }
       #endif
 
@@ -173,19 +166,22 @@ void loop() {
     }
 
     // second core control operations
-    switch(second_core_control_flag) {
-      case 1: // resume the other core
-        // rp2040.restartCore1();
-        // rp2040.resumeOtherCore();
-        second_core_control_flag = 2;  // core started
-        // Serial.println("Resumed core1");
-        break;
-      case 3: // core1 is done processing and can be idled
-        // rp2040.idleOtherCore();
-        second_core_control_flag = 0;  // core idled
-        // Serial.println("Idled core1");
-        break;
+    if(second_core_task == kTaskCompleted) {
+      second_core_task = kNoTask;
     }
+    // switch(second_core_control_flag) {
+    //   case 1: // resume the other core
+    //     // rp2040.restartCore1();
+    //     // rp2040.resumeOtherCore();
+    //     second_core_control_flag = 2;  // core started
+    //     // Serial.println("Resumed core1");
+    //     break;
+    //   case 3: // core1 is done processing and can be idled
+    //     // rp2040.idleOtherCore();
+    //     second_core_control_flag = 0;  // core idled
+    //     // Serial.println("Idled core1");
+    //     break;
+    // }
   }
 
   // make screensaver motion fast
@@ -212,24 +208,34 @@ void setup1() {
 void loop1() {
 
   // run the core only to do specific not time important operations
-  if (second_core_control_flag == 2) {
+  if (second_core_task != kNoTask && second_core_task != kTaskCompleted) {
 
-    // get today's weather info
-    wifi_stuff->GetTodaysWeatherInfo();
-
-    // try once more if did not get info
-    if(!wifi_stuff->got_weather_info_)
+    if(second_core_task == kGetWeatherInfo) {
+      // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
+
+      // try once more if did not get info
+      if(!wifi_stuff->got_weather_info_)
+        wifi_stuff->GetTodaysWeatherInfo();
+    }
+    else if(second_core_task == kUpdateTimeFromNtpServer) {
+      // get time from NTP server
+      if(!(wifi_stuff->GetTimeFromNtpServer())) {
+        delay(1000);
+        // try once more if did not get info
+        wifi_stuff->GetTimeFromNtpServer();
+      }
+    }
 
     // done processing the task
     // set the core up to be idled from core0
-    second_core_control_flag = 3;
+    // second_core_control_flag = 3;
+    second_core_task = kTaskCompleted;
   }
 
   // a delay to slow things down and not crash
   delay(1000);
 }
-
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
@@ -251,6 +257,9 @@ ScreenPage current_page = kMainPage;
 //    2 = core is running some operation
 //    3 = core is done processing and can be idled
 volatile byte second_core_control_flag = 0;
+
+// second core current task
+volatile SecondCoreTask second_core_task = kNoTask;
 
 extern "C" char* sbrk(int incr);
 // Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
@@ -433,6 +442,13 @@ void ProcessSerialInput() {
         wifi_stuff->wifi_password_ = new char[inputStr.length()];   // allocate space
         strcpy(wifi_stuff->wifi_password_,inputStr.c_str());
         wifi_stuff->SaveWiFiDetails();
+      }
+      break;
+    case 'n':   // get time from NTP server and set on RTC HW
+      {
+        Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
+        // update time from NTP server
+        second_core_task = kUpdateTimeFromNtpServer;
       }
       break;
     default:

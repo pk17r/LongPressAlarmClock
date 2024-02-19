@@ -1,3 +1,4 @@
+#include "lwipopts.h"
 #include "uRTCLib.h"
 #include "rtc.h"
 
@@ -126,16 +127,29 @@ void RTC::SecondsUpdateInterruptISR() {
   }
 }
 
-// to update rtcHw's time and date
-void RTC::SetRtcTimeAndDate() {
+/**
+ * \brief Sets RTC HW datetime data with input Hr in 24 hour mode and puts RTC to 12 hour mode
+ *
+ * @param second second
+ * @param minute minute
+ * @param hour_24_hr_mode hour to set in 24 hour mode
+ * @param dayOfWeek_Sun_is_1 day of week with Sunday = 1
+ * @param day today's date
+ * @param month_Jan_is_1 month with January = 1
+ * @param year year
+ */
+void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year) {
+  // pause interrupts
+  noInterrupts();
   // Set current time and date
-  Serial.println();
-  Serial.println(F("Waiting for input from user to set time."));
-  Serial.println(F("Provide a keyboard input when set time is equal to real world time..."));
-  while (Serial.available() == 0) {};
-  // Only used once, then disabled
-  rtc_hw_.set(0, 30, 2, 6, 26, 1, 24);
-  //  RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
+  // RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
+  rtc_hw_.set(second, minute, hour_24_hr_mode, dayOfWeek_Sun_is_1, day, month_Jan_is_1, year - 2000);
   Serial.println(F("Time set"));
-  SerialInputFlush();
+  // refresh time from RTC HW
+  Refresh();
+  delay(100);
+  // set RTC HW back into 12 hour mode
+  rtc_hw_.set_12hour_mode(true);
+  // restart interrupts
+  interrupts();
 }

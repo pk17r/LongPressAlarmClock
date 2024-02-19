@@ -13,8 +13,18 @@ public:
   static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
   static inline volatile bool rtc_hw_min_update_ = false;     // minutes change flag
 
-  // to update rtc's time and date
-  void SetRtcTimeAndDate();
+  /**
+  * \brief Sets RTC HW datetime data with input Hr in 24 hour mode and puts RTC to 12 hour mode
+  *
+  * @param second second
+  * @param minute minute
+  * @param hour_24_hr_mode hour to set in 24 hour mode
+  * @param dayOfWeek_Sun_is_1 day of week with Sunday = 1
+  * @param day today's date
+  * @param month_Jan_is_1 month with January = 1
+  * @param year year
+  */
+  void SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year);
 
   uint8_t second() { return second_; }
   uint8_t minute() { return rtc_hw_.minute(); }

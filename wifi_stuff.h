@@ -13,8 +13,8 @@ public:
   void TurnWiFiOn();
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
-  void GetTimeUpdate();
-  void ConvertEpochIntoDate(unsigned long epoch_since_1970);
+  bool GetTimeFromNtpServer();
+  void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     char* wifi_ssid_ = MY_WIFI_SSID;

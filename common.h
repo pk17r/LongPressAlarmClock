@@ -48,6 +48,17 @@ enum ScreenPage {
 // current page on display
 extern ScreenPage current_page;
 
+// flag for second core task
+enum SecondCoreTask {
+  kNoTask = 0,
+  kGetWeatherInfo ,
+  kUpdateTimeFromNtpServer,
+  kTaskCompleted
+  };
+
+// second core current task
+extern volatile SecondCoreTask second_core_task;
+
 // display time data in char arrays
 struct DisplayData {
   char time_HHMM[kHHMM_ArraySize];

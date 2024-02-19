@@ -5,6 +5,7 @@
 #include "eeprom.h"
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include "rtc.h"
 
 void WiFiStuff::RetrieveWiFiDetails() {
   eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
@@ -55,7 +56,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   String countryCode = "840";
 
   // Check WiFi connection status
-  if(WiFi.status()== WL_CONNECTED){
+  if(WiFi.status()== WL_CONNECTED) {
     String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
 
     WiFiClient client;
@@ -141,7 +142,6 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed_);
       Serial.print("weather_humidity "); Serial.println(weather_humidity_);
 
-      GetTimeUpdate();
     }
   }
   else {
@@ -152,30 +152,52 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   TurnWiFiOff();
 }
 
-void WiFiStuff::GetTimeUpdate() {
-  const char* NTP_SERVER = "pool.ntp.org";
-  const long  GMT_OFFSET_SEC = -8*60*60;
-  const int   DAYLIGHT_OFFSET_SEC = 60*60;
+bool WiFiStuff::GetTimeFromNtpServer() {
 
-  // Define an NTP Client object
-  WiFiUDP udpSocket;
-  NTPClient ntpClient(udpSocket, NTP_SERVER, GMT_OFFSET_SEC);
+  bool returnVal = false;
 
-  ntpClient.begin();
-  ntpClient.update();
+  // turn On Wifi
+  TurnWiFiOn();
 
-  unsigned long epoch_since_1970 = ntpClient.getEpochTime();
-  int hours = ntpClient.getHours();
-  int minutes = ntpClient.getMinutes();
-  int seconds = ntpClient.getSeconds();
-  int dayOfWeekSunday0 = ntpClient.getDay();
 
-  ntpClient.end();
+  // Check WiFi connection status
+  if(WiFi.status()== WL_CONNECTED) {
 
-  Serial.println("TIME FROM NTP SERVER:");
-  Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.print(seconds); Serial.print("  DoW: "); Serial.print(kDaysTable_[dayOfWeekSunday0]); Serial.print("  EpochTime: "); Serial.println(epoch_since_1970);
+    const char* NTP_SERVER = "pool.ntp.org";
+    const long  GMT_OFFSET_SEC = -8*60*60;
+    const int   DAYLIGHT_OFFSET_SEC = 60*60;
 
-  ConvertEpochIntoDate(epoch_since_1970);
+    // Define an NTP Client object
+    WiFiUDP udpSocket;
+    NTPClient ntpClient(udpSocket, NTP_SERVER, GMT_OFFSET_SEC);
+
+    ntpClient.begin();
+    returnVal = ntpClient.update();
+
+    if(returnVal) {
+      unsigned long epoch_since_1970 = ntpClient.getEpochTime();
+      int hours = ntpClient.getHours();
+      int minutes = ntpClient.getMinutes();
+      int seconds = ntpClient.getSeconds();
+      int dayOfWeekSunday0 = ntpClient.getDay();
+
+
+      Serial.print("TIME FROM NTP SERVER:  Success="); Serial.println(returnVal);
+      Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.print(seconds); Serial.print("  DoW: "); Serial.print(kDaysTable_[dayOfWeekSunday0]); Serial.print("  EpochTime: "); Serial.println(epoch_since_1970);
+
+      int today, month, year;
+      ConvertEpochIntoDate(epoch_since_1970, today, month, year);
+
+      // RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year)
+      rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
+    }
+
+    ntpClient.end();
+
+  }
+  else {
+    Serial.println("WiFi not connected");
+  }
 
   // // test
   // Serial.println();
@@ -188,13 +210,18 @@ void WiFiStuff::GetTimeUpdate() {
   // Serial.print("Test Date:  1/31/2025   "); ConvertEpochIntoDate(1738281800);
   // Serial.print("Test Date:  3/1/2028   "); ConvertEpochIntoDate(1835481800);
 
+  // turn off WiFi
+  TurnWiFiOff();
+
+  return returnVal;
 }
 
-void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970) {
+void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year) {
 
   unsigned long epoch_Jan_1_2023_12_AM = 1704067200;
   float day = static_cast<float>(epoch_since_1970 - epoch_Jan_1_2023_12_AM) / (24*60*60);
-  int year = 2024, monthJan0 = 0;
+  year = 2024;
+  int monthJan0 = 0;
   // calculate year
   while(1) {
     if(day - 365 - (year % 4 == 0 ? 1 : 0) < 0)
@@ -248,6 +275,7 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970) {
       }
     }
   }
-  int today = ceil(day);
-  Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(day,2); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
+  today = ceil(day);
+  Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
+  month = monthJan0 + 1;
 }
