@@ -45,7 +45,6 @@ public:
   void SetMaxBrightness();
   void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
-  void UpdateSecondsOnTimeStrArr(uint8_t second);
   ScreenPage ClassifyMainPageTouchInput();
 
 // PUBLIC VARIABLES

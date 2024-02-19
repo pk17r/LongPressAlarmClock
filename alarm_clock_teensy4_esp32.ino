@@ -40,7 +40,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(100);
-  while(!Serial) { delay(20); };
+  // while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
 
   // make all SPI CS pins high
@@ -112,9 +112,6 @@ void loop() {
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
-    // prepare updated seconds array
-    display->UpdateSecondsOnTimeStrArr(rtc->second());
-
     SerialTimeStampPrefix();
 
     // new minute!
@@ -137,7 +134,6 @@ void loop() {
 
       // 5 mins before alarm time, try to get weather info
       #if defined(WIFI_IS_USED)
-
         if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000) && second_core_control_flag == 0) {
           if(wifi_stuff->got_weather_info_time_ms == 0)
             second_core_control_flag = 1;
@@ -149,13 +145,20 @@ void loop() {
           if(second_core_control_flag == 1)
             Serial.println("Time to update weather info!");
         }
-
       #endif
 
     }
 
     // prepare date and time arrays
     PrepareTimeDayDateArrays();
+
+    // update time on main page
+    if(current_page == kMainPage)
+      display->DisplayTimeUpdate();
+
+    // serial print RTC Date Time
+    SerialPrintRtcDateTime();
+    Serial.println();
 
     // check for inactivity
     if(inactivity_seconds < kInactivitySecondsLimit) {
@@ -168,14 +171,6 @@ void loop() {
           SetPage(kScreensaverPage);
       }
     }
-
-    // update time on main page
-    if(current_page == kMainPage)
-      display->DisplayTimeUpdate();
-
-    // serial print RTC Date Time
-    SerialPrintRtcDateTime();
-    Serial.println();
 
     // second core control operations
     switch(second_core_control_flag) {

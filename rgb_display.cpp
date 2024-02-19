@@ -106,10 +106,6 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
   }
 }
 
-void RGBDisplay::UpdateSecondsOnTimeStrArr(uint8_t second) {
-  snprintf(new_display_data_.time_SS, kSS_ArraySize, ":%02d", second);
-}
-
 void RGBDisplay::ScreensaverControl(bool turnOn) {
   if(!turnOn && my_canvas_ != NULL) {
     // delete screensaverCanvas;

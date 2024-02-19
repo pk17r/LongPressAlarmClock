@@ -413,7 +413,7 @@ void RGBDisplay::SettingsPage() {
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
   int16_t title_x0 = 30, title_y0 = 50;
-  int16_t s_x0 = 215, s_y0 = title_y0 + 48;
+  int16_t s_x0 = 230, s_y0 = title_y0 + 48;
   
   if(firstTime) {
 

@@ -35,7 +35,7 @@ public:
   bool alarm_ON_ = true;    // flag to set alarm On or Off
 
   // Alarm constants
-  const uint8_t kAlarmEndButtonPressAndHoldSeconds = 2;
+  const uint8_t kAlarmEndButtonPressAndHoldSeconds = 25;
   const unsigned long kAlarmMaxON_TimeMs = 120*1000;
 
   // Set Screen variables
