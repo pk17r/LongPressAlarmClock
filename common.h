@@ -27,13 +27,6 @@ extern Touchscreen* ts;
 // counter to note user inactivity seconds
 extern uint8_t inactivity_seconds;
 
-// secondCoreControlFlag controls idling and restarting core1 from core0
-//    0 = core is idling
-//    1 = resume the other core from core0
-//    2 = core is running some operation
-//    3 = core is done processing and can be idled
-extern volatile byte second_core_control_flag;
-
 // flag for display pages
 enum ScreenPage {
   kMainPage = 0,

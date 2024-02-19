@@ -248,16 +248,6 @@ DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_d
 // current page on display
 ScreenPage current_page = kMainPage;
 
-// seconds flag triggered by interrupt
-// static volatile bool rtcHwSecUpdate = false;
-
-// secondCoreControlFlag controls idling and restarting core1 from core0
-//    0 = core is idling
-//    1 = resume the other core from core0
-//    2 = core is running some operation
-//    3 = core is done processing and can be idled
-volatile byte second_core_control_flag = 0;
-
 // second core current task
 volatile SecondCoreTask second_core_task = kNoTask;
 
@@ -404,7 +394,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        second_core_control_flag = 1;
+        second_core_task = kGetWeatherInfo;
       }
       break;
     case 'i':   // set WiFi details

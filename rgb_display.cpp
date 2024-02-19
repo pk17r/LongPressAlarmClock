@@ -84,25 +84,34 @@ void RGBDisplay::SetMaxBrightness() {
 }
 
 void RGBDisplay::CheckTimeAndSetBrightness() {
-  if (rtc->hourModeAndAmPm() == 1) {  // 12hr AM
-    if (rtc->hour() < 6 || rtc->hour() == 12)
-      SetBrightness(kNightBrightness);
-    else
-      SetBrightness(kDayBrightness);
-  } else if (rtc->hourModeAndAmPm() == 2) {  // 12hr PM
-    if (rtc->hour() > 10 && rtc->hour() != 12)
-      SetBrightness(kNightBrightness);
-    else if(rtc->hour() >= 6)
-      SetBrightness(kEveningBrightness);
-    else
-      SetBrightness(kDayBrightness);
-  } else if (rtc->hourModeAndAmPm() == 0) {  // 24hr
-    if (rtc->hour() > 21 || rtc->hour() < 7)
-      SetBrightness(kNightBrightness);
-    else if(rtc->hour() > 18)
-      SetBrightness(kEveningBrightness);
-    else
-      SetBrightness(kDayBrightness);
+  // check if RTC is good
+  if(rtc->year() < 2024) {
+    // RTC Time is not set!
+    // Keep screen on day brightness
+    SetBrightness(kDayBrightness);
+  }
+  else {
+    // check time of the day and set brightness
+    if (rtc->hourModeAndAmPm() == 1) {  // 12hr AM
+      if (rtc->hour() < 6 || rtc->hour() == 12)
+        SetBrightness(kNightBrightness);
+      else
+        SetBrightness(kDayBrightness);
+    } else if (rtc->hourModeAndAmPm() == 2) {  // 12hr PM
+      if (rtc->hour() > 10 && rtc->hour() != 12)
+        SetBrightness(kNightBrightness);
+      else if(rtc->hour() >= 6)
+        SetBrightness(kEveningBrightness);
+      else
+        SetBrightness(kDayBrightness);
+    } else if (rtc->hourModeAndAmPm() == 0) {  // 24hr
+      if (rtc->hour() > 21 || rtc->hour() < 7)
+        SetBrightness(kNightBrightness);
+      else if(rtc->hour() > 18)
+        SetBrightness(kEveningBrightness);
+      else
+        SetBrightness(kDayBrightness);
+    }
   }
 }
 
