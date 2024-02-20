@@ -18,6 +18,9 @@ private:
   // uEEPROMLib eeprom for AT24C32 EEPROM
   uEEPROMLib eeprom_;
 
+  // byte 0 needs to be this to read further data. Otherwise default data will be saved to EEPROM
+  const unsigned int kDataCompatibilityByte0Flag = 121;
+
   /** the address in the EEPROM **/
   const unsigned int kAlarmAddressEEPROM = 0; // stores data in order 0 = data is set, 1 = hr, 2 = min, 3 = isAm, 4 = alarmOn
 

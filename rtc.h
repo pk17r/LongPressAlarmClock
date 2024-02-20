@@ -56,9 +56,9 @@ public:
   */
   uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
 
-
-protected:
-
+#if !defined(MCU_IS_ESP32)
+  protected:
+#endif
   // protected function to refresh time from RTC HW and do basic power failure checks
   void Refresh();
 
@@ -73,7 +73,7 @@ private:
   // we'll refresh RTC time everytime second reaches 60
   // All other parameters of RTC will not change at any other time
   // at 60 seconds, we'll update the time row
-  static inline uint8_t second_ = 0;
+  static inline volatile uint8_t second_ = 0;
 
   // setup DS3231 rtc for the first time, no problem doing it again
   void FirstTimeRtcSetup();

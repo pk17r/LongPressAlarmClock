@@ -32,6 +32,9 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // counter to note when time is not being updated, thereafter reboot system
 unsigned long last_seconds_update_millis = 0;
+#if defined(MCU_IS_ESP32)
+  TaskHandle_t Task1;
+#endif
 
 // setup core0
 void setup() {
@@ -78,6 +81,17 @@ void setup() {
   // setup display
   display->Setup();
   ts = new Touchscreen();
+
+  #if defined(MCU_IS_ESP32)
+    xTaskCreatePinnedToCore(
+        Task1code, /* Function to implement the task */
+        "Task1", /* Name of the task */
+        10000,  /* Stack size in words */
+        NULL,  /* Task input parameter */
+        0,  /* Priority of the task */
+        &Task1,  /* Task handle. */
+        0); /* Core where the task should run */
+  #endif
 
   // restart the other core
   // rp2040.restartCore1();
@@ -128,6 +142,9 @@ void loop() {
 
     // new minute!
     if (rtc->rtc_hw_min_update_) {
+      #if defined(MCU_IS_ESP32)
+        rtc->Refresh();
+      #endif
       rtc->rtc_hw_min_update_ = false;
 
       // Activate Buzzer if Alarm Time has arrived
@@ -215,9 +232,11 @@ void loop() {
     ProcessSerialInput();
 
   // check if time is not being updated, then reset system
-  if(millis() - last_seconds_update_millis > 3000) {
+  if(millis() - last_seconds_update_millis > 5000) {
     Serial.println(); Serial.println("**** Time Stuck. Rebooting! ****"); Serial.println(); Serial.flush();
-    rp2040.reboot();
+    #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+      rp2040.reboot();
+    #endif
   }
 
   // #if defined(MCU_IS_ESP32)
@@ -227,14 +246,20 @@ void loop() {
   // #endif
 }
 
+#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
 // setup core1
 void setup1() {
   delay(2000);
 }
+#endif
 
 // arduino loop function on core1 - low priority one with wifi weather update task
-void loop1() {
-
+#if defined(MCU_IS_ESP32)
+void Task1code( void * parameter) {
+  for(;;) {
+#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  void loop1() {
+#endif
   // run the core only to do specific not time important operations
   if (second_core_task != kNoTask && second_core_task != kTaskCompleted) {
 
@@ -263,13 +288,17 @@ void loop1() {
 
     // done processing the task
     // set the core up to be idled from core0
-    // second_core_control_flag = 3;
     second_core_task = kTaskCompleted;
   }
 
   // a delay to slow things down and not crash
   delay(1000);
+#if defined(MCU_IS_ESP32)
+  }
 }
+#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+}
+#endif
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
@@ -285,11 +314,17 @@ ScreenPage current_page = kMainPage;
 // second core current task
 volatile SecondCoreTask second_core_task = kNoTask;
 
-extern "C" char* sbrk(int incr);
+#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  extern "C" char* sbrk(int incr);
+#endif
 // Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
 int AvailableRam() {
-  char top;
-  return &top - reinterpret_cast<char*>(sbrk(0));
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    char top;
+    return &top - reinterpret_cast<char*>(sbrk(0));
+  #elif defined(MCU_IS_ESP32)
+    return esp_get_free_heap_size();
+  #endif
 }
 
 void SerialInputFlush() {

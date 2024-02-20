@@ -53,7 +53,7 @@ private:
   // buzzer used is a passive buzzer which is run using timers
   void SetupBuzzerTimer();
   #if defined(MCU_IS_ESP32)
-    void IRAM_ATTR PassiveBuzzerTimerISR();
+    static void IRAM_ATTR PassiveBuzzerTimerISR();
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
   #endif

@@ -178,7 +178,7 @@ void AlarmClock::SetupBuzzerTimer() {
   #if defined(MCU_IS_ESP32)
     passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
     timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
-    timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (BUZZER_FREQUENCY * 2), true);
+    timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true);
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     passive_buzzer_timer_ptr_ = new struct repeating_timer;
   #endif

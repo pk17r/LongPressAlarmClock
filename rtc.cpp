@@ -8,6 +8,8 @@ RTC::RTC() {
   /* INITIALIZE RTC */
 
   // initialize Wire lib
+  URTCLIB_WIRE.setSDA(SDA_PIN);
+  URTCLIB_WIRE.setSCL(SCL_PIN);
   URTCLIB_WIRE.begin();
 
   // set rtc model
@@ -122,7 +124,9 @@ void RTC::SecondsUpdateInterruptISR() {
   rtc_hw_sec_update_ = true;
 
   if(second_ >= 60) {
-    rtc->Refresh();
+    #if !defined(MCU_IS_ESP32)
+      rtc->Refresh();
+    #endif
     rtc_hw_min_update_ = true;
   }
 }

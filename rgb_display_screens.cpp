@@ -28,7 +28,7 @@ void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
 
   // elapsedMillis timer1;
 
-  int16_t bx1 = 0, by1 = 0, // Clipped top-left within bitmap
+  int bx1 = 0, by1 = 0, // Clipped top-left within bitmap
       saveW = w,            // Save original bitmap width value
       saveH = h;
   if (x < 0) {              // Clip left
@@ -507,8 +507,8 @@ void RGBDisplay::Screensaver() {
     int16_t alarm_icon_w = (new_display_data_.alarm_ON ? kBellSmallWidth : kBellFallenSmallWidth);
     int16_t alarm_icon_h = (new_display_data_.alarm_ON ? kBellSmallHeight : kBellFallenSmallHeight);
     uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
-    screensaver_w_ = max(tft_HHMM_w_ + 5 * GAP_BAND, date_row_w + 5 * GAP_BAND);
-    screensaver_h_ = tft_HHMM_h_ + max(date_h, alarm_icon_h) + 3*GAP_BAND;
+    screensaver_w_ = max(static_cast<unsigned int>(tft_HHMM_w_ + 5 * GAP_BAND), static_cast<unsigned int>(date_row_w + 5 * GAP_BAND));
+    screensaver_h_ = tft_HHMM_h_ + max(static_cast<unsigned int>(date_h), static_cast<unsigned int>(alarm_icon_h)) + 3*GAP_BAND;
     // middle both rows
     tft_HHMM_x0_ = (screensaver_w_ - tft_HHMM_w_) / 2 - gap_right_x_;
     date_x0 = (screensaver_w_ - date_row_w) / 2 - date_gap_x;

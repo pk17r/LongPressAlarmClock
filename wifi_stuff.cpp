@@ -1,5 +1,5 @@
 #include "wifi_stuff.h"
-#include "WiFi.h"
+#include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include "eeprom.h"
@@ -18,6 +18,8 @@ void WiFiStuff::SaveWiFiDetails() {
 void WiFiStuff::TurnWiFiOn() {
   Serial.println(F("Connecting to WiFi"));
   WiFi.persistent(true);
+  delay(1);
+  WiFi.mode(WIFI_STA);
   delay(1);
   WiFi.begin(wifi_ssid_, wifi_password_);
   int i = 0;

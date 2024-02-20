@@ -3,7 +3,12 @@
 
 EEPROM::EEPROM() {
   eeprom_.set_address(0x57);
+  Wire.setSDA(SDA_PIN);
+  Wire.setSCL(SCL_PIN);
   Wire.begin();
+
+  // check if data is compatible with code, otherwise set the respective flag and default data
+  
 }
 
 bool EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
@@ -83,6 +88,7 @@ void EEPROM::RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
   }
   wifi_ssid = new char[address - char_arr_start_address];   // allocate space
   strcpy(wifi_ssid,eeprom_read_array);
+  // Serial.print("EEPROM wifi_ssid: "); Serial.println(wifi_ssid);
 
   // read wifi_password
   char_arr_start_address = address;
@@ -107,10 +113,10 @@ void EEPROM::RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
   }
   wifi_password = new char[address - char_arr_start_address];   // allocate space
   strcpy(wifi_password,eeprom_read_array);
+  // Serial.print("EEPROM wifi_password: "); Serial.println(wifi_password);
 
   Serial.println(F("WiFi details retrieved from EEPROM."));
 }
-
 
 void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
 
