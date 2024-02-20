@@ -30,8 +30,6 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // LOCAL PROGRAM VARIABLES
 
-// counter to note when time is not being updated, thereafter reboot system
-unsigned long last_seconds_update_millis = 0;
 #if defined(MCU_IS_ESP32)
   TaskHandle_t Task1;
 #endif
@@ -44,6 +42,10 @@ void setup() {
 
   #if defined(MCU_IS_ESP32)
     setCpuFrequencyMhz(160);
+  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
+    rp2040.wdt_begin(8300);
   #endif
 
   Serial.begin(9600);
@@ -204,6 +206,17 @@ void loop() {
     // second core control operations
     if(second_core_task == kTaskCompleted) {
       second_core_task = kNoTask;
+      // core1 is done processing and can be idled
+      // Serial.print("Idle second core.. ");
+      // rp2040.idleOtherCore();
+      // Serial.println("Idled core1.");
+    }
+    else if(second_core_task != kNoTask) {
+      // resume the other core
+      // Serial.print("Resume second core.. ");
+      // rp2040.restartCore1();
+      // rp2040.resumeOtherCore();
+      // Serial.println("Resumed core1.");
     }
     // switch(second_core_control_flag) {
     //   case 1: // resume the other core
@@ -219,8 +232,8 @@ void loop() {
     //     break;
     // }
 
-    // counter to note when time is not being updated, thereafter reboot system. Needs to be at end of seconds update control
-    last_seconds_update_millis = millis();
+    // watchdog to reboot system if it gets stuck for whatever reason
+    ResetWatchdog();
   }
 
   // make screensaver motion fast
@@ -231,13 +244,12 @@ void loop() {
   if (Serial.available() != 0)
     ProcessSerialInput();
 
-  // check if time is not being updated, then reset system
-  if(millis() - last_seconds_update_millis > 5000) {
-    Serial.println(); Serial.println("**** Time Stuck. Rebooting! ****"); Serial.println(); Serial.flush();
-    #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-      rp2040.reboot();
-    #endif
-  }
+  // Reboot system if BOOTSEL button is pressed
+  // https://arduino-pico.readthedocs.io/en/latest/bootsel.html
+  // if (BOOTSEL) {
+  //   // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-reboot
+  //   rp2040.reboot();
+  // }
 
   // #if defined(MCU_IS_ESP32)
   //     // if button is inactive, then go to sleep
@@ -314,14 +326,10 @@ ScreenPage current_page = kMainPage;
 // second core current task
 volatile SecondCoreTask second_core_task = kNoTask;
 
-#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  extern "C" char* sbrk(int incr);
-#endif
-// Serial.print(F("- SRAM left: ")); Serial.println(freeRam());
 int AvailableRam() {
   #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    char top;
-    return &top - reinterpret_cast<char*>(sbrk(0));
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
+    return rp2040.getFreeHeap();
   #elif defined(MCU_IS_ESP32)
     return esp_get_free_heap_size();
   #endif
@@ -348,7 +356,7 @@ void SerialTimeStampPrefix() {
   if(inactivity_seconds < 100) Serial.print(kCharZero);
   if(inactivity_seconds < 10) Serial.print(kCharZero);
   Serial.print(inactivity_seconds);
-  Serial.print(F(": SRAM left: ")); Serial.print(AvailableRam());
+  Serial.print(F(": RAM: ")); Serial.print(AvailableRam());
   Serial.print(F(") - "));
   Serial.flush();
 }
@@ -396,6 +404,14 @@ void SerialPrintRtcDateTime() {
   Serial.print(kCharSpace);
   Serial.print(new_display_data_.alarm_str);
   Serial.flush();
+}
+
+// reset watchdog within time so it does not reboot system
+void ResetWatchdog() {
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
+    rp2040.wdt_reset();
+  #endif
 }
 
 void ProcessSerialInput() {

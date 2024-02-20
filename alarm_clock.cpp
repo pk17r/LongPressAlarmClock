@@ -86,6 +86,7 @@ void AlarmClock::BuzzAlarmFn() {
   unsigned long alarmStartTimeMs = millis();
   int buttonPressSecondsCounter = kAlarmEndButtonPressAndHoldSeconds;
   while(!alarmStopped) {
+    ResetWatchdog();
     // if user presses button then pauze buzzer and start alarm end countdown!
     if(push_button->buttonActiveDebounced()) {
       if(!buzzerPausedByUser) {
@@ -95,6 +96,7 @@ void AlarmClock::BuzzAlarmFn() {
       unsigned long buttonPressStartTimeMs = millis(); //note time of button press
       // while button is pressed, display seconds countdown
       while(push_button->buttonActiveDebounced() && !alarmStopped) {
+        ResetWatchdog();
         // display countdown to alarm off
         if(kAlarmEndButtonPressAndHoldSeconds - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;

@@ -1120,7 +1120,7 @@ void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge) {
   tft.fillCircle(cx - eye_offset_x, cy - eye_offset_y, eye_r, background);
   tft.fillCircle(cx + eye_offset_x, cy - eye_offset_y, eye_r, background);
 
-  // smile
+  // draw smile
   int16_t smile_angle_deg = 37;
   int16_t smile_cy = cy - sr / 2;
   int16_t smile_r = sr * 1.1, smile_w = max(sr / 15, 3);
@@ -1133,8 +1133,9 @@ void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge) {
     tft.fillCircle(cx + smile_offset_x, smile_cy + smile_offset_y, smile_tapered_w, background);
   }
 
-  // rays
+  // draw changing rays
   for(int16_t i = 0; i < 120; i++) {
+    ResetWatchdog();
     // variation goes from 0 to 5 to 0
     int16_t i_base10_fwd = i % 10;
     int16_t i_base10_bwd = ((i / 10) + 1) * 10 - i;
@@ -1455,6 +1456,7 @@ void RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
 
   // get user input
   while(1) {
+    ResetWatchdog();
     // See if there's any  touch data for us
     if(GetKeyboardPress(user_input_buffer, label, return_text))
       break;

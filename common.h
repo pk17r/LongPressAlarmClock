@@ -77,5 +77,6 @@ extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void SetPage(ScreenPage page);
+extern void ResetWatchdog();
 
 #endif // COMMON_H
