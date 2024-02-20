@@ -37,15 +37,12 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 // setup core0
 void setup() {
 
-  // idle the other core
-  // rp2040.idleOtherCore();
-
-  #if defined(MCU_IS_ESP32)
-    setCpuFrequencyMhz(160);
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
     // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
     rp2040.wdt_begin(8300);
+  #elif defined(MCU_IS_ESP32)
+    setCpuFrequencyMhz(160);
   #endif
 
   Serial.begin(9600);
@@ -94,9 +91,6 @@ void setup() {
         &Task1,  /* Task handle. */
         0); /* Core where the task should run */
   #endif
-
-  // restart the other core
-  // rp2040.restartCore1();
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -206,31 +200,7 @@ void loop() {
     // second core control operations
     if(second_core_task == kTaskCompleted) {
       second_core_task = kNoTask;
-      // core1 is done processing and can be idled
-      // Serial.print("Idle second core.. ");
-      // rp2040.idleOtherCore();
-      // Serial.println("Idled core1.");
     }
-    else if(second_core_task != kNoTask) {
-      // resume the other core
-      // Serial.print("Resume second core.. ");
-      // rp2040.restartCore1();
-      // rp2040.resumeOtherCore();
-      // Serial.println("Resumed core1.");
-    }
-    // switch(second_core_control_flag) {
-    //   case 1: // resume the other core
-    //     // rp2040.restartCore1();
-    //     // rp2040.resumeOtherCore();
-    //     second_core_control_flag = 2;  // core started
-    //     // Serial.println("Resumed core1");
-    //     break;
-    //   case 3: // core1 is done processing and can be idled
-    //     // rp2040.idleOtherCore();
-    //     second_core_control_flag = 0;  // core idled
-    //     // Serial.println("Idled core1");
-    //     break;
-    // }
 
     // watchdog to reboot system if it gets stuck for whatever reason
     ResetWatchdog();
@@ -243,13 +213,6 @@ void loop() {
   // accept user serial inputs
   if (Serial.available() != 0)
     ProcessSerialInput();
-
-  // Reboot system if BOOTSEL button is pressed
-  // https://arduino-pico.readthedocs.io/en/latest/bootsel.html
-  // if (BOOTSEL) {
-  //   // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-reboot
-  //   rp2040.reboot();
-  // }
 
   // #if defined(MCU_IS_ESP32)
   //     // if button is inactive, then go to sleep
