@@ -47,8 +47,7 @@ enum SecondCoreTask {
   kGetWeatherInfo ,
   kUpdateTimeFromNtpServer,
   kConnectWiFi,
-  kDisconnectWiFi,
-  kTaskCompleted
+  kDisconnectWiFi
   };
 
 // second core current task
@@ -78,5 +77,6 @@ extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void SetPage(ScreenPage page);
 extern void ResetWatchdog();
+extern void PrintLn(const char* charText = "");
 
 #endif // COMMON_H

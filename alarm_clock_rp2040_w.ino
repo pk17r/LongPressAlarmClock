@@ -57,8 +57,6 @@ AlarmClock* alarm_clock = NULL;  // ptr to alarm clock class object that control
 RGBDisplay* display = NULL;   // ptr to display class object that manages the display
 Touchscreen* ts = NULL;         // Touchscreen class object
 
-// LOCAL PROGRAM VARIABLES
-
 
 // setup core0
 void setup() {
@@ -70,7 +68,8 @@ void setup() {
   Serial.begin(9600);
   delay(100);
   // while(!Serial) { delay(20); };
-  Serial.println(F("\nSerial OK"));
+  PrintLn("Serial OK");
+  // Serial.println();
 
   // make all SPI CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -151,6 +150,7 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
+      Serial.println("New Minute!");
 
       // Activate Buzzer if Alarm Time has arrived
       if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
@@ -171,6 +171,7 @@ void loop() {
         if((second_core_task == kNoTask) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
             // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
             second_core_task = kGetWeatherInfo;
+            Serial.println("Get Weather Info!");
         }
 
         // auto update time at 2AM every morning
@@ -178,6 +179,7 @@ void loop() {
           Serial.println(F("Auto Update RTC HW Time from NTP Server"));
           // update time from NTP server
           second_core_task = kUpdateTimeFromNtpServer;
+          Serial.println("Get Time Update!");
         }
       #endif
 
@@ -206,11 +208,6 @@ void loop() {
       }
     }
 
-    // second core control operations
-    if(second_core_task == kTaskCompleted) {
-      second_core_task = kNoTask;
-    }
-
     // watchdog to reboot system if it gets stuck for whatever reason
     ResetWatchdog();
   }
@@ -233,7 +230,7 @@ void setup1() {
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
   // run the core only to do specific not time important operations
-  if (second_core_task != kNoTask && second_core_task != kTaskCompleted) {
+  if (second_core_task != kNoTask) {
 
     if(second_core_task == kGetWeatherInfo) {
       // get today's weather info
@@ -259,8 +256,7 @@ void loop1() {
     }
 
     // done processing the task
-    // set the core up to be idled from core0
-    second_core_task = kTaskCompleted;
+    second_core_task = kNoTask;
   }
 
   // a delay to slow things down and not crash
@@ -301,15 +297,32 @@ void SerialInputFlush() {
 }
 
 void SerialTimeStampPrefix() {
-  Serial.print(F("(s"));
+  Serial.print('(');
+  Serial.print(rtc->hour());
+  Serial.print(kCharColon);
+  if(rtc->minute() < 10) Serial.print(kCharZero);
+  Serial.print(rtc->minute());
+  Serial.print(kCharColon);
   if(rtc->second() < 10) Serial.print(kCharZero);
   Serial.print(rtc->second());
-  Serial.print(F(":i"));
+  Serial.print(kCharSpace);
+  if(rtc->hourModeAndAmPm() == 1)
+    Serial.print(kAmLabel);
+  else if(rtc->hourModeAndAmPm() == 2)
+    Serial.print(kPmLabel);
+  Serial.print(" :i");
   if(inactivity_seconds < 100) Serial.print(kCharZero);
   if(inactivity_seconds < 10) Serial.print(kCharZero);
   Serial.print(inactivity_seconds);
-  Serial.print(F(": RAM: ")); Serial.print(AvailableRam());
-  Serial.print(F(") - "));
+  Serial.print(": RAM "); Serial.print(AvailableRam());
+  Serial.print(')');
+  Serial.print(kCharSpace);
+  Serial.flush();
+}
+
+void PrintLn(const char* charText) {
+  SerialTimeStampPrefix();
+  Serial.println(charText);
   Serial.flush();
 }
 
