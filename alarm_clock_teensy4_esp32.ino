@@ -157,20 +157,20 @@ void loop() {
       if(current_page == kScreensaverPage)
         display->refresh_screensaver_canvas_ = true;
 
-      // 5 mins before alarm time, try to get weather info
       #if defined(WIFI_IS_USED)
+        // try to get weather info 5 mins before alarm time and every 60 minutes
         if((second_core_task == kNoTask) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
             // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
             second_core_task = kGetWeatherInfo;
         }
-      #endif
 
-      // auto update time at 2AM every morning
-      if(rtc->hour() == 2 && rtc->minute() == 0 && second_core_task == kNoTask) {
-        Serial.println(F("Auto Update RTC HW Time from NTP Server"));
-        // update time from NTP server
-        second_core_task = kUpdateTimeFromNtpServer;
-      }
+        // auto update time at 2AM every morning
+        if(second_core_task == kNoTask && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
+          Serial.println(F("Auto Update RTC HW Time from NTP Server"));
+          // update time from NTP server
+          second_core_task = kUpdateTimeFromNtpServer;
+        }
+      #endif
 
     }
 
