@@ -38,14 +38,11 @@ void RGBDisplay::Setup() {
   tft.setRotation(tft.getRotation() + 2);
   int16_t x, y;
   tft.getOrigin(&x, &y);
-  Serial.print("x="); Serial.print(x); Serial.print(" y="); Serial.println(y);
   x = 0, y = 0;
   tft.setOrigin(x, y);
   tft.setClipRect();
   tft.setFontAdafruit();
   tft.invertDisplay(true);
-  // make display landscape orientation
-  Serial.print("h="); Serial.print(tft.height()); Serial.print(" w="); Serial.println(tft.width());
 
 #endif
 
@@ -67,13 +64,13 @@ void RGBDisplay::Setup() {
   // set display brightness based on time of day
   CheckTimeAndSetBrightness();
 
-  Serial.println(F("Display Initialized"));
+  PrintLn("Display Initialized");
 }
 
 // set display brightness function
 void RGBDisplay::SetBrightness(int brightness) {
   analogWrite(TFT_BL, brightness);
-  Serial.print(F("Display Brightness set to ")); Serial.print(brightness); Serial.print(kCharSpace);
+  PrintLn("Display Brightness set to ", brightness);
   current_brightness_ = brightness;
   show_colored_edge_screensaver_ = (brightness >= kEveningBrightness);
 }

@@ -16,7 +16,6 @@ public:
 
   // function declerations
   void Setup();
-  void RetrieveAlarmSettings();
   void SaveAlarm();
   int16_t MinutesToAlarm();
   void BuzzAlarmFn();

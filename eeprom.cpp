@@ -26,10 +26,12 @@ bool EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &al
     eeprom_.eeprom_read(address, &alarmIsAm); address++;
     eeprom_.eeprom_read(address, &alarmOn); address++;
 
-    Serial.println(F("Alarm settings retrieved from EEPROM."));
+    PrintLn("Alarm settings retrieved from EEPROM.");
 
     return true;
   }
+
+  PrintLn("Could not retrieve Alarm settings from EEPROM.");
 
   return false;
 }
@@ -40,22 +42,22 @@ void EEPROM::SaveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, boo
   unsigned int address = kAlarmAddressEEPROM;
   // write alarm on EEPROM
   if (!eeprom_.eeprom_write(address, 1)) {
-    Serial.println("Failed to store 1");
+    PrintLn("Failed to store 1");
   }address++;
   if (!eeprom_.eeprom_write(address, alarmHr)) {
-    Serial.println("Failed to store alarmHr");
+    PrintLn("Failed to store alarmHr");
   }address++;
   if (!eeprom_.eeprom_write(address, alarmMin)) {
-    Serial.println("Failed to store alarmMin");
+    PrintLn("Failed to store alarmMin");
   }address++;
   if (!eeprom_.eeprom_write(address, alarmIsAm)) {
-    Serial.println("Failed to store alarmIsAm");
+    PrintLn("Failed to store alarmIsAm");
   }address++;
   if (!eeprom_.eeprom_write(address, alarmOn)) {
-    Serial.println("Failed to store alarmOn");
+    PrintLn("Failed to store alarmOn");
   }address++;
 
-  Serial.println(F("Alarm settings saved to EEPROM."));
+  PrintLn("Alarm settings saved to EEPROM.");
 
 }
 
@@ -88,7 +90,7 @@ void EEPROM::RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
   }
   wifi_ssid = new char[address - char_arr_start_address];   // allocate space
   strcpy(wifi_ssid,eeprom_read_array);
-  // Serial.print("EEPROM wifi_ssid: "); Serial.println(wifi_ssid);
+  // PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
 
   // read wifi_password
   char_arr_start_address = address;
@@ -113,9 +115,9 @@ void EEPROM::RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
   }
   wifi_password = new char[address - char_arr_start_address];   // allocate space
   strcpy(wifi_password,eeprom_read_array);
-  // Serial.print("EEPROM wifi_password: "); Serial.println(wifi_password);
+  // PrintLn("EEPROM wifi_password: ", wifi_password);
 
-  Serial.println(F("WiFi details retrieved from EEPROM."));
+  PrintLn("WiFi details retrieved from EEPROM.");
 }
 
 void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
@@ -128,7 +130,7 @@ void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
   while(1) {
     char c = *(wifi_ssid + i);
     if (!eeprom_.eeprom_write(address, c)) {
-      Serial.println("Failed to store c");
+      PrintLn("Failed to store c");
     }address++;
     i++;
     // break at null character
@@ -137,7 +139,7 @@ void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
     // limit to force out of while loop, won't reach here in normal operation
     if(i >= kWifiSsidPasswordLengthMax) {
       if (!eeprom_.eeprom_write(address, '\0')) {
-        Serial.println("Failed to store '\0'");
+        PrintLn("Failed to store '\0'");
       }address++;
       break;
     }
@@ -148,7 +150,7 @@ void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
   while(1) {
     char c = *(wifi_password + i);
     if (!eeprom_.eeprom_write(address, c)) {
-      Serial.println("Failed to store c");
+      PrintLn("Failed to store c");
     }address++;
     i++;
     // break at null character
@@ -157,13 +159,13 @@ void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
     // limit to force out of while loop, won't reach here in normal operation
     if(i >= kWifiSsidPasswordLengthMax) {
       if (!eeprom_.eeprom_write(address, '\0')) {
-        Serial.println("Failed to store '\0'");
+        PrintLn("Failed to store '\0'");
       }address++;
       break;
     }
   }
 
-  Serial.println(F("WiFi ssid and password written to EEPROM"));
+  PrintLn("WiFi ssid and password written to EEPROM");
 
 }
 

@@ -67,7 +67,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(200);
-  // while(!Serial) { delay(20); };
+  while(!Serial) { delay(20); };
   PrintLn("Serial OK");
 
   // make all SPI CS pins high
@@ -315,9 +315,19 @@ void SerialTimeStampPrefix() {
   Serial.flush();
 }
 
-void PrintLn(const char* charText) {
+void PrintLn(const char* someText1, const char* someText2) {
   SerialTimeStampPrefix();
-  Serial.println(charText);
+  if(someText1 != nullptr)
+    Serial.print(someText1);
+  if(someText2 != nullptr)
+    Serial.print(someText2);
+  Serial.println();
+  Serial.flush();
+}
+void PrintLn(const char* someText1, int &someInt) {
+  SerialTimeStampPrefix();
+  Serial.print(someText1);
+  Serial.println(someInt);
   Serial.flush();
 }
 

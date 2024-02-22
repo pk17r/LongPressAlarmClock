@@ -16,7 +16,7 @@ void WiFiStuff::SaveWiFiDetails() {
 }
 
 void WiFiStuff::TurnWiFiOn() {
-  Serial.println(F("Connecting to WiFi"));
+  PrintLn("Connecting to WiFi");
   WiFi.persistent(true);
   delay(1);
   WiFi.mode(WIFI_STA);
@@ -25,14 +25,14 @@ void WiFiStuff::TurnWiFiOn() {
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
-    Serial.print(".");
+    // Serial.print(".");
     i++;
     if(i >= 10) break;
   }
   if(WiFi.status() == WL_CONNECTED)
-    Serial.println(F("WiFi Connected."));
+    PrintLn("WiFi Connected.");
   else
-    Serial.println(F("Could NOT connect to WiFi."));
+    PrintLn("Could NOT connect to WiFi.");
 }
 
 void WiFiStuff::TurnWiFiOff() {
@@ -41,7 +41,7 @@ void WiFiStuff::TurnWiFiOff() {
   WiFi.mode(WIFI_OFF);
   delay(1);
   WiFi.disconnect();
-  Serial.println(F("WiFi Off."));
+  PrintLn("WiFi Off.");
 }
 
 void WiFiStuff::GetTodaysWeatherInfo() {
@@ -147,7 +147,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     }
   }
   else {
-    Serial.println("WiFi not connected");
+    PrintLn("WiFi not connected");
   }
 
   // turn off WiFi

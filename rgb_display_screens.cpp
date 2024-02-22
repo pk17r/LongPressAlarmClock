@@ -1465,7 +1465,7 @@ void RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
     tft.setCursor(10,30);
     tft.println(return_text);
     if(strcmp(return_text, "") != 0) {
-      Serial.println(return_text);
+      PrintLn(return_text);
       delay(2000);
       break;
     }

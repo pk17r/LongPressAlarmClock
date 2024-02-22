@@ -8,19 +8,14 @@
 
 // program setup function
 void AlarmClock::Setup() {
-  
+
   // setup alarm clock program
 
   // initialize buzzer
   pinMode(BUZZER_PIN, OUTPUT);
   digitalWrite(BUZZER_PIN, LOW);
 
-  // retrieve alarm settings
-  RetrieveAlarmSettings();
-}
-
-void AlarmClock::RetrieveAlarmSettings() {
-  
+  // retrieve alarm settings or save default
   if(!(eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_)))
     SaveAlarm();
 }
@@ -33,6 +28,8 @@ void AlarmClock::SaveAlarm() {
 
   // save alarm settings
   eeprom->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
+
+  PrintLn("Alarm Settings Saved!");
 }
 
 int16_t AlarmClock::MinutesToAlarm() {
@@ -161,12 +158,12 @@ void AlarmClock::BuzzerDisable() {
 
 void AlarmClock::SetupBuzzerTimer() {
   passive_buzzer_timer_ptr_ = new struct repeating_timer;
-  Serial.println(F("Timer setup successful!"));
+  PrintLn("Timer setup successful!");
 }
 
 void AlarmClock::DeallocateBuzzerTimer() {
   delete passive_buzzer_timer_ptr_;
   passive_buzzer_timer_ptr_ = NULL;
-  Serial.println(F("Buzzer Timer deallocated."));
+  PrintLn("Buzzer Timer deallocated.");
 }
 

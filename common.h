@@ -77,6 +77,7 @@ extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void SetPage(ScreenPage page);
 extern void ResetWatchdog();
-extern void PrintLn(const char* charText = "");
+extern void PrintLn(const char* someText1 = nullptr, const char* someText2 = nullptr);
+extern void PrintLn(const char* someText1, int &someInt);
 
 #endif // COMMON_H
