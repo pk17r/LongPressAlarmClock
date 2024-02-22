@@ -104,6 +104,12 @@ void RTC::Refresh() {
   // make _second equal to rtcHw seconds -> should be 0
   second_ = rtc_hw_.second();
 
+  // check for minute update
+  if(rtc_hw_.minute() != minute_) {
+    minute_ = rtc_hw_.minute();
+    rtc_hw_min_update_ = true;
+  }
+
   // Check whether RTC HW experienced a power loss and thereby know if time is up to date or not
   if (rtc_hw_.lostPower()) {
     Serial.println(F("RTC POWER FAILED. Time is not up to date!"));
@@ -122,13 +128,9 @@ void RTC::SecondsUpdateInterruptISR() {
   second_++;
   // a flag for others that time has updated!
   rtc_hw_sec_update_ = true;
-
-  if(second_ >= 60) {
-    #if !defined(MCU_IS_ESP32)
-      rtc->Refresh();
-    #endif
-    rtc_hw_min_update_ = true;
-  }
+  // refresh time on rtc class object on new minute
+  if(second_ >= 60)
+    rtc->Refresh();
 }
 
 /**
