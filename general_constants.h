@@ -39,7 +39,7 @@ const char kMonthDec[MONTH_ARR_SIZE] = "Dec";
 const char *const kMonthsTable[12] = { kMonthJan, kMonthFeb, kMonthMar, kMonthApr, kMonthMay, kMonthJun, kMonthJul, kMonthAug, kMonthSep, kMonthOct, kMonthNov, kMonthDec };
 
 const char kAmLabel[3] = "AM", kPmLabel[3] = "PM", kOffLabel[4] = "Off", kAlarmLabel[6] = "Alarm";
-const char kCharSpace = ' ', kCharZero = '0', kCharColon = '0';
+const char kCharSpace = ' ', kCharZero = '0', kCharColon = ':';
 
 const unsigned int kWifiSsidPasswordLengthMax = 32;
 

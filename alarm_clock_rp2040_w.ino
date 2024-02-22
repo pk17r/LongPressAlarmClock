@@ -66,10 +66,9 @@ void setup() {
   rp2040.wdt_begin(8300);
 
   Serial.begin(9600);
-  delay(100);
+  delay(200);
   // while(!Serial) { delay(20); };
   PrintLn("Serial OK");
-  // Serial.println();
 
   // make all SPI CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -138,11 +137,9 @@ void loop() {
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
-    SerialTimeStampPrefix();
-
     // if time is lost because of power failure
     if(rtc->year() < 2024 && second_core_task == kNoTask) {
-      Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
+      PrintLn("**** Update RTC HW Time from NTP Server ****");
       // update time from NTP server
       second_core_task = kUpdateTimeFromNtpServer;
     }
@@ -150,7 +147,7 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
-      Serial.println("New Minute!");
+      PrintLn("New Minute!");
 
       // Activate Buzzer if Alarm Time has arrived
       if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
@@ -171,15 +168,14 @@ void loop() {
         if((second_core_task == kNoTask) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
             // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
             second_core_task = kGetWeatherInfo;
-            Serial.println("Get Weather Info!");
+            PrintLn("Get Weather Info!");
         }
 
         // auto update time at 2AM every morning
         if(second_core_task == kNoTask && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
-          Serial.println(F("Auto Update RTC HW Time from NTP Server"));
           // update time from NTP server
           second_core_task = kUpdateTimeFromNtpServer;
-          Serial.println("Get Time Update!");
+          PrintLn("Get Time Update from NTP Server");
         }
       #endif
 
@@ -193,8 +189,7 @@ void loop() {
       display->DisplayTimeUpdate();
 
     // serial print RTC Date Time
-    SerialPrintRtcDateTime();
-    Serial.println();
+    // SerialPrintRtcDateTime();
 
     // check for inactivity
     if(inactivity_seconds < kInactivitySecondsLimit) {
@@ -351,6 +346,7 @@ void PrepareTimeDayDateArrays() {
 }
 
 void SerialPrintRtcDateTime() {
+  SerialTimeStampPrefix();
   // full serial print time date day array
   Serial.print(new_display_data_.time_HHMM);
   // snprintf(timeArraySec, SS_ARR_SIZE, ":%02d", second);
@@ -367,7 +363,7 @@ void SerialPrintRtcDateTime() {
   Serial.print(kCharSpace);
   Serial.print(rtc->year());
   Serial.print(kCharSpace);
-  Serial.print(new_display_data_.alarm_str);
+  Serial.println(new_display_data_.alarm_str);
   Serial.flush();
 }
 
