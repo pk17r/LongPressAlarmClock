@@ -2,12 +2,11 @@
 #define ALARM_CLOCK_H
 
 #include "common.h"
-#if defined(MCU_IS_RASPBERRY_PI_PICO_W)   // include files for timer
-  #include <stdio.h>
-  #include "pico/stdlib.h"
-  #include "hardware/timer.h"
-  #include "hardware/irq.h"
-#endif
+// include files for timer
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "hardware/timer.h"
+#include "hardware/irq.h"
 
 class AlarmClock {
 
@@ -21,10 +20,7 @@ public:
   void SaveAlarm();
   int16_t MinutesToAlarm();
   void BuzzAlarmFn();
-  // #if defined(MCU_IS_ESP32)
-  // void print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason);
-  // void putEsp32ToLightSleep();
-  // #endif
+
 
 // OBJECTS and VARIABLES
 
@@ -52,21 +48,13 @@ private:
   // buzzer functions
   // buzzer used is a passive buzzer which is run using timers
   void SetupBuzzerTimer();
-  #if defined(MCU_IS_ESP32)
-    static void IRAM_ATTR PassiveBuzzerTimerISR();
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
-  #endif
+  static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
   void BuzzerEnable();
   void BuzzerDisable();
   void DeallocateBuzzerTimer();
 
   // Hardware Timer
-  #if defined(MCU_IS_ESP32)
-    hw_timer_t *passive_buzzer_timer_ptr_ = NULL;
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
-  #endif
+  struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
 
   const int kBuzzerFrequency = 2048;
   static inline const unsigned long kBeepLengthMs = 800;

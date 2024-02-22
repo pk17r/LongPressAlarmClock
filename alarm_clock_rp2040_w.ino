@@ -1,11 +1,40 @@
 /**************************************************************************
-  Arduino Alarm Clock using 
-    2.4" ILI9341 display and Adafruit Library and Functions
-    DS3231 RTC Clock and uRTCLib Library and Functions
-    RTC HW sends out a 1H wave so arduino can update time without talking to RTC HW
-    TM1637 LED 4 digit clock display and TM1637Display Library and Functions
+
+  # Touchscreen Long Press Alarm Clock
+
+
+- Hardware:
+  - MCU: Raspberry Pi Pico W
+  - Display: 2.8" ST7789V touchscreen display, other selectable options: ST7735, ILI9341 and ILI9488
+  - DS3231 RTC Clock
+  - A push button with LED
+  - A quite powerful 85dB passive buzzer for alarm
+
+
+- Software:
+  - A fast low RAM usage FastDrawBitmap function is implement that converts monochrome image into RGB565 with 2 colors and sends image to display via SPI row by row
+  - Adafruit Library used for GFX functions
+  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+
+
+- Salient Features
+  - Program requires user to press and hold a button for 25 seconds continously to turn off alarm and buzzer
+  - C++ OOP Based Project
+  - All modules have their own independent definition headers
+  - A common header containing pointers to objects of every module and gloal functions
+  - Time update via NTP server using WiFi once every day to keep accuracy
+  - DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
+  - Get Weather info using WiFi and display today's weather after alarm
+  - Get user input of WiFi details via an on-screen keyboard
+  - Colorful smooth Screensaver with a big clock
+  - Touchscreen based alarm set page
+  - Settings saved in EEPROM so not lost on power loss
+  - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
+  - Screen brightness changes according to time of the day, with lowest brightness setting at night time
+
 
   Prashant Kumar
+
 
 ***************************************************************************/
 #include "common.h"
@@ -30,20 +59,13 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // LOCAL PROGRAM VARIABLES
 
-#if defined(MCU_IS_ESP32)
-  TaskHandle_t Task1;
-#endif
 
 // setup core0
 void setup() {
 
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    rp2040.wdt_begin(8300);
-  #elif defined(MCU_IS_ESP32)
-    setCpuFrequencyMhz(160);
-  #endif
+  // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
+  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
+  rp2040.wdt_begin(8300);
 
   Serial.begin(9600);
   delay(100);
@@ -81,16 +103,6 @@ void setup() {
   display->Setup();
   ts = new Touchscreen();
 
-  #if defined(MCU_IS_ESP32)
-    xTaskCreatePinnedToCore(
-        Task1code, /* Function to implement the task */
-        "Task1", /* Name of the task */
-        10000,  /* Stack size in words */
-        NULL,  /* Task input parameter */
-        0,  /* Priority of the task */
-        &Task1,  /* Task handle. */
-        0); /* Core where the task should run */
-  #endif
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -138,9 +150,6 @@ void loop() {
 
     // new minute!
     if (rtc->rtc_hw_min_update_) {
-      #if defined(MCU_IS_ESP32)
-        rtc->Refresh();
-      #endif
       rtc->rtc_hw_min_update_ = false;
 
       // Activate Buzzer if Alarm Time has arrived
@@ -214,27 +223,15 @@ void loop() {
   if (Serial.available() != 0)
     ProcessSerialInput();
 
-  // #if defined(MCU_IS_ESP32)
-  //     // if button is inactive, then go to sleep
-  //     if(!pushBtn->buttonActiveDebounced())
-  //       putEsp32ToLightSleep();
-  // #endif
 }
 
-#if defined(MCU_IS_RASPBERRY_PI_PICO_W)
 // setup core1
 void setup1() {
   delay(2000);
 }
-#endif
 
 // arduino loop function on core1 - low priority one with wifi weather update task
-#if defined(MCU_IS_ESP32)
-void Task1code( void * parameter) {
-  for(;;) {
-#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  void loop1() {
-#endif
+void loop1() {
   // run the core only to do specific not time important operations
   if (second_core_task != kNoTask && second_core_task != kTaskCompleted) {
 
@@ -268,12 +265,8 @@ void Task1code( void * parameter) {
 
   // a delay to slow things down and not crash
   delay(1000);
-#if defined(MCU_IS_ESP32)
-  }
 }
-#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-}
-#endif
+
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
@@ -290,12 +283,8 @@ ScreenPage current_page = kMainPage;
 volatile SecondCoreTask second_core_task = kNoTask;
 
 int AvailableRam() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
-    return rp2040.getFreeHeap();
-  #elif defined(MCU_IS_ESP32)
-    return esp_get_free_heap_size();
-  #endif
+  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
+  return rp2040.getFreeHeap();
 }
 
 void SerialInputFlush() {
@@ -371,10 +360,8 @@ void SerialPrintRtcDateTime() {
 
 // reset watchdog within time so it does not reboot system
 void ResetWatchdog() {
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
-    rp2040.wdt_reset();
-  #endif
+  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
+  rp2040.wdt_reset();
 }
 
 void ProcessSerialInput() {
@@ -556,79 +543,3 @@ void SetPage(ScreenPage page) {
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
 }
-
-// #if defined(MCU_IS_ESP32)
-// /*
-//   Esp32 light sleep function
-//   https://lastminuteengineers.com/esp32-deep-sleep-wakeup-sources/
-// */
-// void AlarmClock::putEsp32ToLightSleep() {
-//   /*
-//   First we configure the wake up source
-//   We set our ESP32 to wake up for an external trigger.
-//   There are two types for ESP32, ext0 and ext1 .
-//   ext0 uses RTC_IO to wakeup thus requires RTC peripherals
-//   to be on while ext1 uses RTC Controller so doesnt need
-//   peripherals to be powered on.
-//   Note that using internal pullups/pulldowns also requires
-//   RTC peripherals to be turned on.
-//   */
-//   // add a timer to wake up ESP32
-//   esp_sleep_enable_timer_wakeup(500000); //0.5 seconds
-//   // ext1 button press as wake up source
-//   esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK,ESP_EXT1_WAKEUP_ANY_HIGH);
-//   //Go to sleep now
-//   serialTimeStampPrefix();
-//   Serial.println("Go To Light Sleep for 0.5 sec or button press");
-//   Serial.flush();
-//   // go to light sleep
-//   esp_light_sleep_start();
-//   // On WAKEUP disable timer as wake up source
-//   esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
-
-//   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-//   //Print the wakeup reason for ESP32
-//   serialTimeStampPrefix();
-//   print_wakeup_reason(wakeup_reason);
-
-//   // if wakeup reason was timer then add seconds ticker signal to wake up source and go back to sleep
-//   if(wakeup_reason == ESP_SLEEP_WAKEUP_TIMER) {
-//     // add ext0 RTC seconds ticker as wake up source
-//     esp_sleep_enable_ext0_wakeup((gpio_num_t)SQW_INT_PIN,1); //Wake up at: 1 = High, 0 = Low
-//     //Go to sleep now
-//     serialTimeStampPrefix();
-//     Serial.println("Go To Light Sleep until seconds tick or button press");
-//     //esp_deep_sleep_start();
-//     Serial.flush();
-//     // go to light sleep
-//     esp_light_sleep_start();
-
-//     // On WAKEUP disable EXT0 as wake up source
-//     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_EXT0);
-
-//     wakeup_reason = esp_sleep_get_wakeup_cause();
-//     // if(wakeup_reason == ESP_SLEEP_WAKEUP_EXT0)
-//     //   turnBacklightOn();
-
-//     //Print the wakeup reason for ESP32
-//     serialTimeStampPrefix();
-//     print_wakeup_reason(wakeup_reason);
-//   }
-// }
-
-// /*
-// Method to print the reason by which ESP32
-// has been awaken from sleep
-// */
-// void AlarmClock::print_wakeup_reason(esp_sleep_wakeup_cause_t &wakeup_reason){
-//   switch(wakeup_reason)
-//   {
-//     case ESP_SLEEP_WAKEUP_EXT0 : Serial.println(F("Wakeup by ext signal RTC_IO - SECONDS TICK")); break;
-//     case ESP_SLEEP_WAKEUP_EXT1 : Serial.println(F("Wakeup by ext signal RTC_CNTL - BUTTON PRESS")); break;
-//     case ESP_SLEEP_WAKEUP_TIMER : Serial.println(F("Wakeup caused by TIMER")); break;
-//     case ESP_SLEEP_WAKEUP_TOUCHPAD : Serial.println(F("Wakeup caused by touchpad")); break;
-//     case ESP_SLEEP_WAKEUP_ULP : Serial.println(F("Wakeup caused by ULP program")); break;
-//     default : Serial.printf("Wakeup was not caused by deep sleep: %d\n",wakeup_reason); break;
-//   }
-// }
-// #endif

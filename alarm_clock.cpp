@@ -1,7 +1,6 @@
 #include "alarm_clock.h"
 #include "rgb_display.h"
 #include "rtc.h"
-// #include "hardware/sync.h"
 #include "wifi_stuff.h"
 #include "eeprom.h"
 #include <PushButtonTaps.h>
@@ -133,11 +132,7 @@ void AlarmClock::BuzzAlarmFn() {
 }
 
 // Passive Buzzer Timer Interrupt Service Routine
-#if defined(MCU_IS_ESP32)
-void IRAM_ATTR AlarmClock::PassiveBuzzerTimerISR() {
-#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
 bool AlarmClock::PassiveBuzzerTimerISR(struct repeating_timer *t) {
-#endif
   // PassiveBuzzerTimerISR() function
   if(millis() - beep_start_time_ms_ > kBeepLengthMs) {
     beep_toggle_ = !beep_toggle_;
@@ -146,29 +141,18 @@ bool AlarmClock::PassiveBuzzerTimerISR(struct repeating_timer *t) {
   }
   buzzer_square_wave_toggle_ = !buzzer_square_wave_toggle_;
   digitalWrite(BUZZER_PIN, buzzer_square_wave_toggle_ && beep_toggle_);
-
-  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    return true;
-  #endif
+  return true;
 }
 
 void AlarmClock::BuzzerEnable() {
   // Timer Enable
-  #if defined(MCU_IS_ESP32)
-    timerAlarmEnable(passive_buzzer_timer_ptr_);
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
-    add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
-  #endif
+  int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
+  add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
 }
 
 void AlarmClock::BuzzerDisable() {
   // Timer Disable
-  #if defined(MCU_IS_ESP32)
-    timerAlarmDisable(passive_buzzer_timer_ptr_);
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    cancel_repeating_timer(passive_buzzer_timer_ptr_);
-  #endif
+  cancel_repeating_timer(passive_buzzer_timer_ptr_);
   digitalWrite(BUZZER_PIN, LOW);
   digitalWrite(LED_PIN, LOW);
   buzzer_square_wave_toggle_ = false;
@@ -176,27 +160,13 @@ void AlarmClock::BuzzerDisable() {
 }
 
 void AlarmClock::SetupBuzzerTimer() {
-
-  #if defined(MCU_IS_ESP32)
-    passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
-    timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
-    timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true);
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    passive_buzzer_timer_ptr_ = new struct repeating_timer;
-  #endif
-
+  passive_buzzer_timer_ptr_ = new struct repeating_timer;
   Serial.println(F("Timer setup successful!"));
 }
 
 void AlarmClock::DeallocateBuzzerTimer() {
-
-  #if defined(MCU_IS_ESP32)
+  delete passive_buzzer_timer_ptr_;
   passive_buzzer_timer_ptr_ = NULL;
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    delete passive_buzzer_timer_ptr_;
-    passive_buzzer_timer_ptr_ = NULL;
-  #endif
-
   Serial.println(F("Buzzer Timer deallocated."));
 }
 

@@ -23,11 +23,7 @@
 #include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
 #include <elapsedMillis.h>
-#if defined(MCU_IS_ESP32)
-  #include <pgmspace.h>
-#else
-  #include <avr/pgmspace.h>
-#endif
+#include <avr/pgmspace.h>
 
 
 class RGBDisplay {
