@@ -383,6 +383,23 @@ void RGBDisplay::SettingsPage() {
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeSans12pt7b);
   tft.setCursor(10, 20);
+  tft.print("Settings:");
+  tft.setFont(&FreeMono9pt7b);
+  tft.setCursor(10, 40);
+
+  // Update WiFi Details button
+  DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+    // Cancel button
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
+
+void RGBDisplay::WiFiSettingsPage() {
+
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeSans12pt7b);
+  tft.setCursor(10, 20);
   tft.print("WiFi:");
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
@@ -1041,6 +1058,23 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   }
   else if(current_page == kSettingsPage) {
 
+    // Update WiFi Details button
+    if(ts_x >= kWiFiSettingsButtonX1 && ts_x <= kWiFiSettingsButtonX1 + kWiFiSettingsButtonW && ts_y >= kWiFiSettingsButtonY1 && ts_y <= kWiFiSettingsButtonY1 + kWiFiSettingsButtonH) {
+      DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kWiFiSettingsPage;
+    }
+
+    // cancel button
+    if(ts_x >= kCancelButtonX1 && ts_y >= kCancelButtonY1) {
+      // show a little graphic of Cancel button Press
+      DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kMainPage;
+    }
+  }
+  else if(current_page == kWiFiSettingsPage) {
+
     // update wifi ssid button
     if(ts_x >= kSsidButtonX1 && ts_x <= kSsidButtonX1 + kSsidButtonW && ts_y >= kSsidButtonY1 && ts_y <= kSsidButtonY1 + kSsidButtonH) {
       DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, ssidStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
@@ -1060,7 +1094,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       // show a little graphic of Cancel button Press
       DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
-      return kMainPage;
+      return kSettingsPage;
     }
   }
 

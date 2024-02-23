@@ -574,8 +574,13 @@ void SetPage(ScreenPage page) {
       display->SettingsPage();
       display->SetMaxBrightness();
       break;
+    case kWiFiSettingsPage:
+      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
+      display->WiFiSettingsPage();
+      display->SetMaxBrightness();
+      break;
     case kEnterWiFiSsidPage:
-      current_page = kSettingsPage;     // new page needs to be set before any action
+      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
       display->SetMaxBrightness();
       {
         PrintLn("**** On Screen WiFi SSID Text Input ****");
@@ -596,13 +601,11 @@ void SetPage(ScreenPage page) {
           PrintLn("EEPROM wifi_ssid: ", wifi_stuff->wifi_ssid_);
           wifi_stuff->SaveWiFiDetails();
         }
-        SetPage(kSettingsPage);
+        SetPage(kWiFiSettingsPage);
       }
-      display->SettingsPage();
-      display->SetMaxBrightness();
       break;
     case kEnterWiFiPasswdPage:
-      current_page = kSettingsPage;     // new page needs to be set before any action
+      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
       display->SetMaxBrightness();
       {
         PrintLn("**** On Screen WiFi PASSWD Text Input ****");
@@ -623,10 +626,8 @@ void SetPage(ScreenPage page) {
           PrintLn("EEPROM wifi_password_: ", wifi_stuff->wifi_password_);
           wifi_stuff->SaveWiFiDetails();
         }
-        SetPage(kSettingsPage);
+        SetPage(kWiFiSettingsPage);
       }
-      display->SettingsPage();
-      display->SetMaxBrightness();
       break;
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
