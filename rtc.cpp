@@ -99,7 +99,7 @@ void RTC::Refresh() {
 
   // refresh time in class object from RTC HW
   rtc_hw_.refresh();
-  Serial.println(F("__RTC Refresh__ "));
+  PrintLn("__RTC Refresh__ ");
 
   // make _second equal to rtcHw seconds -> should be 0
   second_ = rtc_hw_.second();

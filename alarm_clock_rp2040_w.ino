@@ -292,6 +292,8 @@ void SerialInputFlush() {
 }
 
 void SerialTimeStampPrefix() {
+  Serial.print(millis());
+  Serial.print(kCharSpace);
   Serial.print('(');
   Serial.print(rtc->hour());
   Serial.print(kCharColon);
