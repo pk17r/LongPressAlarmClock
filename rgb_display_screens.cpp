@@ -425,6 +425,12 @@ void RGBDisplay::WiFiSettingsPage() {
   // Update PASSWD button
   DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
+  // Update WEATHER button
+  DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Update TIME button
+  DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
@@ -1085,6 +1091,20 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // update wifi Passwd button
     if(ts_x >= kPasswdButtonX1 && ts_x <= kPasswdButtonX1 + kPasswdButtonW && ts_y >= kPasswdButtonY1 && ts_y <= kPasswdButtonY1 + kPasswdButtonH) {
       DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWiFiPasswdPage;
+    }
+
+    // update Weather button
+    if(ts_x >= kWeatherButtonX1 && ts_x <= kWeatherButtonX1 + kWeatherButtonW && ts_y >= kWeatherButtonY1 && ts_y <= kWeatherButtonY1 + kWeatherButtonH) {
+      DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWiFiPasswdPage;
+    }
+
+    // update Time button
+    if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
+      DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kEnterWiFiPasswdPage;
     }
