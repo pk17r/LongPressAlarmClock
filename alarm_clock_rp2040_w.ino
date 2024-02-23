@@ -67,7 +67,8 @@ void setup() {
 
   Serial.begin(9600);
   delay(200);
-  while(!Serial) { delay(20); };
+  // while(!Serial) { delay(20); };
+  PrintLn();
   PrintLn("Serial OK");
 
   // make all SPI CS pins high

@@ -64,7 +64,7 @@ void RGBDisplay::Setup() {
   // set display brightness based on time of day
   CheckTimeAndSetBrightness();
 
-  PrintLn("Display Initialized");
+  PrintLn("Display Initialized!");
 }
 
 // set display brightness function

@@ -18,6 +18,8 @@ void AlarmClock::Setup() {
   // retrieve alarm settings or save default
   if(!(eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_)))
     SaveAlarm();
+
+  PrintLn("Alarm Clock Initialized!");
 }
 
 void AlarmClock::SaveAlarm() {

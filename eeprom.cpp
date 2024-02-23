@@ -9,7 +9,7 @@ EEPROM::EEPROM() {
 
   // check if data is compatible with code, otherwise set the respective flag and default data
   
-  PrintLn("EEPROM initialized!");
+  PrintLn("EEPROM Initialized!");
 }
 
 bool EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
@@ -82,7 +82,7 @@ void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_passw
       break;
     }
   }
-  PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
+  // PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
 
   // read wifi_password
   wifi_password = "";
@@ -100,7 +100,7 @@ void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_passw
       break;
     }
   }
-  PrintLn("EEPROM wifi_password: ", wifi_password);
+  // PrintLn("EEPROM wifi_password: ", wifi_password);
 
   PrintLn("WiFi details retrieved from EEPROM.");
 }
