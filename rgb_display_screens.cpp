@@ -1293,7 +1293,7 @@ byte RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
 // get keyboard presses on keyboard made by MakeKeyboard
 bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textReturn) {
   char key = 0;
-  static bool shift = true, special = false, back = false, lastSp = false, lastSh = false;
+  static bool shift = true, lastSh = true, special = false, lastSp = false;
   static char bufIndex = 0;
 
   if (ts->IsTouched())
@@ -1318,6 +1318,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textRet
       delay(200);
     }
 
+    // re-draw keyboard if...
     if (special != lastSp || shift != lastSh)
     {
       if (special)
@@ -1364,8 +1365,6 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textRet
 
       tft.setCursor(15, kTextAreaHeight + 65);
       tft.print('^');
-
-      lastSh = shift;
 
       lastSp = special;
       lastSh = shift;
