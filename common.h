@@ -35,6 +35,8 @@ enum ScreenPage {
   kAlarmTriggeredPage,
   kTimeSetPage,
   kSettingsPage,
+  kEnterWiFiSsidPage,
+  kEnterWiFiPasswdPage,
   kNoPageSelected
   };
 

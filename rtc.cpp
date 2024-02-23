@@ -99,7 +99,6 @@ void RTC::Refresh() {
 
   // refresh time in class object from RTC HW
   rtc_hw_.refresh();
-  PrintLn("__RTC Refresh__ ");
 
   // make _second equal to rtcHw seconds -> should be 0
   second_ = rtc_hw_.second();
@@ -109,15 +108,16 @@ void RTC::Refresh() {
     minute_ = rtc_hw_.minute();
     rtc_hw_min_update_ = true;
   }
+  PrintLn("__RTC Refresh__ ");
 
   // Check whether RTC HW experienced a power loss and thereby know if time is up to date or not
   if (rtc_hw_.lostPower()) {
-    Serial.println(F("RTC POWER FAILED. Time is not up to date!"));
+    PrintLn("RTC POWER FAILED. Time is not up to date!");
   }
 
   // Check whether RTC HW Oscillator is set to use VBAT or not
   if (rtc_hw_.getEOSCFlag()) {
-    Serial.println(F("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!"));
+    PrintLn("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!");
   }
 
 }

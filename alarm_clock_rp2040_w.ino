@@ -67,7 +67,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(200);
-  while(!Serial) { delay(20); };
+  // while(!Serial) { delay(20); };
   PrintLn("Serial OK");
 
   // make all SPI CS pins high
@@ -119,8 +119,8 @@ void loop() {
       display->SetAlarmScreen(true);
     }
     else if(current_page != kAlarmSetPage && inactivity_seconds >= 1)
-    { // if on main page and user clicked somewhere, get touch input
-      ScreenPage userTouchRegion = display->ClassifyMainPageTouchInput();
+    { // if not on alarm page and user clicked somewhere, get touch input
+      ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
       if(userTouchRegion != kNoPageSelected)
         SetPage(userTouchRegion);
     }
@@ -147,7 +147,7 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
-      PrintLn("New Minute!");
+      // PrintLn("New Minute!");
 
       // Activate Buzzer if Alarm Time has arrived
       if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
@@ -321,6 +321,7 @@ void PrintLn(const char* someText1, const char* someText2) {
   SerialTimeStampPrefix();
   if(someText1 != nullptr)
     Serial.print(someText1);
+  Serial.print(kCharSpace);
   if(someText2 != nullptr)
     Serial.print(someText2);
   Serial.println();
@@ -329,6 +330,7 @@ void PrintLn(const char* someText1, const char* someText2) {
 void PrintLn(const char* someText1, int &someInt) {
   SerialTimeStampPrefix();
   Serial.print(someText1);
+  Serial.print(kCharSpace);
   Serial.println(someInt);
   Serial.flush();
 }
@@ -557,6 +559,48 @@ void SetPage(ScreenPage page) {
       break;
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
+      display->SettingsPage();
+      display->SetMaxBrightness();
+      break;
+    case kEnterWiFiSsidPage:
+      current_page = kSettingsPage;     // new page needs to be set before any action
+      display->SetMaxBrightness();
+      {
+        PrintLn("**** On Screen WiFi SSID Text Input ****");
+        // user input string
+        char label[] = "WiFi SSID";
+        char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+        // get user input from screen
+        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        PrintLn(label, returnText);
+        if(ret) {
+          // set WiFi SSID:
+          wifi_stuff->wifi_ssid_ = returnText;
+          wifi_stuff->SaveWiFiDetails();
+        }
+        SetPage(kSettingsPage);
+      }
+      display->SettingsPage();
+      display->SetMaxBrightness();
+      break;
+    case kEnterWiFiPasswdPage:
+      current_page = kSettingsPage;     // new page needs to be set before any action
+      display->SetMaxBrightness();
+      {
+        PrintLn("**** On Screen WiFi PASSWD Text Input ****");
+        // user input string
+        char label[] = "WiFi PASSWD";
+        char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+        // get user input from screen
+        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        PrintLn(label, returnText);
+        if(ret) {
+          // set WiFi SSID:
+          wifi_stuff->wifi_password_ = returnText;
+          wifi_stuff->SaveWiFiDetails();
+        }
+        SetPage(kSettingsPage);
+      }
       display->SettingsPage();
       display->SetMaxBrightness();
       break;

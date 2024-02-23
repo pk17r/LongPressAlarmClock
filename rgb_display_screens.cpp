@@ -401,9 +401,12 @@ void RGBDisplay::SettingsPage() {
       tft.print('*');
     i++;
   }
-  // draw settings gear to edit WiFi details
-  tft.drawBitmap(kSettingsGearX1, 10, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
 
+  // Update SSID button
+  DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, ssidStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Update PASSWD button
+  DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1016,7 +1019,7 @@ void RGBDisplay::DisplayTimeUpdate() {
   redraw_display_ = false;
 }
 
-ScreenPage RGBDisplay::ClassifyMainPageTouchInput() {
+ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
   ScreenPage returnVal = kNoPageSelected;
 
@@ -1038,11 +1041,18 @@ ScreenPage RGBDisplay::ClassifyMainPageTouchInput() {
   }
   else if(current_page == kSettingsPage) {
 
-    // edit wifi details button
-    if(ts_x >= kSettingsGearX1 && ts_x <= kSettingsGearX1 + kSettingsGearWidth && ts_y >= 10 && ts_y <= 10 + kSettingsGearHeight) {
-      tft.drawRoundRect(kSettingsGearX1, 10, kSettingsGearWidth, kSettingsGearHeight, kRadiusButtonRoundRect, kDisplayColorCyan);
+    // update wifi ssid button
+    if(ts_x >= kSsidButtonX1 && ts_x <= kSsidButtonX1 + kSsidButtonW && ts_y >= kSsidButtonY1 && ts_y <= kSsidButtonY1 + kSsidButtonH) {
+      DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, ssidStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
-      return kSettingsPage;
+      return kEnterWiFiSsidPage;
+    }
+
+    // update wifi Passwd button
+    if(ts_x >= kPasswdButtonX1 && ts_x <= kPasswdButtonX1 + kPasswdButtonW && ts_y >= kPasswdButtonY1 && ts_y <= kPasswdButtonY1 + kPasswdButtonH) {
+      DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWiFiPasswdPage;
     }
 
     // cancel button
@@ -1291,7 +1301,7 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textRet
     // check if cancel button is pressed
     if (IsTouchWithin(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize))
     {
-      return true;
+      return false;
     }
 
     //ShiftKey
@@ -1442,15 +1452,18 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textRet
   tft.setCursor(15, kTextAreaHeight - 30);
   tft.print(textBuffer);
   // Serial.println(textBuffer);
-  return false;
+  return true;
 }
 
 // get user text input from on-screen keyboard
-void RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
+bool RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
+  bool ret = false;
+
   tft.fillScreen(kDisplayBackroundColor);
   tft.setFont(NULL);
 
   MakeKeyboard(Mobile_KB_Capitals, label);
+
   // buffer for user input
   char user_input_buffer[kWifiSsidPasswordLengthMax + 1] = "";
 
@@ -1458,19 +1471,21 @@ void RGBDisplay::GetUserOnScreenTextInput(char* label, char* return_text) {
   while(1) {
     ResetWatchdog();
     // See if there's any  touch data for us
-    if(GetKeyboardPress(user_input_buffer, label, return_text))
+    ret = GetKeyboardPress(user_input_buffer, label, return_text);
+    if(!ret)
       break;
-    
+
     //print the text
     tft.setCursor(10,30);
     tft.println(return_text);
     if(strcmp(return_text, "") != 0) {
       PrintLn(return_text);
-      delay(2000);
+      delay(1000);
       break;
     }
   }
   tft.setTextSize(1);
+  return ret;
 }
 
 // void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {

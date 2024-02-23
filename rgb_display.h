@@ -39,7 +39,7 @@ public:
   void SetAlarmScreen(bool process_user_input);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void SettingsPage();
-  void GetUserOnScreenTextInput(char* label, char* return_text);
+  bool GetUserOnScreenTextInput(char* label, char* return_text);
 
   // functions
   void Setup();
@@ -47,7 +47,7 @@ public:
   void SetMaxBrightness();
   void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
-  ScreenPage ClassifyMainPageTouchInput();
+  ScreenPage ClassifyUserScreenTouchInput();
 
 // PUBLIC VARIABLES
 
@@ -132,8 +132,10 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X";
+  const char cancelStr[2] = "X", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD";
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
+  const int16_t kSsidButtonX1 = 100, kSsidButtonY1 = 0, kSsidButtonW = 80, kSsidButtonH = 25;
+  const int16_t kPasswdButtonX1 = 200, kPasswdButtonY1 = 0, kPasswdButtonW = 120, kPasswdButtonH = 25;
 
   // color definitions
   const uint16_t  kDisplayColorBlack        = 0x0000;
