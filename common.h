@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include "pin_defs.h"
 #include "general_constants.h"
+#include <string>
 
 // forward decleration of classes
 class RTC;
@@ -81,5 +82,8 @@ extern void SetPage(ScreenPage page);
 extern void ResetWatchdog();
 extern void PrintLn(const char* someText1 = nullptr, const char* someText2 = nullptr);
 extern void PrintLn(const char* someText1, int &someInt);
+extern void PrintLn(std::string someTextStr1, std::string someTextStr2);
+extern void PrintLn(std::string &someTextStr1, std::string &someTextStr2);
+extern void PrintLn(std::string &someTextStr1);
 
 #endif // COMMON_H

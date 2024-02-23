@@ -10,8 +10,8 @@ public:
   EEPROM();
   bool RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
   void SaveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
-  void RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password);
-  void SaveWiFiDetails(char* wifi_ssid, char* wifi_password);
+  void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
+  void SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password);
 
 private:
 

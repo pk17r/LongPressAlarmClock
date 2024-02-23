@@ -67,7 +67,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(200);
-  // while(!Serial) { delay(20); };
+  while(!Serial) { delay(20); };
   PrintLn("Serial OK");
 
   // make all SPI CS pins high
@@ -334,6 +334,25 @@ void PrintLn(const char* someText1, int &someInt) {
   Serial.println(someInt);
   Serial.flush();
 }
+void PrintLn(std::string someTextStr1, std::string someTextStr2) {
+  SerialTimeStampPrefix();
+  Serial.print(someTextStr1.c_str());
+  Serial.print(kCharSpace);
+  Serial.println(someTextStr2.c_str());
+  Serial.flush();
+}
+void PrintLn(std::string &someTextStr1, std::string &someTextStr2) {
+  SerialTimeStampPrefix();
+  Serial.print(someTextStr1.c_str());
+  Serial.print(kCharSpace);
+  Serial.println(someTextStr2.c_str());
+  Serial.flush();
+}
+void PrintLn(std::string &someTextStr1) {
+  SerialTimeStampPrefix();
+  Serial.println(someTextStr1.c_str());
+  Serial.flush();
+}
 
 void PrepareTimeDayDateArrays() {
   // HH:MM
@@ -465,30 +484,22 @@ void ProcessSerialInput() {
         }
         delay(20);
         inputStr = Serial.readString();
-        inputStr[inputStr.length()-1] = '\0';
-        Serial.println(inputStr);
-        // fill wifi_ssid
-        if(wifi_stuff->wifi_ssid_ != NULL) {
-          delete wifi_stuff->wifi_ssid_;
-          wifi_stuff->wifi_ssid_ = NULL;
-        }
-        wifi_stuff->wifi_ssid_ = new char[inputStr.length()];   // allocate space
-        strcpy(wifi_stuff->wifi_ssid_,inputStr.c_str());
+        wifi_stuff->wifi_ssid_ = "";
+        for (int i = 0; i < min(inputStr.length(), kWifiSsidPasswordLengthMax); i++)
+          if(inputStr[i] != '\0' || inputStr[i] != '\n')
+            wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + inputStr[i];
+        Serial.println(wifi_stuff->wifi_ssid_.c_str());
         Serial.print("PASSWORD: ");
         while(Serial.available() == 0) {
           delay(20);
         }
         delay(20);
         inputStr = Serial.readString();
-        inputStr[inputStr.length()-1] = '\0';
-        Serial.println(inputStr);
-        // fill wifi_ssid
-        if(wifi_stuff->wifi_password_ != NULL) {
-          delete wifi_stuff->wifi_password_;
-          wifi_stuff->wifi_password_ = NULL;
-        }
-        wifi_stuff->wifi_password_ = new char[inputStr.length()];   // allocate space
-        strcpy(wifi_stuff->wifi_password_,inputStr.c_str());
+        wifi_stuff->wifi_password_ = "";
+        for (int i = 0; i < min(inputStr.length(), kWifiSsidPasswordLengthMax); i++)
+          if(inputStr[i] != '\0' || inputStr[i] != '\n')
+            wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + inputStr[i];
+        Serial.println(wifi_stuff->wifi_password_.c_str());
         wifi_stuff->SaveWiFiDetails();
       }
       break;
@@ -575,7 +586,13 @@ void SetPage(ScreenPage page) {
         PrintLn(label, returnText);
         if(ret) {
           // set WiFi SSID:
-          wifi_stuff->wifi_ssid_ = returnText;
+          wifi_stuff->wifi_ssid_ = "";
+          int i = 0;
+          while(returnText[i] != '\0' && i <= kWifiSsidPasswordLengthMax) {
+            wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + returnText[i];
+            i++;
+          }
+          PrintLn("EEPROM wifi_ssid: ", wifi_stuff->wifi_ssid_);
           wifi_stuff->SaveWiFiDetails();
         }
         SetPage(kSettingsPage);
@@ -595,8 +612,14 @@ void SetPage(ScreenPage page) {
         bool ret = display->GetUserOnScreenTextInput(label, returnText);
         PrintLn(label, returnText);
         if(ret) {
-          // set WiFi SSID:
-          wifi_stuff->wifi_password_ = returnText;
+          // set WiFi Passwd:
+          wifi_stuff->wifi_password_ = "";
+          int i = 0;
+          while(returnText[i] != '\0' && i <= kWifiSsidPasswordLengthMax) {
+            wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + returnText[i];
+            i++;
+          }
+          PrintLn("EEPROM wifi_password_: ", wifi_stuff->wifi_password_);
           wifi_stuff->SaveWiFiDetails();
         }
         SetPage(kSettingsPage);

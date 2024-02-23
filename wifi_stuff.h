@@ -7,7 +7,7 @@
 class WiFiStuff {
 
 public:
-  WiFiStuff() { RetrieveWiFiDetails(); TurnWiFiOff(); }
+  WiFiStuff();
   void RetrieveWiFiDetails();
   void SaveWiFiDetails();
   void TurnWiFiOn();
@@ -17,14 +17,14 @@ public:
   void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
-    char* wifi_ssid_ = MY_WIFI_SSID;
+    std::string wifi_ssid_ = MY_WIFI_SSID;
   #else
-    char* wifi_ssid_ = NULL;
+    std::string wifi_ssid_ = "";
   #endif
   #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
-    char* wifi_password_ = MY_WIFI_PASSWD;
+    std::string wifi_password_ = MY_WIFI_PASSWD;
   #else
-    char* wifi_password_ = NULL;
+    std::string wifi_password_ = "";
   #endif
 
   // weather information

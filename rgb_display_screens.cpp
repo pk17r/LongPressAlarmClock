@@ -387,19 +387,19 @@ void RGBDisplay::SettingsPage() {
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
   tft.print("ssid: ");
-  tft.print(wifi_stuff->wifi_ssid_);
+  tft.print(wifi_stuff->wifi_ssid_.c_str());
   tft.setCursor(10, 60);
   tft.print("pass: ");
   int i = 0;
   while(i <= kWifiSsidPasswordLengthMax) {
-    char c = *(wifi_stuff->wifi_password_ + i);
-    if(c == '\0')
-     break;
+    char c = wifi_stuff->wifi_password_[i];
     if(i % 4 == 0)
       tft.print(c);
     else
       tft.print('*');
     i++;
+    if(c == wifi_stuff->wifi_password_.length())
+     break;
   }
 
   // Update SSID button

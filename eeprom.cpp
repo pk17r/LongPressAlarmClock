@@ -9,6 +9,7 @@ EEPROM::EEPROM() {
 
   // check if data is compatible with code, otherwise set the respective flag and default data
   
+  PrintLn("EEPROM initialized!");
 }
 
 bool EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
@@ -61,66 +62,50 @@ void EEPROM::SaveAlarm(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, boo
 
 }
 
-void EEPROM::RetrieveWiFiDetails(char* &wifi_ssid, char* &wifi_password) {
+void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password) {
 
-  // read WiFi SSID and Password
-  char eeprom_read_array[kWifiSsidPasswordLengthMax + 1];
-
+  PrintLn("RetrieveWiFiDetails");
   // read wifi_ssid
+  wifi_ssid = "";
   int address = kWifiAddressEEPROM;
   int char_arr_start_address = kWifiAddressEEPROM;
   while(1) {
     char eeprom_char_read;
     eeprom_.eeprom_read(address, &eeprom_char_read);
-    eeprom_read_array[address - char_arr_start_address] = eeprom_char_read;
     address++;
     // break at null character
     if(eeprom_char_read == '\0')
       break;
+    wifi_ssid = wifi_ssid + eeprom_char_read;
     // limit to force out of while loop, won't reach here in normal operation
     if(address >= char_arr_start_address + kWifiSsidPasswordLengthMax) {
-      eeprom_read_array[address - char_arr_start_address] = '\0';
       break;
     }
   }
-  // fill wifi_ssid
-  if(wifi_ssid != NULL) {
-    delete wifi_ssid;
-    wifi_ssid = NULL;
-  }
-  wifi_ssid = new char[address - char_arr_start_address];   // allocate space
-  strcpy(wifi_ssid,eeprom_read_array);
-  // PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
+  PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
 
   // read wifi_password
+  wifi_password = "";
   char_arr_start_address = address;
   while(1) {
     char eeprom_char_read;
     eeprom_.eeprom_read(address, &eeprom_char_read);
-    eeprom_read_array[address - char_arr_start_address] = eeprom_char_read;
     address++;
     // break at null character
     if(eeprom_char_read == '\0')
       break;
+    wifi_password = wifi_password + eeprom_char_read;
     // limit to force out of while loop, won't reach here in normal operation
     if(address >= char_arr_start_address + kWifiSsidPasswordLengthMax) {
-      eeprom_read_array[address - char_arr_start_address] = '\0';
       break;
     }
   }
-  // fill wifi_password
-  if(wifi_password != NULL) {
-    delete wifi_password;
-    wifi_password = NULL;
-  }
-  wifi_password = new char[address - char_arr_start_address];   // allocate space
-  strcpy(wifi_password,eeprom_read_array);
-  // PrintLn("EEPROM wifi_password: ", wifi_password);
+  PrintLn("EEPROM wifi_password: ", wifi_password);
 
   PrintLn("WiFi details retrieved from EEPROM.");
 }
 
-void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
+void EEPROM::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password) {
 
   // start writing from the first byte of the EEPROM
   unsigned int address = kWifiAddressEEPROM;
@@ -128,36 +113,30 @@ void EEPROM::SaveWiFiDetails(char* wifi_ssid, char* wifi_password) {
   // write wifi_ssid on EEPROM
   int i = 0;
   while(1) {
-    char c = *(wifi_ssid + i);
+    char c = wifi_ssid[i];
     if (!eeprom_.eeprom_write(address, c)) {
       PrintLn("Failed to store c");
     }address++;
     i++;
-    // break at null character
-    if(c == '\0')
-      break;
     // limit to force out of while loop, won't reach here in normal operation
-    if(i >= kWifiSsidPasswordLengthMax) {
+    if(i == kWifiSsidPasswordLengthMax || i == wifi_ssid.length()) {
       if (!eeprom_.eeprom_write(address, '\0')) {
         PrintLn("Failed to store '\0'");
       }address++;
       break;
     }
   }
-  
+
   // write wifi_password on EEPROM
   i = 0;
   while(1) {
-    char c = *(wifi_password + i);
+    char c = wifi_password[i];
     if (!eeprom_.eeprom_write(address, c)) {
       PrintLn("Failed to store c");
     }address++;
     i++;
-    // break at null character
-    if(c == '\0')
-      break;
     // limit to force out of while loop, won't reach here in normal operation
-    if(i >= kWifiSsidPasswordLengthMax) {
+    if(i == kWifiSsidPasswordLengthMax || i == wifi_password.length()) {
       if (!eeprom_.eeprom_write(address, '\0')) {
         PrintLn("Failed to store '\0'");
       }address++;

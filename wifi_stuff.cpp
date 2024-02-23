@@ -7,6 +7,15 @@
 #include <NTPClient.h>
 #include "rtc.h"
 
+WiFiStuff::WiFiStuff() {
+
+  RetrieveWiFiDetails();
+
+  TurnWiFiOff();
+
+  PrintLn("WiFiStuff Initialized!");
+}
+
 void WiFiStuff::RetrieveWiFiDetails() {
   eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
 }
@@ -21,7 +30,7 @@ void WiFiStuff::TurnWiFiOn() {
   delay(1);
   WiFi.mode(WIFI_STA);
   delay(1);
-  WiFi.begin(wifi_ssid_, wifi_password_);
+  WiFi.begin(wifi_ssid_.c_str(), wifi_password_.c_str());
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(1000);
