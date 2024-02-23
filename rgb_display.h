@@ -38,6 +38,7 @@ public:
   void GoodMorningScreen();
   void SetAlarmScreen(bool process_user_input);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
+  void DisplayWeatherInfo();
   void SettingsPage();
   void WiFiSettingsPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
@@ -138,8 +139,8 @@ private:
   const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 0, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
   const int16_t kSsidButtonX1 = 100, kSsidButtonY1 = 0, kSsidButtonW = 80, kSsidButtonH = 25;
   const int16_t kPasswdButtonX1 = 200, kPasswdButtonY1 = 0, kPasswdButtonW = 120, kPasswdButtonH = 25;
-  const int16_t kWeatherButtonX1 = 0, kWeatherButtonY1 = 80, kWeatherButtonW = 120, kWeatherButtonH = 25;
-  const int16_t kUpdateTimeButtonX1 = 160, kUpdateTimeButtonY1 = 80, kUpdateTimeButtonW = 160, kUpdateTimeButtonH = 25;
+  const int16_t kWeatherButtonX1 = 0, kWeatherButtonY1 = 80, kWeatherButtonW = 130, kWeatherButtonH = 25;
+  const int16_t kUpdateTimeButtonX1 = 150, kUpdateTimeButtonY1 = 80, kUpdateTimeButtonW = 170, kUpdateTimeButtonH = 25;
 
   // color definitions
   const uint16_t  kDisplayColorBlack        = 0x0000;

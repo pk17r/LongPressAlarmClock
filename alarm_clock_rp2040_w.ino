@@ -31,6 +31,8 @@
   - Settings saved in EEPROM so not lost on power loss
   - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
+  - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
+  - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
 
 
   Prashant Kumar
@@ -102,6 +104,12 @@ void setup() {
   display->Setup();
   ts = new Touchscreen();
 
+  // if time is lost because of power failure
+  if(rtc->year() < 2024) {
+    PrintLn("**** Update RTC HW Time from NTP Server ****");
+    // update time from NTP server
+    second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+  }
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -138,13 +146,6 @@ void loop() {
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
 
-    // if time is lost because of power failure
-    if(rtc->year() < 2024 && second_core_task == kNoTask) {
-      PrintLn("**** Update RTC HW Time from NTP Server ****");
-      // update time from NTP server
-      second_core_task = kUpdateTimeFromNtpServer;
-    }
-
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
@@ -166,16 +167,16 @@ void loop() {
 
       #if defined(WIFI_IS_USED)
         // try to get weather info 5 mins before alarm time and every 60 minutes
-        if((second_core_task == kNoTask) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
-            // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
-            second_core_task = kGetWeatherInfo;
-            PrintLn("Get Weather Info!");
+        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
+          // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
+          second_core_tasks_queue.push(kGetWeatherInfo);
+          PrintLn("Get Weather Info!");
         }
 
         // auto update time at 2AM every morning
-        if(second_core_task == kNoTask && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
+        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
           // update time from NTP server
-          second_core_task = kUpdateTimeFromNtpServer;
+          second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
           PrintLn("Get Time Update from NTP Server");
         }
       #endif
@@ -226,9 +227,11 @@ void setup1() {
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
   // run the core only to do specific not time important operations
-  if (second_core_task != kNoTask) {
+  while (!second_core_tasks_queue.empty())
+  {
+    SecondCoreTask current_task = second_core_tasks_queue.front();
 
-    if(second_core_task == kGetWeatherInfo) {
+    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 10*60*1000)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
 
@@ -236,7 +239,7 @@ void loop1() {
       if(!wifi_stuff->got_weather_info_)
         wifi_stuff->GetTodaysWeatherInfo();
     }
-    else if(second_core_task == kUpdateTimeFromNtpServer) {
+    else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 5*60*1000)) {
       // get time from NTP server
       if(!(wifi_stuff->GetTimeFromNtpServer())) {
         delay(1000);
@@ -244,15 +247,15 @@ void loop1() {
         wifi_stuff->GetTimeFromNtpServer();
       }
     }
-    else if(second_core_task == kConnectWiFi) {
+    else if(current_task == kConnectWiFi) {
       wifi_stuff->TurnWiFiOn();
     }
-    else if(second_core_task == kDisconnectWiFi) {
+    else if(current_task == kDisconnectWiFi) {
       wifi_stuff->TurnWiFiOff();
     }
 
     // done processing the task
-    second_core_task = kNoTask;
+    second_core_tasks_queue.pop();
   }
 
   // a delay to slow things down and not crash
@@ -272,7 +275,8 @@ DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_d
 ScreenPage current_page = kMainPage;
 
 // second core current task
-volatile SecondCoreTask second_core_task = kNoTask;
+// volatile SecondCoreTask second_core_task = kNoTask;
+std::queue<SecondCoreTask> second_core_tasks_queue;
 
 int AvailableRam() {
   // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
@@ -472,7 +476,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        second_core_task = kGetWeatherInfo;
+        second_core_tasks_queue.push(kGetWeatherInfo);
       }
       break;
     case 'i':   // set WiFi details
@@ -508,7 +512,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
         // update time from NTP server
-        second_core_task = kUpdateTimeFromNtpServer;
+        second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
       }
       break;
     case 'o' :  // On Screen User Text Input
@@ -527,13 +531,13 @@ void ProcessSerialInput() {
     case 'c' :  // connect to WiFi
       {
         Serial.println(F("**** Connect to WiFi ****"));
-        second_core_task = kConnectWiFi;
+        second_core_tasks_queue.push(kConnectWiFi);
       }
       break;
     case 'd' :  // disconnect WiFi
       {
         Serial.println(F("**** Disconnect WiFi ****"));
-        second_core_task = kDisconnectWiFi;
+        second_core_tasks_queue.push(kDisconnectWiFi);
       }
       break;
     default:

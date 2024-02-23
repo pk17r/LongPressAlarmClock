@@ -60,15 +60,25 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   TurnWiFiOn();
 
   // Your Domain name with URL path or IP address with path
-  String openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
+  std::string openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
+
+  //https://api.openweathermap.org/data/2.5/weather?zip=92104,US&appid=0fad3740b3a6b502ad57504f6fc3521e
+  //{"coord":{"lon":-117.1272,"lat":32.7454},"weather":[{"id":701,"main":"Mist","description":"mist","icon":"50n"}],"base":"stations","main":{"temp":284.81,"feels_like":284.41,"temp_min":283.18,"temp_max":286.57,"pressure":1020,"humidity":91},"visibility":10000,"wind":{"speed":3.09,"deg":0},"clouds":{"all":75},"dt":1708677188,"sys":{"type":2,"id":2019527,"country":"US","sunrise":1708698233,"sunset":1708738818},"timezone":-28800,"id":0,"name":"San Diego","cod":200}
 
   // Replace with your country code and city
-  String city = "San%20Diego";
-  String countryCode = "840";
+  std::string city = "San Diego";
+  std::string countryCode = "840";
+
+  std::string city_copy = city;
+  int pos = city_copy.find(" ");
+  while(pos != std::string::npos) {
+    city_copy.replace(pos,1,"%20");
+    pos = city_copy.find(" ", pos + 1);
+  }
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
-    String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
+    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
 
     WiFiClient client;
     HTTPClient http;
@@ -201,6 +211,8 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
       // RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year)
       rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
+
+      last_ntp_server_time_update_time_ms = millis();
     }
 
     ntpClient.end();

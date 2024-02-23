@@ -29,6 +29,8 @@
   - Settings saved in EEPROM so not lost on power loss
   - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
+  - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
+  - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
 
 
   Prashant Kumar

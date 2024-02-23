@@ -431,8 +431,30 @@ void RGBDisplay::WiFiSettingsPage() {
   // Update TIME button
   DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
+  DisplayWeatherInfo();
+
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
+
+void RGBDisplay::DisplayWeatherInfo() {
+
+  int16_t title_x0 = 30, title_y0 = 50;
+  int16_t s_x0 = 230, s_y0 = title_y0 + 48;
+
+  // show today's weather
+  if(wifi_stuff->got_weather_info_) {
+    tft.setFont(&FreeMono9pt7b);
+    tft.setCursor(20, s_y0 + 65);
+    tft.setTextColor(kDisplayColorOrange);
+    tft.print(wifi_stuff->weather_main_); tft.print(" : "); tft.print(wifi_stuff->weather_description_);
+    tft.setCursor(20, s_y0 + 85);
+    tft.print("Temp : "); tft.print(wifi_stuff->weather_temp_); tft.print("F ("); tft.print(wifi_stuff->weather_temp_max_); tft.print("/"); tft.print(wifi_stuff->weather_temp_min_); tft.print(")");
+    tft.setCursor(20, s_y0 + 105);
+    tft.print("Wind Speed : "); tft.print(wifi_stuff->weather_wind_speed_); tft.print("m/s");
+    tft.setCursor(20, s_y0 + 125);
+    tft.print("Humidity : "); tft.print(wifi_stuff->weather_humidity_); tft.print("%");
+  }
 }
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
@@ -463,18 +485,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
     tft.print(new_display_data_.date_str);
 
     // show today's weather
-    if(wifi_stuff->got_weather_info_) {
-      tft.setFont(&FreeMono9pt7b);
-      tft.setCursor(20, s_y0 + 65);
-      tft.setTextColor(kDisplayColorOrange);
-      tft.print(wifi_stuff->weather_main_); tft.print(" : "); tft.print(wifi_stuff->weather_description_);
-      tft.setCursor(20, s_y0 + 85);
-      tft.print("Temp : "); tft.print(wifi_stuff->weather_temp_); tft.print("F ("); tft.print(wifi_stuff->weather_temp_max_); tft.print("/"); tft.print(wifi_stuff->weather_temp_min_); tft.print(")");
-      tft.setCursor(20, s_y0 + 105);
-      tft.print("Wind Speed : "); tft.print(wifi_stuff->weather_wind_speed_); tft.print("m/s");
-      tft.setCursor(20, s_y0 + 125);
-      tft.print("Humidity : "); tft.print(wifi_stuff->weather_humidity_); tft.print("%");
-    }
+    DisplayWeatherInfo();
   }
 
   char timer_str[4];
@@ -1098,15 +1109,17 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // update Weather button
     if(ts_x >= kWeatherButtonX1 && ts_x <= kWeatherButtonX1 + kWeatherButtonW && ts_y >= kWeatherButtonY1 && ts_y <= kWeatherButtonY1 + kWeatherButtonH) {
       DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      second_core_tasks_queue.push(kGetWeatherInfo);
       delay(100);
-      return kEnterWiFiPasswdPage;
+      return kWiFiSettingsPage;
     }
 
     // update Time button
     if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
       DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
       delay(100);
-      return kEnterWiFiPasswdPage;
+      return kWiFiSettingsPage;
     }
 
     // cancel button

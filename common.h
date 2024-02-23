@@ -6,6 +6,7 @@
 #include "pin_defs.h"
 #include "general_constants.h"
 #include <string>
+#include <queue>          // std::queue
 
 // forward decleration of classes
 class RTC;
@@ -55,7 +56,8 @@ enum SecondCoreTask {
   };
 
 // second core current task
-extern volatile SecondCoreTask second_core_task;
+// extern volatile SecondCoreTask second_core_task;
+extern std::queue<SecondCoreTask> second_core_tasks_queue;
 
 // display time data in char arrays
 struct DisplayData {
