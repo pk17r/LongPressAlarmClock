@@ -156,6 +156,8 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
 bool WiFiStuff::GetTimeFromNtpServer() {
 
+  if(!got_weather_info_) return false; // we need gmt_offset_sec_ before getting time update!
+
   bool returnVal = false;
 
   // turn On Wifi
@@ -166,11 +168,11 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   if(WiFi.status()== WL_CONNECTED) {
 
     const char* NTP_SERVER = "pool.ntp.org";
-    const long  GMT_OFFSET_SEC = -8*60*60;
+    // const long  GMT_OFFSET_SEC = -8*60*60;
 
     // Define an NTP Client object
     WiFiUDP udpSocket;
-    NTPClient ntpClient(udpSocket, NTP_SERVER, GMT_OFFSET_SEC);
+    NTPClient ntpClient(udpSocket, NTP_SERVER, gmt_offset_sec_);
 
     ntpClient.begin();
     returnVal = ntpClient.update();
