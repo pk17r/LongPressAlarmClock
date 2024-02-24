@@ -52,7 +52,7 @@ RTC::RTC() {
 // setup DS3231 rtc for the first time, no problem doing it again
 void RTC::FirstTimeRtcSetup() {
   // Set Oscillator to use VBAT when VCC turns off if not set
-  if(!rtc_hw_.getEOSCFlag()) {
+  if(rtc_hw_.getEOSCFlag()) {
     if(rtc_hw_.enableBattery())
       PrintLn("Enable Battery Success");
     else
@@ -130,9 +130,12 @@ void RTC::SecondsUpdateInterruptISR() {
   second_++;
   // a flag for others that time has updated!
   rtc_hw_sec_update_ = true;
-  // refresh time on rtc class object on new minute
-  if(second_ >= 60)
-    rtc->Refresh();
+
+  #if !defined(MCU_IS_ESP32)
+    // refresh time on rtc class object on new minute
+    if(second_ >= 60)
+      rtc->Refresh();
+  #endif
 }
 
 /**

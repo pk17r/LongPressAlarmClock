@@ -4,9 +4,12 @@
 #include "common.h"
 // include files for timer
 #include <stdio.h>
-#include "pico/stdlib.h"
-#include "hardware/timer.h"
-#include "hardware/irq.h"
+#if defined(MCU_IS_RP2040)   // include files for timer
+  #include <stdio.h>
+  #include "pico/stdlib.h"
+  #include "hardware/timer.h"
+  #include "hardware/irq.h"
+#endif
 
 class AlarmClock {
 
@@ -47,13 +50,21 @@ private:
   // buzzer functions
   // buzzer used is a passive buzzer which is run using timers
   void SetupBuzzerTimer();
-  static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
+  #if defined(MCU_IS_ESP32)
+    static void IRAM_ATTR PassiveBuzzerTimerISR();
+  #elif defined(MCU_IS_RP2040)
+    static bool PassiveBuzzerTimerISR(struct repeating_timer *t);
+  #endif
   void BuzzerEnable();
   void BuzzerDisable();
   void DeallocateBuzzerTimer();
 
   // Hardware Timer
-  struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
+  #if defined(MCU_IS_ESP32)
+    hw_timer_t *passive_buzzer_timer_ptr_ = NULL;
+  #elif defined(MCU_IS_RP2040)
+    struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
+  #endif
 
   const int kBuzzerFrequency = 2048;
   static inline const unsigned long kBeepLengthMs = 800;

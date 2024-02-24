@@ -59,15 +59,25 @@ AlarmClock* alarm_clock = NULL;  // ptr to alarm clock class object that control
 RGBDisplay* display = NULL;   // ptr to display class object that manages the display
 Touchscreen* ts = NULL;         // Touchscreen class object
 
+// LOCAL PROGRAM VARIABLES
+
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+  TaskHandle_t Task1;
+#endif
 
 // setup core0
 void setup() {
 
-  // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
-  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-  rp2040.wdt_begin(8300);
+  #if defined(MCU_IS_RP2040)
+    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
+    rp2040.wdt_begin(8300);
+  #elif defined (MCU_IS_ESP32)
+    // slow the ESP32 CPU to reduce power consumption
+    setCpuFrequencyMhz(160);
+  #endif
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(200);
   // while(!Serial) { delay(20); };
   PrintLn();
@@ -110,6 +120,17 @@ void setup() {
     // update time from NTP server
     second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
   }
+
+  #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+    xTaskCreatePinnedToCore(
+        Task1code, /* Function to implement the task */
+        "Task1", /* Name of the task */
+        10000,  /* Stack size in words */
+        NULL,  /* Task input parameter */
+        0,  /* Priority of the task */
+        &Task1,  /* Task handle. */
+        0); /* Core where the task should run */
+  #endif
 }
 
 // arduino loop function on core0 - High Priority one with time update tasks
@@ -149,6 +170,9 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
+      #if defined (MCU_IS_ESP32)
+        rtc->Refresh();
+      #endif
       // PrintLn("New Minute!");
 
       // Activate Buzzer if Alarm Time has arrived
@@ -225,10 +249,14 @@ void loop() {
 
 }
 
+#if defined(MCU_IS_RP2040)
 // setup core1
 void setup1() {
   delay(2000);
 }
+#elif defined (MCU_IS_ESP32)
+
+#endif
 
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
@@ -264,9 +292,18 @@ void loop1() {
     second_core_tasks_queue.pop();
   }
 
-  // a delay to slow things down and not crash
+  // a delay to slow things down
   delay(1000);
 }
+
+
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+void Task1code( void * parameter) {
+  for(;;) {
+    loop1();
+  }
+}
+#endif
 
 
 // GLOBAL VARIABLES AND FUNCTIONS
@@ -285,8 +322,13 @@ ScreenPage current_page = kMainPage;
 std::queue<SecondCoreTask> second_core_tasks_queue;
 
 int AvailableRam() {
+#if defined(MCU_IS_RP2040)
   // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
   return rp2040.getFreeHeap();
+#elif defined (MCU_IS_ESP32)
+  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
+  return esp_get_free_heap_size();
+#endif
 }
 
 void SerialInputFlush() {
@@ -413,8 +455,12 @@ void SerialPrintRtcDateTime() {
 
 // reset watchdog within time so it does not reboot system
 void ResetWatchdog() {
-  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
-  rp2040.wdt_reset();
+  #if defined(MCU_IS_RP2040)
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
+    rp2040.wdt_reset();
+  #elif defined (MCU_IS_ESP32)
+
+  #endif
 }
 
 void ProcessSerialInput() {

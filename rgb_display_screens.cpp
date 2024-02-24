@@ -48,7 +48,6 @@ void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
 
   int16_t jLim = min(saveH, h + by1);
   int16_t iLim = min(saveW, w + bx1);
-  uint8_t currentByte = 0;
 
   // new 16 bit buffter of length w to hold 1 row colors
   uint16_t buffer16Bit[w];
@@ -56,7 +55,6 @@ void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
   tft.setAddrWindow(x, y, w, h);
 
   int16_t bitmapWidthBytes = (saveW + 7) >> 3;          // bitmap width in bytes
-  int8_t bits8 = 0;
   for (int16_t j = by1; j < jLim; j++) {
     int bufi = 0;
     int16_t i = bx1;

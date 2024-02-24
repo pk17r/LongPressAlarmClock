@@ -57,7 +57,9 @@ public:
   uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
 
 
-protected:
+#if !defined(MCU_IS_ESP32)
+  protected:
+#endif
 
   // protected function to refresh time from RTC HW and do basic power failure checks
   void Refresh();
