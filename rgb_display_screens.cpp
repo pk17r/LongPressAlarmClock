@@ -444,10 +444,11 @@ void RGBDisplay::DisplayWeatherInfo() {
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
-    tft.setFont(&FreeMono9pt7b);
+    tft.setFont(&FreeMonoBold9pt7b);
     tft.setCursor(20, s_y0 + 65);
     tft.setTextColor(kDisplayColorOrange);
     tft.print(wifi_stuff->weather_main_); tft.print(" : "); tft.print(wifi_stuff->weather_description_);
+    tft.setFont(&FreeMono9pt7b);
     tft.setCursor(20, s_y0 + 85);
     tft.print("Temp : "); tft.print(wifi_stuff->weather_temp_); tft.print("F ("); tft.print(wifi_stuff->weather_temp_max_); tft.print("/"); tft.print(wifi_stuff->weather_temp_min_); tft.print(")");
     tft.setCursor(20, s_y0 + 105);

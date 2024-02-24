@@ -20,6 +20,7 @@
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
 #include <Fonts/FreeSans12pt7b.h>
+#include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
 #include <elapsedMillis.h>
