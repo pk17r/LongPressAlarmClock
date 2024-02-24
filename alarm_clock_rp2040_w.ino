@@ -231,7 +231,7 @@ void loop1() {
   {
     SecondCoreTask current_task = second_core_tasks_queue.front();
 
-    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 10*60*1000)) {
+    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 1*60*1000)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
 
@@ -239,7 +239,7 @@ void loop1() {
       if(!wifi_stuff->got_weather_info_)
         wifi_stuff->GetTodaysWeatherInfo();
     }
-    else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 5*60*1000)) {
+    else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000)) {
       // get time from NTP server
       if(!(wifi_stuff->GetTimeFromNtpServer())) {
         delay(1000);

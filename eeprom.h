@@ -15,6 +15,7 @@ public:
   void SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password);
   void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
   void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
+  void SaveWeatherUnits(bool weather_units_metric_not_imperial);
 
 private:
 

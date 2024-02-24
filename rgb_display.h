@@ -136,13 +136,20 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", weatherStr[8] = "WEATHER", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", connectWiFiStr[10] = "TEST WIFI", disconnectWiFiStr[11] = "DISCONNECT";
+  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", locationStr[9] = "LOCATION", weatherStr[8] = "WEATHER", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "TEST WIFI", disconnectWiFiStr[11] = "DISCONNECT";
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
-  const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 0, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
+  const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
+  const int16_t kWeatherSettingsButtonX1 = 150, kWeatherSettingsButtonY1 = 40, kWeatherSettingsButtonW = 150, kWeatherSettingsButtonH = 25;
   const int16_t kSsidButtonX1 = 100, kSsidButtonY1 = 0, kSsidButtonW = 80, kSsidButtonH = 25;
   const int16_t kPasswdButtonX1 = 200, kPasswdButtonY1 = 0, kPasswdButtonW = 120, kPasswdButtonH = 25;
-  const int16_t kWeatherButtonX1 = 0, kWeatherButtonY1 = 80, kWeatherButtonW = 130, kWeatherButtonH = 25;
-  const int16_t kUpdateTimeButtonX1 = 150, kUpdateTimeButtonY1 = 80, kUpdateTimeButtonW = 170, kUpdateTimeButtonH = 25;
+  const int16_t kConnectWiFiButtonX1 = 0, kConnectWiFiButtonY1 = 90, kConnectWiFiButtonW = 130, kConnectWiFiButtonH = 25;
+  const int16_t kDisconnectWiFiButtonX1 = 150, kDisconnectWiFiButtonY1 = 90, kDisconnectWiFiButtonW = 170, kDisconnectWiFiButtonH = 25;
+
+  const int16_t kZipPinButtonX1 = 220, kZipPinButtonY1 = 0, kZipPinButtonW = 100, kZipPinButtonH = 25;
+  const int16_t kCountryCodeButtonX1 = 200, kCountryCodeButtonY1 = 30, kCountryCodeButtonW = 120, kCountryCodeButtonH = 25;
+  const int16_t kUnitsButtonX1 = 200, kUnitsButtonY1 = 60, kUnitsButtonW = 120, kUnitsButtonH = 25;
+  const int16_t kGetWeatherInfoButtonX1 = 0, kGetWeatherInfoButtonY1 = 90, kGetWeatherInfoButtonW = 130, kGetWeatherInfoButtonH = 25;
+  const int16_t kUpdateTimeButtonX1 = 150, kUpdateTimeButtonY1 = 90, kUpdateTimeButtonW = 170, kUpdateTimeButtonH = 25;
 
   // color definitions
   const uint16_t  kDisplayColorBlack        = 0x0000;

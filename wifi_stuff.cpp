@@ -26,6 +26,10 @@ void WiFiStuff::SaveWeatherLocationDetails() {
   eeprom->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
 }
 
+void WiFiStuff::SaveWeatherUnits() {
+  eeprom->SaveWeatherUnits(weather_units_metric_not_imperial_);
+}
+
 void WiFiStuff::TurnWiFiOn() {
   PrintLn("Connecting to WiFi");
   WiFi.persistent(true);

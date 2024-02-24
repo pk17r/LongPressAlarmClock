@@ -12,6 +12,7 @@ public:
   WiFiStuff();
   void SaveWiFiDetails();
   void SaveWeatherLocationDetails();
+  void SaveWeatherUnits();
   void TurnWiFiOn();
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();

@@ -76,7 +76,11 @@ void EEPROM::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string 
   Save1Byte(kWeatherCountryCodeAddress + 1, static_cast<uint8_t>(location_country_code[1]));
   Save1Byte(kWeatherUnitsMetricNotImperialAddress, static_cast<uint8_t>(weather_units_metric_not_imperial));
   PrintLn("Weather Location details written to EEPROM");
+}
 
+void EEPROM::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
+  Save1Byte(kWeatherUnitsMetricNotImperialAddress, static_cast<uint8_t>(weather_units_metric_not_imperial));
+  PrintLn("Weather Location details written to EEPROM");
 }
 
 std::string EEPROM::FetchString(uint16_t length_address, uint16_t data_address) {
