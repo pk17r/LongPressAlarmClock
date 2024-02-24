@@ -391,7 +391,10 @@ void RGBDisplay::SettingsPage() {
   DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Update Location button
-  DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kLocationSettingsButtonX1, kLocationSettingsButtonY1, kLocationSettingsButtonW, kLocationSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Start Screensaver Button
+  DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1144,10 +1147,17 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     }
 
     // update Location Settings button
-    if(ts_x >= kWeatherSettingsButtonX1 && ts_x <= kWeatherSettingsButtonX1 + kWeatherSettingsButtonW && ts_y >= kWeatherSettingsButtonY1 && ts_y <= kWeatherSettingsButtonY1 + kWeatherSettingsButtonH) {
-      DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    if(ts_x >= kLocationSettingsButtonX1 && ts_x <= kLocationSettingsButtonX1 + kLocationSettingsButtonW && ts_y >= kLocationSettingsButtonY1 && ts_y <= kLocationSettingsButtonY1 + kLocationSettingsButtonH) {
+      DrawButton(kLocationSettingsButtonX1, kLocationSettingsButtonY1, kLocationSettingsButtonW, kLocationSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kWeatherSettingsPage;
+    }
+
+    // Start Screensaver Button
+    if(ts_x >= kScreensaverButtonX1 && ts_x <= kScreensaverButtonX1 + kScreensaverButtonW && ts_y >= kScreensaverButtonY1 && ts_y <= kScreensaverButtonY1 + kScreensaverButtonH) {
+      DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kScreensaverPage;
     }
 
     // cancel button
