@@ -437,24 +437,30 @@ void RGBDisplay::WiFiSettingsPage() {
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
+// void RGBDisplay::WeatherSettingsPage() {
+
+// }
+
 void RGBDisplay::DisplayWeatherInfo() {
 
   int16_t title_x0 = 30, title_y0 = 50;
-  int16_t s_x0 = 230, s_y0 = title_y0 + 48;
+  int16_t w_x0 = 5, s_y0 = title_y0 + 48;
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
     tft.setFont(&FreeMonoBold9pt7b);
-    tft.setCursor(20, s_y0 + 65);
+    tft.setCursor(200, s_y0 + 40);
     tft.setTextColor(kDisplayColorOrange);
-    tft.print(wifi_stuff->weather_main_); tft.print(" : "); tft.print(wifi_stuff->weather_description_);
+    tft.print(wifi_stuff->city_.c_str());
+    tft.setCursor(w_x0, s_y0 + 65);
+    tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
     tft.setFont(&FreeMono9pt7b);
-    tft.setCursor(20, s_y0 + 85);
-    tft.print("Temp : "); tft.print(wifi_stuff->weather_temp_); tft.print("F ("); tft.print(wifi_stuff->weather_temp_max_); tft.print("/"); tft.print(wifi_stuff->weather_temp_min_); tft.print(")");
-    tft.setCursor(20, s_y0 + 105);
-    tft.print("Wind Speed : "); tft.print(wifi_stuff->weather_wind_speed_); tft.print("m/s");
-    tft.setCursor(20, s_y0 + 125);
-    tft.print("Humidity : "); tft.print(wifi_stuff->weather_humidity_); tft.print("%");
+    tft.setCursor(w_x0, s_y0 + 85);
+    tft.print("Temp: "); tft.print(wifi_stuff->weather_temp_.c_str()); tft.print("  Feels: "); tft.print(wifi_stuff->weather_temp_feels_like_.c_str());
+    tft.setCursor(w_x0, s_y0 + 105);
+    tft.print("Max : "); tft.print(wifi_stuff->weather_temp_max_.c_str()); tft.print("  Min: "); tft.print(wifi_stuff->weather_temp_min_.c_str());
+    tft.setCursor(w_x0, s_y0 + 125);
+    tft.print("Wind: "); tft.print(wifi_stuff->weather_wind_speed_.c_str()); tft.print(" Humidity: "); tft.print(wifi_stuff->weather_humidity_.c_str());
   }
 }
 

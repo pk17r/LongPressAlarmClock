@@ -66,20 +66,13 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   //{"coord":{"lon":-117.1272,"lat":32.7454},"weather":[{"id":701,"main":"Mist","description":"mist","icon":"50n"}],"base":"stations","main":{"temp":284.81,"feels_like":284.41,"temp_min":283.18,"temp_max":286.57,"pressure":1020,"humidity":91},"visibility":10000,"wind":{"speed":3.09,"deg":0},"clouds":{"all":75},"dt":1708677188,"sys":{"type":2,"id":2019527,"country":"US","sunrise":1708698233,"sunset":1708738818},"timezone":-28800,"id":0,"name":"San Diego","cod":200}
 
   // Replace with your country code and city
-  std::string city = "San Diego";
-  std::string countryCode = "840";
-
-  std::string city_copy = city;
-  int pos = city_copy.find(" ");
-  while(pos != std::string::npos) {
-    city_copy.replace(pos,1,"%20");
-    pos = city_copy.find(" ", pos + 1);
-  }
+  // std::string city = "San%20Diego";
+  // std::string countryCode = "840";
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
-    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
-
+    // std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
+    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + std::to_string(kWeatherZipCode) + "," + kWeatherCountryCode + "&appid=" + openWeatherMapApiKey + "&units=" + (kWeatherUnitsMetricNotImperial ? "metric" : "imperial" );
     WiFiClient client;
     HTTPClient http;
       
@@ -119,49 +112,37 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       Serial.print("JSON object = ");
       Serial.println(myObject);
       Serial.print("Weather: ");
-      {
-      String sss = myObject["weather"][0]["main"];
-      if(weather_main_ != NULL) { delete weather_main_; weather_main_ = NULL;}
-      weather_main_ = new char[sss.length()];
-      strcpy(weather_main_, sss.c_str());
-      } {
-      String sss = myObject["weather"][0]["description"];
-      if(weather_description_ != NULL) { delete weather_description_; weather_description_ = NULL;}
-      weather_description_ = new char[sss.length()];
-      strcpy(weather_description_, sss.c_str());
-      } {
-      String sss = JSONVar::stringify(myObject["main"]["temp"]);
-      if(weather_temp_ != NULL) { delete weather_temp_; weather_temp_ = NULL;}
-      weather_temp_ = new char[sss.length()];
-      strcpy(weather_temp_, sss.c_str());
-      } {
-      String sss = JSONVar::stringify(myObject["main"]["temp_max"]);
-      if(weather_temp_max_ != NULL) { delete weather_temp_max_; weather_temp_max_ = NULL;}
-      weather_temp_max_ = new char[sss.length()];
-      strcpy(weather_temp_max_, sss.c_str());
-      } {
-      String sss = JSONVar::stringify(myObject["main"]["temp_min"]);
-      if(weather_temp_min_ != NULL) { delete weather_temp_min_; weather_temp_min_ = NULL;}
-      weather_temp_min_ = new char[sss.length()];
-      strcpy(weather_temp_min_, sss.c_str());
-      } {
-      String sss = JSONVar::stringify(myObject["wind"]["speed"]);
-      if(weather_wind_speed_ != NULL) { delete weather_wind_speed_; weather_wind_speed_ = NULL;}
-      weather_wind_speed_ = new char[sss.length()];
-      strcpy(weather_wind_speed_, sss.c_str());
-      } {
-      String sss = JSONVar::stringify(myObject["main"]["humidity"]);
-      if(weather_humidity_ != NULL) { delete weather_humidity_; weather_humidity_ = NULL;}
-      weather_humidity_ = new char[sss.length()];
-      strcpy(weather_humidity_, sss.c_str());
-      }
-      Serial.print("weather_main "); Serial.println(weather_main_);
-      Serial.print("weather_description "); Serial.println(weather_description_);
-      Serial.print("weather_temp "); Serial.println(weather_temp_);
-      Serial.print("weather_temp_max "); Serial.println(weather_temp_max_);
-      Serial.print("weather_temp_min "); Serial.println(weather_temp_min_);
-      Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed_);
-      Serial.print("weather_humidity "); Serial.println(weather_humidity_);
+      weather_main_.assign(myObject["weather"][0]["main"]);
+      weather_description_.assign(myObject["weather"][0]["description"]);
+      double val = atof(JSONVar::stringify(myObject["main"]["temp"]).c_str());
+      char valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      weather_temp_.assign(valArr);
+      val = atof(JSONVar::stringify(myObject["main"]["feels_like"]).c_str());
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      weather_temp_feels_like_.assign(valArr);
+      val = atof(JSONVar::stringify(myObject["main"]["temp_max"]).c_str());
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      weather_temp_max_.assign(valArr);
+      val = atof(JSONVar::stringify(myObject["main"]["temp_min"]).c_str());
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      weather_temp_min_.assign(valArr);
+      val = atof(JSONVar::stringify(myObject["wind"]["speed"]).c_str());
+      valArr[10]; sprintf(valArr,"%d%s", (int)val, (kWeatherUnitsMetricNotImperial ? "m/s" : "mi/hr"));
+      weather_wind_speed_.assign(valArr);
+      weather_humidity_.assign(JSONVar::stringify(myObject["main"]["humidity"]).c_str());
+      weather_humidity_ = weather_humidity_ + '%';
+      city_.assign(myObject["name"]);
+      gmt_offset_sec_ = atoi(JSONVar::stringify(myObject["timezone"]).c_str());
+      Serial.print("weather_main "); Serial.println(weather_main_.c_str());
+      Serial.print("weather_description "); Serial.println(weather_description_.c_str());
+      Serial.print("weather_temp "); Serial.println(weather_temp_.c_str());
+      Serial.print("weather_temp_feels_like_ "); Serial.println(weather_temp_feels_like_.c_str());
+      Serial.print("weather_temp_max "); Serial.println(weather_temp_max_.c_str());
+      Serial.print("weather_temp_min "); Serial.println(weather_temp_min_.c_str());
+      Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed_.c_str());
+      Serial.print("weather_humidity "); Serial.println(weather_humidity_.c_str());
+      Serial.print("city_ "); Serial.println(city_.c_str());
+      Serial.print("gmt_offset_sec_ "); Serial.println(gmt_offset_sec_);
 
     }
   }
@@ -186,7 +167,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
     const char* NTP_SERVER = "pool.ntp.org";
     const long  GMT_OFFSET_SEC = -8*60*60;
-    const int   DAYLIGHT_OFFSET_SEC = 60*60;
 
     // Define an NTP Client object
     WiFiUDP udpSocket;

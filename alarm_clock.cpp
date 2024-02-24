@@ -16,8 +16,7 @@ void AlarmClock::Setup() {
   digitalWrite(BUZZER_PIN, LOW);
 
   // retrieve alarm settings or save default
-  if(!(eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_)))
-    SaveAlarm();
+  eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 
   PrintLn("Alarm Clock Initialized!");
 }

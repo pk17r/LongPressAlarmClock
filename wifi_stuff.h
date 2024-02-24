@@ -1,3 +1,5 @@
+#include <sys/_stdint.h>
+#include <string>
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
@@ -28,20 +30,27 @@ public:
   #endif
 
   // weather information
-  char* weather_main_ = NULL;
-  char* weather_description_ = NULL;
-  char* weather_temp_ = NULL;
-  char* weather_temp_max_ = NULL;
-  char* weather_temp_min_ = NULL;
-  char* weather_wind_speed_ = NULL;
-  char* weather_humidity_ = NULL;
+  std::string weather_main_ = "";
+  std::string weather_description_ = "";
+  std::string weather_temp_ = "";
+  std::string weather_temp_feels_like_ = "";
+  std::string weather_temp_max_ = "";
+  std::string weather_temp_min_ = "";
+  std::string weather_wind_speed_ = "";
+  std::string weather_humidity_ = "";
+  std::string city_ = "";
+  int32_t gmt_offset_sec_ = 0;
 
   bool got_weather_info_ = false;   // whether weather information has been pulled
   unsigned long got_weather_info_time_ms = 0;
 
   unsigned long last_ntp_server_time_update_time_ms = 0;
 
-  bool temp_in_C_not_F_ = false;
+  uint32_t kWeatherZipCode = 92104;
+
+  std::string kWeatherCountryCode = "US";     // https://developer.accuweather.com/countries-by-region
+
+  bool kWeatherUnitsMetricNotImperial = false;
 
 // PRIVATE VARIABLES
 private:

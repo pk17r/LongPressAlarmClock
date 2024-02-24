@@ -30,12 +30,11 @@ void EEPROM::SaveDefaults() {
   PrintLn("Defaults saved to EEPROM!");
 }
 
-bool EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
+void EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
   alarmHr = Fetch1Byte(kAlarmHrAddress);
   alarmMin = Fetch1Byte(kAlarmMinAddress);
   alarmIsAm = static_cast<bool>(Fetch1Byte(kAlarmIsAmAddress));
   alarmOn = static_cast<bool>(Fetch1Byte(kAlarmOnAddress));
-  return true;
 }
 
 void EEPROM::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn) {
