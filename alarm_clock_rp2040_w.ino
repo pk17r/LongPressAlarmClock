@@ -162,8 +162,14 @@ void loop() {
       }
 
       // if screensaver is On, then update time on it
-      if(current_page == kScreensaverPage)
+      if(current_page == kScreensaverPage) {
         display->refresh_screensaver_canvas_ = true;
+        // every new hour, show main page
+        if(rtc->minute() == 0) {
+          SetPage(kMainPage);
+          inactivity_seconds = 0;
+        }
+      }
 
       #if defined(WIFI_IS_USED)
         // try to get weather info 5 mins before alarm time and every 60 minutes
