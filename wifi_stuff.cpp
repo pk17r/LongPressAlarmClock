@@ -9,19 +9,21 @@
 
 WiFiStuff::WiFiStuff() {
 
-  RetrieveWiFiDetails();
+  eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
+
+  eeprom->RetrieveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
 
   TurnWiFiOff();
 
   PrintLn("WiFiStuff Initialized!");
 }
 
-void WiFiStuff::RetrieveWiFiDetails() {
-  eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
-}
-
 void WiFiStuff::SaveWiFiDetails() {
   eeprom->SaveWiFiDetails(wifi_ssid_, wifi_password_);
+}
+
+void WiFiStuff::SaveWeatherLocationDetails() {
+  eeprom->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
 }
 
 void WiFiStuff::TurnWiFiOn() {
@@ -72,7 +74,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
     // std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
-    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + std::to_string(kWeatherZipCode) + "," + kWeatherCountryCode + "&appid=" + openWeatherMapApiKey + "&units=" + (kWeatherUnitsMetricNotImperial ? "metric" : "imperial" );
+    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + std::to_string(location_zip_code_) + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
     WiFiClient client;
     HTTPClient http;
       
@@ -115,19 +117,19 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       weather_main_.assign(myObject["weather"][0]["main"]);
       weather_description_.assign(myObject["weather"][0]["description"]);
       double val = atof(JSONVar::stringify(myObject["main"]["temp"]).c_str());
-      char valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      char valArr[10]; sprintf(valArr,"%.1f%c", val, (weather_units_metric_not_imperial_ ? 'C' : 'F'));
       weather_temp_.assign(valArr);
       val = atof(JSONVar::stringify(myObject["main"]["feels_like"]).c_str());
-      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (weather_units_metric_not_imperial_ ? 'C' : 'F'));
       weather_temp_feels_like_.assign(valArr);
       val = atof(JSONVar::stringify(myObject["main"]["temp_max"]).c_str());
-      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (weather_units_metric_not_imperial_ ? 'C' : 'F'));
       weather_temp_max_.assign(valArr);
       val = atof(JSONVar::stringify(myObject["main"]["temp_min"]).c_str());
-      valArr[10]; sprintf(valArr,"%.1f%c", val, (kWeatherUnitsMetricNotImperial ? 'C' : 'F'));
+      valArr[10]; sprintf(valArr,"%.1f%c", val, (weather_units_metric_not_imperial_ ? 'C' : 'F'));
       weather_temp_min_.assign(valArr);
       val = atof(JSONVar::stringify(myObject["wind"]["speed"]).c_str());
-      valArr[10]; sprintf(valArr,"%d%s", (int)val, (kWeatherUnitsMetricNotImperial ? "m/s" : "mi/hr"));
+      valArr[10]; sprintf(valArr,"%d%s", (int)val, (weather_units_metric_not_imperial_ ? "m/s" : "mi/hr"));
       weather_wind_speed_.assign(valArr);
       weather_humidity_.assign(JSONVar::stringify(myObject["main"]["humidity"]).c_str());
       weather_humidity_ = weather_humidity_ + '%';

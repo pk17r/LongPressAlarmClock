@@ -10,13 +10,12 @@ class WiFiStuff {
 
 public:
   WiFiStuff();
-  void RetrieveWiFiDetails();
   void SaveWiFiDetails();
+  void SaveWeatherLocationDetails();
   void TurnWiFiOn();
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
-  void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -46,15 +45,17 @@ public:
 
   unsigned long last_ntp_server_time_update_time_ms = 0;
 
-  uint32_t kWeatherZipCode = 92104;
+  uint32_t location_zip_code_ = 92104;
 
-  std::string kWeatherCountryCode = "US";     // https://developer.accuweather.com/countries-by-region
+  std::string location_country_code_ = "US";     // https://developer.accuweather.com/countries-by-region
 
-  bool kWeatherUnitsMetricNotImperial = false;
+  bool weather_units_metric_not_imperial_ = false;
 
 // PRIVATE VARIABLES
+
 private:
 
+  void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
 
 };
 

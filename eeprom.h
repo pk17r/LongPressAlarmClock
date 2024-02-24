@@ -13,6 +13,8 @@ public:
   void SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn);
   void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
   void SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password);
+  void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
+  void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
 
 private:
 

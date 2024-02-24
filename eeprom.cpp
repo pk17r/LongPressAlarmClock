@@ -59,6 +59,26 @@ void EEPROM::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password) {
 
 }
 
+void EEPROM::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
+  location_zip_code = Fetch4Bytes(kWeatherZipCodeAddress);
+  location_country_code = static_cast<char>(Fetch1Byte(kWeatherCountryCodeAddress));
+  location_country_code = location_country_code + static_cast<char>(Fetch1Byte(kWeatherCountryCodeAddress + 1));
+  weather_units_metric_not_imperial = static_cast<bool>(Fetch1Byte(kWeatherUnitsMetricNotImperialAddress));
+  PrintLn("EEPROM location_zip_code: ", location_zip_code);
+  PrintLn("EEPROM location_country_code: ", location_country_code);
+  PrintLn("EEPROM weather_units_metric_not_imperial: ", weather_units_metric_not_imperial);
+  PrintLn("Weather Location details retrieved from EEPROM.");
+}
+
+void EEPROM::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
+  Save4Bytes(kWeatherZipCodeAddress, location_zip_code);
+  Save1Byte(kWeatherCountryCodeAddress, static_cast<uint8_t>(location_country_code[0]));
+  Save1Byte(kWeatherCountryCodeAddress + 1, static_cast<uint8_t>(location_country_code[1]));
+  Save1Byte(kWeatherUnitsMetricNotImperialAddress, static_cast<uint8_t>(weather_units_metric_not_imperial));
+  PrintLn("Weather Location details written to EEPROM");
+
+}
+
 std::string EEPROM::FetchString(uint16_t length_address, uint16_t data_address) {
   int text_length = Fetch1Byte(length_address);
   std::string text = "";
