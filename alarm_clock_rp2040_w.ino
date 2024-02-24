@@ -332,7 +332,7 @@ void PrintLn(const char* someText1, const char* someText2) {
   Serial.println();
   Serial.flush();
 }
-void PrintLn(const char* someText1, int &someInt) {
+void PrintLn(const char* someText1, int someInt) {
   SerialTimeStampPrefix();
   Serial.print(someText1);
   Serial.print(kCharSpace);
@@ -631,6 +631,51 @@ void SetPage(ScreenPage page) {
           wifi_stuff->SaveWiFiDetails();
         }
         SetPage(kWiFiSettingsPage);
+      }
+      break;
+    case kWeatherSettingsPage:
+      current_page = kWeatherSettingsPage;     // new page needs to be set before any action
+      display->WeatherSettingsPage();
+      display->SetMaxBrightness();
+      break;
+    case kEnterWeatherLocationZipPage:
+      current_page = kWeatherSettingsPage;     // new page needs to be set before any action
+      display->SetMaxBrightness();
+      {
+        PrintLn("**** On Screen ZIP/PIN Code Text Input ****");
+        // user input string
+        char label[] = "ZIP/PIN Code";
+        char returnText[8] = "";
+        // get user input from screen
+        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        PrintLn(label, returnText);
+        if(ret) {
+          // set Location ZIP code:
+          wifi_stuff->location_zip_code_ = atoi(returnText);
+          PrintLn("Location ZIP code: ", wifi_stuff->location_zip_code_);
+          wifi_stuff->SaveWeatherLocationDetails();
+        }
+        SetPage(kWeatherSettingsPage);
+      }
+      break;
+    case kEnterWeatherLocationCountryCodePage:
+      current_page = kWeatherSettingsPage;     // new page needs to be set before any action
+      display->SetMaxBrightness();
+      {
+        PrintLn("**** On Screen Country Code Text Input ****");
+        // user input string
+        char label[] = "2 Letter Country Code";
+        char returnText[3] = "";
+        // get user input from screen
+        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        PrintLn(label, returnText);
+        if(ret) {
+          // set country code:
+          wifi_stuff->location_country_code_.assign(returnText);
+          PrintLn("country code: ", wifi_stuff->location_country_code_);
+          wifi_stuff->SaveWeatherLocationDetails();
+        }
+        SetPage(kWeatherSettingsPage);
       }
       break;
     default:

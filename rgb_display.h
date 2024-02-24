@@ -42,6 +42,7 @@ public:
   void DisplayWeatherInfo();
   void SettingsPage();
   void WiFiSettingsPage();
+  void WeatherSettingsPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
 
   // functions
@@ -135,7 +136,7 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", weatherStr[8] = "WEATHER", updateTimeStr[12] = "UPDATE TIME";
+  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", weatherStr[8] = "WEATHER", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY";
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
   const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 0, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
   const int16_t kSsidButtonX1 = 100, kSsidButtonY1 = 0, kSsidButtonW = 80, kSsidButtonH = 25;

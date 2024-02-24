@@ -390,6 +390,9 @@ void RGBDisplay::SettingsPage() {
   // Update WiFi Details button
   DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
+  // Update WEATHER button
+  DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
     // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
@@ -437,9 +440,37 @@ void RGBDisplay::WiFiSettingsPage() {
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
-// void RGBDisplay::WeatherSettingsPage() {
+void RGBDisplay::WeatherSettingsPage() {
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeSans12pt7b);
+  tft.setCursor(10, 20);
+  tft.print("Weather Location:");
+  tft.setFont(&FreeMono9pt7b);
+  tft.setCursor(10, 40);
+  tft.print("ZIP Code: ");
+  tft.print(wifi_stuff->location_zip_code_);
+  tft.setCursor(10, 60);
+  tft.print("Country Code: ");
+  tft.print(wifi_stuff->location_country_code_.c_str());
+  
+  // Update zipCodeStr button
+  DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-// }
+  // Update countryCodeStr button
+  DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Update WEATHER button
+  DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Update TIME button
+  DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  DisplayWeatherInfo();
+
+  // Cancel button
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
 
 void RGBDisplay::DisplayWeatherInfo() {
 
@@ -1089,6 +1120,14 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       return kWiFiSettingsPage;
     }
 
+    // update Weather button
+    if(ts_x >= kWeatherButtonX1 && ts_x <= kWeatherButtonX1 + kWeatherButtonW && ts_y >= kWeatherButtonY1 && ts_y <= kWeatherButtonY1 + kWeatherButtonH) {
+      DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      second_core_tasks_queue.push(kGetWeatherInfo);
+      delay(100);
+      return kWeatherSettingsPage;
+    }
+
     // cancel button
     if(ts_x >= kCancelButtonX1 && ts_y >= kCancelButtonY1) {
       // show a little graphic of Cancel button Press
@@ -1127,6 +1166,46 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
       delay(100);
       return kWiFiSettingsPage;
+    }
+
+    // cancel button
+    if(ts_x >= kCancelButtonX1 && ts_y >= kCancelButtonY1) {
+      // show a little graphic of Cancel button Press
+      DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kSettingsPage;
+    }
+  }
+  else if(current_page == kWeatherSettingsPage) {
+
+    // update kEnterWeatherLocationZipPage button
+    if(ts_x >= kSsidButtonX1 && ts_x <= kSsidButtonX1 + kSsidButtonW && ts_y >= kSsidButtonY1 && ts_y <= kSsidButtonY1 + kSsidButtonH) {
+      DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWeatherLocationZipPage;
+    }
+
+    // update kEnterWeatherLocationCountryCodePage button
+    if(ts_x >= kPasswdButtonX1 && ts_x <= kPasswdButtonX1 + kPasswdButtonW && ts_y >= kPasswdButtonY1 && ts_y <= kPasswdButtonY1 + kPasswdButtonH) {
+      DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWeatherLocationCountryCodePage;
+    }
+
+    // update Weather button
+    if(ts_x >= kWeatherButtonX1 && ts_x <= kWeatherButtonX1 + kWeatherButtonW && ts_y >= kWeatherButtonY1 && ts_y <= kWeatherButtonY1 + kWeatherButtonH) {
+      DrawButton(kWeatherButtonX1, kWeatherButtonY1, kWeatherButtonW, kWeatherButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      second_core_tasks_queue.push(kGetWeatherInfo);
+      delay(100);
+      return kWeatherSettingsPage;
+    }
+
+    // update Time button
+    if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
+      DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+      delay(100);
+      return kWeatherSettingsPage;
     }
 
     // cancel button

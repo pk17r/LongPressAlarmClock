@@ -111,11 +111,11 @@ void EEPROM::Save1Byte(uint16_t address, uint8_t value) {
 uint32_t EEPROM::Fetch4Bytes(uint16_t address) {
   uint32_t value = Fetch1Byte(address);   // MSB
   value = value << 8;
-  value = value & Fetch1Byte(address + 1);
+  value = value | Fetch1Byte(address + 1);
   value = value << 8;
-  value = value & Fetch1Byte(address + 2);
+  value = value | Fetch1Byte(address + 2);
   value = value << 8;
-  value = value & Fetch1Byte(address + 3);    // LSB
+  value = value | Fetch1Byte(address + 3);    // LSB
   return value;
 }
 
