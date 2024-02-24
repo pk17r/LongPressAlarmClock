@@ -46,6 +46,13 @@ void WiFiStuff::TurnWiFiOn() {
     PrintLn("Could NOT connect to WiFi.");
 }
 
+bool WiFiStuff::IsWiFiConnected() {
+  if(WiFi.status() == WL_CONNECTED)
+    return true;
+  else
+    return false;
+}
+
 void WiFiStuff::TurnWiFiOff() {
   WiFi.persistent(false);
   delay(1);
