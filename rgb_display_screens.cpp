@@ -438,11 +438,16 @@ void RGBDisplay::WiFiSettingsPage() {
   int16_t title_y0 = 50;
   int16_t w_x0 = 5, s_y0 = title_y0 + 48;
 
-  if(wifi_stuff->IsWiFiConnected()) {
+  if(wifi_stuff->wifi_connected_) {
     tft.setFont(&FreeMonoBold9pt7b);
     tft.setTextColor(kDisplayColorOrange);
     tft.setCursor(w_x0, s_y0 + 40);
     tft.print("WiFi Connected!");
+    tft.setFont(&FreeMono9pt7b);
+    tft.setCursor(w_x0, s_y0 + 65);
+    tft.print("Auto disconnect after");
+    tft.setCursor(w_x0, s_y0 + 90);
+    tft.print(kInactivitySecondsLimit); tft.print(" inactive seconds.");
   }
   else {
     tft.setFont(&FreeMono9pt7b);
@@ -450,9 +455,9 @@ void RGBDisplay::WiFiSettingsPage() {
     tft.setCursor(w_x0, s_y0 + 40);
     tft.print("Not connected.");
     tft.setCursor(w_x0, s_y0 + 65);
-    tft.print("Click TEST WIFI Button,");
+    tft.print("Click CONNECT Button,");
     tft.setCursor(w_x0, s_y0 + 90);
-    tft.print("Wait 10 seconds, click again.");
+    tft.print("Wait a few seconds..");
   }
 
   // Cancel button
@@ -1186,7 +1191,8 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kConnectWiFiButtonX1 && ts_x <= kConnectWiFiButtonX1 + kConnectWiFiButtonW && ts_y >= kConnectWiFiButtonY1 && ts_y <= kConnectWiFiButtonY1 + kConnectWiFiButtonH) {
       DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kConnectWiFi);
-      delay(100);
+      loop1();
+      // delay(100);
       return kWiFiSettingsPage;
     }
 
@@ -1194,7 +1200,8 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kDisconnectWiFiButtonX1 && ts_x <= kDisconnectWiFiButtonX1 + kDisconnectWiFiButtonW && ts_y >= kDisconnectWiFiButtonY1 && ts_y <= kDisconnectWiFiButtonY1 + kDisconnectWiFiButtonH) {
       DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kDisconnectWiFi);
-      delay(100);
+      loop1();
+      // delay(100);
       return kWiFiSettingsPage;
     }
 
@@ -1226,7 +1233,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kUnitsButtonX1 && ts_x <= kUnitsButtonX1 + kUnitsButtonW && ts_y >= kUnitsButtonY1 && ts_y <= kUnitsButtonY1 + kUnitsButtonH) {
       wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
       DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (wifi_stuff->weather_units_metric_not_imperial_ ? metricUnitStr : imperialUnitStr), kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      delay(100);
+      // delay(100);
       wifi_stuff->SaveWeatherUnits();
       return kWeatherSettingsPage;
     }
@@ -1235,7 +1242,8 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kGetWeatherInfoButtonX1 && ts_x <= kGetWeatherInfoButtonX1 + kGetWeatherInfoButtonW && ts_y >= kGetWeatherInfoButtonY1 && ts_y <= kGetWeatherInfoButtonY1 + kGetWeatherInfoButtonH) {
       DrawButton(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kGetWeatherInfo);
-      delay(100);
+      loop1();
+      // delay(100);
       return kWeatherSettingsPage;
     }
 
@@ -1243,8 +1251,9 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
       DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-      delay(100);
-      return kWeatherSettingsPage;
+      loop1();
+      // delay(100);
+      return kMainPage;
     }
 
     // cancel button

@@ -62,15 +62,15 @@ public:
   // display object
   #if defined(DISPLAY_IS_ST7789V)
     // Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
-    Adafruit_ST7789 tft = Adafruit_ST7789(&SPI, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
+    Adafruit_ST7789 tft = Adafruit_ST7789(spi_obj, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
   #elif defined(DISPLAY_IS_ST7735)
     // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
     Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
   #elif defined(DISPLAY_IS_ILI9341)
-    Adafruit_ILI9341 tft = Adafruit_ILI9341(&SPI, TFT_DC, TFT_CS, TFT_RST);
+    Adafruit_ILI9341 tft = Adafruit_ILI9341(spi_obj, TFT_DC, TFT_CS, TFT_RST);
   #elif defined(DISPLAY_IS_ILI9488)
     // Use hardware SPI (#13, #12, #11) and the above for CS/DC
-    ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
+    ILI9488_t3 tft = ILI9488_t3(spi_obj, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);
   #endif
 
   // redraw full display flag
@@ -140,7 +140,7 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", locationStr[9] = "LOCATION", screensaverStr[12] = "SCREENSAVER", weatherStr[8] = "WEATHER", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "TEST WIFI", disconnectWiFiStr[11] = "DISCONNECT";
+  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", locationStr[9] = "LOCATION", screensaverStr[12] = "SCREENSAVER", weatherStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
   const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
   const int16_t kLocationSettingsButtonX1 = 150, kLocationSettingsButtonY1 = 40, kLocationSettingsButtonW = 150, kLocationSettingsButtonH = 25;

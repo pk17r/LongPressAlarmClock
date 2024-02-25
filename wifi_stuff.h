@@ -17,7 +17,6 @@ public:
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
-  bool IsWiFiConnected();
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -52,6 +51,8 @@ public:
   std::string location_country_code_ = "US";     // https://developer.accuweather.com/countries-by-region
 
   bool weather_units_metric_not_imperial_ = false;
+
+  volatile bool wifi_connected_ = false;
 
 // PRIVATE VARIABLES
 

@@ -65,6 +65,8 @@ Touchscreen* ts = NULL;         // Touchscreen class object
   TaskHandle_t Task1;
 #endif
 
+SPIClass* spi_obj = NULL;
+
 // setup core0
 void setup() {
 
@@ -80,18 +82,26 @@ void setup() {
   Serial.begin(115200);
   delay(200);
   while(!Serial) { delay(20); };
-  Serial.println(F("\nSerial OK"));
+  // Serial.println(F("\nSerial OK"));
   Serial.flush();
 
-  // make all SPI CS pins high
+  // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
   pinMode(TS_CS_PIN, OUTPUT);
   digitalWrite(TS_CS_PIN, HIGH);
 
+  // initialize spi
+  spi_obj = new SPIClass(HSPI);
+  spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+
   // LED Pin
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
+
+  // BUILTIN LED - we use for WiFi Connect Notification
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN);
@@ -195,7 +205,7 @@ void loop() {
 
       #if defined(WIFI_IS_USED)
         // try to get weather info 5 mins before alarm time and every 60 minutes
-        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 5)) {
+        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
           // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
           second_core_tasks_queue.push(kGetWeatherInfo);
           PrintLn("Get Weather Info!");
@@ -266,7 +276,7 @@ void loop1() {
     SecondCoreTask current_task = second_core_tasks_queue.front();
     // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
-    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 1*60*1000)) {
+    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 10*1000)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
 
@@ -292,9 +302,9 @@ void loop1() {
     // done processing the task
     second_core_tasks_queue.pop();
   }
-
-  // a delay to slow things down
-  // delay(1000);
+  // turn off WiFi if there are no more requests and User is not using device
+  if(inactivity_seconds >= kInactivitySecondsLimit && wifi_stuff->wifi_connected_)
+    wifi_stuff->TurnWiFiOff();
 }
 
 #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)

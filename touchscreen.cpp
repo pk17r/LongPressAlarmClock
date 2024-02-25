@@ -3,7 +3,7 @@
 #include "rgb_display.h"
 
 Touchscreen::Touchscreen() {
-  touchscreen_object_.begin(SPI);
+  touchscreen_object_.begin(*spi_obj);
   touchscreen_object_.setRotation(1);
   touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, display->kTftWidth, display->kTftHeight};
 

@@ -34,27 +34,24 @@ void WiFiStuff::TurnWiFiOn() {
   PrintLn("Connecting to WiFi");
   WiFi.persistent(true);
   delay(1);
-  WiFi.mode(WIFI_STA);
-  delay(1);
   WiFi.begin(wifi_ssid_.c_str(), wifi_password_.c_str());
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
-    delay(1000);
+    delay(500);
     // Serial.print(".");
     i++;
-    if(i >= 10) break;
+    if(i >= 5) break;
   }
-  if(WiFi.status() == WL_CONNECTED)
+  if(WiFi.status() == WL_CONNECTED) {
     PrintLn("WiFi Connected.");
-  else
+    digitalWrite(LED_BUILTIN, HIGH);
+    wifi_connected_ = true;
+  }
+  else {
     PrintLn("Could NOT connect to WiFi.");
-}
-
-bool WiFiStuff::IsWiFiConnected() {
-  if(WiFi.status() == WL_CONNECTED)
-    return true;
-  else
-    return false;
+    digitalWrite(LED_BUILTIN, LOW);
+    wifi_connected_ = false;
+  }
 }
 
 void WiFiStuff::TurnWiFiOff() {
@@ -64,13 +61,16 @@ void WiFiStuff::TurnWiFiOff() {
   delay(1);
   WiFi.disconnect();
   PrintLn("WiFi Off.");
+  digitalWrite(LED_BUILTIN, LOW);
+  wifi_connected_ = false;
 }
 
 void WiFiStuff::GetTodaysWeatherInfo() {
   got_weather_info_ = false;
 
   // turn On Wifi
-  TurnWiFiOn();
+  if(!wifi_connected_)
+    TurnWiFiOn();
 
   // Your Domain name with URL path or IP address with path
   std::string openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
@@ -164,7 +164,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   }
 
   // turn off WiFi
-  TurnWiFiOff();
+  // TurnWiFiOff();
 }
 
 bool WiFiStuff::GetTimeFromNtpServer() {
@@ -174,7 +174,8 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   bool returnVal = false;
 
   // turn On Wifi
-  TurnWiFiOn();
+  if(!wifi_connected_)
+    TurnWiFiOn();
 
 
   // Check WiFi connection status
@@ -229,7 +230,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   // Serial.print("Test Date:  3/1/2028   "); ConvertEpochIntoDate(1835481800);
 
   // turn off WiFi
-  TurnWiFiOff();
+  // TurnWiFiOff();
 
   return returnVal;
 }

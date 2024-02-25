@@ -7,6 +7,7 @@
 #include "general_constants.h"
 #include <string>
 #include <queue>          // std::queue
+#include "SPI.h"
 
 // forward decleration of classes
 class RTC;
@@ -16,6 +17,9 @@ class WiFiStuff;
 class EEPROM;
 class PushButtonTaps;
 class Touchscreen;
+
+// spi
+extern SPIClass* spi_obj;
 
 // extern all global variables
 extern RTC* rtc;
@@ -78,6 +82,7 @@ extern DisplayData new_display_data_, displayed_data_;
 
 
 // extern all global functions
+extern void loop1();
 extern int AvailableRam();
 extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();

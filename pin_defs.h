@@ -2,8 +2,8 @@
 #define PIN_DEFS_H
 
 // SELECT MCU
-#define MCU_IS_ESP32_WROOM_DA_MODULE
-// #define MCU_IS_ESP32_S2_MINI
+// #define MCU_IS_ESP32_WROOM_DA_MODULE
+#define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_RASPBERRY_PI_PICO_W
 
 // SELECT DISPLAY
@@ -48,6 +48,7 @@
   #define BUTTON_PIN 35
   #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   #define LED_PIN 32
+  #define LED_BUILTIN 2
   #define BUZZER_PIN 13
 
 
@@ -77,7 +78,8 @@
   #define SCL_PIN 9
   #define BUTTON_PIN 6
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  #define LED_PIN 15
+  #define LED_PIN 5
+  #define LED_BUILTIN 15
   #define BUZZER_PIN 4
 
 
@@ -109,6 +111,7 @@
   #define SCL_PIN 5
   #define BUTTON_PIN 14
   #define LED_PIN 15
+  #define LED_BUILTIN 0
   #define BUZZER_PIN 11
 
 
