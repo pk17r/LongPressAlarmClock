@@ -61,7 +61,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // LOCAL PROGRAM VARIABLES
 
-#if defined(MCU_IS_ESP32)
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
   TaskHandle_t Task1;
 #endif
 
@@ -74,7 +74,7 @@ void setup() {
     rp2040.wdt_begin(8300);
   #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
-    // setCpuFrequencyMhz(160);
+    setCpuFrequencyMhz(80);
   #endif
 
   Serial.begin(115200);
@@ -121,7 +121,7 @@ void setup() {
     second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
   }
 
-  #if defined(MCU_IS_ESP32)
+  #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
         Task1code, /* Function to implement the task */
         "Task1", /* Name of the task */
@@ -171,6 +171,7 @@ void loop() {
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
       // PrintLn("New Minute!");
+      // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
       // Activate Buzzer if Alarm Time has arrived
       if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
@@ -264,6 +265,7 @@ void Task1code( void * parameter) {
   while (!second_core_tasks_queue.empty())
   {
     SecondCoreTask current_task = second_core_tasks_queue.front();
+    // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
     if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 1*60*1000)) {
       // get today's weather info

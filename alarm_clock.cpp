@@ -18,6 +18,9 @@ void AlarmClock::Setup() {
   // retrieve alarm settings or save default
   eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 
+  // setup buzzer timer
+  SetupBuzzerTimer();
+
   PrintLn("Alarm Clock Initialized!");
 }
 
@@ -75,8 +78,6 @@ int16_t AlarmClock::MinutesToAlarm() {
 void AlarmClock::BuzzAlarmFn() {
   // start alarm triggered page
   SetPage(kAlarmTriggeredPage);
-  // setup buzzer timer
-  SetupBuzzerTimer();
   //start buzzer!
   BuzzerEnable();
   bool alarmStopped = false, buzzerPausedByUser = false;
@@ -126,7 +127,6 @@ void AlarmClock::BuzzAlarmFn() {
       alarmStopped = true;
     }
   }
-  DeallocateBuzzerTimer();
 }
 
 // Passive Buzzer Timer Interrupt Service Routine
@@ -157,6 +157,8 @@ void AlarmClock::BuzzerEnable() {
     int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
     add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
   #endif
+
+  PrintLn("BuzzerEnable!");
 }
 
 void AlarmClock::BuzzerDisable() {
@@ -170,6 +172,8 @@ void AlarmClock::BuzzerDisable() {
   digitalWrite(LED_PIN, LOW);
   buzzer_square_wave_toggle_ = false;
   beep_toggle_ = false;
+
+  PrintLn("BuzzerDisable!");
 }
 
 void AlarmClock::SetupBuzzerTimer() {
@@ -182,17 +186,14 @@ void AlarmClock::SetupBuzzerTimer() {
     passive_buzzer_timer_ptr_ = new struct repeating_timer;
   #endif
 
-  PrintLn("Timer setup successful!");
+  PrintLn("Buzzer Timer setup successful!");
 }
 
 void AlarmClock::DeallocateBuzzerTimer() {
-
-  #if defined(MCU_IS_ESP32)
-  passive_buzzer_timer_ptr_ = NULL;
-  #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
     delete passive_buzzer_timer_ptr_;
     passive_buzzer_timer_ptr_ = NULL;
-  #endif
 
-  PrintLn("Buzzer Timer deallocated.");
+    PrintLn("Buzzer Timer deallocated.");
+  #endif
 }
