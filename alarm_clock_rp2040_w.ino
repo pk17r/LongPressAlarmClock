@@ -49,6 +49,9 @@
 #include "alarm_clock.h"
 #include "rgb_display.h"
 #include "touchscreen.h"
+#if defined(MCU_IS_ESP32)
+  #include <esp_task_wdt.h>   // ESP32 Watchdog header
+#endif
 
 // modules - hardware or software
 PushButtonTaps* push_button = NULL;   // Push Button object
@@ -67,7 +70,12 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 SPIClass* spi_obj = NULL;
 
+// watchdog timeout time
+#if defined(MCU_IS_RP2040)
 const unsigned long kWatchdogTimeoutMs = 8300;
+#elif defined(MCU_IS_ESP32)
+const unsigned long kWatchdogTimeoutMs = 10000;
+#endif
 
 // setup core0
 void setup() {
@@ -79,12 +87,17 @@ void setup() {
   #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
     setCpuFrequencyMhz(80);
+    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
+    esp_task_wdt_init(kWatchdogTimeoutMs / 1000, true); //enable panic so ESP32 restarts
+    esp_task_wdt_add(NULL); //add current thread to WDT watch
   #endif
 
   Serial.begin(115200);
   delay(200);
-  while(!Serial) { delay(20); };
-  // Serial.println(F("\nSerial OK"));
+  // while(!Serial) { delay(20); };
+  Serial.println(F("\nSerial OK"));
   Serial.flush();
 
   // make all spi CS pins high
@@ -500,7 +513,9 @@ void ResetWatchdog() {
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
     rp2040.wdt_reset();
   #elif defined(MCU_IS_ESP32)
-
+    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+    esp_task_wdt_reset();
   #endif
 }
 
