@@ -67,7 +67,7 @@ public:
     // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
     Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
   #elif defined(DISPLAY_IS_ILI9341)
-    Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST, TFT_CIPO);
+    Adafruit_ILI9341 tft = Adafruit_ILI9341(&SPI, TFT_DC, TFT_CS, TFT_RST);
   #elif defined(DISPLAY_IS_ILI9488)
     // Use hardware SPI (#13, #12, #11) and the above for CS/DC
     ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST, TFT_COPI, TFT_CLK, TFT_CIPO);

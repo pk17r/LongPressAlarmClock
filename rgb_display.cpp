@@ -26,11 +26,15 @@ void RGBDisplay::Setup() {
   tft.initR(INITR_BLACKTAB);  // Init ST7735 chip, black tab
   // set col and row offset of display for ST7735S
   tft.setColRowStart(2, 1);
+  // make display landscape orientation
+  tft.setRotation(1);
 
 #elif defined(DISPLAY_IS_ILI9341)
 
   // Use this initializer if using a 1.8" ILI9341 TFT screen:
   tft.begin();
+  // make display landscape orientation
+  tft.setRotation(1);
 
 #elif defined(DISPLAY_IS_ILI9488)
 

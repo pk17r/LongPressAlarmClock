@@ -61,7 +61,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // LOCAL PROGRAM VARIABLES
 
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+#if defined(MCU_IS_ESP32)
   TaskHandle_t Task1;
 #endif
 
@@ -72,16 +72,16 @@ void setup() {
     // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
     rp2040.wdt_begin(8300);
-  #elif defined (MCU_IS_ESP32)
+  #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
-    setCpuFrequencyMhz(160);
+    // setCpuFrequencyMhz(160);
   #endif
 
   Serial.begin(115200);
   delay(200);
-  // while(!Serial) { delay(20); };
-  PrintLn();
-  PrintLn("Serial OK");
+  while(!Serial) { delay(20); };
+  Serial.println(F("\nSerial OK"));
+  Serial.flush();
 
   // make all SPI CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -121,7 +121,7 @@ void setup() {
     second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
   }
 
-  #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+  #if defined(MCU_IS_ESP32)
     xTaskCreatePinnedToCore(
         Task1code, /* Function to implement the task */
         "Task1", /* Name of the task */
@@ -170,9 +170,6 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
-      #if defined (MCU_IS_ESP32)
-        rtc->Refresh();
-      #endif
       // PrintLn("New Minute!");
 
       // Activate Buzzer if Alarm Time has arrived
@@ -254,12 +251,15 @@ void loop() {
 void setup1() {
   delay(2000);
 }
-#elif defined (MCU_IS_ESP32)
-
 #endif
 
 // arduino loop function on core1 - low priority one with wifi weather update task
-void loop1() {
+#if defined(MCU_IS_ESP32)
+void Task1code( void * parameter) {
+  for(;;) {
+#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  void loop1() {
+#endif
   // run the core only to do specific not time important operations
   while (!second_core_tasks_queue.empty())
   {
@@ -294,14 +294,10 @@ void loop1() {
 
   // a delay to slow things down
   delay(1000);
-}
-
-
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-void Task1code( void * parameter) {
-  for(;;) {
-    loop1();
+#if defined(MCU_IS_ESP32)
   }
+}
+#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
 }
 #endif
 
@@ -322,13 +318,13 @@ ScreenPage current_page = kMainPage;
 std::queue<SecondCoreTask> second_core_tasks_queue;
 
 int AvailableRam() {
-#if defined(MCU_IS_RP2040)
-  // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
-  return rp2040.getFreeHeap();
-#elif defined (MCU_IS_ESP32)
-  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
-  return esp_get_free_heap_size();
-#endif
+  #if defined(MCU_IS_RP2040)
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
+    return rp2040.getFreeHeap();
+  #elif defined(MCU_IS_ESP32)
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
+    return esp_get_free_heap_size();
+  #endif
 }
 
 void SerialInputFlush() {
@@ -348,18 +344,20 @@ void SerialTimeStampPrefix() {
   Serial.print(millis());
   Serial.print(kCharSpace);
   Serial.print('(');
-  Serial.print(rtc->hour());
-  Serial.print(kCharColon);
-  if(rtc->minute() < 10) Serial.print(kCharZero);
-  Serial.print(rtc->minute());
-  Serial.print(kCharColon);
-  if(rtc->second() < 10) Serial.print(kCharZero);
-  Serial.print(rtc->second());
-  Serial.print(kCharSpace);
-  if(rtc->hourModeAndAmPm() == 1)
-    Serial.print(kAmLabel);
-  else if(rtc->hourModeAndAmPm() == 2)
-    Serial.print(kPmLabel);
+  if(rtc != NULL) {
+    Serial.print(rtc->hour());
+    Serial.print(kCharColon);
+    if(rtc->minute() < 10) Serial.print(kCharZero);
+    Serial.print(rtc->minute());
+    Serial.print(kCharColon);
+    if(rtc->second() < 10) Serial.print(kCharZero);
+    Serial.print(rtc->second());
+    Serial.print(kCharSpace);
+    if(rtc->hourModeAndAmPm() == 1)
+      Serial.print(kAmLabel);
+    else if(rtc->hourModeAndAmPm() == 2)
+      Serial.print(kPmLabel);
+  }
   Serial.print(" :i");
   if(inactivity_seconds < 100) Serial.print(kCharZero);
   if(inactivity_seconds < 10) Serial.print(kCharZero);
@@ -377,6 +375,13 @@ void PrintLn(const char* someText1, const char* someText2) {
   Serial.print(kCharSpace);
   if(someText2 != nullptr)
     Serial.print(someText2);
+  Serial.println();
+  Serial.flush();
+}
+void PrintLn(const char* someText1) {
+  SerialTimeStampPrefix();
+  if(someText1 != nullptr)
+    Serial.print(someText1);
   Serial.println();
   Serial.flush();
 }
@@ -404,6 +409,11 @@ void PrintLn(std::string &someTextStr1, std::string &someTextStr2) {
 void PrintLn(std::string &someTextStr1) {
   SerialTimeStampPrefix();
   Serial.println(someTextStr1.c_str());
+  Serial.flush();
+}
+void PrintLn() {
+  SerialTimeStampPrefix();
+  Serial.println();
   Serial.flush();
 }
 
@@ -458,7 +468,7 @@ void ResetWatchdog() {
   #if defined(MCU_IS_RP2040)
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
     rp2040.wdt_reset();
-  #elif defined (MCU_IS_ESP32)
+  #elif defined(MCU_IS_ESP32)
 
   #endif
 }

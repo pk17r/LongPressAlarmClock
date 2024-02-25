@@ -3,6 +3,10 @@
 
 #include "common.h"
 #include "uRTCLib.h"
+#if !defined (MCU_IS_ESP32)
+ #define IRAM_ATTR
+ #define DRAM_ATTR
+#endif
 
 class RTC {
 
@@ -27,8 +31,8 @@ public:
   void SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year);
 
   uint8_t second() { return second_; }
-  uint8_t minute() { return rtc_hw_.minute(); }
-  uint8_t hour() { return rtc_hw_.hour(); }
+  uint8_t minute();
+  uint8_t hour();
   uint8_t day() { return rtc_hw_.day(); }
   uint8_t month() { return rtc_hw_.month(); }
   uint16_t year() { return rtc_hw_.year() + 2000; }
@@ -57,14 +61,6 @@ public:
   uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
 
 
-#if !defined(MCU_IS_ESP32)
-  protected:
-#endif
-
-  // protected function to refresh time from RTC HW and do basic power failure checks
-  void Refresh();
-
-
 private:
 
   // RTC clock object for DC3231 rtc
@@ -77,14 +73,16 @@ private:
   // at 60 seconds, we'll update the time row
   static inline volatile uint8_t second_ = 0;
 
-  static inline uint8_t minute_ = 0;
+  static inline volatile bool rtc_refresh_reqd_ = false;
 
   // setup DS3231 rtc for the first time, no problem doing it again
   void FirstTimeRtcSetup();
 
-  // clock seconds interrupt ISR
-  static void SecondsUpdateInterruptISR();
+  // private function to refresh time from RTC HW and do basic power failure checks
+  void Refresh();
 
+  // clock seconds interrupt ISR
+  static void IRAM_ATTR SecondsUpdateInterruptISR();
 
 
 };

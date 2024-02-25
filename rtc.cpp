@@ -8,9 +8,13 @@ RTC::RTC() {
   /* INITIALIZE RTC */
 
   // initialize Wire lib
-  URTCLIB_WIRE.setSDA(SDA_PIN);
-  URTCLIB_WIRE.setSCL(SCL_PIN);
-  URTCLIB_WIRE.begin();
+  #if defined(MCU_IS_RP2040)
+    URTCLIB_WIRE.setSDA(SDA_PIN);
+    URTCLIB_WIRE.setSCL(SCL_PIN);
+    URTCLIB_WIRE.begin();
+  #elif defined (MCU_IS_ESP32)
+    URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
+  #endif
 
   // set rtc model
   rtc_hw_.set_model(URTCLIB_MODEL_DS3231);
@@ -96,20 +100,16 @@ void RTC::FirstTimeRtcSetup() {
     rtc_hw_.set_12hour_mode(true);
 }
 
-// protected function to refresh time from RTC HW and do basic power failure checks
+// private function to refresh time from RTC HW and do basic power failure checks
 void RTC::Refresh() {
 
   // refresh time in class object from RTC HW
   rtc_hw_.refresh();
+  rtc_refresh_reqd_ = false;
 
   // make _second equal to rtcHw seconds -> should be 0
   second_ = rtc_hw_.second();
 
-  // check for minute update
-  if(rtc_hw_.minute() != minute_) {
-    minute_ = rtc_hw_.minute();
-    rtc_hw_min_update_ = true;
-  }
   PrintLn("__RTC Refresh__ ");
 
   // Check whether RTC HW experienced a power loss and thereby know if time is up to date or not
@@ -125,17 +125,29 @@ void RTC::Refresh() {
 }
 
 // clock seconds interrupt ISR
-void RTC::SecondsUpdateInterruptISR() {
+void IRAM_ATTR RTC::SecondsUpdateInterruptISR() {
   // update seconds
   second_++;
   // a flag for others that time has updated!
   rtc_hw_sec_update_ = true;
 
-  #if !defined(MCU_IS_ESP32)
-    // refresh time on rtc class object on new minute
-    if(second_ >= 60)
-      rtc->Refresh();
-  #endif
+  // refresh time on rtc class object on new minute
+  if(second_ >= 60) {
+    rtc_hw_min_update_ = true;
+    rtc_refresh_reqd_ = true;
+  }
+}
+
+uint8_t RTC::minute() {
+  if(rtc_refresh_reqd_)
+    Refresh();
+  return rtc_hw_.minute();
+}
+
+uint8_t RTC::hour() {
+  if(rtc_refresh_reqd_)
+    Refresh();
+  return rtc_hw_.hour();
 }
 
 /**

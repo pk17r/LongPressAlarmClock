@@ -4,9 +4,13 @@
 
 EEPROM::EEPROM() {
   eeprom_.set_address(0x57);
-  Wire.setSDA(SDA_PIN);
-  Wire.setSCL(SCL_PIN);
-  Wire.begin();
+  #if defined(MCU_IS_RP2040)
+    Wire.setSDA(SDA_PIN);
+    Wire.setSCL(SCL_PIN);
+    Wire.begin();
+  #elif defined (MCU_IS_ESP32)
+    Wire.begin(SDA_PIN, SCL_PIN);
+  #endif
 
   // check if data is compatible with code, otherwise set the respective flag and default data
   if(Fetch1Byte(kDataModelVersionAddress) != kDataModelVersion)
@@ -93,8 +97,9 @@ std::string EEPROM::FetchString(uint16_t length_address, uint16_t data_address) 
 }
 
 void EEPROM::SaveString(uint16_t length_address, uint8_t length_max, uint16_t data_address, std::string text) {
-  Save1Byte(length_address, min(text.length(), length_max));
-  for (int i = 0; i < min(text.length(), length_max); i++) {
+  int text_length = min((int)(text.length()), (int)length_max);
+  Save1Byte(length_address, text_length);
+  for (int i = 0; i < text_length; i++) {
     Save1Byte(data_address + i, static_cast<uint8_t>(text[i]));
   }
 }

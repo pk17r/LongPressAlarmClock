@@ -86,10 +86,12 @@ extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void SetPage(ScreenPage page);
 extern void ResetWatchdog();
-extern void PrintLn(const char* someText1 = nullptr, const char* someText2 = nullptr);
+extern void PrintLn(const char* someText1, const char* someText2);
+extern void PrintLn(const char* someText1);
 extern void PrintLn(const char* someText1, int someInt);
 extern void PrintLn(std::string someTextStr1, std::string someTextStr2);
 extern void PrintLn(std::string &someTextStr1, std::string &someTextStr2);
 extern void PrintLn(std::string &someTextStr1);
+extern void PrintLn();
 
 #endif // COMMON_H

@@ -81,7 +81,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
   int16_t gap_x = kTftWidth / 11;
   int16_t gap_y = kTftHeight / 9;
   int16_t hr_x = gap_x / 2, min_x = 2.25*gap_x, amPm_x = 4.25*gap_x, onOff_x = 6.5*gap_x, setCancel_x = 9*gap_x;
-  int16_t time_y = 6*gap_y, onSet_y = 3.5*gap_y, offCancel_y = 6.5*gap_y, inc_y = 4*gap_y, dec_y = 8*gap_y;
+  int16_t time_y = 6*gap_y, onSet_y = 3.5*gap_y, offCancel_y = 6.5*gap_y;
   int16_t incB_y = time_y - 3*gap_y, decB_y = time_y + gap_y;
   uint16_t onFill = kDisplayColorGreen, offFill = kDisplayColorBlack, borderColor = kDisplayColorCyan;
   uint16_t button_w = 2*gap_x, button_h = 2*gap_y;
@@ -435,7 +435,7 @@ void RGBDisplay::WiFiSettingsPage() {
   // Disconnect WiFi button
   DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  int16_t title_x0 = 30, title_y0 = 50;
+  int16_t title_y0 = 50;
   int16_t w_x0 = 5, s_y0 = title_y0 + 48;
 
   if(wifi_stuff->IsWiFiConnected()) {
@@ -498,7 +498,7 @@ void RGBDisplay::WeatherSettingsPage() {
 
 void RGBDisplay::DisplayWeatherInfo() {
 
-  int16_t title_x0 = 30, title_y0 = 50;
+  int16_t title_y0 = 50;
   int16_t w_x0 = 5, s_y0 = title_y0 + 48;
 
   // show today's weather
@@ -577,7 +577,7 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 
 void RGBDisplay::Screensaver() {
   // elapsedMillis timer1;
-  const int16_t GAP_BAND = 5, GAP_BAND_RIGHT = 30;
+  const int16_t GAP_BAND = 5;
   if(refresh_screensaver_canvas_) {
 
     // delete created canvas and null the pointer
@@ -607,7 +607,7 @@ void RGBDisplay::Screensaver() {
     int16_t alarm_icon_h = (new_display_data_.alarm_ON ? kBellSmallHeight : kBellFallenSmallHeight);
     uint16_t date_row_w = date_w + 2 * GAP_BAND + alarm_icon_w;
     screensaver_w_ = max(tft_HHMM_w_ + 5 * GAP_BAND, date_row_w + 5 * GAP_BAND);
-    screensaver_h_ = tft_HHMM_h_ + max(date_h, alarm_icon_h) + 3*GAP_BAND;
+    screensaver_h_ = tft_HHMM_h_ + max((int)date_h, (int)alarm_icon_h) + 3*GAP_BAND;
     // middle both rows
     tft_HHMM_x0_ = (screensaver_w_ - tft_HHMM_w_) / 2 - gap_right_x_;
     date_x0 = (screensaver_w_ - date_row_w) / 2 - date_gap_x;
