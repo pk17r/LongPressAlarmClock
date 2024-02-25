@@ -245,6 +245,10 @@ void loop() {
   if (Serial.available() != 0)
     ProcessSerialInput();
 
+  #if defined(MCU_IS_ESP32_S2_MINI)
+    // ESP32_S2_MINI is single core MCU
+    loop1();
+  #endif
 }
 
 #if defined(MCU_IS_RP2040)
@@ -255,12 +259,7 @@ void setup1() {
 #endif
 
 // arduino loop function on core1 - low priority one with wifi weather update task
-#if defined(MCU_IS_ESP32)
-void Task1code( void * parameter) {
-  for(;;) {
-#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-  void loop1() {
-#endif
+void loop1() {
   // run the core only to do specific not time important operations
   while (!second_core_tasks_queue.empty())
   {
@@ -295,11 +294,13 @@ void Task1code( void * parameter) {
   }
 
   // a delay to slow things down
-  delay(1000);
-#if defined(MCU_IS_ESP32)
-  }
+  // delay(1000);
 }
-#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+void Task1code( void * parameter) {
+  for(;;) 
+    loop1();
 }
 #endif
 
