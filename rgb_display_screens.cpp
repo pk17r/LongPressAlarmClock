@@ -380,16 +380,19 @@ void RGBDisplay::SettingsPage() {
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeSans12pt7b);
-  tft.setCursor(10, 20);
-  tft.print("Settings:");
-  tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 40);
+  tft.print("Settings:");
 
   // Update WiFi Details button
   DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Update Location button
   DrawButton(kLocationSettingsButtonX1, kLocationSettingsButtonY1, kLocationSettingsButtonW, kLocationSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  tft.setFont(&FreeSans12pt7b);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setCursor(10, kScreensaverButtonY1 + kScreensaverButtonH / 2);
+  tft.print("Run:");
 
   // Start Screensaver Button
   DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -439,13 +442,10 @@ void RGBDisplay::WiFiSettingsPage() {
   int16_t w_x0 = 5, s_y0 = title_y0 + 48;
 
   if(wifi_stuff->wifi_connected_) {
-    tft.setFont(&FreeMonoBold9pt7b);
+    tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorOrange);
-    tft.setCursor(w_x0, s_y0 + 40);
+    tft.setCursor(w_x0, s_y0 + 50);
     tft.print("WiFi Connected!");
-    tft.setFont(&FreeMono9pt7b);
-    tft.setCursor(w_x0, s_y0 + 65);
-    tft.print("Auto disconnect "); tft.print(kInactivitySecondsLimit); tft.print(" seconds.");
   }
   else {
     tft.setFont(&FreeMono9pt7b);
@@ -506,7 +506,8 @@ void RGBDisplay::DisplayWeatherInfo() {
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
-    tft.setFont(&FreeMonoBold9pt7b);
+    // tft.setFont(&FreeMonoBold9pt7b);
+    tft.setFont(&FreeSans12pt7b);
     tft.setCursor(200, s_y0 + 40);
     tft.setTextColor(kDisplayColorOrange);
     tft.print(wifi_stuff->city_.c_str());

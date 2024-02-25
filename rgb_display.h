@@ -144,7 +144,7 @@ private:
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize, kCancelButtonY1 = kTftHeight - kCancelButtonSize;
   const int16_t kWiFiSettingsButtonX1 = 200, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonW = 100, kWiFiSettingsButtonH = 25;
   const int16_t kLocationSettingsButtonX1 = 150, kLocationSettingsButtonY1 = 40, kLocationSettingsButtonW = 150, kLocationSettingsButtonH = 25;
-  const int16_t kScreensaverButtonX1 = 120, kScreensaverButtonY1 = 70, kScreensaverButtonW = 180, kScreensaverButtonH = 25;
+  const int16_t kScreensaverButtonX1 = 120, kScreensaverButtonY1 = 150, kScreensaverButtonW = 180, kScreensaverButtonH = 25;
 
   const int16_t kSsidButtonX1 = 100, kSsidButtonY1 = 0, kSsidButtonW = 80, kSsidButtonH = 25;
   const int16_t kPasswdButtonX1 = 200, kPasswdButtonY1 = 0, kPasswdButtonW = 120, kPasswdButtonH = 25;
