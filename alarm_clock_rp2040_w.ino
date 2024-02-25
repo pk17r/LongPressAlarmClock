@@ -67,13 +67,15 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 SPIClass* spi_obj = NULL;
 
+const unsigned long kWatchdogTimeoutMs = 8300;
+
 // setup core0
 void setup() {
 
   #if defined(MCU_IS_RP2040)
     // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    rp2040.wdt_begin(8300);
+    rp2040.wdt_begin(kWatchdogTimeoutMs);
   #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
     setCpuFrequencyMhz(80);
@@ -92,8 +94,13 @@ void setup() {
   digitalWrite(TS_CS_PIN, HIGH);
 
   // initialize spi
-  spi_obj = new SPIClass(HSPI);
-  spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+  #if defined(MCU_IS_RP2040)
+    spi_obj = &SPI;
+    spi_obj->begin();   // Hardware SPI
+  #elif defined(MCU_IS_ESP32)
+    spi_obj = new SPIClass(HSPI);
+    spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+  #endif
 
   // LED Pin
   pinMode(LED_PIN, OUTPUT);
@@ -314,6 +321,17 @@ void Task1code( void * parameter) {
 }
 #endif
 
+void WaitForExecutionOfSecondCoreTask() {
+  #if defined(MCU_IS_ESP32_S2_MINI)
+    // ESP32_S2_MINI is single core MCU
+    loop1();
+  #elif defined(MCU_IS_RP2040) || defined(MCU_IS_ESP32)
+    unsigned long time_start = millis();
+    while (!second_core_tasks_queue.empty() && millis() - time_start <  kWatchdogTimeoutMs - 3000) {
+      delay(10);
+    }
+  #endif
+}
 
 // GLOBAL VARIABLES AND FUNCTIONS
 

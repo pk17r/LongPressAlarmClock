@@ -3,8 +3,8 @@
 
 // SELECT MCU
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
-#define MCU_IS_ESP32_S2_MINI
-// #define MCU_IS_RASPBERRY_PI_PICO_W
+// #define MCU_IS_ESP32_S2_MINI
+#define MCU_IS_RASPBERRY_PI_PICO_W
 
 // SELECT DISPLAY
 #define DISPLAY_IS_ST7789V
@@ -111,7 +111,7 @@
   #define SCL_PIN 5
   #define BUTTON_PIN 14
   #define LED_PIN 15
-  #define LED_BUILTIN 0
+  // #define LED_BUILTIN 0
   #define BUZZER_PIN 11
 
 

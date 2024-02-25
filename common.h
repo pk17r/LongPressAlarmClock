@@ -82,7 +82,7 @@ extern DisplayData new_display_data_, displayed_data_;
 
 
 // extern all global functions
-extern void loop1();
+extern void WaitForExecutionOfSecondCoreTask();
 extern int AvailableRam();
 extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();

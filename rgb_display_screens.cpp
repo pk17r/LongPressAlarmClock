@@ -445,9 +445,7 @@ void RGBDisplay::WiFiSettingsPage() {
     tft.print("WiFi Connected!");
     tft.setFont(&FreeMono9pt7b);
     tft.setCursor(w_x0, s_y0 + 65);
-    tft.print("Auto disconnect after");
-    tft.setCursor(w_x0, s_y0 + 90);
-    tft.print(kInactivitySecondsLimit); tft.print(" inactive seconds.");
+    tft.print("Auto disconnect "); tft.print(kInactivitySecondsLimit); tft.print(" seconds.");
   }
   else {
     tft.setFont(&FreeMono9pt7b);
@@ -1191,7 +1189,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kConnectWiFiButtonX1 && ts_x <= kConnectWiFiButtonX1 + kConnectWiFiButtonW && ts_y >= kConnectWiFiButtonY1 && ts_y <= kConnectWiFiButtonY1 + kConnectWiFiButtonH) {
       DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kConnectWiFi);
-      loop1();
+      WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWiFiSettingsPage;
     }
@@ -1200,7 +1198,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kDisconnectWiFiButtonX1 && ts_x <= kDisconnectWiFiButtonX1 + kDisconnectWiFiButtonW && ts_y >= kDisconnectWiFiButtonY1 && ts_y <= kDisconnectWiFiButtonY1 + kDisconnectWiFiButtonH) {
       DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kDisconnectWiFi);
-      loop1();
+      WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWiFiSettingsPage;
     }
@@ -1242,7 +1240,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kGetWeatherInfoButtonX1 && ts_x <= kGetWeatherInfoButtonX1 + kGetWeatherInfoButtonW && ts_y >= kGetWeatherInfoButtonY1 && ts_y <= kGetWeatherInfoButtonY1 + kGetWeatherInfoButtonH) {
       DrawButton(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kGetWeatherInfo);
-      loop1();
+      WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWeatherSettingsPage;
     }
@@ -1251,7 +1249,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
       DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-      loop1();
+      WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kMainPage;
     }
