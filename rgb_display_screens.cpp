@@ -1419,6 +1419,7 @@ void RGBDisplay::DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &
 }
 
 // make keyboard on screen
+// credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
 void RGBDisplay::MakeKeyboard(const char type[][13], char* label) {
   tft.setTextSize(2);
   // heading label
@@ -1474,6 +1475,7 @@ void RGBDisplay::MakeKeyboard(const char type[][13], char* label) {
 }
 
 // helper function for MakeKeyboard
+// credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
 void RGBDisplay::DrawKeyboardButton(int x, int y, int w, int h) {
   // grey
   tft.fillRoundRect(x - 3, y + 3, w, h, 3, 0x8888); //Button Shading
@@ -1491,6 +1493,7 @@ byte RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
 }
 
 // get keyboard presses on keyboard made by MakeKeyboard
+// credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
 bool RGBDisplay::GetKeyboardPress(char * textBuffer, char* label, char * textReturn) {
   char key = 0;
   static bool shift = true, lastSh = true, special = false, lastSp = false;

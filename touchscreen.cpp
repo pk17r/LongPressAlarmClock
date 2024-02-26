@@ -3,8 +3,11 @@
 #include "rgb_display.h"
 
 Touchscreen::Touchscreen() {
-  touchscreen_object_.begin(*spi_obj);
-  touchscreen_object_.setRotation(1);
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
+  #endif
+  touchscreen_ptr_->begin(*spi_obj);
+  touchscreen_ptr_->setRotation(1);
   touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, display->kTftWidth, display->kTftHeight};
 
   PrintLn("Touchscreen Initialized!");
@@ -12,7 +15,7 @@ Touchscreen::Touchscreen() {
 
 bool Touchscreen::IsTouched() {
   // irq touch is super fast
-  if(!touchscreen_object_.tirqTouched())
+  if(!touchscreen_ptr_->tirqTouched())
     return false;
   // when irq touch is triggered, it takes a few hundred milliseconds to turn off
   // during this time we will poll touch screen pressure using SPI to know if touchscreen is pressed or not
@@ -34,7 +37,7 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
     last_polled_millis_ = millis();
 
     // get touch point from XPT2046
-    TS_Point touch = touchscreen_object_.getPoint();
+    TS_Point touch = touchscreen_ptr_->getPoint();
 
     if(touch.z < 100) {
       last_touch_Pixel_ = TouchPixel{-1, -1, false};

@@ -35,6 +35,14 @@
   - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
 
 
+- Datasheets:
+  - ESP32 Lolin S2 Mini Single Core MCU Board https://www.wemos.cc/en/latest/s2/s2_mini.html
+  - ESP32 Lolin S2 Mini Pinouts https://www.studiopieters.nl/wp-content/uploads/2022/08/WEMOS-ESP32-S2-MINI.png
+  - 2.8" Touchscreen ST7789V driver https://www.aliexpress.us/item/3256805747165796.html
+  - 2.8" Touchscreen ILI9341 driver http://www.lcdwiki.com/2.8inch_SPI_Module_ILI9341_SKU:MSP2807
+
+
+
   Prashant Kumar
 
 
@@ -103,8 +111,10 @@ void setup() {
   // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
-  pinMode(TS_CS_PIN, OUTPUT);
-  digitalWrite(TS_CS_PIN, HIGH);
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    pinMode(TS_CS_PIN, OUTPUT);
+    digitalWrite(TS_CS_PIN, HIGH);
+  #endif
 
   // initialize spi
   #if defined(MCU_IS_RP2040)
@@ -112,7 +122,11 @@ void setup() {
     spi_obj->begin();   // Hardware SPI
   #elif defined(MCU_IS_ESP32)
     spi_obj = new SPIClass(HSPI);
-    spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+    #if defined(TOUCHSCREEN_IS_XPT2046)
+      spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+    #else
+      spi_obj->begin(TFT_CLK, -1, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+    #endif
   #endif
 
   // LED Pin
@@ -142,7 +156,9 @@ void setup() {
   display = new RGBDisplay();
   // setup display
   display->Setup();
-  ts = new Touchscreen();
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    ts = new Touchscreen();
+  #endif
 
   // if time is lost because of power failure
   if(rtc->year() < 2024) {
@@ -166,7 +182,7 @@ void setup() {
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
   // check if button pressed or touchscreen touched
-  if(push_button->checkButtonStatus() != 0 || ts->IsTouched()) {
+  if(push_button->checkButtonStatus() != 0 || (ts != NULL && ts->IsTouched())) {
     // show instant response by turing up brightness
     display->SetMaxBrightness();
 
@@ -178,7 +194,7 @@ void loop() {
     { // if on alarm page, then take alarm set page user inputs
       display->SetAlarmScreen(true);
     }
-    else if(current_page != kAlarmSetPage && inactivity_seconds >= 1)
+    else if(ts != NULL && current_page != kAlarmSetPage && inactivity_seconds >= 1)
     { // if not on alarm page and user clicked somewhere, get touch input
       ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
       if(userTouchRegion != kNoPageSelected)

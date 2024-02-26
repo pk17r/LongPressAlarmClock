@@ -13,7 +13,7 @@
 // #define DISPLAY_IS_ILI9488
 
 // SELECT IF TOUCHSCREEN IS PRESENT
-#define TOUCHSCREEN_IS_XPT2046
+// #define TOUCHSCREEN_IS_XPT2046
 
 // SELECT IF WIFI IS USED
 #define WIFI_IS_USED
@@ -83,6 +83,7 @@
   #define BUZZER_PIN 4
 
 
+
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
 
 
@@ -111,7 +112,7 @@
   #define SCL_PIN 5
   #define BUTTON_PIN 14
   #define LED_PIN 15
-  // #define LED_BUILTIN 0    // pre-defined
+  // #define LED_BUILTIN 25    // pre-defined
   #define BUZZER_PIN 11
 
 
