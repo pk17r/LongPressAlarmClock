@@ -217,29 +217,52 @@ void loop() {
         SetPage(kAlarmSetPage);
       else if(highlight == kSettingsPageWiFi)
         SetPage(kWiFiSettingsPage);
-      else if(highlight == kSettingsPageLocation)
+      else if(highlight == kSettingsPageWeather)
         SetPage(kWeatherSettingsPage);
       else if(highlight == kSettingsPageScreensaver)
         SetPage(kScreensaverPage);
       else if(highlight == kSettingsPageCancel)
         SetPage(kMainPage);
       else if(highlight == kWiFiSettingsPageConnect) {
-        display->InstantHighlightResponse(kWiFiSettingsPageConnect);
+        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
         second_core_tasks_queue.push(kConnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiSettingsPage);
       }
       else if(highlight == kWiFiSettingsPageDisconnect) {
-        display->InstantHighlightResponse(kWiFiSettingsPageDisconnect);
+        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
         second_core_tasks_queue.push(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiSettingsPage);
       }
       else if(highlight == kWiFiSettingsPageCancel)
         SetPage(kSettingsPage);
+      else if(highlight == kSettingsPageWeather)
+        SetPage(kWeatherSettingsPage);
+      else if(highlight == kWeatherSettingsPageUnits) {
+        wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
+        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
+        wifi_stuff->SaveWeatherUnits();
+        wifi_stuff->got_weather_info_ = false;
+        SetPage(kWeatherSettingsPage);
+      }
+      else if(highlight == kWeatherSettingsPageFetch) {
+        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
+        second_core_tasks_queue.push(kGetWeatherInfo);
+        WaitForExecutionOfSecondCoreTask();
+        SetPage(kWeatherSettingsPage);
+      }
+      else if(highlight == kWeatherSettingsPageUpdateTime) {
+        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
+        second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+        WaitForExecutionOfSecondCoreTask();
+        SetPage(kMainPage);
+      }
+      else if(highlight == kWeatherSettingsPageCancel)
+        SetPage(kSettingsPage);
 
       if(ts == NULL)
-        display->InstantHighlightResponse(kCursorNoSelection);
+        display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
     }
     else if(inc_button->buttonActiveDebounced()) {
       MoveCursor(true);
@@ -735,8 +758,7 @@ void SetPage(ScreenPage page) {
       break;
     case kAlarmSetPage:
       current_page = kAlarmSetPage;     // new page needs to be set before any action
-      if(ts == NULL)
-        highlight = kAlarmSetPageHour;
+      highlight = kAlarmSetPageHour;
       // set variables for alarm set screen
       alarm_clock->var_1_ = alarm_clock->alarm_hr_;
       alarm_clock->var_2_ = alarm_clock->alarm_min_;
@@ -751,13 +773,13 @@ void SetPage(ScreenPage page) {
       break;
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
-      if(ts == NULL)
-        highlight = kSettingsPageWiFi;
+      highlight = kSettingsPageWiFi;
       display->SettingsPage();
       display->SetMaxBrightness();
       break;
     case kWiFiSettingsPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
+      highlight = kWiFiSettingsPageConnect;
       display->WiFiSettingsPage();
       display->SetMaxBrightness();
       break;
@@ -813,6 +835,7 @@ void SetPage(ScreenPage page) {
       break;
     case kWeatherSettingsPage:
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
+      highlight = kWeatherSettingsPageUnits;
       display->WeatherSettingsPage();
       display->SetMaxBrightness();
       break;
@@ -859,10 +882,11 @@ void SetPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
+  display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
 }
 
 void MoveCursor(bool increment) {
-  Serial.print("MoveCursor top highlight "); Serial.println(highlight);
+  Serial.print("MoveCursor top current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   if(current_page == kMainPage) {
     if(increment) {
       if(highlight == kMainPageSetAlarm)
@@ -923,6 +947,20 @@ void MoveCursor(bool increment) {
         highlight--;
     }
   }
-  Serial.print("MoveCursor bottom highlight "); Serial.println(highlight);
-  display->InstantHighlightResponse(kCursorNoSelection);
+  else if(current_page == kWeatherSettingsPage) {
+    if(increment) {
+      if(highlight == kWeatherSettingsPageCancel)
+        highlight = kWeatherSettingsPageUnits;
+      else
+        highlight++;
+    }
+    else {
+      if(highlight == kWeatherSettingsPageUnits)
+        highlight = kWeatherSettingsPageCancel;
+      else
+        highlight--;
+    }
+  }
+  Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
+  display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
 }

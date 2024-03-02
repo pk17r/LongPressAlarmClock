@@ -69,12 +69,16 @@ enum Cursor {
   kAlarmSetPageSet,
   kAlarmSetPageX,
   kSettingsPageWiFi,
-  kSettingsPageLocation,
+  kSettingsPageWeather,
   kSettingsPageScreensaver,
   kSettingsPageCancel,
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
   kWiFiSettingsPageCancel,
+  kWeatherSettingsPageUnits,
+  kWeatherSettingsPageFetch,
+  kWeatherSettingsPageUpdateTime,
+  kWeatherSettingsPageCancel,
   kCursorMaxValue
   };
 
@@ -83,7 +87,7 @@ extern Cursor highlight;
 
 // postfix form ++ -- operator overloads for Cursor enum variables
 inline Cursor operator++ (Cursor& highlight_location, int) {
-  if(static_cast<int>(highlight_location) < static_cast<int>(kCursorMaxValue) - 2)
+  if(static_cast<int>(highlight_location) < static_cast<int>(kCursorMaxValue) - 1)
     highlight_location = static_cast<Cursor>(static_cast<int>(highlight_location) + 1);
   else
     highlight_location = kCursorNoSelection;
