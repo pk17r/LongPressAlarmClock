@@ -8,6 +8,7 @@
 #include <string>
 #include <queue>          // std::queue
 #include "SPI.h"
+#include <elapsedMillis.h>
 
 // forward decleration of classes
 class RTC;
@@ -33,7 +34,7 @@ extern PushButtonTaps* dec_button;
 extern Touchscreen* ts;
 
 // counter to note user inactivity seconds
-extern uint8_t inactivity_seconds;
+extern elapsedMillis inactivity_millis;
 
 // flag for display pages
 enum ScreenPage {
@@ -59,7 +60,7 @@ extern ScreenPage current_page;
 enum Cursor {
   kCursorNoSelection = 0,
   kMainPageSettingsWheel,
-  kMainPageAlarm,
+  kMainPageSetAlarm,
   kAlarmSetPageHour,
   kAlarmSetPageMinute,
   kAlarmSetPageAmPm,
@@ -68,8 +69,12 @@ enum Cursor {
   kAlarmSetPageSet,
   kAlarmSetPageX,
   kSettingsPageWiFi,
-  kSettingsPageWeather,
+  kSettingsPageLocation,
   kSettingsPageScreensaver,
+  kSettingsPageCancel,
+  kWiFiSettingsPageConnect,
+  kWiFiSettingsPageDisconnect,
+  kWiFiSettingsPageCancel,
   kCursorMaxValue
   };
 

@@ -2,7 +2,10 @@
 #define GENERAL_CONSTANTS_H
 
 // max user inactivity seconds before turning down brightness or turning On screensaver
-const uint8_t kInactivitySecondsLimit = 60;
+const uint32_t kInactivityMillisLimit = 60000;
+
+// user input delay
+const uint32_t kUserInputDelayMs = 150;
 
 // char array sizes for time, date and alarm texts
 const int kHHMM_ArraySize = 6, kSS_ArraySize = 4, kDateArraySize = 13, kAlarmArraySize = 10;

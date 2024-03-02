@@ -186,25 +186,13 @@ void setup() {
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
   // check if button pressed or touchscreen touched
-  if(push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched())) {
+  if((inactivity_millis >= kUserInputDelayMs) && (push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched()))) {
     // show instant response by turing up brightness
     display->SetMaxBrightness();
 
-    if(push_button->buttonActiveDebounced())
-      PrintLn("push_button");
-    if(inc_button->buttonActiveDebounced()) {
-      MoveCursor(true);
-      display->InstantHighlightResponse();
-      PrintLn("inc_button");
-      delay(100);
-    }
-    if(dec_button->buttonActiveDebounced()) {
-      MoveCursor(false);
-      display->InstantHighlightResponse();
-      PrintLn("dec_button");
-      delay(100);
-    }
+    inactivity_millis = 0;
 
+    // instant page change action
     if(current_page == kScreensaverPage)
     { // turn off screensaver if on
       SetPage(kMainPage);
@@ -213,13 +201,54 @@ void loop() {
     { // if on alarm page, then take alarm set page user inputs
       display->SetAlarmScreen(true);
     }
-    else if(ts != NULL && current_page != kAlarmSetPage && inactivity_seconds >= 1)
+    else if(ts != NULL && current_page != kAlarmSetPage && inactivity_millis >= kUserInputDelayMs)
     { // if not on alarm page and user clicked somewhere, get touch input
       ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
       if(userTouchRegion != kNoPageSelected)
         SetPage(userTouchRegion);
     }
-    inactivity_seconds = 0;
+
+    // button click action
+    if(push_button->buttonActiveDebounced()) {
+      PrintLn("push_button");
+      if(highlight == kMainPageSettingsWheel)
+        SetPage(kSettingsPage);
+      else if(highlight == kMainPageSetAlarm)
+        SetPage(kAlarmSetPage);
+      else if(highlight == kSettingsPageWiFi)
+        SetPage(kWiFiSettingsPage);
+      else if(highlight == kSettingsPageLocation)
+        SetPage(kWeatherSettingsPage);
+      else if(highlight == kSettingsPageScreensaver)
+        SetPage(kScreensaverPage);
+      else if(highlight == kSettingsPageCancel)
+        SetPage(kMainPage);
+      else if(highlight == kWiFiSettingsPageConnect) {
+        display->InstantHighlightResponse(kWiFiSettingsPageConnect);
+        second_core_tasks_queue.push(kConnectWiFi);
+        WaitForExecutionOfSecondCoreTask();
+        SetPage(kWiFiSettingsPage);
+      }
+      else if(highlight == kWiFiSettingsPageDisconnect) {
+        display->InstantHighlightResponse(kWiFiSettingsPageDisconnect);
+        second_core_tasks_queue.push(kDisconnectWiFi);
+        WaitForExecutionOfSecondCoreTask();
+        SetPage(kWiFiSettingsPage);
+      }
+      else if(highlight == kWiFiSettingsPageCancel)
+        SetPage(kSettingsPage);
+
+      if(ts == NULL)
+        display->InstantHighlightResponse(kCursorNoSelection);
+    }
+    else if(inc_button->buttonActiveDebounced()) {
+      MoveCursor(true);
+      PrintLn("inc_button");
+    }
+    else if(dec_button->buttonActiveDebounced()) {
+      MoveCursor(false);
+      PrintLn("dec_button");
+    }
   }
 
   // if user presses button, show instant response by turning On LED
@@ -245,7 +274,7 @@ void loop() {
         // returned from Alarm Triggered Screen and Good Morning Screen
         // set main page
         SetPage(kMainPage);
-        inactivity_seconds = 0;
+        inactivity_millis = 0;
       }
 
       // if screensaver is On, then update time on it
@@ -254,7 +283,7 @@ void loop() {
         // every new hour, show main page
         if(rtc->minute() == 0) {
           SetPage(kMainPage);
-          inactivity_seconds = 0;
+          inactivity_millis = 0;
         }
       }
 
@@ -287,15 +316,12 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_seconds < kInactivitySecondsLimit) {
-      inactivity_seconds++;
-      if(inactivity_seconds == kInactivitySecondsLimit) {
-        // set display brightness based on time
-        display->CheckTimeAndSetBrightness();
-        // turn screen saver On
-        if(current_page != kScreensaverPage)
-          SetPage(kScreensaverPage);
-      }
+    if(inactivity_millis > kInactivityMillisLimit) {
+      // set display brightness based on time
+      display->CheckTimeAndSetBrightness();
+      // turn screen saver On
+      if(current_page != kScreensaverPage)
+        SetPage(kScreensaverPage);
     }
 
     // watchdog to reboot system if it gets stuck for whatever reason
@@ -358,7 +384,7 @@ void loop1() {
     second_core_tasks_queue.pop();
   }
   // turn off WiFi if there are no more requests and User is not using device
-  if(inactivity_seconds >= kInactivitySecondsLimit && wifi_stuff->wifi_connected_)
+  if(wifi_stuff->wifi_connected_ && inactivity_millis >= kInactivityMillisLimit)
     wifi_stuff->TurnWiFiOff();
 }
 
@@ -384,7 +410,7 @@ void WaitForExecutionOfSecondCoreTask() {
 // GLOBAL VARIABLES AND FUNCTIONS
 
 // counter to note user inactivity seconds
-uint8_t inactivity_seconds = 0;
+elapsedMillis inactivity_millis = 0;
 
 // Display Visible Data Structure variables
 DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_data_ { "", "", "", "", true, false, true };
@@ -441,9 +467,9 @@ void SerialTimeStampPrefix() {
       Serial.print(kPmLabel);
   }
   Serial.print(" :i");
-  if(inactivity_seconds < 100) Serial.print(kCharZero);
-  if(inactivity_seconds < 10) Serial.print(kCharZero);
-  Serial.print(inactivity_seconds);
+  // if(inactivity_millis < 100) Serial.print(kCharZero);
+  // if(inactivity_millis < 10) Serial.print(kCharZero);
+  Serial.print(inactivity_millis);
   Serial.print(": RAM "); Serial.print(AvailableRam());
   Serial.print(')');
   Serial.print(kCharSpace);
@@ -598,7 +624,7 @@ void ProcessSerialInput() {
         alarm_clock->BuzzAlarmFn();
         // set main page back
         SetPage(kMainPage);
-        inactivity_seconds = 0;
+        inactivity_millis = 0;
       }
       break;
     case 'y':   // show alarm triggered screen
@@ -615,7 +641,7 @@ void ProcessSerialInput() {
         delay(1000);
         // set main page back
         SetPage(kMainPage);
-        inactivity_seconds = 0;
+        inactivity_millis = 0;
       }
       break;
     case 'w':   // get today's weather info
@@ -698,15 +724,19 @@ void SetPage(ScreenPage page) {
       if(current_page == kScreensaverPage)
         display->ScreensaverControl(false);
       current_page = kMainPage;         // new page needs to be set before any action
+      highlight = kCursorNoSelection;
       display->redraw_display_ = true;
       display->DisplayTimeUpdate();
       break;
     case kScreensaverPage:
       current_page = kScreensaverPage;      // new page needs to be set before any action
       display->ScreensaverControl(true);
+      highlight = kCursorNoSelection;
       break;
     case kAlarmSetPage:
       current_page = kAlarmSetPage;     // new page needs to be set before any action
+      if(ts == NULL)
+        highlight = kAlarmSetPageHour;
       // set variables for alarm set screen
       alarm_clock->var_1_ = alarm_clock->alarm_hr_;
       alarm_clock->var_2_ = alarm_clock->alarm_min_;
@@ -721,6 +751,8 @@ void SetPage(ScreenPage page) {
       break;
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
+      if(ts == NULL)
+        highlight = kSettingsPageWiFi;
       display->SettingsPage();
       display->SetMaxBrightness();
       break;
@@ -830,20 +862,31 @@ void SetPage(ScreenPage page) {
 }
 
 void MoveCursor(bool increment) {
+  Serial.print("MoveCursor top highlight "); Serial.println(highlight);
   if(current_page == kMainPage) {
     if(increment) {
-      if(highlight == kCursorNoSelection)
-        highlight = kMainPageSettingsWheel;
-      else if(highlight == kMainPageAlarm)
+      if(highlight == kMainPageSetAlarm)
         highlight = kCursorNoSelection;
       else
         highlight++;
     }
     else {
       if(highlight == kCursorNoSelection)
-        highlight = kMainPageAlarm;
-      else if(highlight == kMainPageSettingsWheel)
-        highlight = kCursorNoSelection;
+        highlight = kMainPageSetAlarm;
+      else
+        highlight--;
+    }
+  }
+  else if(current_page == kSettingsPage) {
+    if(increment) {
+      if(highlight == kSettingsPageCancel)
+        highlight = kSettingsPageWiFi;
+      else
+        highlight++;
+    }
+    else {
+      if(highlight == kSettingsPageWiFi)
+        highlight = kSettingsPageCancel;
       else
         highlight--;
     }
@@ -866,22 +909,20 @@ void MoveCursor(bool increment) {
         highlight--;
     }
   }
-  else if(current_page == kSettingsPage) {
+  else if(current_page == kWiFiSettingsPage) {
     if(increment) {
-      if(highlight == kCursorNoSelection)
-        highlight = kSettingsPageWiFi;
-      else if(highlight == kSettingsPageScreensaver)
-        highlight = kCursorNoSelection;
+      if(highlight == kWiFiSettingsPageCancel)
+        highlight = kWiFiSettingsPageConnect;
       else
         highlight++;
     }
     else {
-      if(highlight == kCursorNoSelection)
-        highlight = kSettingsPageScreensaver;
-      else if(highlight == kSettingsPageWiFi)
-        highlight = kCursorNoSelection;
+      if(highlight == kWiFiSettingsPageConnect)
+        highlight = kWiFiSettingsPageCancel;
       else
         highlight--;
     }
   }
+  Serial.print("MoveCursor bottom highlight "); Serial.println(highlight);
+  display->InstantHighlightResponse(kCursorNoSelection);
 }

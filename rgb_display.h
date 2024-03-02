@@ -23,7 +23,6 @@
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeMono9pt7b.h>
 #include <SPI.h>
-#include <elapsedMillis.h>
 #if defined(MCU_IS_ESP32)
   #include <pgmspace.h>
 #else
@@ -48,7 +47,8 @@ public:
   void WiFiSettingsPage();
   void WeatherSettingsPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
-  void InstantHighlightResponse();
+  void InstantHighlightResponse(Cursor color_button);
+  void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
 
   // functions
   void Setup();

@@ -386,7 +386,7 @@ void RGBDisplay::SettingsPage() {
   // Update WiFi Details button
   DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Update Location button
+  // Update Weather and Location button
   DrawButton(kLocationSettingsButtonX1, kLocationSettingsButtonY1, kLocationSettingsButtonW, kLocationSettingsButtonH, locationStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   tft.setFont(&FreeSans12pt7b);
@@ -1041,11 +1041,11 @@ void RGBDisplay::DisplayTimeUpdate() {
     strcpy(displayed_data_.date_str, new_display_data_.date_str);
   }
 
-  // settings wheel cursor highlight
-  if(highlight == kMainPageSettingsWheel)
-    tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
-  else
-    tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  // // settings wheel cursor highlight
+  // if(highlight == kMainPageSettingsWheel)
+  //   tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  // else
+  //   tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
 
   // alarm string center aligned
   if (strcmp(new_display_data_.alarm_str, displayed_data_.alarm_str) != 0 || new_display_data_.alarm_ON != displayed_data_.alarm_ON || redraw_display_) {
@@ -1122,28 +1122,54 @@ void RGBDisplay::DisplayTimeUpdate() {
     displayed_data_.alarm_ON = new_display_data_.alarm_ON;
   }
 
-  // alarm cursor highlight
-  if(highlight == kMainPageAlarm)
-    tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
-  else
-    tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  // // alarm cursor highlight
+  // if(highlight == kMainPageSetAlarm)
+  //   tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+  // else
+  //   tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
 
   redraw_display_ = false;
 }
 
-void RGBDisplay::InstantHighlightResponse() {
+void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap) {
+  if(turnOn)
+    tft.drawRoundRect(x - gap, y - gap, w + 2 * gap, h + 2 * gap, kRadiusButtonRoundRect, kDisplayColorCyan);
+  else
+    tft.drawRoundRect(x - gap, y - gap, w + 2 * gap, h + 2 * gap, kRadiusButtonRoundRect, kDisplayBackroundColor);
+}
+
+void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
   if(current_page == kMainPage) {
     // settings wheel cursor highlight
-    if(highlight == kMainPageSettingsWheel)
-      tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
-    else
-      tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    ButtonHighlight(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, (highlight == kMainPageSettingsWheel), 5);
 
     // alarm cursor highlight
-    if(highlight == kMainPageAlarm)
-      tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
-    else
-      tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    ButtonHighlight(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, (highlight == kMainPageSetAlarm), 0);
+  }
+  else if(current_page == kSettingsPage) {
+    // Update WiFi Details button
+    ButtonHighlight(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, (highlight == kSettingsPageWiFi), 5);
+
+    // Update Weather and Location button
+    ButtonHighlight(kLocationSettingsButtonX1, kLocationSettingsButtonY1, kLocationSettingsButtonW, kLocationSettingsButtonH, (highlight == kSettingsPageLocation), 5);
+
+    // Start Screensaver Button
+    ButtonHighlight(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, (highlight == kSettingsPageScreensaver), 5);
+
+    // Cancel button
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);
+  }
+  else if(current_page == kWiFiSettingsPage) {
+    // Connect To WiFi
+    ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (highlight == kWiFiSettingsPageConnect), 5);
+    if(color_button == kWiFiSettingsPageConnect) DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+    // Disconnect WiFi button
+    ButtonHighlight(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, (highlight == kWiFiSettingsPageDisconnect), 5);
+    if(color_button == kWiFiSettingsPageDisconnect) DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+    // Cancel button
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWiFiSettingsPageCancel), 5);
   }
 }
 

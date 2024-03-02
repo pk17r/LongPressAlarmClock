@@ -73,8 +73,10 @@ void RGBDisplay::Setup() {
 
 // set display brightness function
 void RGBDisplay::SetBrightness(int brightness) {
-  analogWrite(TFT_BL, brightness);
-  PrintLn("Display Brightness set to ", brightness);
+  if(current_brightness_ != brightness) {
+    analogWrite(TFT_BL, brightness);
+    PrintLn("Display Brightness set to ", brightness);
+  }
   current_brightness_ = brightness;
   show_colored_edge_screensaver_ = (brightness >= kEveningBrightness);
 }
