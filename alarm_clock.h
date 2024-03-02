@@ -39,8 +39,8 @@ public:
   // Set Screen variables
   uint8_t var_1_ = alarm_hr_;
   uint8_t var_2_ = alarm_min_;
-  bool var_3_AM_PM_ = alarm_is_AM_;
-  bool var_4_ON_OFF_ = alarm_ON_;
+  bool var_3_is_AM_ = alarm_is_AM_;
+  bool var_4_ON_ = alarm_ON_;
 
 
 // PRIVATE FUNCTIONS AND VARIABLES / CONSTANTS

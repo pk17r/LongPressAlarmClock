@@ -187,6 +187,7 @@ void setup() {
 void loop() {
   // check if button pressed or touchscreen touched
   if((inactivity_millis >= kUserInputDelayMs) && (push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched()))) {
+    bool ts_input = (ts != NULL && ts->IsTouched());
     // show instant response by turing up brightness
     display->SetMaxBrightness();
 
@@ -197,11 +198,11 @@ void loop() {
     { // turn off screensaver if on
       SetPage(kMainPage);
     }
-    else if(current_page == kAlarmSetPage)
+    else if(ts_input && current_page == kAlarmSetPage)
     { // if on alarm page, then take alarm set page user inputs
-      display->SetAlarmScreen(true);
+      display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
     }
-    else if(ts != NULL && current_page != kAlarmSetPage && inactivity_millis >= kUserInputDelayMs)
+    else if(ts_input && current_page != kAlarmSetPage && inactivity_millis >= kUserInputDelayMs)
     { // if not on alarm page and user clicked somewhere, get touch input
       ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
       if(userTouchRegion != kNoPageSelected)
@@ -210,67 +211,77 @@ void loop() {
 
     // button click action
     if(push_button->buttonActiveDebounced()) {
-      PrintLn("push_button");
-      if(highlight == kMainPageSettingsWheel)
-        SetPage(kSettingsPage);
-      else if(highlight == kMainPageSetAlarm)
-        SetPage(kAlarmSetPage);
-      else if(highlight == kSettingsPageWiFi)
-        SetPage(kWiFiSettingsPage);
-      else if(highlight == kSettingsPageWeather)
-        SetPage(kWeatherSettingsPage);
-      else if(highlight == kSettingsPageScreensaver)
-        SetPage(kScreensaverPage);
-      else if(highlight == kSettingsPageCancel)
-        SetPage(kMainPage);
-      else if(highlight == kWiFiSettingsPageConnect) {
-        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
-        second_core_tasks_queue.push(kConnectWiFi);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kWiFiSettingsPage);
+      // PrintLn("push_button");
+      if(current_page == kAlarmSetPage)
+        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
+      else {
+        if(highlight == kMainPageSettingsWheel)
+          SetPage(kSettingsPage);
+        else if(highlight == kMainPageSetAlarm)
+          SetPage(kAlarmSetPage);
+        else if(highlight == kSettingsPageWiFi)
+          SetPage(kWiFiSettingsPage);
+        else if(highlight == kSettingsPageWeather)
+          SetPage(kWeatherSettingsPage);
+        else if(highlight == kSettingsPageScreensaver)
+          SetPage(kScreensaverPage);
+        else if(highlight == kSettingsPageCancel)
+          SetPage(kMainPage);
+        else if(highlight == kWiFiSettingsPageConnect) {
+          display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
+          second_core_tasks_queue.push(kConnectWiFi);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kWiFiSettingsPage);
+        }
+        else if(highlight == kWiFiSettingsPageDisconnect) {
+          display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
+          second_core_tasks_queue.push(kDisconnectWiFi);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kWiFiSettingsPage);
+        }
+        else if(highlight == kWiFiSettingsPageCancel)
+          SetPage(kSettingsPage);
+        else if(highlight == kSettingsPageWeather)
+          SetPage(kWeatherSettingsPage);
+        else if(highlight == kWeatherSettingsPageUnits) {
+          wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
+          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
+          wifi_stuff->SaveWeatherUnits();
+          wifi_stuff->got_weather_info_ = false;
+          SetPage(kWeatherSettingsPage);
+        }
+        else if(highlight == kWeatherSettingsPageFetch) {
+          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
+          second_core_tasks_queue.push(kGetWeatherInfo);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kWeatherSettingsPage);
+        }
+        else if(highlight == kWeatherSettingsPageUpdateTime) {
+          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
+          second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kMainPage);
+        }
+        else if(highlight == kWeatherSettingsPageCancel)
+          SetPage(kSettingsPage);
       }
-      else if(highlight == kWiFiSettingsPageDisconnect) {
-        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
-        second_core_tasks_queue.push(kDisconnectWiFi);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kWiFiSettingsPage);
-      }
-      else if(highlight == kWiFiSettingsPageCancel)
-        SetPage(kSettingsPage);
-      else if(highlight == kSettingsPageWeather)
-        SetPage(kWeatherSettingsPage);
-      else if(highlight == kWeatherSettingsPageUnits) {
-        wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
-        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
-        wifi_stuff->SaveWeatherUnits();
-        wifi_stuff->got_weather_info_ = false;
-        SetPage(kWeatherSettingsPage);
-      }
-      else if(highlight == kWeatherSettingsPageFetch) {
-        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
-        second_core_tasks_queue.push(kGetWeatherInfo);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kWeatherSettingsPage);
-      }
-      else if(highlight == kWeatherSettingsPageUpdateTime) {
-        display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
-        second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kMainPage);
-      }
-      else if(highlight == kWeatherSettingsPageCancel)
-        SetPage(kSettingsPage);
 
-      if(ts == NULL)
-        display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+      // if(!ts_input)
+      //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
     }
     else if(inc_button->buttonActiveDebounced()) {
-      MoveCursor(true);
       PrintLn("inc_button");
+      if(current_page != kAlarmSetPage)
+        MoveCursor(false);
+      else
+        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ true, /* dec_button_pressed */ false, /* push_button_pressed */ false);
     }
     else if(dec_button->buttonActiveDebounced()) {
-      MoveCursor(false);
       PrintLn("dec_button");
+      if(current_page != kAlarmSetPage)
+        MoveCursor(true);
+      else
+        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ true, /* push_button_pressed */ false);
     }
   }
 
@@ -312,7 +323,7 @@ void loop() {
 
       #if defined(WIFI_IS_USED)
         // try to get weather info 5 mins before alarm time and every 60 minutes
-        if((wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
+        if((inactivity_millis > kInactivityMillisLimit) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
           // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
           second_core_tasks_queue.push(kGetWeatherInfo);
           PrintLn("Get Weather Info!");
@@ -762,9 +773,9 @@ void SetPage(ScreenPage page) {
       // set variables for alarm set screen
       alarm_clock->var_1_ = alarm_clock->alarm_hr_;
       alarm_clock->var_2_ = alarm_clock->alarm_min_;
-      alarm_clock->var_3_AM_PM_ = alarm_clock->alarm_is_AM_;
-      alarm_clock->var_4_ON_OFF_ = alarm_clock->alarm_ON_;
-      display->SetAlarmScreen(false);
+      alarm_clock->var_3_is_AM_ = alarm_clock->alarm_is_AM_;
+      alarm_clock->var_4_ON_ = alarm_clock->alarm_ON_;
+      display->SetAlarmScreen(/* process_user_input */ false, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
       break;
     case kAlarmTriggeredPage:
       current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
@@ -886,7 +897,7 @@ void SetPage(ScreenPage page) {
 }
 
 void MoveCursor(bool increment) {
-  Serial.print("MoveCursor top current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
+  // Serial.print("MoveCursor top current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   if(current_page == kMainPage) {
     if(increment) {
       if(highlight == kMainPageSetAlarm)
@@ -919,14 +930,14 @@ void MoveCursor(bool increment) {
     if(increment) {
       if(highlight == kCursorNoSelection)
         highlight = kAlarmSetPageHour;
-      else if(highlight == kAlarmSetPageX)
+      else if(highlight == kAlarmSetPageCancel)
         highlight = kCursorNoSelection;
       else
         highlight++;
     }
     else {
       if(highlight == kCursorNoSelection)
-        highlight = kAlarmSetPageX;
+        highlight = kAlarmSetPageCancel;
       else if(highlight == kAlarmSetPageHour)
         highlight = kCursorNoSelection;
       else
@@ -961,6 +972,6 @@ void MoveCursor(bool increment) {
         highlight--;
     }
   }
-  Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
+  // Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
 }

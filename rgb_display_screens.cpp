@@ -76,7 +76,7 @@ void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w
   // Serial.print(" fastDrawBitmapTime "); Serial.print(charSpace); Serial.println(timer1);
 }
 
-void RGBDisplay::SetAlarmScreen(bool processUserInput) {
+void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed) {
 
   int16_t gap_x = kTftWidth / 11;
   int16_t gap_y = kTftHeight / 9;
@@ -124,7 +124,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
       tft.print('0');
     tft.print(alarm_clock->var_2_);
     tft.setCursor(amPm_x, time_y);
-    if(alarm_clock->var_3_AM_PM_)
+    if(alarm_clock->var_3_is_AM_)
       tft.print(kAmLabel);
     else
       tft.print(kPmLabel);
@@ -141,19 +141,19 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
     DrawTriangleButton(amPm_x, decB_y, gap_x, gap_y, false, borderColor, offFill);
 
     // ON button
-    DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
+    DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
     // OFF button
-    DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
+    DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_);
     // Set button
     DrawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, kDisplayColorOrange, offFill, true);
     // Cancel button
     DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorOrange, offFill, true);
 
+    // high light text / buttons
+    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageHour), 10);
   }
   else {
     // processUserInput
-
-    int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
 
     // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
     //    0 = no button clicked
@@ -169,37 +169,108 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
     //    10 = Cancel button
     int16_t userButtonClick = 0;
 
-    // find if user clicked a button
-    if(ts_x < amPm_x + gap_x && ts_y > incB_y) {
-      // check for increase or decrease button press
-      // font color inside
-      if(ts_y < incB_y + gap_y) {
-        // increase button
-        if(ts_x > hr_x && ts_x < hr_x + gap_x)
-          userButtonClick = 1;
-        else if(ts_x > min_x && ts_x < min_x + gap_x)
-          userButtonClick = 3;
-        else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
-          userButtonClick = 5;
+    if(!inc_button_pressed && !dec_button_pressed && !push_button_pressed) {
+      // touch screen input
+      int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
+
+      // find if user clicked a button
+      if(ts_x < amPm_x + gap_x && ts_y > incB_y) {
+        // check for increase or decrease button press
+        // font color inside
+        if(ts_y < incB_y + gap_y) {
+          // increase button
+          if(ts_x > hr_x && ts_x < hr_x + gap_x)
+            userButtonClick = 1;
+          else if(ts_x > min_x && ts_x < min_x + gap_x)
+            userButtonClick = 3;
+          else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+            userButtonClick = 5;
+        }
+        else if(ts_y > decB_y && ts_y < decB_y + gap_y) {
+          // decrease button
+          if(ts_x > hr_x && ts_x < hr_x + gap_x)
+            userButtonClick = 2;
+          else if(ts_x > min_x && ts_x < min_x + gap_x)
+            userButtonClick = 4;
+          else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+            userButtonClick = 6;
+        }
       }
-      else if(ts_y > decB_y && ts_y < decB_y + gap_y) {
-        // decrease button
-        if(ts_x > hr_x && ts_x < hr_x + gap_x)
-          userButtonClick = 2;
-        else if(ts_x > min_x && ts_x < min_x + gap_x)
-          userButtonClick = 4;
-        else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
-          userButtonClick = 6;
+      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) 
+        userButtonClick = 7;
+      else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+        userButtonClick = 8;
+      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h)
+        userButtonClick = 9;
+      else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
+        userButtonClick = 10;
+    }
+    else {
+      // button input
+      // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
+      //    0 = no button clicked
+      //    1 = Hr Inc button
+      //    2 = Hr Dec button
+      //    3 = Min Inc button
+      //    4 = Min Dec button
+      //    5 = AmPm Inc button
+      //    6 = AmPm Dec button
+      //    7 = Alarm On button
+      //    8 = Alarm Off button
+      //    9 = Set button
+      //    10 = Cancel button
+
+      if(highlight == kAlarmSetPageHour) {
+        if(inc_button_pressed) userButtonClick = 1;
+        else if(dec_button_pressed) userButtonClick = 2;
+        else highlight = kAlarmSetPageMinute;
+      }
+      else if(highlight == kAlarmSetPageMinute) {
+        if(inc_button_pressed) userButtonClick = 3;
+        else if(dec_button_pressed) userButtonClick = 4;
+        else highlight = kAlarmSetPageAmPm;
+      }
+      else if(highlight == kAlarmSetPageAmPm) {
+        if(inc_button_pressed) userButtonClick = 5;
+        else if(dec_button_pressed) userButtonClick = 6;
+        else {
+          if(alarm_clock->var_4_ON_)
+            highlight = kAlarmSetPageOn;
+          else
+            highlight = kAlarmSetPageOff;
+        }
+      }
+      else if(highlight == kAlarmSetPageOn || highlight == kAlarmSetPageOff) {
+        if(inc_button_pressed) highlight = kAlarmSetPageOn;
+        else if(dec_button_pressed) highlight = kAlarmSetPageOff;
+        else {
+          if(highlight == kAlarmSetPageOn)
+            userButtonClick = 7;
+          else
+            userButtonClick = 8;
+          highlight = kAlarmSetPageSet;
+        }
+      }
+      else if(highlight == kAlarmSetPageSet || highlight == kAlarmSetPageCancel) {
+        if(inc_button_pressed) highlight = kAlarmSetPageSet;
+        else if(dec_button_pressed) highlight = kAlarmSetPageCancel;
+        else {
+          if(highlight == kAlarmSetPageSet)
+            userButtonClick = 9;
+          else
+            userButtonClick = 10;
+        }
       }
     }
-    else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h) 
-      userButtonClick = 7;
-    else if(ts_x > onOff_x && ts_x < onOff_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
-      userButtonClick = 8;
-    else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > onSet_y && ts_y < onSet_y + button_h)
-      userButtonClick = 9;
-    else if(ts_x > setCancel_x && ts_x < setCancel_x + button_w && ts_y > offCancel_y && ts_y < offCancel_y + button_h)
-      userButtonClick = 10;
+
+    // high light text / buttons
+    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageHour), 10);
+    ButtonHighlight(min_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageMinute), 10);
+    ButtonHighlight(amPm_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageAmPm), 10);
+    ButtonHighlight(onOff_x, onSet_y, button_w, button_h, (highlight == kAlarmSetPageOn), 5);
+    ButtonHighlight(onOff_x, offCancel_y, button_w, button_h, (highlight == kAlarmSetPageOff), 5);
+    ButtonHighlight(setCancel_x, onSet_y, button_w, button_h, (highlight == kAlarmSetPageSet), 5);
+    ButtonHighlight(setCancel_x, offCancel_y, button_w, button_h, (highlight == kAlarmSetPageCancel), 5);
 
     // Process user input
     if(userButtonClick >= 1 && userButtonClick <= 6) {
@@ -229,14 +300,14 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
         tft.print(alarm_clock->var_2_);
       }
       else {
-        if(alarm_clock->var_3_AM_PM_)
+        if(alarm_clock->var_3_is_AM_)
           tft.print(kAmLabel);
         else
           tft.print(kPmLabel);
       }
       // update value
       if(userButtonClick <= 2) {
-        if(isUp) {  // increase hour
+        if(!isUp) {  // increase hour
           if(alarm_clock->var_1_ < 12)
             alarm_clock->var_1_++;
           else
@@ -250,7 +321,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
         }
       }
       else if(userButtonClick <= 4) {
-        if(isUp) {  // increase min
+        if(!isUp) {  // increase min
           if(alarm_clock->var_2_  < 59)
             alarm_clock->var_2_++;
           else
@@ -263,8 +334,8 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
             alarm_clock->var_2_ = 59;
         }
       }
-      else  // turn alarm On or Off
-        alarm_clock->var_3_AM_PM_ = !alarm_clock->var_3_AM_PM_;
+      else  // toggle alarm Am Pm
+        alarm_clock->var_3_is_AM_ = !alarm_clock->var_3_is_AM_;
       // print updated value
       tft.setCursor(triangle_x, time_y);
       tft.setTextColor(kDisplayColorGreen);
@@ -275,45 +346,43 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
         tft.print(alarm_clock->var_2_);
       }
       else {
-        if(alarm_clock->var_3_AM_PM_)
+        if(alarm_clock->var_3_is_AM_)
           tft.print(kAmLabel);
         else
           tft.print(kPmLabel);
       }
       // wait a little
-      unsigned long waitTime = 200;
-      if(userButtonClick == 3 || userButtonClick == 4)  // wait less for minutes
-        waitTime = 100;
-      delay(waitTime);
+      if(userButtonClick != 3 && userButtonClick != 4)  // no wait for minutes
+        delay(kUserInputDelayMs);
       // turn triangle Off
       DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, offFill);
     }
     else if(userButtonClick == 7 || userButtonClick == 8) {
       // On or Off button pressed
-      if((userButtonClick == 7 && !alarm_clock->var_4_ON_OFF_) || (userButtonClick == 8 && alarm_clock->var_4_ON_OFF_)) {
+      if((userButtonClick == 7 && !alarm_clock->var_4_ON_) || (userButtonClick == 8 && alarm_clock->var_4_ON_)) {
         // toggle alarm
-        alarm_clock->var_4_ON_OFF_ = !alarm_clock->var_4_ON_OFF_;
+        alarm_clock->var_4_ON_ = !alarm_clock->var_4_ON_;
         // draw new ON button with push effect
-        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_OFF_);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_);
         // draw new OFF button
-        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
-        delay(100);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_);
+        delay(kUserInputDelayMs);
         // draw new ON button
-        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
       }
-      else if(userButtonClick == 7 && alarm_clock->var_4_ON_OFF_) {
+      else if(userButtonClick == 7 && alarm_clock->var_4_ON_) {
         // alarm is On but user pressed On button
         // show a little graphic of input taken
-        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_OFF_);
-        delay(100);
-        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_OFF_);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_);
+        delay(kUserInputDelayMs);
+        DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
       }
-      else if(userButtonClick == 8 && !alarm_clock->var_4_ON_OFF_) {
+      else if(userButtonClick == 8 && !alarm_clock->var_4_ON_) {
         // alarm is Off but user pressed Off button
         // show a little graphic of input taken
-        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, kDisplayAlarmColor, offFill, !alarm_clock->var_4_ON_OFF_);
-        delay(100);
-        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_OFF_);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, kDisplayAlarmColor, offFill, !alarm_clock->var_4_ON_);
+        delay(kUserInputDelayMs);
+        DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_);
       }
     }
     else if(userButtonClick == 9 || userButtonClick == 10) {
@@ -327,7 +396,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput) {
       else  // show a little graphic of Cancel button Press
         DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorRed, offFill, true);
       // wait a little
-      delay(100);
+      delay(kUserInputDelayMs);
       // go back to main page
       SetPage(kMainPage);
     }

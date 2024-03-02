@@ -27,8 +27,8 @@ void AlarmClock::Setup() {
 void AlarmClock::SaveAlarm() {
   alarm_hr_ = var_1_;
   alarm_min_ = var_2_;
-  alarm_is_AM_ = var_3_AM_PM_;
-  alarm_ON_ = var_4_ON_OFF_;
+  alarm_is_AM_ = var_3_is_AM_;
+  alarm_ON_ = var_4_ON_;
 
   // save alarm settings
   eeprom->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);

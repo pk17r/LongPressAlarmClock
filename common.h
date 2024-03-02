@@ -67,7 +67,7 @@ enum Cursor {
   kAlarmSetPageOn,
   kAlarmSetPageOff,
   kAlarmSetPageSet,
-  kAlarmSetPageX,
+  kAlarmSetPageCancel,
   kSettingsPageWiFi,
   kSettingsPageWeather,
   kSettingsPageScreensaver,

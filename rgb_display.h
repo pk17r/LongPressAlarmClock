@@ -40,7 +40,7 @@ public:
   void DisplayTimeUpdate();
   void Screensaver();
   void GoodMorningScreen();
-  void SetAlarmScreen(bool process_user_input);
+  void SetAlarmScreen(bool process_user_input, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void DisplayWeatherInfo();
   void SettingsPage();
