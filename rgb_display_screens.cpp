@@ -1041,6 +1041,12 @@ void RGBDisplay::DisplayTimeUpdate() {
     strcpy(displayed_data_.date_str, new_display_data_.date_str);
   }
 
+  // settings wheel cursor highlight
+  if(highlight == kMainPageSettingsWheel)
+    tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  else
+    tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+
   // alarm string center aligned
   if (strcmp(new_display_data_.alarm_str, displayed_data_.alarm_str) != 0 || new_display_data_.alarm_ON != displayed_data_.alarm_ON || redraw_display_) {
     // set font
@@ -1116,7 +1122,29 @@ void RGBDisplay::DisplayTimeUpdate() {
     displayed_data_.alarm_ON = new_display_data_.alarm_ON;
   }
 
+  // alarm cursor highlight
+  if(highlight == kMainPageAlarm)
+    tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+  else
+    tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+
   redraw_display_ = false;
+}
+
+void RGBDisplay::InstantHighlightResponse() {
+  if(current_page == kMainPage) {
+    // settings wheel cursor highlight
+    if(highlight == kMainPageSettingsWheel)
+      tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+    else
+      tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+
+    // alarm cursor highlight
+    if(highlight == kMainPageAlarm)
+      tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+    else
+      tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  }
 }
 
 ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
@@ -1127,14 +1155,14 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   if(current_page == kMainPage) {
     // if settings gear is touched
     if(ts_x >= kSettingsGearX1 && ts_x <= kSettingsGearX1 + kSettingsGearWidth && ts_y >= kSettingsGearY1 && ts_y <= kSettingsGearY1 + kSettingsGearHeight) {
-      tft.drawRoundRect(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, kRadiusButtonRoundRect, kDisplayColorCyan);
+      tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
       delay(100);
       return kSettingsPage;
     }
 
     // alarm area
     if(ts_y >= kAlarmRowY1) {
-      tft.drawRoundRect(0, kAlarmRowY1, kTftWidth, kTftHeight - kAlarmRowY1, kRadiusButtonRoundRect, kDisplayColorCyan);
+      tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
       delay(100);
       return kAlarmSetPage;
     }

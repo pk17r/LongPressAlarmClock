@@ -18,7 +18,7 @@ void RGBDisplay::Setup() {
   tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
   // make display landscape orientation
-  tft.setRotation(1);
+  tft.setRotation(3);
 
 #elif defined(DISPLAY_IS_ST7735)
 

@@ -63,6 +63,8 @@
 
 // modules - hardware or software
 PushButtonTaps* push_button = NULL;   // Push Button object
+PushButtonTaps* inc_button = NULL;   // Push Button object
+PushButtonTaps* dec_button = NULL;   // Push Button object
 EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object
 WiFiStuff* wifi_stuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions
 RTC* rtc = NULL;  // ptr to class object containing RTC HW
@@ -139,6 +141,8 @@ void setup() {
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN);
+  inc_button = new PushButtonTaps(INC_BUTTON_PIN);
+  dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
   // initialize modules
   eeprom = new EEPROM();
@@ -182,9 +186,24 @@ void setup() {
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
   // check if button pressed or touchscreen touched
-  if(push_button->checkButtonStatus() != 0 || (ts != NULL && ts->IsTouched())) {
+  if(push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched())) {
     // show instant response by turing up brightness
     display->SetMaxBrightness();
+
+    if(push_button->buttonActiveDebounced())
+      PrintLn("push_button");
+    if(inc_button->buttonActiveDebounced()) {
+      MoveCursor(true);
+      display->InstantHighlightResponse();
+      PrintLn("inc_button");
+      delay(100);
+    }
+    if(dec_button->buttonActiveDebounced()) {
+      MoveCursor(false);
+      display->InstantHighlightResponse();
+      PrintLn("dec_button");
+      delay(100);
+    }
 
     if(current_page == kScreensaverPage)
     { // turn off screensaver if on
@@ -372,6 +391,9 @@ DisplayData new_display_data_ { "", "", "", "", true, false, true }, displayed_d
 
 // current page on display
 ScreenPage current_page = kMainPage;
+
+// current cursor highlight location on page
+Cursor highlight = kCursorNoSelection;
 
 // second core current task
 // volatile SecondCoreTask second_core_task = kNoTask;
@@ -804,5 +826,62 @@ void SetPage(ScreenPage page) {
       break;
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
+  }
+}
+
+void MoveCursor(bool increment) {
+  if(current_page == kMainPage) {
+    if(increment) {
+      if(highlight == kCursorNoSelection)
+        highlight = kMainPageSettingsWheel;
+      else if(highlight == kMainPageAlarm)
+        highlight = kCursorNoSelection;
+      else
+        highlight++;
+    }
+    else {
+      if(highlight == kCursorNoSelection)
+        highlight = kMainPageAlarm;
+      else if(highlight == kMainPageSettingsWheel)
+        highlight = kCursorNoSelection;
+      else
+        highlight--;
+    }
+  }
+  else if(current_page == kAlarmSetPage) {
+    if(increment) {
+      if(highlight == kCursorNoSelection)
+        highlight = kAlarmSetPageHour;
+      else if(highlight == kAlarmSetPageX)
+        highlight = kCursorNoSelection;
+      else
+        highlight++;
+    }
+    else {
+      if(highlight == kCursorNoSelection)
+        highlight = kAlarmSetPageX;
+      else if(highlight == kAlarmSetPageHour)
+        highlight = kCursorNoSelection;
+      else
+        highlight--;
+    }
+  }
+  else if(current_page == kSettingsPage) {
+    if(increment) {
+      if(highlight == kCursorNoSelection)
+        highlight = kSettingsPageWiFi;
+      else if(highlight == kSettingsPageScreensaver)
+        highlight = kCursorNoSelection;
+      else
+        highlight++;
+    }
+    else {
+      if(highlight == kCursorNoSelection)
+        highlight = kSettingsPageScreensaver;
+      else if(highlight == kSettingsPageWiFi)
+        highlight = kCursorNoSelection;
+      else
+        highlight--;
+    }
   }
 }

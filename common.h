@@ -28,6 +28,8 @@ extern AlarmClock* alarm_clock;
 extern WiFiStuff* wifi_stuff;
 extern EEPROM* eeprom;
 extern PushButtonTaps* push_button;
+extern PushButtonTaps* inc_button;
+extern PushButtonTaps* dec_button;
 extern Touchscreen* ts;
 
 // counter to note user inactivity seconds
@@ -52,6 +54,44 @@ enum ScreenPage {
 
 // current page on display
 extern ScreenPage current_page;
+
+// flag for cursor highlight location
+enum Cursor {
+  kCursorNoSelection = 0,
+  kMainPageSettingsWheel,
+  kMainPageAlarm,
+  kAlarmSetPageHour,
+  kAlarmSetPageMinute,
+  kAlarmSetPageAmPm,
+  kAlarmSetPageOn,
+  kAlarmSetPageOff,
+  kAlarmSetPageSet,
+  kAlarmSetPageX,
+  kSettingsPageWiFi,
+  kSettingsPageWeather,
+  kSettingsPageScreensaver,
+  kCursorMaxValue
+  };
+
+// current cursor highlight location on page
+extern Cursor highlight;
+
+// postfix form ++ -- operator overloads for Cursor enum variables
+inline Cursor operator++ (Cursor& highlight_location, int) {
+  if(static_cast<int>(highlight_location) < static_cast<int>(kCursorMaxValue) - 2)
+    highlight_location = static_cast<Cursor>(static_cast<int>(highlight_location) + 1);
+  else
+    highlight_location = kCursorNoSelection;
+  return highlight_location;
+}
+inline Cursor operator-- (Cursor& highlight_location, int) {
+  if(static_cast<int>(highlight_location) > static_cast<int>(kCursorNoSelection))
+    highlight_location = static_cast<Cursor>(static_cast<int>(highlight_location) - 1);
+  else
+    highlight_location = static_cast<Cursor>(static_cast<int>(kCursorMaxValue) - 1);
+  return highlight_location;
+}
+
 
 // flag for second core task
 enum SecondCoreTask {

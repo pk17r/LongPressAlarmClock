@@ -48,6 +48,7 @@ public:
   void WiFiSettingsPage();
   void WeatherSettingsPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
+  void InstantHighlightResponse();
 
   // functions
   void Setup();
