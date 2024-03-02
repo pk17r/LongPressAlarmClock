@@ -6,6 +6,8 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "rtc.h"
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 WiFiStuff::WiFiStuff() {
 
@@ -297,4 +299,139 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today,
   today = ceil(day);
   Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
   month = monthJan0 + 1;
+}
+
+void WiFiStuff::GetSsidAndPasswdUsingSoftAP() {
+  extern void SoftAP();
+  SoftAP();
+}
+
+AsyncWebServer* server = NULL;
+
+const char* PARAM_ssid = "html_ssid";
+const char* PARAM_passwd = "html_passwd";
+const char* PARAM_INT = "html_int";
+
+String ssid_str = "Enter SSID";
+String passwd_str = "Enter Passwd";
+String int_var_str = "22";
+
+// HTML web page to handle 3 input fields (html_ssid, html_passwd, html_int)
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html><head>
+  <title>Long Press Alarm WiFi Details Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    function submitMessage() {
+      alert("Saved!");
+      setTimeout(function(){ document.location.reload(false); }, 500);   
+    }
+  </script></head><body>
+  <form action="/get" target="hidden-form">
+    <label>ssid:</label>
+    <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
+    <label>password:</label>
+    <input type="text" name="html_passwd" value="%html_passwd%"><br><br>
+    <label>html_int:</label>
+    <input type="text" name="html_int" value="%html_int%"><br><br>
+    <input type="submit" value="Submit" onclick="submitMessage()">
+  </form>
+  <iframe style="display:none" name="hidden-form"></iframe>
+</body></html>)rawliteral";
+
+// Replaces placeholder with stored values
+String processor(const String& var){
+  //Serial.println(var);
+  if(strcmp(var.c_str(), PARAM_ssid) == 0){
+    return ssid_str;
+  }
+  else if(strcmp(var.c_str(), PARAM_passwd) == 0){
+    return passwd_str;
+  }
+  else if(strcmp(var.c_str(), PARAM_INT) == 0){
+    return int_var_str;
+  }
+  return String();
+}
+
+void SoftAP() {
+
+  server = new AsyncWebServer(80);
+
+  // Connect to Wi-Fi network with SSID and password
+  Serial.print("Setting AP (Access Point)…");
+  // Remove the password parameter, if you want the AP (Access Point) to be open
+  WiFi.softAP(softApSsid);
+
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP);
+  
+  server->begin();
+
+  ssid_str = wifi_stuff->wifi_ssid_.c_str();
+  passwd_str = wifi_stuff->wifi_password_.c_str();
+
+  extern String processor(const String& var);
+
+  // Send web page with input fields to client
+  server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html, processor);
+  });
+
+  // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
+  server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    String inputMessage;
+    // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
+    if (request->hasParam(PARAM_ssid)) {
+      inputMessage = request->getParam(PARAM_ssid)->value();
+      ssid_str = inputMessage;
+    }
+    // GET html_int value on <ESP_IP>/get?html_int=<inputMessage>
+    if (request->hasParam(PARAM_passwd)) {
+      inputMessage = request->getParam(PARAM_passwd)->value();
+      passwd_str = inputMessage;
+    }
+    // GET html_passwd value on <ESP_IP>/get?html_passwd=<inputMessage>
+    if (request->hasParam(PARAM_INT)) {
+      inputMessage = request->getParam(PARAM_INT)->value();
+      int_var_str = inputMessage;
+    }
+    // else {
+    //   inputMessage = "No message sent";
+    // }
+    Serial.println(inputMessage);
+    request->send(200, "text/text", inputMessage);
+  });
+  // server->onNotFound(notFound);
+  server->begin();
+
+  while(1)
+  {
+    ResetWatchdog();
+    // To access your stored values on ssid_str, passwd_str, int_var_str
+    Serial.print("SSID: ");
+    Serial.println(ssid_str);
+    
+    Serial.print("PASSWD: ");
+    Serial.println(passwd_str);
+    
+    int yourInputInt = atoi(int_var_str.c_str());
+    Serial.print("INT VAR: ");
+    Serial.println(yourInputInt);
+    delay(5000);
+
+    if(yourInputInt == 1) {
+      Serial.println("break");
+      break;
+    }
+  }
+
+  server->end();
+
+  delete server;
+  server = NULL;
+
+  // wifi_stuff->wifi_ssid_ = ssid_str.c_str();
+  // wifi_stuff->wifi_password_ = passwd_str.c_str();
 }

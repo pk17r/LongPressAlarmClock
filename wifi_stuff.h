@@ -1,10 +1,9 @@
-#include <sys/_stdint.h>
-#include <string>
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
 #include "common.h"
 // #include "secrets.h"
+#include <sys/_stdint.h>      // try removing it, don't know why it is here
 
 class WiFiStuff {
 
@@ -17,6 +16,7 @@ public:
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
+  void GetSsidAndPasswdUsingSoftAP();
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     std::string wifi_ssid_ = MY_WIFI_SSID;

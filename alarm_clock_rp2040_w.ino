@@ -222,8 +222,10 @@ void loop() {
             SetPage(kAlarmSetPage);
         }
         else if(current_page == kSettingsPage) {        // SETTINGS PAGE
-          if(highlight == kSettingsPageWiFi)
+          if(highlight == kSettingsPageWiFi) {
+            // wifi_stuff->GetSsidAndPasswdUsingSoftAP();
             SetPage(kWiFiSettingsPage);
+          }
           else if(highlight == kSettingsPageWeather) {
             display->InstantHighlightResponse(/* color_button = */ kSettingsPageWeather);
             second_core_tasks_queue.push(kGetWeatherInfo);

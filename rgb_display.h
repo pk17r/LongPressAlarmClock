@@ -44,6 +44,7 @@ public:
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void DisplayWeatherInfo();
   void SettingsPage();
+  void SoftApInputs();
   void WiFiSettingsPage();
   void WeatherSettingsPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);

@@ -46,4 +46,6 @@ const char kCharSpace = ' ', kCharZero = '0', kCharColon = ':';
 
 const unsigned int kWifiSsidPasswordLengthMax = 32;
 
+const char softApSsid[24] = "Long-Press-Alarm-SoftAP";
+
 #endif  // GENERAL_CONSTANTS_H

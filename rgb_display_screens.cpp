@@ -470,6 +470,21 @@ void RGBDisplay::SettingsPage() {
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
+void RGBDisplay::SoftApInputs() {
+
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeSans12pt7b);
+  tft.setCursor(10, 40);
+  tft.println("Connect to Created WiFi Soft AP");
+  tft.println("using mobile/computer.");
+  tft.print("WiFi SSID: "); tft.println(softApSsid);
+  tft.print("Set values.");
+
+  // Cancel button
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
+
 void RGBDisplay::WiFiSettingsPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
