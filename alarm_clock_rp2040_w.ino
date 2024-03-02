@@ -846,7 +846,7 @@ void SetPage(ScreenPage page) {
       break;
     case kWeatherSettingsPage:
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
-      highlight = kWeatherSettingsPageUnits;
+      highlight = kWeatherSettingsPageFetch;
       display->WeatherSettingsPage();
       display->SetMaxBrightness();
       break;

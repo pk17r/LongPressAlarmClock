@@ -234,10 +234,10 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         if(inc_button_pressed) userButtonClick = 5;
         else if(dec_button_pressed) userButtonClick = 6;
         else {
-          if(alarm_clock->var_4_ON_)
+          // if(alarm_clock->var_4_ON_)
             highlight = kAlarmSetPageOn;
-          else
-            highlight = kAlarmSetPageOff;
+          // else
+            // highlight = kAlarmSetPageOff;
         }
       }
       else if(highlight == kAlarmSetPageOn || highlight == kAlarmSetPageOff) {
@@ -352,7 +352,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
           tft.print(kPmLabel);
       }
       // wait a little
-      if(userButtonClick != 3 && userButtonClick != 4)  // no wait for minutes
+      if(userButtonClick != 3 && userButtonClick != 4)  // no extra wait for minutes, to make inc/dec fast
         delay(kUserInputDelayMs);
       // turn triangle Off
       DrawTriangleButton(triangle_x, triangle_y, gap_x, gap_y, isUp, borderColor, offFill);
@@ -366,7 +366,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_);
         // draw new OFF button
         DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_);
-        delay(kUserInputDelayMs);
+        delay(2*kUserInputDelayMs);
         // draw new ON button
         DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
       }
@@ -374,14 +374,14 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         // alarm is On but user pressed On button
         // show a little graphic of input taken
         DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, kDisplayAlarmColor, offFill, alarm_clock->var_4_ON_);
-        delay(kUserInputDelayMs);
+        delay(2*kUserInputDelayMs);
         DrawButton(onOff_x, onSet_y, button_w, button_h, onStr, borderColor, onFill, offFill, alarm_clock->var_4_ON_);
       }
       else if(userButtonClick == 8 && !alarm_clock->var_4_ON_) {
         // alarm is Off but user pressed Off button
         // show a little graphic of input taken
         DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, kDisplayAlarmColor, offFill, !alarm_clock->var_4_ON_);
-        delay(kUserInputDelayMs);
+        delay(2*kUserInputDelayMs);
         DrawButton(onOff_x, offCancel_y, button_w, button_h, offStr, borderColor, onFill, offFill, !alarm_clock->var_4_ON_);
       }
     }
@@ -396,7 +396,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       else  // show a little graphic of Cancel button Press
         DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorRed, offFill, true);
       // wait a little
-      delay(kUserInputDelayMs);
+      delay(2*kUserInputDelayMs);
       // go back to main page
       SetPage(kMainPage);
     }
@@ -557,7 +557,7 @@ void RGBDisplay::WeatherSettingsPage() {
   DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Get WEATHER Info button
-  DrawButton(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, fetchStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Update TIME button
   DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1246,8 +1246,8 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
     // Get WEATHER Info button
-    ButtonHighlight(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, (highlight == kWeatherSettingsPageFetch), 5);
-    if(color_button == kWeatherSettingsPageFetch) DrawButton(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (highlight == kWeatherSettingsPageFetch), 5);
+    if(color_button == kWeatherSettingsPageFetch) DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Update TIME button
     ButtonHighlight(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, (highlight == kWeatherSettingsPageUpdateTime), 5);
@@ -1378,8 +1378,8 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     }
 
     // get Weather Info button
-    if(ts_x >= kGetWeatherInfoButtonX1 && ts_x <= kGetWeatherInfoButtonX1 + kGetWeatherInfoButtonW && ts_y >= kGetWeatherInfoButtonY1 && ts_y <= kGetWeatherInfoButtonY1 + kGetWeatherInfoButtonH) {
-      DrawButton(kGetWeatherInfoButtonX1, kGetWeatherInfoButtonY1, kGetWeatherInfoButtonW, kGetWeatherInfoButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    if(ts_x >= kFetchWeatherButtonX1 && ts_x <= kFetchWeatherButtonX1 + kFetchWeatherButtonW && ts_y >= kFetchWeatherButtonY1 && ts_y <= kFetchWeatherButtonY1 + kFetchWeatherButtonH) {
+      DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       second_core_tasks_queue.push(kGetWeatherInfo);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
