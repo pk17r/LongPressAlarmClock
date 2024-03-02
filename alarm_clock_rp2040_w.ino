@@ -215,59 +215,66 @@ void loop() {
       if(current_page == kAlarmSetPage)
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
       else {
-        if(highlight == kMainPageSettingsWheel)
-          SetPage(kSettingsPage);
-        else if(highlight == kMainPageSetAlarm)
-          SetPage(kAlarmSetPage);
-        else if(highlight == kSettingsPageWiFi)
-          SetPage(kWiFiSettingsPage);
-        else if(highlight == kSettingsPageWeather)
-          SetPage(kWeatherSettingsPage);
-        else if(highlight == kSettingsPageScreensaver)
-          SetPage(kScreensaverPage);
-        else if(highlight == kSettingsPageCancel)
-          SetPage(kMainPage);
-        else if(highlight == kWiFiSettingsPageConnect) {
-          display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
-          second_core_tasks_queue.push(kConnectWiFi);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kWiFiSettingsPage);
+        if(current_page == kMainPage) {                 // MAIN PAGE
+          if(highlight == kMainPageSettingsWheel)
+            SetPage(kSettingsPage);
+          else if(highlight == kMainPageSetAlarm)
+            SetPage(kAlarmSetPage);
         }
-        else if(highlight == kWiFiSettingsPageDisconnect) {
-          display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
-          second_core_tasks_queue.push(kDisconnectWiFi);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kWiFiSettingsPage);
+        else if(current_page == kSettingsPage) {        // SETTINGS PAGE
+          if(highlight == kSettingsPageWiFi)
+            SetPage(kWiFiSettingsPage);
+          else if(highlight == kSettingsPageWeather) {
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageWeather);
+            second_core_tasks_queue.push(kGetWeatherInfo);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kWeatherSettingsPage);
+          }
+          else if(highlight == kSettingsPageScreensaver)
+            SetPage(kScreensaverPage);
+          else if(highlight == kSettingsPageCancel)
+            SetPage(kMainPage);
         }
-        else if(highlight == kWiFiSettingsPageCancel)
-          SetPage(kSettingsPage);
-        else if(highlight == kSettingsPageWeather)
-          SetPage(kWeatherSettingsPage);
-        else if(highlight == kWeatherSettingsPageUnits) {
-          wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
-          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
-          wifi_stuff->SaveWeatherUnits();
-          wifi_stuff->got_weather_info_ = false;
-          SetPage(kWeatherSettingsPage);
+        else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
+          if(highlight == kWiFiSettingsPageConnect) {
+            display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
+            second_core_tasks_queue.push(kConnectWiFi);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kWiFiSettingsPage);
+          }
+          else if(highlight == kWiFiSettingsPageDisconnect) {
+            display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
+            second_core_tasks_queue.push(kDisconnectWiFi);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kWiFiSettingsPage);
+          }
+          else if(highlight == kWiFiSettingsPageCancel)
+            SetPage(kSettingsPage);
+          else if(highlight == kWeatherSettingsPageUnits) {
+            wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
+            display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
+            wifi_stuff->SaveWeatherUnits();
+            wifi_stuff->got_weather_info_ = false;
+            SetPage(kWeatherSettingsPage);
+          }
         }
-        else if(highlight == kWeatherSettingsPageFetch) {
-          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
-          second_core_tasks_queue.push(kGetWeatherInfo);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kWeatherSettingsPage);
+        else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
+          if(highlight == kWeatherSettingsPageFetch) {
+            display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
+            second_core_tasks_queue.push(kGetWeatherInfo);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kWeatherSettingsPage);
+          }
+          else if(highlight == kWeatherSettingsPageUpdateTime) {
+            display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
+            second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kMainPage);
+          }
+          else if(highlight == kWeatherSettingsPageCancel)
+            SetPage(kSettingsPage);
         }
-        else if(highlight == kWeatherSettingsPageUpdateTime) {
-          display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
-          second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kMainPage);
-        }
-        else if(highlight == kWeatherSettingsPageCancel)
-          SetPage(kSettingsPage);
       }
-
-      // if(!ts_input)
-      //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
     }
     else if(inc_button->buttonActiveDebounced()) {
       PrintLn("inc_button");
@@ -391,7 +398,7 @@ void loop1() {
     SecondCoreTask current_task = second_core_tasks_queue.front();
     // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
-    if(current_task == kGetWeatherInfo && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 10*1000)) {
+    if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*1000)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
 

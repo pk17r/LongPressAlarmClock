@@ -1208,19 +1208,20 @@ void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, b
 }
 
 void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
-  if(current_page == kMainPage) {
+  if(current_page == kMainPage) {                 // MAIN PAGE
     // settings wheel cursor highlight
     ButtonHighlight(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, (highlight == kMainPageSettingsWheel), 5);
 
     // alarm cursor highlight
     ButtonHighlight(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, (highlight == kMainPageSetAlarm), 0);
   }
-  else if(current_page == kSettingsPage) {
+  else if(current_page == kSettingsPage) {        // SETTINGS PAGE
     // Update WiFi Details button
     ButtonHighlight(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, (highlight == kSettingsPageWiFi), 5);
 
     // Update Weather and Location button
     ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (highlight == kSettingsPageWeather), 5);
+    if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Start Screensaver Button
     ButtonHighlight(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, (highlight == kSettingsPageScreensaver), 5);
@@ -1228,7 +1229,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);
   }
-  else if(current_page == kWiFiSettingsPage) {
+  else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
     // Connect To WiFi
     ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (highlight == kWiFiSettingsPageConnect), 5);
     if(color_button == kWiFiSettingsPageConnect) DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
@@ -1240,7 +1241,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWiFiSettingsPageCancel), 5);
   }
-  else if(current_page == kWeatherSettingsPage) {
+  else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
     // Toggle Units Metric/Imperial button
     ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (highlight == kWeatherSettingsPageUnits), 5);
     if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
