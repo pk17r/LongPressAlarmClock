@@ -258,11 +258,17 @@ void loop() {
             SetPage(kSettingsPage);
         }
         else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
-          if(highlight == kSoftApInputsPageCancel) {
-            display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageCancel);
+          if(highlight == kSoftApInputsPageSave) {
+            display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageSave);
             second_core_tasks_queue.push(kStopSetWiFiSoftAP);
             WaitForExecutionOfSecondCoreTask();
             wifi_stuff->SaveWiFiDetails();
+            SetPage(kWiFiSettingsPage);
+          }
+          else if(highlight == kSoftApInputsPageCancel) {
+            display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageCancel);
+            second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+            WaitForExecutionOfSecondCoreTask();
             SetPage(kWiFiSettingsPage);
           }
         }
@@ -827,7 +833,7 @@ void SetPage(ScreenPage page) {
       break;
     case kSoftApInputsPage:
       current_page = kSoftApInputsPage;     // new page needs to be set before any action
-      highlight = kSoftApInputsPageCancel;
+      highlight = kSoftApInputsPageSave;
       display->SoftApInputs();
       display->SetMaxBrightness();
       break;
@@ -994,6 +1000,12 @@ void MoveCursor(bool increment) {
       else
         highlight--;
     }
+  }
+  else if(current_page == kSoftApInputsPage) {
+    if(highlight == kSoftApInputsPageSave)
+      highlight = kSoftApInputsPageCancel;
+    else
+      highlight = kSoftApInputsPageSave;
   }
   else if(current_page == kWeatherSettingsPage) {
     if(increment) {

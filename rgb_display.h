@@ -143,8 +143,12 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[8] = "WEATHER", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
+
+  const char saveStr[5] = "SAVE", cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[8] = "WEATHER", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
+
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize - 5, kCancelButtonY1 = kTftHeight - kCancelButtonSize - 5;
+  const int16_t kSaveButtonW = 80, kSaveButtonH = 40, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 15, kSaveButtonY1 = kTftHeight - kSaveButtonH - 5;
+
   const int16_t kWiFiSettingsButtonW = 100, kWiFiSettingsButtonX1 = kTftWidth - kWiFiSettingsButtonW - 5, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonH = 25;
   const int16_t kWeatherSettingsButtonW = 150, kWeatherSettingsButtonX1 = kTftWidth - kWeatherSettingsButtonW - 5, kWeatherSettingsButtonY1 = 40, kWeatherSettingsButtonH = 25;
   const int16_t kScreensaverButtonW = 180, kScreensaverButtonX1 = kTftWidth - kScreensaverButtonW - 5, kScreensaverButtonY1 = 150, kScreensaverButtonH = 25;

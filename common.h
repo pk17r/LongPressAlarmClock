@@ -77,6 +77,7 @@ enum Cursor {
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
   kWiFiSettingsPageCancel,
+  kSoftApInputsPageSave,
   kSoftApInputsPageCancel,
   kWeatherSettingsPageUnits,
   kWeatherSettingsPageFetch,

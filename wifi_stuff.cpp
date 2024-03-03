@@ -367,7 +367,7 @@ const char index_html[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Saved!");
+      alert("Sent to device!");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>

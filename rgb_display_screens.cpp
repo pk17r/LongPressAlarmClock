@@ -475,34 +475,39 @@ void RGBDisplay::SoftApInputs() {
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.setCursor(10, 30);
+  tft.setCursor(10, 20);
   tft.print("Connect to Created WiFi");
-  tft.setCursor(10, 50);
+  tft.setCursor(10, 40);
   tft.print("using mobile/computer.");
-  tft.setCursor(10, 70);
+  tft.setCursor(10, 60);
   tft.print("WiFi SSID:");
 
-  tft.setCursor(10, 100);
+  tft.setCursor(10, 90);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(softApSsid);
 
-  tft.setCursor(10, 130);
+  tft.setCursor(10, 120);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
   tft.print("Open web browser and in");
-  tft.setCursor(10, 150);
+  tft.setCursor(10, 140);
   tft.print("address bar enter:");
 
-  tft.setCursor(10, 180);
+  tft.setCursor(10, 170);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(wifi_stuff->soft_AP_IP.c_str());
 
-  tft.setCursor(10, 210);
+  tft.setCursor(10, 200);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.print("Set values.");
+  tft.print("Set your 2.4GHz");
+  tft.setCursor(10, 220);
+  tft.print("WiFi details.");
+
+  // Save button
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1281,6 +1286,10 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWiFiSettingsPageCancel), 5);
   }
   else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
+    // Save button
+    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (highlight == kSoftApInputsPageSave), 5);
+    if(color_button == kSoftApInputsPageSave) DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSoftApInputsPageCancel), 5);
     if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
