@@ -273,7 +273,13 @@ void loop() {
           }
         }
         else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
-          if(highlight == kWeatherSettingsPageUnits) {
+          if(highlight == kWeatherSettingsPageSetLocation) {
+            display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageSetLocation);
+            second_core_tasks_queue.push(kStartLocationInputsLocalServer);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kLocationInputsPage);
+          }
+          else if(highlight == kWeatherSettingsPageUnits) {
             wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
             wifi_stuff->SaveWeatherUnits();
@@ -294,6 +300,22 @@ void loop() {
           }
           else if(highlight == kWeatherSettingsPageCancel)
             SetPage(kSettingsPage);
+        }
+        else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
+          if(highlight == kLocationInputsPageSave) {
+            display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageSave);
+            second_core_tasks_queue.push(kStopLocationInputsLocalServer);
+            WaitForExecutionOfSecondCoreTask();
+            wifi_stuff->SaveWeatherLocationDetails();
+            wifi_stuff->got_weather_info_ = false;
+            SetPage(kWeatherSettingsPage);
+          }
+          else if(highlight == kLocationInputsPageCancel) {
+            display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageCancel);
+            second_core_tasks_queue.push(kStopLocationInputsLocalServer);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kWeatherSettingsPage);
+          }
         }
       }
     }
@@ -378,10 +400,12 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_millis > (current_page != kSoftApInputsPage ? kInactivityMillisLimit : 3 * kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page != kSoftApInputsPage) || (current_page != kLocationInputsPage)) ? kInactivityMillisLimit : 3 * kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+      else if(current_page == kLocationInputsPage)
+        second_core_tasks_queue.push(kStopLocationInputsLocalServer);
       // set display brightness based on time
       display->CheckTimeAndSetBrightness();
       // turn screen saver On
@@ -449,6 +473,12 @@ void loop1() {
     }
     else if(current_task == kStopSetWiFiSoftAP) {
       wifi_stuff->StopSetWiFiSoftAP();
+    }
+    else if(current_task == kStartLocationInputsLocalServer) {
+      wifi_stuff->StartSetLocationLocalServer();
+    }
+    else if(current_task == kStopLocationInputsLocalServer) {
+      wifi_stuff->StopSetLocationLocalServer();
     }
 
     // done processing the task
@@ -834,7 +864,7 @@ void SetPage(ScreenPage page) {
     case kSoftApInputsPage:
       current_page = kSoftApInputsPage;     // new page needs to be set before any action
       highlight = kSoftApInputsPageSave;
-      display->SoftApInputs();
+      display->SoftApInputsPage();
       display->SetMaxBrightness();
       break;
     case kEnterWiFiSsidPage:
@@ -891,6 +921,12 @@ void SetPage(ScreenPage page) {
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
       highlight = kWeatherSettingsPageFetch;
       display->WeatherSettingsPage();
+      display->SetMaxBrightness();
+      break;
+    case kLocationInputsPage:
+      current_page = kLocationInputsPage;     // new page needs to be set before any action
+      highlight = kLocationInputsPageSave;
+      display->LocationInputsLocalServerPage();
       display->SetMaxBrightness();
       break;
     case kEnterWeatherLocationZipPage:
@@ -1010,16 +1046,22 @@ void MoveCursor(bool increment) {
   else if(current_page == kWeatherSettingsPage) {
     if(increment) {
       if(highlight == kWeatherSettingsPageCancel)
-        highlight = kWeatherSettingsPageUnits;
+        highlight = kWeatherSettingsPageSetLocation;
       else
         highlight++;
     }
     else {
-      if(highlight == kWeatherSettingsPageUnits)
+      if(highlight == kWeatherSettingsPageSetLocation)
         highlight = kWeatherSettingsPageCancel;
       else
         highlight--;
     }
+  }
+  else if(current_page == kLocationInputsPage) {
+    if(highlight == kLocationInputsPageSave)
+      highlight = kLocationInputsPageCancel;
+    else
+      highlight = kLocationInputsPageSave;
   }
   // Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);

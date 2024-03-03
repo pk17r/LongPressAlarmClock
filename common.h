@@ -49,6 +49,7 @@ enum ScreenPage {
   kEnterWiFiSsidPage,
   kEnterWiFiPasswdPage,
   kWeatherSettingsPage,
+  kLocationInputsPage,
   kEnterWeatherLocationZipPage,
   kEnterWeatherLocationCountryCodePage,
   kNoPageSelected
@@ -79,10 +80,13 @@ enum Cursor {
   kWiFiSettingsPageCancel,
   kSoftApInputsPageSave,
   kSoftApInputsPageCancel,
+  kWeatherSettingsPageSetLocation,
   kWeatherSettingsPageUnits,
   kWeatherSettingsPageFetch,
   kWeatherSettingsPageUpdateTime,
   kWeatherSettingsPageCancel,
+  kLocationInputsPageSave,
+  kLocationInputsPageCancel,
   kCursorMaxValue
   };
 
@@ -111,6 +115,8 @@ enum SecondCoreTask {
   kNoTask = 0,
   kStartSetWiFiSoftAP,
   kStopSetWiFiSoftAP,
+  kStartLocationInputsLocalServer,
+  kStopLocationInputsLocalServer,
   kGetWeatherInfo,
   kUpdateTimeFromNtpServer,
   kConnectWiFi,

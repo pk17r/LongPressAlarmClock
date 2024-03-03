@@ -1,3 +1,4 @@
+#include <string>
 #include <cstddef>
 #include "wifi_stuff.h"
 #include <WiFi.h>
@@ -35,6 +36,8 @@ void WiFiStuff::SaveWeatherUnits() {
 
 void WiFiStuff::TurnWiFiOn() {
   PrintLn("Connecting to WiFi");
+  WiFi.mode(WIFI_STA);
+  delay(1);
   WiFi.persistent(true);
   delay(1);
   WiFi.begin(wifi_ssid_.c_str(), wifi_password_.c_str());
@@ -304,13 +307,16 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today,
 
 void WiFiStuff::StartSetWiFiSoftAP() {
   PrintLn("WiFiStuff::StartSetWiFiSoftAP()");
-  extern void SoftAP();
+  extern void _SoftAPWiFiDetails();
 
   extern AsyncWebServer* server;
 
-  if(server == NULL) {
-    server = new AsyncWebServer(80);
+  if(server != NULL) {
+    delete server;
+    server = NULL;
   }
+
+  server = new AsyncWebServer(80);
 
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Setting AP (Access Point)…");
@@ -324,7 +330,7 @@ void WiFiStuff::StartSetWiFiSoftAP() {
   
   server->begin();
 
-  SoftAP();
+  _SoftAPWiFiDetails();
 }
 
 void WiFiStuff::StopSetWiFiSoftAP() {
@@ -352,16 +358,68 @@ void WiFiStuff::StopSetWiFiSoftAP() {
   wifi_stuff->wifi_password_ = passwd_str.c_str();
 }
 
+void WiFiStuff::StartSetLocationLocalServer() {
+  PrintLn("WiFiStuff::StartSetLocationLocalServer()");
+  extern void _LocalServerLocationInputs();
+
+  extern AsyncWebServer* server;
+
+  if(server != NULL) {
+    delete server;
+    server = NULL;
+  }
+
+  server = new AsyncWebServer(80);
+
+  TurnWiFiOn();
+
+  IPAddress IP = WiFi.localIP();
+  Serial.print("Local IP address: ");
+  Serial.println(IP);
+  soft_AP_IP = IP.toString().c_str();
+  
+  _LocalServerLocationInputs();
+}
+
+void WiFiStuff::StopSetLocationLocalServer() {
+  PrintLn("WiFiStuff::StopSetLocationLocalServer()");
+  extern AsyncWebServer* server;
+  extern String zip_pin_str, country_code_str;
+
+  // To access your stored values on ssid_str, passwd_str
+  Serial.print("ZIP/PIN: ");
+  Serial.println(zip_pin_str);
+
+  Serial.print("Country Code: ");
+  Serial.println(country_code_str);
+
+  if(server != NULL) {
+    server->end();
+
+    delete server;
+    server = NULL;
+  }
+
+  TurnWiFiOff();
+
+  wifi_stuff->location_zip_code_ = std::atoi(zip_pin_str.c_str());
+  wifi_stuff->location_country_code_ = country_code_str.c_str();
+}
+
 AsyncWebServer* server = NULL;
 
 const char* PARAM_ssid = "html_ssid";
 const char* PARAM_passwd = "html_passwd";
+const char* PARAM_zip_pin = "html_zip_pin";
+const char* PARAM_country_code = "html_country_code";
 
 String ssid_str = "Enter SSID";
 String passwd_str = "Enter Passwd";
+String zip_pin_str = "Enter ZIP/PIN";
+String country_code_str = "Enter Country Code";
 
 // HTML web page to handle 2 input fields (html_ssid, html_passwd)
-const char index_html[] PROGMEM = R"rawliteral(
+const char index_html_wifi_details[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
   <title>Long Press Alarm WiFi Details Form</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -381,6 +439,28 @@ const char index_html[] PROGMEM = R"rawliteral(
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
 
+// HTML web page to handle 2 input fields (html_ssid, html_passwd)
+const char index_html_location_details[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html><head>
+  <title>Long Press Alarm WiFi Details Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    function submitMessage() {
+      alert("Sent to device!");
+      setTimeout(function(){ document.location.reload(false); }, 500);   
+    }
+  </script></head><body>
+  <form action="/get" target="hidden-form">
+    <label>Location ZIP/PIN Code:</label>
+    <input type="number" name="html_zip_pin" value="%html_zip_pin%" min="10000" max="999999"><br><br>
+    <label>2-Letter Country Code:</label>
+    <input type="text" name="html_country_code" value="%html_country_code%"><br><br>
+    <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes" target="_blank">2-Letter Country Codes List</a> 
+    <input type="submit" value="Submit" onclick="submitMessage()">
+  </form>
+  <iframe style="display:none" name="hidden-form"></iframe>
+</body></html>)rawliteral";
+
 // Replaces placeholder with stored values
 String processor(const String& var){
   if(strcmp(var.c_str(), PARAM_ssid) == 0){
@@ -389,10 +469,16 @@ String processor(const String& var){
   else if(strcmp(var.c_str(), PARAM_passwd) == 0){
     return passwd_str;
   }
+  else if(strcmp(var.c_str(), PARAM_zip_pin) == 0){
+    return zip_pin_str;
+  }
+  else if(strcmp(var.c_str(), PARAM_country_code) == 0){
+    return country_code_str;
+  }
   return String();
 }
 
-void SoftAP() {
+void _SoftAPWiFiDetails() {
 
   ssid_str = wifi_stuff->wifi_ssid_.c_str();
   passwd_str = wifi_stuff->wifi_password_.c_str();
@@ -401,7 +487,7 @@ void SoftAP() {
 
   // Send web page with input fields to client
   server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200, "text/html", index_html, processor);
+    request->send_P(200, "text/html", index_html_wifi_details, processor);
   });
 
   // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
@@ -420,7 +506,41 @@ void SoftAP() {
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);
   });
+
   // server->onNotFound(notFound);
   server->begin();
+}
 
+
+void _LocalServerLocationInputs() {
+
+  zip_pin_str = std::to_string(wifi_stuff->location_zip_code_).c_str();
+  country_code_str = wifi_stuff->location_country_code_.c_str();
+
+  extern String processor(const String& var);
+
+  // Send web page with input fields to client
+  server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", index_html_location_details, processor);
+  });
+
+  // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
+  server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
+    String inputMessage;
+    // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
+    if (request->hasParam(PARAM_zip_pin)) {
+      inputMessage = request->getParam(PARAM_zip_pin)->value();
+      zip_pin_str = inputMessage;
+    }
+    // GET html_passwd value on <ESP_IP>/get?html_passwd=<inputMessage>
+    if (request->hasParam(PARAM_country_code)) {
+      inputMessage = request->getParam(PARAM_country_code)->value();
+      country_code_str = inputMessage;
+    }
+    Serial.println(inputMessage);
+    request->send(200, "text/text", inputMessage);
+  });
+
+  // server->onNotFound(notFound);
+  server->begin();
 }

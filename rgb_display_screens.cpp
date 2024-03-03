@@ -470,7 +470,7 @@ void RGBDisplay::SettingsPage() {
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
-void RGBDisplay::SoftApInputs() {
+void RGBDisplay::SoftApInputsPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
@@ -587,11 +587,8 @@ void RGBDisplay::WeatherSettingsPage() {
   tft.setCursor(10, 80);
   tft.print("Units: "); tft.print(wifi_stuff->weather_units_metric_not_imperial_ ? metricUnitStr : imperialUnitStr);
   
-  // Update zipCodeStr button
-  DrawButton(kZipPinButtonX1, kZipPinButtonY1, kZipPinButtonW, kZipPinButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
-
-  // Update countryCodeStr button
-  DrawButton(kCountryCodeButtonX1, kCountryCodeButtonY1, kCountryCodeButtonW, kCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  // Set Location button
+  DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Toggle Units Metric/Imperial button
   DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -603,6 +600,49 @@ void RGBDisplay::WeatherSettingsPage() {
   DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   DisplayWeatherInfo();
+
+  // Cancel button
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
+
+void RGBDisplay::LocationInputsLocalServerPage() {
+
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeMono9pt7b);
+  tft.setCursor(10, 20);
+  tft.print("Connect to this WiFi");
+  tft.setCursor(10, 40);
+  tft.print("using mobile/computer.");
+  tft.setCursor(10, 60);
+  tft.print("WiFi SSID:");
+
+  tft.setCursor(10, 90);
+  tft.setFont(&FreeSansBold12pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.print(wifi_stuff->wifi_ssid_.c_str());
+
+  tft.setCursor(10, 120);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeMono9pt7b);
+  tft.print("Open web browser and in");
+  tft.setCursor(10, 140);
+  tft.print("address bar enter:");
+
+  tft.setCursor(10, 170);
+  tft.setFont(&FreeSansBold12pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.print(wifi_stuff->soft_AP_IP.c_str());
+
+  tft.setCursor(10, 200);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeMono9pt7b);
+  tft.print("Set Location");
+  tft.setCursor(10, 220);
+  tft.print("details.");
+
+  // Save button
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
   DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1303,9 +1343,13 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
   else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
+    // set location button
+    ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
+    if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
     // Toggle Units Metric/Imperial button
     ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (highlight == kWeatherSettingsPageUnits), 5);
-    if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Get WEATHER Info button
     ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (highlight == kWeatherSettingsPageFetch), 5);
@@ -1317,6 +1361,15 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWeatherSettingsPageCancel), 5);
+  }
+  else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
+    // Save button
+    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (highlight == kLocationInputsPageSave), 5);
+    if(color_button == kLocationInputsPageSave) DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+    // Cancel button
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kLocationInputsPageCancel), 5);
+    if(color_button == kLocationInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
 }
 
@@ -1409,17 +1462,10 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   else if(current_page == kWeatherSettingsPage) {     // WEATHER SETTINGS PAGE
 
     // update kEnterWeatherLocationZipPage button
-    if(ts_x >= kZipPinButtonX1 && ts_x <= kZipPinButtonX1 + kZipPinButtonW && ts_y >= kZipPinButtonY1 && ts_y <= kZipPinButtonY1 + kZipPinButtonH) {
-      DrawButton(kZipPinButtonX1, kZipPinButtonY1, kZipPinButtonW, kZipPinButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    if(ts_x >= kSetLocationButtonX1 && ts_x <= kSetLocationButtonX1 + kSetLocationButtonW && ts_y >= kSetLocationButtonY1 && ts_y <= kSetLocationButtonY1 + kSetLocationButtonH) {
+      DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kEnterWeatherLocationZipPage;
-    }
-
-    // update kEnterWeatherLocationCountryCodePage button
-    if(ts_x >= kCountryCodeButtonX1 && ts_x <= kCountryCodeButtonX1 + kCountryCodeButtonW && ts_y >= kCountryCodeButtonY1 && ts_y <= kCountryCodeButtonY1 + kCountryCodeButtonH) {
-      DrawButton(kCountryCodeButtonX1, kCountryCodeButtonY1, kCountryCodeButtonW, kCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      delay(100);
-      return kEnterWeatherLocationCountryCodePage;
     }
 
     // Toggle Units Metric/Imperial button
