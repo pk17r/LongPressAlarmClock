@@ -108,7 +108,9 @@ inline Cursor operator-- (Cursor& highlight_location, int) {
 // flag for second core task
 enum SecondCoreTask {
   kNoTask = 0,
-  kGetWeatherInfo ,
+  kStartSetWiFiSoftAP,
+  kStopSetWiFiSoftAP,
+  kGetWeatherInfo,
   kUpdateTimeFromNtpServer,
   kConnectWiFi,
   kDisconnectWiFi

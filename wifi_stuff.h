@@ -1,3 +1,4 @@
+#include <string>
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
@@ -16,7 +17,8 @@ public:
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
-  void GetSsidAndPasswdUsingSoftAP();
+  void StartSetWiFiSoftAP();
+  void StopSetWiFiSoftAP();
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -53,6 +55,8 @@ public:
   bool weather_units_metric_not_imperial_ = false;
 
   volatile bool wifi_connected_ = false;
+
+  std::string soft_AP_IP = "";
 
 // PRIVATE VARIABLES
 

@@ -474,20 +474,34 @@ void RGBDisplay::SoftApInputs() {
 
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
-  tft.setFont(&FreeSans12pt7b);
+  tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 30);
   tft.print("Connect to Created WiFi");
-  tft.setCursor(10, 60);
+  tft.setCursor(10, 50);
   tft.print("using mobile/computer.");
-  tft.setCursor(10, 90);
+  tft.setCursor(10, 70);
   tft.print("WiFi SSID:");
-  tft.setCursor(10, 120);
+
+  tft.setCursor(10, 100);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(softApSsid);
-  tft.setCursor(10, 150);
+
+  tft.setCursor(10, 130);
   tft.setTextColor(kDisplayColorYellow);
-  tft.setFont(&FreeSans12pt7b);
+  tft.setFont(&FreeMono9pt7b);
+  tft.print("Open web browser and in");
+  tft.setCursor(10, 150);
+  tft.print("address bar enter:");
+
+  tft.setCursor(10, 180);
+  tft.setFont(&FreeSansBold12pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.print(wifi_stuff->soft_AP_IP.c_str());
+
+  tft.setCursor(10, 210);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeMono9pt7b);
   tft.print("Set values.");
 
   // Cancel button
@@ -1253,6 +1267,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
   else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
     // Set WiFi Ssid Passwd
     ButtonHighlight(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, (highlight == kWiFiSettingsPageSetSsidPasswd), 5);
+    if(color_button == kWiFiSettingsPageSetSsidPasswd) DrawButton(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, setWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Connect To WiFi
     ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (highlight == kWiFiSettingsPageConnect), 5);
@@ -1268,6 +1283,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
   else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSoftApInputsPageCancel), 5);
+    if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
   else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
     // Toggle Units Metric/Imperial button

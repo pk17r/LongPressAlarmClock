@@ -236,8 +236,12 @@ void loop() {
             SetPage(kMainPage);
         }
         else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
-          if(highlight == kWiFiSettingsPageSetSsidPasswd)
+          if(highlight == kWiFiSettingsPageSetSsidPasswd) {
+            display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageSetSsidPasswd);
+            second_core_tasks_queue.push(kStartSetWiFiSoftAP);
+            WaitForExecutionOfSecondCoreTask();
             SetPage(kSoftApInputsPage);
+          }
           else if(highlight == kWiFiSettingsPageConnect) {
             display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
             second_core_tasks_queue.push(kConnectWiFi);
@@ -252,20 +256,25 @@ void loop() {
           }
           else if(highlight == kWiFiSettingsPageCancel)
             SetPage(kSettingsPage);
-          else if(highlight == kWeatherSettingsPageUnits) {
+        }
+        else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
+          if(highlight == kSoftApInputsPageCancel) {
+            display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageCancel);
+            second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+            WaitForExecutionOfSecondCoreTask();
+            wifi_stuff->SaveWiFiDetails();
+            SetPage(kWiFiSettingsPage);
+          }
+        }
+        else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
+          if(highlight == kWeatherSettingsPageUnits) {
             wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);
             wifi_stuff->SaveWeatherUnits();
             wifi_stuff->got_weather_info_ = false;
             SetPage(kWeatherSettingsPage);
           }
-        }
-        else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
-          if(highlight == kSoftApInputsPageCancel)
-            SetPage(kWiFiSettingsPage);
-        }
-        else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
-          if(highlight == kWeatherSettingsPageFetch) {
+          else if(highlight == kWeatherSettingsPageFetch) {
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
             second_core_tasks_queue.push(kGetWeatherInfo);
             WaitForExecutionOfSecondCoreTask();
@@ -363,7 +372,10 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_millis > kInactivityMillisLimit) {
+    if(inactivity_millis > (current_page != kSoftApInputsPage ? kInactivityMillisLimit : 3 * kInactivityMillisLimit)) {
+      // if softap server is on, then end it
+      if(current_page == kSoftApInputsPage)
+        second_core_tasks_queue.push(kStopSetWiFiSoftAP);
       // set display brightness based on time
       display->CheckTimeAndSetBrightness();
       // turn screen saver On
@@ -425,6 +437,12 @@ void loop1() {
     }
     else if(current_task == kDisconnectWiFi) {
       wifi_stuff->TurnWiFiOff();
+    }
+    else if(current_task == kStartSetWiFiSoftAP) {
+      wifi_stuff->StartSetWiFiSoftAP();
+    }
+    else if(current_task == kStopSetWiFiSoftAP) {
+      wifi_stuff->StopSetWiFiSoftAP();
     }
 
     // done processing the task
@@ -812,7 +830,6 @@ void SetPage(ScreenPage page) {
       highlight = kSoftApInputsPageCancel;
       display->SoftApInputs();
       display->SetMaxBrightness();
-      wifi_stuff->GetSsidAndPasswdUsingSoftAP();
       break;
     case kEnterWiFiSsidPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
