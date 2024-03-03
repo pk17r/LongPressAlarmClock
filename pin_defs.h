@@ -47,6 +47,8 @@
   #define SCL_PIN 22
   #define BUTTON_PIN 35
   #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
+  #define INC_BUTTON_PIN 34
+  #define DEC_BUTTON_PIN 33
   #define LED_PIN 32
   #define LED_BUILTIN 2
   #define BUZZER_PIN 13
@@ -77,8 +79,8 @@
   #define SDA_PIN 8
   #define SCL_PIN 9
   #define BUTTON_PIN 6
-  #define INC_BUTTON_PIN 3
-  #define DEC_BUTTON_PIN 2
+  #define INC_BUTTON_PIN 11
+  #define DEC_BUTTON_PIN 10
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   #define LED_PIN 5
   // #define LED_BUILTIN 15   // pre-defined

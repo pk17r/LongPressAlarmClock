@@ -400,7 +400,7 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_millis > (((current_page != kSoftApInputsPage) || (current_page != kLocationInputsPage)) ? kInactivityMillisLimit : 3 * kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page != kSoftApInputsPage) || (current_page != kLocationInputsPage)) ? kInactivityMillisLimit : 5 * kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         second_core_tasks_queue.push(kStopSetWiFiSoftAP);
