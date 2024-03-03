@@ -630,6 +630,14 @@ void RGBDisplay::DisplayWeatherInfo() {
     tft.setCursor(w_x0, s_y0 + 125);
     tft.print("Wind: "); tft.print(wifi_stuff->weather_wind_speed_.c_str()); tft.print(" Humidity: "); tft.print(wifi_stuff->weather_humidity_.c_str());
   }
+  else {
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setFont(&FreeMono9pt7b);
+    tft.setCursor(10, 150);
+    tft.print("Could not fetch");
+    tft.setCursor(10, 180);
+    tft.print("Weather info!");
+  }
 }
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
