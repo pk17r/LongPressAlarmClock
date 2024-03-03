@@ -19,6 +19,7 @@
 #include <Fonts/FreeSans24pt7b.h>
 #include <Fonts/FreeSans18pt7b.h>
 #include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include <Fonts/FreeSansBold12pt7b.h>
 #include <Fonts/FreeSans12pt7b.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <Fonts/FreeMono9pt7b.h>
@@ -142,14 +143,13 @@ private:
   const int16_t kDateRow_Y0 = 140;
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
-  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", ssidStr[5] = "SSID", passwdStr[7] = "PASSWD", weatherStr[8] = "WEATHER", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
+  const char cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[8] = "WEATHER", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize - 5, kCancelButtonY1 = kTftHeight - kCancelButtonSize - 5;
   const int16_t kWiFiSettingsButtonW = 100, kWiFiSettingsButtonX1 = kTftWidth - kWiFiSettingsButtonW - 5, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonH = 25;
   const int16_t kWeatherSettingsButtonW = 150, kWeatherSettingsButtonX1 = kTftWidth - kWeatherSettingsButtonW - 5, kWeatherSettingsButtonY1 = 40, kWeatherSettingsButtonH = 25;
   const int16_t kScreensaverButtonW = 180, kScreensaverButtonX1 = kTftWidth - kScreensaverButtonW - 5, kScreensaverButtonY1 = 150, kScreensaverButtonH = 25;
 
-  const int16_t kPasswdButtonW = 120, kPasswdButtonX1 = kTftWidth - kPasswdButtonW - 5, kPasswdButtonY1 = 0, kPasswdButtonH = 25;
-  const int16_t kSsidButtonW = 80, kSsidButtonX1 = kPasswdButtonX1 - 10 - kSsidButtonW, kSsidButtonY1 = 0, kSsidButtonH = 25;
+  const int16_t kSetWiFiButtonW = 150, kSetWiFiButtonX1 = kTftWidth - kSetWiFiButtonW - 5, kSetWiFiButtonY1 = 0, kSetWiFiButtonH = 25;
   const int16_t kConnectWiFiButtonW = 130, kConnectWiFiButtonX1 = 5, kConnectWiFiButtonY1 = 90, kConnectWiFiButtonH = 25;
   const int16_t kDisconnectWiFiButtonW = 170, kDisconnectWiFiButtonX1 = kTftWidth - kDisconnectWiFiButtonW - 5, kDisconnectWiFiButtonY1 = 90, kDisconnectWiFiButtonH = 25;
 

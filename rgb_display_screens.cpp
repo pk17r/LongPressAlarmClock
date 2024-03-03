@@ -475,10 +475,19 @@ void RGBDisplay::SoftApInputs() {
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeSans12pt7b);
-  tft.setCursor(10, 40);
-  tft.println("Connect to Created WiFi Soft AP");
-  tft.println("using mobile/computer.");
-  tft.print("WiFi SSID: "); tft.println(softApSsid);
+  tft.setCursor(10, 30);
+  tft.print("Connect to Created WiFi");
+  tft.setCursor(10, 60);
+  tft.print("using mobile/computer.");
+  tft.setCursor(10, 90);
+  tft.print("WiFi SSID:");
+  tft.setCursor(10, 120);
+  tft.setFont(&FreeSansBold12pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.print(softApSsid);
+  tft.setCursor(10, 150);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeSans12pt7b);
   tft.print("Set values.");
 
   // Cancel button
@@ -510,11 +519,8 @@ void RGBDisplay::WiFiSettingsPage() {
      break;
   }
 
-  // Update SSID button
-  DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, ssidStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
-
-  // Update PASSWD button
-  DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  // Set WiFi SSID and Passwd button
+  DrawButton(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, setWiFiStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Connect To WiFi
   DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1245,6 +1251,9 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);
   }
   else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
+    // Set WiFi Ssid Passwd
+    ButtonHighlight(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, (highlight == kWiFiSettingsPageSetSsidPasswd), 5);
+
     // Connect To WiFi
     ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (highlight == kWiFiSettingsPageConnect), 5);
     if(color_button == kWiFiSettingsPageConnect) DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
@@ -1255,6 +1264,10 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWiFiSettingsPageCancel), 5);
+  }
+  else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
+    // Cancel button
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSoftApInputsPageCancel), 5);
   }
   else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
     // Toggle Units Metric/Imperial button
@@ -1327,16 +1340,9 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   }
   else if(current_page == kWiFiSettingsPage) {      // WIFI SETTINGS PAGE
 
-    // update wifi ssid button
-    if(ts_x >= kSsidButtonX1 && ts_x <= kSsidButtonX1 + kSsidButtonW && ts_y >= kSsidButtonY1 && ts_y <= kSsidButtonY1 + kSsidButtonH) {
-      DrawButton(kSsidButtonX1, kSsidButtonY1, kSsidButtonW, kSsidButtonH, ssidStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      delay(100);
-      return kEnterWiFiSsidPage;
-    }
-
-    // update wifi Passwd button
-    if(ts_x >= kPasswdButtonX1 && ts_x <= kPasswdButtonX1 + kPasswdButtonW && ts_y >= kPasswdButtonY1 && ts_y <= kPasswdButtonY1 + kPasswdButtonH) {
-      DrawButton(kPasswdButtonX1, kPasswdButtonY1, kPasswdButtonW, kPasswdButtonH, passwdStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    // update wifi Ssid Passwd button
+    if(ts_x >= kSetWiFiButtonX1 && ts_x <= kSetWiFiButtonX1 + kSetWiFiButtonW && ts_y >= kSetWiFiButtonY1 && ts_y <= kSetWiFiButtonY1 + kSetWiFiButtonH) {
+      DrawButton(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, setWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kEnterWiFiPasswdPage;
     }

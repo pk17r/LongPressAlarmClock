@@ -222,10 +222,8 @@ void loop() {
             SetPage(kAlarmSetPage);
         }
         else if(current_page == kSettingsPage) {        // SETTINGS PAGE
-          if(highlight == kSettingsPageWiFi) {
-            // wifi_stuff->GetSsidAndPasswdUsingSoftAP();
+          if(highlight == kSettingsPageWiFi)
             SetPage(kWiFiSettingsPage);
-          }
           else if(highlight == kSettingsPageWeather) {
             display->InstantHighlightResponse(/* color_button = */ kSettingsPageWeather);
             second_core_tasks_queue.push(kGetWeatherInfo);
@@ -238,7 +236,9 @@ void loop() {
             SetPage(kMainPage);
         }
         else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
-          if(highlight == kWiFiSettingsPageConnect) {
+          if(highlight == kWiFiSettingsPageSetSsidPasswd)
+            SetPage(kSoftApInputsPage);
+          else if(highlight == kWiFiSettingsPageConnect) {
             display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
             second_core_tasks_queue.push(kConnectWiFi);
             WaitForExecutionOfSecondCoreTask();
@@ -259,6 +259,10 @@ void loop() {
             wifi_stuff->got_weather_info_ = false;
             SetPage(kWeatherSettingsPage);
           }
+        }
+        else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
+          if(highlight == kSoftApInputsPageCancel)
+            SetPage(kWiFiSettingsPage);
         }
         else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
           if(highlight == kWeatherSettingsPageFetch) {
@@ -803,6 +807,13 @@ void SetPage(ScreenPage page) {
       display->WiFiSettingsPage();
       display->SetMaxBrightness();
       break;
+    case kSoftApInputsPage:
+      current_page = kSoftApInputsPage;     // new page needs to be set before any action
+      highlight = kSoftApInputsPageCancel;
+      display->SoftApInputs();
+      display->SetMaxBrightness();
+      wifi_stuff->GetSsidAndPasswdUsingSoftAP();
+      break;
     case kEnterWiFiSsidPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
       display->SetMaxBrightness();
@@ -956,12 +967,12 @@ void MoveCursor(bool increment) {
   else if(current_page == kWiFiSettingsPage) {
     if(increment) {
       if(highlight == kWiFiSettingsPageCancel)
-        highlight = kWiFiSettingsPageConnect;
+        highlight = kWiFiSettingsPageSetSsidPasswd;
       else
         highlight++;
     }
     else {
-      if(highlight == kWiFiSettingsPageConnect)
+      if(highlight == kWiFiSettingsPageSetSsidPasswd)
         highlight = kWiFiSettingsPageCancel;
       else
         highlight--;
