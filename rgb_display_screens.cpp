@@ -450,7 +450,7 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     tft.fillScreen(kDisplayBackroundColor);
     tft.setTextColor(kDisplayColorYellow);
     tft.setFont(&FreeSans12pt7b);
-    tft.setCursor(10, 40);
+    tft.setCursor(10, 30);
     tft.print("Settings:");
 
     // Update WiFi Details button
@@ -856,16 +856,7 @@ void RGBDisplay::Screensaver() {
       my_canvas_->drawRect(0,0, screensaver_w_, screensaver_h_, kDisplayColorWhite);  // canvas border
 
     if(rtc->year() < 2024) {
-      // RTC Time is not Set!
-      my_canvas_->fillRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayBackroundColor);
-      my_canvas_->drawRect(0, 0, screensaver_w_, kTimeRowY0, kDisplayTimeColor);
-      my_canvas_->setFont(&FreeSansBold12pt7b);
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 / 3 - 3);
-      my_canvas_->print("Clock Power Lost!");
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 2 / 3 - 6);
-      my_canvas_->print("Battery may be out!");
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 - 9);
-      my_canvas_->print("Updating Time using WiFi..");
+      IncorrectTimeBanner();
     }
 
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
@@ -956,90 +947,79 @@ void RGBDisplay::DisplayTimeUpdate() {
     }
 
     // create new canvas for time row
-    // myCanvas = std::unique_ptr<GFXcanvas16>(new GFXcanvas16(TFT_WIDTH, TIME_ROW_Y0 + 6));
-    my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
-    my_canvas_->fillScreen(kDisplayBackroundColor);
-    my_canvas_->setTextWrap(false);
+    if(rtc->year() < 2024)  { // incorrect time
+      my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0IncorrectTime);
 
-    // HH:MM
+      IncorrectTimeBanner();
 
-    // set font
-    my_canvas_->setFont(&FreeSansBold48pt7b);
+      // draw canvas to tft   fastDrawBitmap
+      FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+    }
+    else {
+      my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
+      my_canvas_->fillScreen(kDisplayBackroundColor);
+      my_canvas_->setTextWrap(false);
 
-    // home the cursor
-    my_canvas_->setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
+      // HH:MM
 
-    // change the text color to foreground color
-    my_canvas_->setTextColor(kDisplayTimeColor);
-
-    // draw the new time value
-    my_canvas_->print(new_display_data_.time_HHMM);
-    // tft.setTextSize(1);
-    // delay(2000);
-
-    // and remember the new value
-    strcpy(displayed_data_.time_HHMM, new_display_data_.time_HHMM);
-
-
-    // AM/PM
-
-    int16_t x0_pos = my_canvas_->getCursorX();
-
-    // set font
-    my_canvas_->setFont(&FreeSans18pt7b);
-
-    // draw new AM/PM
-    if(new_display_data_._12_hour_mode) {
+      // set font
+      my_canvas_->setFont(&FreeSansBold48pt7b);
 
       // home the cursor
-      my_canvas_->setCursor(x0_pos + kDisplayTextGap, kAM_PM_row_Y0);
-      // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+      my_canvas_->setCursor(kTimeRowX0 + hh_gap_x, kTimeRowY0);
+
+      // change the text color to foreground color
+      my_canvas_->setTextColor(kDisplayTimeColor);
 
       // draw the new time value
-      if(new_display_data_.pm_not_am)
-        my_canvas_->print(kPmLabel);
-      else
-        my_canvas_->print(kAmLabel);
+      my_canvas_->print(new_display_data_.time_HHMM);
+      // tft.setTextSize(1);
+      // delay(2000);
+
+      // and remember the new value
+      strcpy(displayed_data_.time_HHMM, new_display_data_.time_HHMM);
+
+
+      // AM/PM
+
+      int16_t x0_pos = my_canvas_->getCursorX();
+
+      // set font
+      my_canvas_->setFont(&FreeSans18pt7b);
+
+      // draw new AM/PM
+      if(new_display_data_._12_hour_mode) {
+
+        // home the cursor
+        my_canvas_->setCursor(x0_pos + kDisplayTextGap, kAM_PM_row_Y0);
+        // Serial.print("tft_AmPm_x0 "); Serial.print(tft_AmPm_x0); Serial.print(" y0 "); Serial.print(tft_AmPm_y0); Serial.print(" tft.getCursorX() "); Serial.print(tft.getCursorX()); Serial.print(" tft.getCursorY() "); Serial.println(tft.getCursorY()); 
+
+        // draw the new time value
+        if(new_display_data_.pm_not_am)
+          my_canvas_->print(kPmLabel);
+        else
+          my_canvas_->print(kAmLabel);
+      }
+
+      // and remember the new value
+      displayed_data_._12_hour_mode = new_display_data_._12_hour_mode;
+      displayed_data_.pm_not_am = new_display_data_.pm_not_am;
+
+
+      // :SS
+
+      // home the cursor
+      my_canvas_->setCursor(x0_pos + kDisplayTextGap, kTimeRowY0);
+
+      // draw the new time value
+      my_canvas_->print(new_display_data_.time_SS);
+
+      // and remember the new value
+      strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
+
+      // draw canvas to tft   fastDrawBitmap
+      FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
-
-    // and remember the new value
-    displayed_data_._12_hour_mode = new_display_data_._12_hour_mode;
-    displayed_data_.pm_not_am = new_display_data_.pm_not_am;
-
-
-    // :SS
-
-    // home the cursor
-    my_canvas_->setCursor(x0_pos + kDisplayTextGap, kTimeRowY0);
-
-    // draw the new time value
-    my_canvas_->print(new_display_data_.time_SS);
-
-    // and remember the new value
-    strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
-
-    if(rtc->year() < 2024) {
-      // RTC Time is not Set!
-      my_canvas_->fillRect(0, 0, kTftWidth, kTimeRowY0, kDisplayBackroundColor);
-      my_canvas_->drawRect(0, 0, kTftWidth, kTimeRowY0, kDisplayTimeColor);
-      my_canvas_->setTextColor(kDisplayTimeColor);
-      my_canvas_->setFont(&FreeSansBold12pt7b);
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 / 3 - 3);
-      my_canvas_->print("Clock Power Lost!");
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 * 2 / 3 - 6);
-      my_canvas_->print("Battery may be out!");
-      my_canvas_->setCursor(kDisplayTextGap, kTimeRowY0 - 9);
-      my_canvas_->print("Updating Time using WiFi..");
-    }
-
-    // draw canvas to tft   fastDrawBitmap
-    // elapsedMillis time1;
-    // tft.drawBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6, Display_Time_Color, Display_Backround_Color); // Copy to screen
-    FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
-    // tft.drawRGBBitmap(0, 0, myCanvas->getBuffer(), TFT_WIDTH, TIME_ROW_Y0 + 6); // Copy to screen
-    // unsigned long timeA = time1;
-    // Serial.println();
-    // Serial.print("Time to run tft.drawRGBBitmap (ms) = "); Serial.println(timeA);
 
     // delete created canvas and null the pointer
     delete my_canvas_;
@@ -1202,45 +1182,53 @@ void RGBDisplay::DisplayTimeUpdate() {
 
   // date string center aligned
   if (strcmp(new_display_data_.date_str, displayed_data_.date_str) != 0 || redraw_display_) {
-    // set font
-    tft.setFont(&Satisfy_Regular24pt7b);
+    if(rtc->year() < 2024) {
+      // if time is incorrect then don't bother drawing date row
 
-    // change the text color to the background color
-    tft.setTextColor(kDisplayBackroundColor);
+      // draw settings gear
+      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
+    }
+    else {
+      // set font
+      tft.setFont(&Satisfy_Regular24pt7b);
 
-    // clear old data
-    if(!isThisTheFirstTime) {
-      // yes! home the cursor
+      // change the text color to the background color
+      tft.setTextColor(kDisplayBackroundColor);
+
+      // clear old data
+      if(!isThisTheFirstTime) {
+        // yes! home the cursor
+        tft.setCursor(date_row_x0_, kDateRow_Y0);
+
+        // redraw the old value to erase
+        tft.print(displayed_data_.date_str);
+      }
+
+      // home the cursor
       tft.setCursor(date_row_x0_, kDateRow_Y0);
 
-      // redraw the old value to erase
-      tft.print(displayed_data_.date_str);
+      // record date_row_w to calculate center aligned date_row_x0 value
+      int16_t date_row_y1;
+      uint16_t date_row_w, date_row_h;
+      // get bounds of new dateStr on tft display (with background color as this causes a blink)
+      tft.getTextBounds(new_display_data_.date_str, tft.getCursorX(), tft.getCursorY(), &date_row_x0_, &date_row_y1, &date_row_w, &date_row_h);
+      date_row_x0_ = (kSettingsGearX1 - date_row_w) / 2;
+
+      // home the cursor
+      tft.setCursor(date_row_x0_, kDateRow_Y0);
+
+      // change the text color to foreground color
+      tft.setTextColor(kDisplayDateColor);
+
+      // draw the new dateStr value
+      tft.print(new_display_data_.date_str);
+
+      // draw settings gear
+      tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
+
+      // and remember the new value
+      strcpy(displayed_data_.date_str, new_display_data_.date_str);
     }
-
-    // home the cursor
-    tft.setCursor(date_row_x0_, kDateRow_Y0);
-
-    // record date_row_w to calculate center aligned date_row_x0 value
-    int16_t date_row_y1;
-    uint16_t date_row_w, date_row_h;
-    // get bounds of new dateStr on tft display (with background color as this causes a blink)
-    tft.getTextBounds(new_display_data_.date_str, tft.getCursorX(), tft.getCursorY(), &date_row_x0_, &date_row_y1, &date_row_w, &date_row_h);
-    date_row_x0_ = (kSettingsGearX1 - date_row_w) / 2;
-
-    // home the cursor
-    tft.setCursor(date_row_x0_, kDateRow_Y0);
-
-    // change the text color to foreground color
-    tft.setTextColor(kDisplayDateColor);
-
-    // draw the new dateStr value
-    tft.print(new_display_data_.date_str);
-
-    // draw settings gear
-    tft.drawBitmap(kSettingsGearX1, kSettingsGearY1, kSettingsGearBitmap, kSettingsGearWidth, kSettingsGearHeight, RGB565_Sandy_brown); // Copy to screen
-
-    // and remember the new value
-    strcpy(displayed_data_.date_str, new_display_data_.date_str);
   }
 
   // // settings wheel cursor highlight
@@ -1331,6 +1319,26 @@ void RGBDisplay::DisplayTimeUpdate() {
   //   tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
 
   redraw_display_ = false;
+}
+
+void RGBDisplay::IncorrectTimeBanner() {
+  // RTC Time is not Set!
+  my_canvas_->fillRect(0, 0, kTftWidth, kTimeRowY0IncorrectTime, kDisplayBackroundColor);
+  my_canvas_->drawRect(0, 0, kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor);
+  // my_canvas_->setTextColor(kDisplayTimeColor);
+  my_canvas_->setFont(&FreeSansBold12pt7b);
+  my_canvas_->setCursor(kDisplayTextGap, 30);
+  my_canvas_->print("Incorrect Time!");
+  my_canvas_->setFont(&FreeMono9pt7b);
+  my_canvas_->setCursor(kDisplayTextGap, 50);
+  my_canvas_->print("Battery may be out!");
+  my_canvas_->setCursor(kDisplayTextGap, 70);
+  my_canvas_->print("Time Update Required!");
+  my_canvas_->setCursor(kDisplayTextGap, 90);
+  if(!(wifi_stuff->incorrect_wifi_details_))
+    my_canvas_->print("Updating Time using WiFi..");
+  else
+    my_canvas_->print("Could not connect to WiFi.");
 }
 
 void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap) {
@@ -1488,7 +1496,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // Test WiFi Connection button
     if(ts_x >= kConnectWiFiButtonX1 && ts_x <= kConnectWiFiButtonX1 + kConnectWiFiButtonW && ts_y >= kConnectWiFiButtonY1 && ts_y <= kConnectWiFiButtonY1 + kConnectWiFiButtonH) {
       DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      second_core_tasks_queue.push(kConnectWiFi);
+      AddSecondCoreTaskIfNotThere(kConnectWiFi);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWiFiSettingsPage;
@@ -1497,7 +1505,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // disconnect WiFi button
     if(ts_x >= kDisconnectWiFiButtonX1 && ts_x <= kDisconnectWiFiButtonX1 + kDisconnectWiFiButtonW && ts_y >= kDisconnectWiFiButtonY1 && ts_y <= kDisconnectWiFiButtonY1 + kDisconnectWiFiButtonH) {
       DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      second_core_tasks_queue.push(kDisconnectWiFi);
+      AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWiFiSettingsPage;
@@ -1533,7 +1541,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // get Weather Info button
     if(ts_x >= kFetchWeatherButtonX1 && ts_x <= kFetchWeatherButtonX1 + kFetchWeatherButtonW && ts_y >= kFetchWeatherButtonY1 && ts_y <= kFetchWeatherButtonY1 + kFetchWeatherButtonH) {
       DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      second_core_tasks_queue.push(kGetWeatherInfo);
+      AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kWeatherSettingsPage;
@@ -1542,7 +1550,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     // update Time button
     if(ts_x >= kUpdateTimeButtonX1 && ts_x <= kUpdateTimeButtonX1 + kUpdateTimeButtonW && ts_y >= kUpdateTimeButtonY1 && ts_y <= kUpdateTimeButtonY1 + kUpdateTimeButtonH) {
       DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
-      second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+      AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
       return kMainPage;

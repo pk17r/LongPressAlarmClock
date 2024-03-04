@@ -114,20 +114,21 @@ inline Cursor operator-- (Cursor& highlight_location, int) {
 
 // flag for second core task
 enum SecondCoreTask {
-  kNoTask = 0,
-  kStartSetWiFiSoftAP,
+  kStartSetWiFiSoftAP = 0,
   kStopSetWiFiSoftAP,
   kStartLocationInputsLocalServer,
   kStopLocationInputsLocalServer,
   kGetWeatherInfo,
   kUpdateTimeFromNtpServer,
   kConnectWiFi,
-  kDisconnectWiFi
+  kDisconnectWiFi,
+  kNoTask,
   };
 
 // second core current task
 // extern volatile SecondCoreTask second_core_task;
 extern std::queue<SecondCoreTask> second_core_tasks_queue;
+extern bool second_core_task_added_flag_array[];
 
 // display time data in char arrays
 struct DisplayData {
@@ -145,6 +146,7 @@ extern DisplayData new_display_data_, displayed_data_;
 
 
 // extern all global functions
+extern void AddSecondCoreTaskIfNotThere(SecondCoreTask task);
 extern void WaitForExecutionOfSecondCoreTask();
 extern int AvailableRam();
 extern void SerialInputFlush();

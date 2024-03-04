@@ -190,6 +190,10 @@ void setup() {
     ts = new Touchscreen();
   #endif
 
+  // second core task added flag array
+  for (int i = 0; i < kNoTask; i++)
+    second_core_task_added_flag_array[i] = false;
+
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
         Task1code, /* Function to implement the task */
@@ -245,7 +249,7 @@ void loop() {
             SetPage(kWiFiSettingsPage);
           else if(highlight == kSettingsPageWeather) {
             display->InstantHighlightResponse(/* color_button = */ kSettingsPageWeather);
-            second_core_tasks_queue.push(kGetWeatherInfo);
+            AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWeatherSettingsPage);
           }
@@ -270,19 +274,19 @@ void loop() {
         else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
           if(highlight == kWiFiSettingsPageSetSsidPasswd) {
             display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageSetSsidPasswd);
-            second_core_tasks_queue.push(kStartSetWiFiSoftAP);
+            AddSecondCoreTaskIfNotThere(kStartSetWiFiSoftAP);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kSoftApInputsPage);
           }
           else if(highlight == kWiFiSettingsPageConnect) {
             display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
-            second_core_tasks_queue.push(kConnectWiFi);
+            AddSecondCoreTaskIfNotThere(kConnectWiFi);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWiFiSettingsPage);
           }
           else if(highlight == kWiFiSettingsPageDisconnect) {
             display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
-            second_core_tasks_queue.push(kDisconnectWiFi);
+            AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWiFiSettingsPage);
           }
@@ -292,14 +296,14 @@ void loop() {
         else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
           if(highlight == kSoftApInputsPageSave) {
             display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageSave);
-            second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+            AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
             WaitForExecutionOfSecondCoreTask();
             wifi_stuff->SaveWiFiDetails();
             SetPage(kWiFiSettingsPage);
           }
           else if(highlight == kSoftApInputsPageCancel) {
             display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageCancel);
-            second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+            AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWiFiSettingsPage);
           }
@@ -307,7 +311,7 @@ void loop() {
         else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
           if(highlight == kWeatherSettingsPageSetLocation) {
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageSetLocation);
-            second_core_tasks_queue.push(kStartLocationInputsLocalServer);
+            AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kLocationInputsPage);
           }
@@ -320,13 +324,13 @@ void loop() {
           }
           else if(highlight == kWeatherSettingsPageFetch) {
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageFetch);
-            second_core_tasks_queue.push(kGetWeatherInfo);
+            AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWeatherSettingsPage);
           }
           else if(highlight == kWeatherSettingsPageUpdateTime) {
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUpdateTime);
-            second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+            AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kMainPage);
           }
@@ -336,7 +340,7 @@ void loop() {
         else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
           if(highlight == kLocationInputsPageSave) {
             display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageSave);
-            second_core_tasks_queue.push(kStopLocationInputsLocalServer);
+            AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
             WaitForExecutionOfSecondCoreTask();
             wifi_stuff->SaveWeatherLocationDetails();
             wifi_stuff->got_weather_info_ = false;
@@ -344,7 +348,7 @@ void loop() {
           }
           else if(highlight == kLocationInputsPageCancel) {
             display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageCancel);
-            second_core_tasks_queue.push(kStopLocationInputsLocalServer);
+            AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWeatherSettingsPage);
           }
@@ -379,17 +383,17 @@ void loop() {
   else
     digitalWrite(LED_PIN, LOW);
 
-  // if time is lost because of power failure
-  if(rtc->year() < 2024) {
-    PrintLn("**** Update RTC HW Time from NTP Server ****");
-    // update time from NTP server
-    second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-    WaitForExecutionOfSecondCoreTask();
-  }
-
   // new second! Update Time!
   if (rtc->rtc_hw_sec_update_) {
     rtc->rtc_hw_sec_update_ = false;
+
+    // if time is lost because of power failure
+    if(rtc->year() < 2024 && !(wifi_stuff->incorrect_wifi_details_)) {
+      PrintLn("**** Update RTC HW Time from NTP Server ****");
+      // update time from NTP server
+      AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+      WaitForExecutionOfSecondCoreTask();
+    }
 
     // new minute!
     if (rtc->rtc_hw_min_update_) {
@@ -421,14 +425,14 @@ void loop() {
         // try to get weather info 5 mins before alarm time and every 60 minutes
         if((inactivity_millis > kInactivityMillisLimit) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
           // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
-          second_core_tasks_queue.push(kGetWeatherInfo);
+          AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
           PrintLn("Get Weather Info!");
         }
 
         // auto update time at 2AM every morning
         if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
           // update time from NTP server
-          second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+          AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
           PrintLn("Get Time Update from NTP Server");
         }
       #endif
@@ -449,9 +453,9 @@ void loop() {
     if(inactivity_millis > (((current_page != kSoftApInputsPage) || (current_page != kLocationInputsPage)) ? kInactivityMillisLimit : 5 * kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
-        second_core_tasks_queue.push(kStopSetWiFiSoftAP);
+        AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsPage)
-        second_core_tasks_queue.push(kStopLocationInputsLocalServer);
+        AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
       // set display brightness based on time
       display->CheckTimeAndSetBrightness();
       // turn screen saver On
@@ -492,43 +496,61 @@ void loop1() {
     SecondCoreTask current_task = second_core_tasks_queue.front();
     // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
+    bool success = false;
+
     if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*1000)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
+      success = wifi_stuff->got_weather_info_;
 
       // try once more if did not get info
-      if(!wifi_stuff->got_weather_info_)
+      if(!success) {
+        delay(1000);
         wifi_stuff->GetTodaysWeatherInfo();
+        success = wifi_stuff->got_weather_info_;
+      }
     }
     else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000)) {
       // get time from NTP server
-      if(!(wifi_stuff->GetTimeFromNtpServer())) {
+      success = wifi_stuff->GetTimeFromNtpServer();
+
+      // try once more if did not get info
+      if(!success) {
         delay(1000);
-        // try once more if did not get info
-        wifi_stuff->GetTimeFromNtpServer();
+        success = wifi_stuff->GetTimeFromNtpServer();
       }
     }
     else if(current_task == kConnectWiFi) {
       wifi_stuff->TurnWiFiOn();
+      success = wifi_stuff->wifi_connected_;
     }
     else if(current_task == kDisconnectWiFi) {
       wifi_stuff->TurnWiFiOff();
+      success = !(wifi_stuff->wifi_connected_);
     }
     else if(current_task == kStartSetWiFiSoftAP) {
       wifi_stuff->StartSetWiFiSoftAP();
+      success = true;
     }
     else if(current_task == kStopSetWiFiSoftAP) {
       wifi_stuff->StopSetWiFiSoftAP();
+      success = true;
     }
     else if(current_task == kStartLocationInputsLocalServer) {
       wifi_stuff->StartSetLocationLocalServer();
+      success = true;
     }
     else if(current_task == kStopLocationInputsLocalServer) {
       wifi_stuff->StopSetLocationLocalServer();
+      success = true;
     }
 
     // done processing the task
-    second_core_tasks_queue.pop();
+    // if(success) {
+      second_core_tasks_queue.pop();
+      delay(1);   // a delay to avoid race condition in dual core MCUs
+      second_core_task_added_flag_array[current_task] = false;
+    // }
   }
   // turn off WiFi if there are no more requests and User is not using device
   if(wifi_stuff->wifi_connected_ && inactivity_millis >= kInactivityMillisLimit)
@@ -568,9 +590,18 @@ ScreenPage current_page = kMainPage;
 // current cursor highlight location on page
 Cursor highlight = kCursorNoSelection;
 
-// second core current task
-// volatile SecondCoreTask second_core_task = kNoTask;
+// second core current task queue
 std::queue<SecondCoreTask> second_core_tasks_queue;
+// second core task added flag
+bool second_core_task_added_flag_array[kNoTask];
+
+// function to safely add second core task if not already there
+void AddSecondCoreTaskIfNotThere(SecondCoreTask task) {
+  if(!second_core_task_added_flag_array[task]) {
+    second_core_tasks_queue.push(task);
+    second_core_task_added_flag_array[task] = true;
+  }
+}
 
 int AvailableRam() {
   #if defined(MCU_IS_RP2040)
@@ -759,13 +790,13 @@ void ProcessSerialInput() {
     case 'c':   // connect to WiFi
       {
         Serial.println(F("**** Connect to WiFi ****"));
-        second_core_tasks_queue.push(kConnectWiFi);
+        AddSecondCoreTaskIfNotThere(kConnectWiFi);
       }
       break;
     case 'd':   // disconnect WiFi
       {
         Serial.println(F("**** Disconnect WiFi ****"));
-        second_core_tasks_queue.push(kDisconnectWiFi);
+        AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
       }
       break;
     case 'e':   // setup ds3231 rtc
@@ -819,7 +850,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
         // update time from NTP server
-        second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+        AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }
       break;
     case 'o':   // On Screen User Text Input
@@ -855,7 +886,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Get Weather Info ****"));
         // get today's weather info
-        second_core_tasks_queue.push(kGetWeatherInfo);
+        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       }
       break;
     case 'y':   // show alarm triggered screen

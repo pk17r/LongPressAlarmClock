@@ -24,6 +24,7 @@ WiFiStuff::WiFiStuff() {
 
 void WiFiStuff::SaveWiFiDetails() {
   eeprom->SaveWiFiDetails(wifi_ssid_, wifi_password_);
+  incorrect_wifi_details_ = false;
 }
 
 void WiFiStuff::SaveWeatherLocationDetails() {
@@ -34,7 +35,8 @@ void WiFiStuff::SaveWeatherUnits() {
   eeprom->SaveWeatherUnits(weather_units_metric_not_imperial_);
 }
 
-void WiFiStuff::TurnWiFiOn() {
+bool WiFiStuff::TurnWiFiOn() {
+
   PrintLn("Connecting to WiFi");
   WiFi.mode(WIFI_STA);
   delay(1);
@@ -52,12 +54,16 @@ void WiFiStuff::TurnWiFiOn() {
     PrintLn("WiFi Connected.");
     digitalWrite(LED_BUILTIN, HIGH);
     wifi_connected_ = true;
+    incorrect_wifi_details_ = false;
   }
   else {
     PrintLn("Could NOT connect to WiFi.");
     digitalWrite(LED_BUILTIN, LOW);
     wifi_connected_ = false;
+    incorrect_wifi_details_ = true;
   }
+
+  return wifi_connected_;
 }
 
 void WiFiStuff::TurnWiFiOff() {
@@ -76,7 +82,8 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // turn On Wifi
   if(!wifi_connected_)
-    TurnWiFiOn();
+    if(!TurnWiFiOn())
+      return;
 
   // Your Domain name with URL path or IP address with path
   std::string openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
@@ -181,12 +188,12 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       return false;
   }
 
-  bool returnVal = false;
-
   // turn On Wifi
   if(!wifi_connected_)
-    TurnWiFiOn();
+    if(!TurnWiFiOn())
+      return false;
 
+  bool returnVal = false;
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
@@ -383,7 +390,10 @@ void WiFiStuff::StartSetLocationLocalServer() {
     server = NULL;
   }
 
-  TurnWiFiOn();
+  soft_AP_IP = "";
+
+  if(!TurnWiFiOn())
+    return;
   delay(100);
 
   server = new AsyncWebServer(80);

@@ -13,7 +13,7 @@ public:
   void SaveWiFiDetails();
   void SaveWeatherLocationDetails();
   void SaveWeatherUnits();
-  void TurnWiFiOn();
+  bool TurnWiFiOn();
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
@@ -57,6 +57,9 @@ public:
   bool weather_units_metric_not_imperial_ = false;
 
   volatile bool wifi_connected_ = false;
+
+  // flag to stop trying auto connect to WiFi
+  bool incorrect_wifi_details_ = false;
 
   std::string soft_AP_IP = "";
 
