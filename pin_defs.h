@@ -2,8 +2,8 @@
 #define PIN_DEFS_H
 
 // SELECT MCU
-// #define MCU_IS_ESP32_WROOM_DA_MODULE
-#define MCU_IS_ESP32_S2_MINI
+#define MCU_IS_ESP32_WROOM_DA_MODULE
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_RASPBERRY_PI_PICO_W
 
 // SELECT DISPLAY
@@ -52,6 +52,7 @@
   #define LED_PIN 32
   #define LED_BUILTIN 2
   #define BUZZER_PIN 13
+  #define DEBUG_PIN 12    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
 
 
 #elif defined(MCU_IS_ESP32_S2_MINI)
@@ -85,6 +86,7 @@
   #define LED_PIN 5
   // #define LED_BUILTIN 15   // pre-defined
   #define BUZZER_PIN 4
+  #define DEBUG_PIN 21    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
 
 
 

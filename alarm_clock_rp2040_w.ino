@@ -90,39 +90,56 @@ const unsigned long kWatchdogTimeoutMs = 10000;
 // setup core0
 void setup() {
 
+  // make all spi CS pins high
+  pinMode(TFT_CS, OUTPUT);
+  digitalWrite(TFT_CS, HIGH);
+
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    pinMode(TS_CS_PIN, OUTPUT);
+    digitalWrite(TS_CS_PIN, HIGH);
+  #endif
+
+  // make buzzer pin low
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  // pullup debug pin
+  pinMode(DEBUG_PIN, INPUT_PULLUP);
+
+  // LED Pin
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
+
+  // BUILTIN LED - we use for WiFi Connect Notification
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  // a delay to let currents stabalize
+  delay(500);
+
+  Serial.begin(115200);
+  delay(200);
+  if(!digitalRead(DEBUG_PIN))
+    while(!Serial) { delay(20); };
+  Serial.println(F("\nSerial OK"));
+  Serial.flush();
+
   #if defined(MCU_IS_RP2040)
     // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    rp2040.wdt_begin(kWatchdogTimeoutMs);
+    if(digitalRead(DEBUG_PIN))  // enable watchdog reset if not in debug mode
+      rp2040.wdt_begin(kWatchdogTimeoutMs);
   #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
     setCpuFrequencyMhz(80);
     // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
-    esp_task_wdt_init(kWatchdogTimeoutMs / 1000, true); //enable panic so ESP32 restarts
-    esp_task_wdt_add(NULL); //add current thread to WDT watch
+    if(digitalRead(DEBUG_PIN)) {  // enable watchdog reset if not in debug mode
+      esp_task_wdt_init(kWatchdogTimeoutMs / 1000, true); //enable panic so ESP32 restarts
+      esp_task_wdt_add(NULL); //add current thread to WDT watch
+    }
   #endif
-
-  Serial.begin(115200);
-  delay(200);
-  // while(!Serial) { delay(20); };
-  Serial.println(F("\nSerial OK"));
-  Serial.flush();
-
-  // make all spi CS pins high
-  pinMode(TFT_CS, OUTPUT);
-  digitalWrite(TFT_CS, HIGH);
-  #if defined(TOUCHSCREEN_IS_XPT2046)
-    pinMode(TS_CS_PIN, OUTPUT);
-    digitalWrite(TS_CS_PIN, HIGH);
-  #endif
-  // make buzzer pin low
-  pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
-
-  // a delay to let currents stabalize
-  delay(1000);
 
   // initialize spi
   #if defined(MCU_IS_RP2040)
@@ -136,14 +153,6 @@ void setup() {
       spi_obj->begin(TFT_CLK, -1, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
     #endif
   #endif
-
-  // LED Pin
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
-
-  // BUILTIN LED - we use for WiFi Connect Notification
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN);
@@ -699,14 +708,17 @@ void SerialPrintRtcDateTime() {
 
 // reset watchdog within time so it does not reboot system
 void ResetWatchdog() {
-  #if defined(MCU_IS_RP2040)
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
-    rp2040.wdt_reset();
-  #elif defined(MCU_IS_ESP32)
-    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-    esp_task_wdt_reset();
-  #endif
+  // reset MCU if not in debug mode
+  if(digitalRead(DEBUG_PIN)) {
+    #if defined(MCU_IS_RP2040)
+      // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
+      rp2040.wdt_reset();
+    #elif defined(MCU_IS_ESP32)
+      // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+      esp_task_wdt_reset();
+    #endif
+  }
 }
 
 void ProcessSerialInput() {
