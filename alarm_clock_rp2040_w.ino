@@ -164,9 +164,10 @@ void setup() {
   #if defined(WIFI_IS_USED)
     wifi_stuff = new WiFiStuff();
   #endif
+  // setup ds3231 rtc module
   rtc = new RTC();
-  alarm_clock = new AlarmClock();
   // setup alarm clock
+  alarm_clock = new AlarmClock();
   alarm_clock->Setup();
   // prepare date and time arrays and serial print RTC Date Time
   PrepareTimeDayDateArrays();

@@ -24,10 +24,12 @@ private:
   void SaveDefaults();
   std::string FetchString(uint16_t length_address, uint16_t data_address);
   void SaveString(uint16_t length_address, uint8_t length_max, uint16_t data_address, std::string text);
-  uint8_t Fetch1Byte(uint16_t address);
-  void Save1Byte(uint16_t address, uint8_t value);
   uint32_t Fetch4Bytes(uint16_t address);
   void Save4Bytes(uint16_t address, uint32_t value);
+  // last leg of interaction with EEPROM
+  uint8_t Fetch1Byte(uint16_t address);
+  // last leg of interaction with EEPROM
+  void Save1Byte(uint16_t address, uint8_t value);
 
 
   // uEEPROMLib eeprom for AT24C32 EEPROM

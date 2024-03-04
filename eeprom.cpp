@@ -20,17 +20,30 @@ EEPROM::EEPROM() {
 }
 
 void EEPROM::SaveDefaults() {
+  int delay_ms = 25;
+  delay(delay_ms);
   Save1Byte(kDataModelVersionAddress, kDataModelVersion);
+  delay(delay_ms);
   Save1Byte(kAlarmHrAddress, kAlarmHr);
+  delay(delay_ms);
   Save1Byte(kAlarmMinAddress, kAlarmMin);
+  delay(delay_ms);
   Save1Byte(kAlarmIsAmAddress, kAlarmIsAm);
+  delay(delay_ms);
   Save1Byte(kAlarmOnAddress, kAlarmOn);
+  delay(delay_ms);
   SaveString(kWiFiSsidLengthAddress, kWiFiSsidLengthMax, kWiFiSsidAddress, kWiFiSsid);
+  delay(delay_ms);
   SaveString(kWiFiPasswdLengthAddress, kWiFiPasswdLengthMax, kWiFiPasswdAddress, kWiFiPasswd);
+  delay(delay_ms);
   Save4Bytes(kWeatherZipCodeAddress, kWeatherZipCode);
+  delay(delay_ms);
   Save1Byte(kWeatherCountryCodeAddress, static_cast<uint8_t>(kWeatherCountryCode[0]));
+  delay(delay_ms);
   Save1Byte(kWeatherCountryCodeAddress + 1, static_cast<uint8_t>(kWeatherCountryCode[1]));
+  delay(delay_ms);
   Save1Byte(kWeatherUnitsMetricNotImperialAddress, kWeatherUnitsMetricNotImperial);
+  delay(delay_ms);
   Save1Byte(kAlarmLongPressSecondsAddress, kAlarmLongPressSeconds);
   PrintLn("Defaults saved to EEPROM!");
 }
@@ -113,19 +126,6 @@ void EEPROM::SaveString(uint16_t length_address, uint8_t length_max, uint16_t da
   }
 }
 
-
-uint8_t EEPROM::Fetch1Byte(uint16_t address) {
-  uint8_t value;
-  eeprom_.eeprom_read(address, &value);
-  return value;
-}
-
-void EEPROM::Save1Byte(uint16_t address, uint8_t value) {
-  if (!eeprom_.eeprom_write(address, value)) {
-    PrintLn("Failed to save to EEPROM!");
-  } 
-}
-
 uint32_t EEPROM::Fetch4Bytes(uint16_t address) {
   uint32_t value = Fetch1Byte(address);   // MSB
   value = value << 8;
@@ -151,4 +151,16 @@ void EEPROM::Save4Bytes(uint16_t address, uint32_t value) {
   Save1Byte(address, val8bit);   // MSB
 }
 
+// last leg of interaction with EEPROM
+uint8_t EEPROM::Fetch1Byte(uint16_t address) {
+  uint8_t value;
+  eeprom_.eeprom_read(address, &value);
+  return value;
+}
 
+// last leg of interaction with EEPROM
+void EEPROM::Save1Byte(uint16_t address, uint8_t value) {
+  if (!eeprom_.eeprom_write(address, value)) {
+    PrintLn("Failed to save to EEPROM!");
+  }
+}
