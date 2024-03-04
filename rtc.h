@@ -63,6 +63,16 @@ public:
   */
   uint8_t hourModeAndAmPm() { return rtc_hw_.hourModeAndAmPm(); }
 
+  /**
+  * \brief Set clock in 12 or 24 hour mode
+  * 12 hour mode has 1-12 hours and AM or PM flag
+  * 24 hour mode has 0-23 hours
+  * get current clock mode and AM or PM flag using hourModeAndAmPm()
+  *
+  * @param twelveHrMode true or false
+  */
+  void set_12hour_mode(const bool twelveHrMode) { rtc_hw_.set_12hour_mode(twelveHrMode); }
+
 
 private:
 

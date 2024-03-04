@@ -773,6 +773,14 @@ void ProcessSerialInput() {
       rtc->Ds3231RtcSetup();
       Serial.println(F("DS3231 setup."));
       break;
+    case 'f':   // toggle 12 / 24 hour mode
+      Serial.println(F("**** toggle 12 / 24 hour mode ****"));
+      if(rtc->hourModeAndAmPm() == 0)
+        rtc->set_12hour_mode(true);
+      else
+        rtc->set_12hour_mode(false);
+      Serial.print(F("RTC hourModeAndAmPm() = ")); Serial.println(rtc->hourModeAndAmPm());
+      break;
     case 'g':   // good morning
       {
         display->GoodMorningScreen();
