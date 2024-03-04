@@ -22,14 +22,15 @@ RTC::RTC() {
   // get data from DS3231 HW
   Refresh();
 
-  // setup DS3231 rtc for the first time, no problem doing it again
-  FirstTimeRtcSetup();
+  // setup DS3231 rtc
+  Ds3231RtcSetup();
 
   // Check if time is up to date
   PrintLn("Lost power status: ");
   if (rtc_hw_.lostPower()) {
     PrintLn("POWER FAILED. Clearing flag...");
     rtc_hw_.lostPowerClear();
+    delay(100);
   }
   else
     PrintLn("POWER OK");
@@ -47,57 +48,60 @@ RTC::RTC() {
   pinMode(SQW_INT_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), SecondsUpdateInterruptISR, RISING);
 
-  // set sqw pin to trigger every second
-  rtc_hw_.sqwgSetMode(URTCLIB_SQWG_1H);
-
   PrintLn("RTC Initialized!");
 }
 
 // setup DS3231 rtc for the first time, no problem doing it again
-void RTC::FirstTimeRtcSetup() {
+void RTC::Ds3231RtcSetup() {
   // Set Oscillator to use VBAT when VCC turns off if not set
   if(rtc_hw_.getEOSCFlag()) {
     if(rtc_hw_.enableBattery())
       PrintLn("Enable Battery Success");
     else
       PrintLn("Enable Battery UNSUCCESSFUL!");
+    delay(100);
   }
 
   // disable 32K Pin Sq Wave out if on
   if(rtc_hw_.status32KOut()) {
     rtc_hw_.disable32KOut();
     PrintLn("disable32KOut() done");
+    delay(100);
   }
 
-  // disable Sqw Pin Wave out if on
-  if(rtc_hw_.sqwgMode() != URTCLIB_SQWG_OFF_1) {
-    rtc_hw_.sqwgSetMode(URTCLIB_SQWG_OFF_1);
-    PrintLn("stop sq wave on sqw pin. Mode set: URTCLIB_SQWG_OFF_1");
-  }
+  // set sqw pin to trigger every second
+  rtc_hw_.sqwgSetMode(URTCLIB_SQWG_1H);
+  delay(100);
 
   // clear alarms flags if any
   if(rtc_hw_.alarmTriggered(URTCLIB_ALARM_1)) {
     rtc_hw_.alarmClearFlag(URTCLIB_ALARM_1);
     PrintLn("URTCLIB_ALARM_1 alarm flag cleared.");
+    delay(100);
   }
   if(rtc_hw_.alarmTriggered(URTCLIB_ALARM_2)) {
     rtc_hw_.alarmClearFlag(URTCLIB_ALARM_2);
     PrintLn("URTCLIB_ALARM_2 alarm flag cleared.");
+    delay(100);
   }
 
   // we won't use RTC for alarm, disable if enabled
   if(rtc_hw_.alarmMode(URTCLIB_ALARM_1) != URTCLIB_ALARM_TYPE_1_NONE) {
     rtc_hw_.alarmDisable(URTCLIB_ALARM_1);
     PrintLn("URTCLIB_ALARM_1 disabled.");
+    delay(100);
   }
   if(rtc_hw_.alarmMode(URTCLIB_ALARM_2) != URTCLIB_ALARM_TYPE_2_NONE) {
     rtc_hw_.alarmDisable(URTCLIB_ALARM_2);
     PrintLn("URTCLIB_ALARM_2 disabled.");
+    delay(100);
   }
 
   // set rtcHw in 12 hour mode if not already
-  if(rtc_hw_.hourModeAndAmPm() == 0)
+  if(rtc_hw_.hourModeAndAmPm() == 0) {
     rtc_hw_.set_12hour_mode(true);
+    delay(100);
+  }
 }
 
 // private function to refresh time from RTC HW and do basic power failure checks
@@ -168,11 +172,13 @@ void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_m
   // RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   rtc_hw_.set(second, minute, hour_24_hr_mode, dayOfWeek_Sun_is_1, day, month_Jan_is_1, year - 2000);
   PrintLn("Time set");
+  delay(100);
   // refresh time from RTC HW
   Refresh();
   delay(100);
   // set RTC HW back into 12 hour mode
   rtc_hw_.set_12hour_mode(true);
+  delay(100);
   // restart interrupts
   // interrupts();
 }

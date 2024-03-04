@@ -75,8 +75,8 @@ private:
 
   static inline volatile bool rtc_refresh_reqd_ = false;
 
-  // setup DS3231 rtc for the first time, no problem doing it again
-  void FirstTimeRtcSetup();
+  // setup DS3231 rtc
+  void Ds3231RtcSetup();
 
   // private function to refresh time from RTC HW and do basic power failure checks
   void Refresh();

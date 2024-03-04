@@ -200,3 +200,47 @@ void AlarmClock::DeallocateBuzzerTimer() {
     PrintLn("Buzzer Timer deallocated.");
   #endif
 }
+
+// inspired from rp2040 Tone example; Non-blocking
+// Play a note of the specified frequency and for the specified duration.
+// Hold is an optional bool that specifies if this note should be held a
+// little longer, i.e. for eighth notes that are tied together.
+// While waiting for a note to play the waitBreath delay function is used
+// so breath detection and pixel animation continues to run.  No tones
+// will play if the slide switch is in the -/off position or all the
+// candles have been blown out.
+void AlarmClock::playNote(int frequency, int duration, bool hold) {
+  if (hold) {
+    // For a note that's held play it a little longer than the specified duration
+    // so it blends into the next tone (but there's still a small delay to
+    // hear the next note).
+    tone(BUZZER_PIN, frequency, duration + duration / 32);
+  } else {
+    // For a note that isn't held just play it for the specified duration.
+    tone(BUZZER_PIN, frequency, duration);
+  }
+}
+
+// inspired from rp2040 Tone example; Non-blocking
+// Song to play when the candles are blown out.
+void AlarmClock::celebrateSong(int &tone_note_index, unsigned long &next_tone_change_time) {
+  // Play a little charge melody, from:
+  //  https://en.wikipedia.org/wiki/Charge_(fanfare)
+  // Note the explicit boolean parameters in particular the measure=false
+  // at the end.  This means the notes will play without any breath measurement
+  // logic.  Without this false value playNote will try to keep waiting for candles
+  // to blow out during the celebration song!
+
+  int duration = 0;
+  switch(tone_note_index) {
+    case 0: { duration = 183; playNote(392, duration, true); } break;
+    case 1: { duration = 183; playNote(523, duration, true); } break;
+    case 2: { duration = 183; playNote(659, duration, false); } break;
+    case 3: { duration = 275; playNote(784, duration, true); } break;
+    case 4: { duration = 137; playNote(659, duration, false); } break;
+    case 5: { duration = 1100; playNote(784, duration, false); } break;
+    default: { duration = 2000; }
+  }
+  tone_note_index++;
+  next_tone_change_time += duration;
+}

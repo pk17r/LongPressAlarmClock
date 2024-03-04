@@ -22,6 +22,8 @@ public:
   void SaveAlarm();
   int16_t MinutesToAlarm();
   void BuzzAlarmFn();
+  void playNote(int frequency, int duration, bool hold = false);
+  void celebrateSong(int &tone_note_index, unsigned long &next_tone_change_time);
 
 
 // OBJECTS and VARIABLES

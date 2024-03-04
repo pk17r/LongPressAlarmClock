@@ -91,7 +91,7 @@ private:
 
 // PRIVATE FUNCTIONS
 
-  void DrawSun(int16_t x0, int16_t y0, uint16_t edge);
+  void DrawSun(int16_t x0, int16_t y0, uint16_t edge, int &tone_note_index, unsigned long &next_tone_change_time);
   void DrawRays(int16_t &cx, int16_t &cy, int16_t &rr, int16_t &rl, int16_t &rw, uint8_t &rn, int16_t &degStart, uint16_t &color);
   void DrawDenseCircle(int16_t &cx, int16_t &cy, int16_t r, uint16_t &color);
   void PickNewRandomColor();  // for screensaver

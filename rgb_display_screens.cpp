@@ -725,7 +725,7 @@ void RGBDisplay::DisplayWeatherInfo() {
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
-  int16_t title_x0 = 30, title_y0 = 50;
+  int16_t title_x0 = 30, title_y0 = 40;
   int16_t s_x0 = 230, s_y0 = title_y0 + 48;
   
   if(firstTime) {
@@ -1579,8 +1579,14 @@ void RGBDisplay::GoodMorningScreen() {
   uint16_t edge = 160;
   
   unsigned int startTime = millis();
+
+  // start tone
+  int tone_note_index = 0;
+  unsigned long next_tone_change_time = startTime;
+  alarm_clock->celebrateSong(tone_note_index, next_tone_change_time);
+
   while(millis() - startTime < 5000)
-    DrawSun(x0, y0, edge);
+    DrawSun(x0, y0, edge, tone_note_index, next_tone_change_time);
 
   tft.fillScreen(kDisplayColorBlack);
   redraw_display_ = true;
@@ -1590,7 +1596,7 @@ void RGBDisplay::GoodMorningScreen() {
  * 
  * params: top left corner 'x0' and 'y0', square edge length of graphic 'edge'
  */ 
-void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge) {
+void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge, int &tone_note_index, unsigned long &next_tone_change_time) {
 
   // set dimensions of sun and rays
 
@@ -1660,6 +1666,10 @@ void RGBDisplay::DrawSun(int16_t x0, int16_t y0, uint16_t edge) {
     }
     // delay(1000);
     variation_prev = variation;
+
+    // celebration tone
+    if(millis() > next_tone_change_time)
+      alarm_clock->celebrateSong(tone_note_index, next_tone_change_time);
   }
 }
 
