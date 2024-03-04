@@ -444,30 +444,73 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-void RGBDisplay::SettingsPage() {
+void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_long_press_secs) {
 
-  tft.fillScreen(kDisplayBackroundColor);
-  tft.setTextColor(kDisplayColorYellow);
-  tft.setFont(&FreeSans12pt7b);
-  tft.setCursor(10, 40);
-  tft.print("Settings:");
+  if(!inc_alarm_long_press_secs && !dec_alarm_long_press_secs) {
+    tft.fillScreen(kDisplayBackroundColor);
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setFont(&FreeSans12pt7b);
+    tft.setCursor(10, 40);
+    tft.print("Settings:");
 
-  // Update WiFi Details button
-  DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    // Update WiFi Details button
+    DrawButton(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, wifiSettingsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Update Weather and Location button
-  DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    // Update Weather and Location button
+    DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  tft.setFont(&FreeSans12pt7b);
-  tft.setTextColor(kDisplayColorYellow);
-  tft.setCursor(10, kScreensaverButtonY1 + kScreensaverButtonH / 2);
-  tft.print("Run:");
+    tft.setFont(&FreeSans12pt7b);
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setCursor(10, kAlarmLongPressSecondsY0 - 20);
+    tft.print("Alarm Long");
+    tft.setCursor(10, kAlarmLongPressSecondsY0);
+    tft.print("Press Seconds:");
+    tft.setCursor(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY0);
+    tft.print(alarm_clock->alarm_long_press_seconds_);
+    DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - 2 * kAlarmLongPressSecondsTriangleButtonsSize - 2, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, true, kDisplayColorCyan, kDisplayBackroundColor);
+    DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, false, kDisplayColorCyan, kDisplayBackroundColor);
+    // Set button
+    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Start Screensaver Button
-  DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    tft.setFont(&FreeSans12pt7b);
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setCursor(10, kScreensaverButtonY1 + kScreensaverButtonH * 3 / 4);
+    tft.print("Run:");
 
-  // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    // Start Screensaver Button
+    DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+    // Cancel button
+    DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  }
+  else {
+    // clear current alarm long press seconds
+    tft.setFont(&FreeSans12pt7b);
+    tft.setTextColor(kDisplayBackroundColor);
+    tft.setCursor(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY0);
+    tft.print(alarm_clock->alarm_long_press_seconds_);
+    // change seconds
+    if(inc_alarm_long_press_secs && alarm_clock->alarm_long_press_seconds_ < 30)
+      alarm_clock->alarm_long_press_seconds_ += 5;
+    else if(dec_alarm_long_press_secs && alarm_clock->alarm_long_press_seconds_ > 5)
+      alarm_clock->alarm_long_press_seconds_ -= 5;
+    // draw new seconds
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setCursor(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY0);
+    tft.print(alarm_clock->alarm_long_press_seconds_);
+    // show effect of user input
+    if(inc_alarm_long_press_secs) {
+      DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - 2 * kAlarmLongPressSecondsTriangleButtonsSize - 2, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, true, kDisplayColorCyan, kDisplayColorGreen);
+      delay(kUserInputDelayMs);
+      DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - 2 * kAlarmLongPressSecondsTriangleButtonsSize - 2, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, true, kDisplayColorCyan, kDisplayBackroundColor);
+    }
+    if(dec_alarm_long_press_secs) {
+      DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, false, kDisplayColorCyan, kDisplayColorGreen);
+      delay(kUserInputDelayMs);
+      DrawTriangleButton(kAlarmLongPressSecondsX0 + kAlarmLongPressSecondsW, kAlarmLongPressSecondsY0 - kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsTriangleButtonsSize, false, kDisplayColorCyan, kDisplayBackroundColor);
+    }
+    InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+  }
 }
 
 void RGBDisplay::SoftApInputsPage() {
@@ -1310,6 +1353,13 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     // Update Weather and Location button
     ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (highlight == kSettingsPageWeather), 5);
     if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+    // Alarm Long Press Seconds Text
+    ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (highlight == kSettingsPageAlarmLongPressSeconds), 5);
+
+    // Alarm Long Press Seconds Set button
+    ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (highlight == kSettingsPageSet), 5);
+    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageSet ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Start Screensaver Button
     ButtonHighlight(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, (highlight == kSettingsPageScreensaver), 5);

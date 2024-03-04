@@ -215,7 +215,7 @@ void loop() {
         SetPage(userTouchRegion);
     }
 
-    // button click action
+    // push/big button click action
     if(push_button->buttonActiveDebounced()) {
       // PrintLn("push_button");
       if(current_page == kAlarmSetPage)
@@ -235,6 +235,19 @@ void loop() {
             second_core_tasks_queue.push(kGetWeatherInfo);
             WaitForExecutionOfSecondCoreTask();
             SetPage(kWeatherSettingsPage);
+          }
+          else if(highlight == kSettingsPageSet) {
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageSet);
+            delay(kUserInputDelayMs);
+            highlight = kSettingsPageAlarmLongPressSeconds;
+            display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+          }
+          else if(highlight == kSettingsPageAlarmLongPressSeconds) {
+            highlight = kSettingsPageSet;
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageSet);
+            eeprom->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
+            delay(kUserInputDelayMs);
+            display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
           }
           else if(highlight == kSettingsPageScreensaver)
             SetPage(kScreensaverPage);
@@ -327,14 +340,20 @@ void loop() {
     }
     else if(inc_button->buttonActiveDebounced()) {
       PrintLn("inc_button");
-      if(current_page != kAlarmSetPage)
+      if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
+        display->SettingsPage(true, false);
+      }
+      else if(current_page != kAlarmSetPage)
         MoveCursor(false);
       else
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ true, /* dec_button_pressed */ false, /* push_button_pressed */ false);
     }
     else if(dec_button->buttonActiveDebounced()) {
       PrintLn("dec_button");
-      if(current_page != kAlarmSetPage)
+      if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
+        display->SettingsPage(false, true);
+      }
+      else if(current_page != kAlarmSetPage)
         MoveCursor(true);
       else
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ true, /* push_button_pressed */ false);
@@ -852,13 +871,13 @@ void SetPage(ScreenPage page) {
       break;
     case kAlarmTriggeredPage:
       current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
-      display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds);
+      display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
       display->SetMaxBrightness();
       break;
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
       highlight = kSettingsPageWiFi;
-      display->SettingsPage();
+      display->SettingsPage(false, false);
       display->SetMaxBrightness();
       break;
     case kWiFiSettingsPage:

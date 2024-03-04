@@ -72,6 +72,7 @@ enum Cursor {
   kAlarmSetPageCancel,
   kSettingsPageWiFi,
   kSettingsPageWeather,
+  kSettingsPageSet,
   kSettingsPageScreensaver,
   kSettingsPageCancel,
   kWiFiSettingsPageSetSsidPasswd,
@@ -87,7 +88,8 @@ enum Cursor {
   kWeatherSettingsPageCancel,
   kLocationInputsPageSave,
   kLocationInputsPageCancel,
-  kCursorMaxValue
+  kCursorMaxValue,    // inc/dec button scroll won't go above this level
+  kSettingsPageAlarmLongPressSeconds,
   };
 
 // current cursor highlight location on page

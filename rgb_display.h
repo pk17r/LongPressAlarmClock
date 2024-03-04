@@ -44,7 +44,7 @@ public:
   void SetAlarmScreen(bool process_user_input, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void DisplayWeatherInfo();
-  void SettingsPage();
+  void SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_long_press_secs);
   void SoftApInputsPage();
   void WiFiSettingsPage();
   void WeatherSettingsPage();
@@ -152,6 +152,8 @@ private:
 
   const int16_t kWiFiSettingsButtonW = 100, kWiFiSettingsButtonX1 = kTftWidth - kWiFiSettingsButtonW - 5, kWiFiSettingsButtonY1 = 10, kWiFiSettingsButtonH = 25;
   const int16_t kWeatherSettingsButtonW = 150, kWeatherSettingsButtonX1 = kTftWidth - kWeatherSettingsButtonW - 5, kWeatherSettingsButtonY1 = 40, kWeatherSettingsButtonH = 25;
+  const int16_t kAlarmLongPressSecondsX0 = 190, kAlarmLongPressSecondsY0 = 120, kAlarmLongPressSecondsW = 30, kAlarmLongPressSecondsH = 25, kAlarmLongPressSecondsY1 = kAlarmLongPressSecondsY0 - kAlarmLongPressSecondsH, kAlarmLongPressSecondsTriangleButtonsSize = 8;
+  const int16_t kAlarmLongPressSecondsSetButtonW = 80, kAlarmLongPressSecondsSetButtonH = 25, kAlarmLongPressSecondsSetButtonX1 = kTftWidth - kAlarmLongPressSecondsSetButtonW - 5, kAlarmLongPressSecondsSetButtonY1 = kAlarmLongPressSecondsY1;
   const int16_t kScreensaverButtonW = 180, kScreensaverButtonX1 = kTftWidth - kScreensaverButtonW - 5, kScreensaverButtonY1 = 150, kScreensaverButtonH = 25;
 
   const int16_t kSetWiFiButtonW = 150, kSetWiFiButtonX1 = kTftWidth - kSetWiFiButtonW - 5, kSetWiFiButtonY1 = 0, kSetWiFiButtonH = 25;

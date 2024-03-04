@@ -19,7 +19,7 @@ void AlarmClock::Setup() {
   eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 
   // retrieve long press seconds
-  eeprom->RetrieveLongPressSeconds(alarm_long_press_seconds);
+  eeprom->RetrieveLongPressSeconds(alarm_long_press_seconds_);
 
   // setup buzzer timer
   SetupBuzzerTimer();
@@ -85,7 +85,7 @@ void AlarmClock::BuzzAlarmFn() {
   BuzzerEnable();
   bool alarmStopped = false, buzzerPausedByUser = false;
   unsigned long alarmStartTimeMs = millis();
-  int buttonPressSecondsCounter = alarm_long_press_seconds;
+  int buttonPressSecondsCounter = alarm_long_press_seconds_;
   while(!alarmStopped) {
     ResetWatchdog();
     // if user presses button then pauze buzzer and start alarm end countdown!
@@ -99,12 +99,12 @@ void AlarmClock::BuzzAlarmFn() {
       while(push_button->buttonActiveDebounced() && !alarmStopped) {
         ResetWatchdog();
         // display countdown to alarm off
-        if(alarm_long_press_seconds - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
+        if(alarm_long_press_seconds_ - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
           buttonPressSecondsCounter--;
           display->AlarmTriggeredScreen(false, buttonPressSecondsCounter);
         }
         // end alarm after holding button for ALARM_END_BUTTON_PRESS_AND_HOLD_SECONDS
-        if(millis() - buttonPressStartTimeMs > alarm_long_press_seconds * 1000) {
+        if(millis() - buttonPressStartTimeMs > alarm_long_press_seconds_ * 1000) {
           alarmStopped = true;
           // good morning screen! :)
           display->GoodMorningScreen();
@@ -118,10 +118,10 @@ void AlarmClock::BuzzAlarmFn() {
         buzzerPausedByUser = false;
       }
       // if user lifts button press before alarm end then reset counter and re-display alarm-On screen
-      if(buttonPressSecondsCounter != alarm_long_press_seconds) {
+      if(buttonPressSecondsCounter != alarm_long_press_seconds_) {
         // display Alarm On screen with seconds user needs to press and hold button to end alarm
-        buttonPressSecondsCounter = alarm_long_press_seconds;
-        display->AlarmTriggeredScreen(false, alarm_long_press_seconds);
+        buttonPressSecondsCounter = alarm_long_press_seconds_;
+        display->AlarmTriggeredScreen(false, alarm_long_press_seconds_);
       }
     }
     // if user did not stop alarm within ALARM_MAX_ON_TIME_MS, make sure to stop buzzer
