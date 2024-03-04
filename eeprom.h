@@ -9,6 +9,8 @@ class EEPROM {
 
 public:
   EEPROM();
+  void RetrieveLongPressSeconds(uint8_t &long_press_seconds);
+  void SaveLongPressSeconds(uint8_t long_press_seconds);
   void RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
   void SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn);
   void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
@@ -51,6 +53,7 @@ private:
   const uint16_t kWeatherCountryCodeAddress = 75;
   const uint8_t kWeatherCountryCodeBytes = 2;
   const uint16_t kWeatherUnitsMetricNotImperialAddress = 77;
+  const uint16_t kAlarmLongPressSecondsAddress = 79;
 
 
   // DEFAULTS
@@ -64,6 +67,7 @@ private:
   const uint32_t kWeatherZipCode = 92104;
   const std::string kWeatherCountryCode = "US";
   const bool kWeatherUnitsMetricNotImperial = false;
+  const uint8_t kAlarmLongPressSeconds = 25;
 
 
 };

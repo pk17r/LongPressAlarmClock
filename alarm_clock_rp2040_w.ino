@@ -852,7 +852,7 @@ void SetPage(ScreenPage page) {
       break;
     case kAlarmTriggeredPage:
       current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
-      display->AlarmTriggeredScreen(true, alarm_clock->kAlarmEndButtonPressAndHoldSeconds);
+      display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds);
       display->SetMaxBrightness();
       break;
     case kSettingsPage:

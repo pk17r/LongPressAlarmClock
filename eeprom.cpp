@@ -15,7 +15,7 @@ EEPROM::EEPROM() {
   // check if data is compatible with code, otherwise set the respective flag and default data
   if(Fetch1Byte(kDataModelVersionAddress) != kDataModelVersion)
     SaveDefaults();
-  
+
   PrintLn("EEPROM Initialized!");
 }
 
@@ -31,7 +31,16 @@ void EEPROM::SaveDefaults() {
   Save1Byte(kWeatherCountryCodeAddress, static_cast<uint8_t>(kWeatherCountryCode[0]));
   Save1Byte(kWeatherCountryCodeAddress + 1, static_cast<uint8_t>(kWeatherCountryCode[1]));
   Save1Byte(kWeatherUnitsMetricNotImperialAddress, kWeatherUnitsMetricNotImperial);
+  Save1Byte(kAlarmLongPressSecondsAddress, kAlarmLongPressSeconds);
   PrintLn("Defaults saved to EEPROM!");
+}
+
+void EEPROM::RetrieveLongPressSeconds(uint8_t &long_press_seconds) {
+  long_press_seconds = Fetch1Byte(kAlarmLongPressSecondsAddress);
+}
+
+void EEPROM::SaveLongPressSeconds(uint8_t long_press_seconds) {
+  Save1Byte(kAlarmLongPressSecondsAddress, long_press_seconds);
 }
 
 void EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
