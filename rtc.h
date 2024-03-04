@@ -14,6 +14,9 @@ public:
 
   RTC();  // constructor
 
+  // setup DS3231 rtc
+  void Ds3231RtcSetup();
+
   static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
   static inline volatile bool rtc_hw_min_update_ = false;     // minutes change flag
 
@@ -74,9 +77,6 @@ private:
   static inline volatile uint8_t second_ = 0;
 
   static inline volatile bool rtc_refresh_reqd_ = false;
-
-  // setup DS3231 rtc
-  void Ds3231RtcSetup();
 
   // private function to refresh time from RTC HW and do basic power failure checks
   void Refresh();

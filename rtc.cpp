@@ -16,43 +16,21 @@ RTC::RTC() {
     URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
   #endif
 
+  // setup DS3231 rtc
+  Ds3231RtcSetup();
+
+  PrintLn("RTC Initialized!");
+}
+
+// setup DS3231 rtc
+void RTC::Ds3231RtcSetup() {
+
   // set rtc model
   rtc_hw_.set_model(URTCLIB_MODEL_DS3231);
 
   // get data from DS3231 HW
   Refresh();
 
-  // setup DS3231 rtc
-  Ds3231RtcSetup();
-
-  // Check if time is up to date
-  PrintLn("Lost power status: ");
-  if (rtc_hw_.lostPower()) {
-    PrintLn("POWER FAILED. Clearing flag...");
-    rtc_hw_.lostPowerClear();
-    delay(100);
-  }
-  else
-    PrintLn("POWER OK");
-
-  // Check whether OSC is set to use VBAT or not
-  if (rtc_hw_.getEOSCFlag())
-    PrintLn("Oscillator will NOT use VBAT when VCC cuts off. Time will not increment without VCC!");
-  else
-    PrintLn("Oscillator will use VBAT if VCC cuts off.");
-
-  // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
-  // second_ = rtc_hw_.second() + 2;
-
-  // seconds interrupt pin
-  pinMode(SQW_INT_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), SecondsUpdateInterruptISR, RISING);
-
-  PrintLn("RTC Initialized!");
-}
-
-// setup DS3231 rtc for the first time, no problem doing it again
-void RTC::Ds3231RtcSetup() {
   // Set Oscillator to use VBAT when VCC turns off if not set
   if(rtc_hw_.getEOSCFlag()) {
     if(rtc_hw_.enableBattery())
@@ -102,6 +80,31 @@ void RTC::Ds3231RtcSetup() {
     rtc_hw_.set_12hour_mode(true);
     delay(100);
   }
+
+
+  // Check if time is up to date
+  PrintLn("Lost power status: ");
+  if (rtc_hw_.lostPower()) {
+    PrintLn("POWER FAILED. Clearing flag...");
+    rtc_hw_.lostPowerClear();
+    delay(100);
+  }
+  else
+    PrintLn("POWER OK");
+
+  // Check whether OSC is set to use VBAT or not
+  if (rtc_hw_.getEOSCFlag())
+    PrintLn("Oscillator will NOT use VBAT when VCC cuts off. Time will not increment without VCC!");
+  else
+    PrintLn("Oscillator will use VBAT if VCC cuts off.");
+
+  // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
+  // second_ = rtc_hw_.second() + 2;
+
+  // seconds interrupt pin
+  pinMode(SQW_INT_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(SQW_INT_PIN), SecondsUpdateInterruptISR, RISING);
+
 }
 
 // private function to refresh time from RTC HW and do basic power failure checks

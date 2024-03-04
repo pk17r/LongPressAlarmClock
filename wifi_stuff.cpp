@@ -175,7 +175,11 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
 bool WiFiStuff::GetTimeFromNtpServer() {
 
-  if(!got_weather_info_) return false; // we need gmt_offset_sec_ before getting time update!
+  if(!got_weather_info_) { // we need gmt_offset_sec_ before getting time update!
+    GetTodaysWeatherInfo();
+    if(!got_weather_info_)
+      return false;
+  }
 
   bool returnVal = false;
 

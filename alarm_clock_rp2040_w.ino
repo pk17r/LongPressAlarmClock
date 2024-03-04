@@ -77,6 +77,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
   TaskHandle_t Task1;
 #endif
+bool _debug_mode = false;
 
 SPIClass* spi_obj = NULL;
 
@@ -114,20 +115,29 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
+  Serial.begin(115200);
+
   // a delay to let currents stabalize
   delay(500);
 
-  Serial.begin(115200);
-  delay(200);
-  if(!digitalRead(DEBUG_PIN))
-    while(!Serial) { delay(20); };
+  // if(!digitalRead(DEBUG_PIN))
+  //   while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
   Serial.flush();
+
+  // check if in debug mode
+  bool _debug_mode = !digitalRead(DEBUG_PIN);
+  delayMicroseconds(20);
+  while(digitalRead(DEBUG_PIN) == _debug_mode) {
+    _debug_mode = !digitalRead(DEBUG_PIN);
+    delayMicroseconds(20);
+  }
+  if(_debug_mode) Serial.println(F("******** DEBUG MODE ******** : watchdog disabled!"));
 
   #if defined(MCU_IS_RP2040)
     // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    if(digitalRead(DEBUG_PIN))  // enable watchdog reset if not in debug mode
+    if(!_debug_mode)  // enable watchdog reset if not in debug mode
       rp2040.wdt_begin(kWatchdogTimeoutMs);
   #elif defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
@@ -135,7 +145,7 @@ void setup() {
     // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
-    if(digitalRead(DEBUG_PIN)) {  // enable watchdog reset if not in debug mode
+    if(!_debug_mode) {  // enable watchdog reset if not in debug mode
       esp_task_wdt_init(kWatchdogTimeoutMs / 1000, true); //enable panic so ESP32 restarts
       esp_task_wdt_add(NULL); //add current thread to WDT watch
     }
@@ -179,13 +189,6 @@ void setup() {
   #if defined(TOUCHSCREEN_IS_XPT2046)
     ts = new Touchscreen();
   #endif
-
-  // if time is lost because of power failure
-  if(rtc->year() < 2024) {
-    PrintLn("**** Update RTC HW Time from NTP Server ****");
-    // update time from NTP server
-    second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
-  }
 
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
@@ -375,6 +378,14 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);
   else
     digitalWrite(LED_PIN, LOW);
+
+  // if time is lost because of power failure
+  if(rtc->year() < 2024) {
+    PrintLn("**** Update RTC HW Time from NTP Server ****");
+    // update time from NTP server
+    second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
+    WaitForExecutionOfSecondCoreTask();
+  }
 
   // new second! Update Time!
   if (rtc->rtc_hw_sec_update_) {
@@ -710,7 +721,7 @@ void SerialPrintRtcDateTime() {
 // reset watchdog within time so it does not reboot system
 void ResetWatchdog() {
   // reset MCU if not in debug mode
-  if(digitalRead(DEBUG_PIN)) {
+  if(!_debug_mode) {
     #if defined(MCU_IS_RP2040)
       // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
       rp2040.wdt_reset();
@@ -745,49 +756,26 @@ void ProcessSerialInput() {
         display->SetBrightness(brightnessVal);
       }
       break;
+    case 'c':   // connect to WiFi
+      {
+        Serial.println(F("**** Connect to WiFi ****"));
+        second_core_tasks_queue.push(kConnectWiFi);
+      }
+      break;
+    case 'd':   // disconnect WiFi
+      {
+        Serial.println(F("**** Disconnect WiFi ****"));
+        second_core_tasks_queue.push(kDisconnectWiFi);
+      }
+      break;
+    case 'e':   // setup ds3231 rtc
+      Serial.println(F("**** setup ds3231 rtc ****"));
+      rtc->Ds3231RtcSetup();
+      Serial.println(F("DS3231 setup."));
+      break;
     case 'g':   // good morning
       {
         display->GoodMorningScreen();
-      }
-      break;
-    case 's':   // screensaver
-      {
-        Serial.println(F("**** Screensaver ****"));
-        SetPage(kScreensaverPage);
-      }
-      break;
-    case 't':   // go to buzzAlarm Function
-      {
-        Serial.println(F("**** buzzAlarm Function ****"));
-        // go to buzz alarm function
-        alarm_clock->BuzzAlarmFn();
-        // set main page back
-        SetPage(kMainPage);
-        inactivity_millis = 0;
-      }
-      break;
-    case 'y':   // show alarm triggered screen
-      {
-        Serial.println(F("**** Show Alarm Triggered Screen ****"));
-        // start alarm triggered page
-        SetPage(kAlarmTriggeredPage);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 24);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 13);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 14);
-        delay(1000);
-        // set main page back
-        SetPage(kMainPage);
-        inactivity_millis = 0;
-      }
-      break;
-    case 'w':   // get today's weather info
-      {
-        Serial.println(F("**** Get Weather Info ****"));
-        // get today's weather info
-        second_core_tasks_queue.push(kGetWeatherInfo);
       }
       break;
     case 'i':   // set WiFi details
@@ -826,7 +814,7 @@ void ProcessSerialInput() {
         second_core_tasks_queue.push(kUpdateTimeFromNtpServer);
       }
       break;
-    case 'o' :  // On Screen User Text Input
+    case 'o':   // On Screen User Text Input
       {
         Serial.println(F("**** On Screen User Text Input ****"));
         SetPage(kSettingsPage);
@@ -839,16 +827,44 @@ void ProcessSerialInput() {
         SetPage(kSettingsPage);
       }
       break;
-    case 'c' :  // connect to WiFi
+    case 's':   // screensaver
       {
-        Serial.println(F("**** Connect to WiFi ****"));
-        second_core_tasks_queue.push(kConnectWiFi);
+        Serial.println(F("**** Screensaver ****"));
+        SetPage(kScreensaverPage);
       }
       break;
-    case 'd' :  // disconnect WiFi
+    case 't':   // go to buzzAlarm Function
       {
-        Serial.println(F("**** Disconnect WiFi ****"));
-        second_core_tasks_queue.push(kDisconnectWiFi);
+        Serial.println(F("**** buzzAlarm Function ****"));
+        // go to buzz alarm function
+        alarm_clock->BuzzAlarmFn();
+        // set main page back
+        SetPage(kMainPage);
+        inactivity_millis = 0;
+      }
+      break;
+    case 'w':   // get today's weather info
+      {
+        Serial.println(F("**** Get Weather Info ****"));
+        // get today's weather info
+        second_core_tasks_queue.push(kGetWeatherInfo);
+      }
+      break;
+    case 'y':   // show alarm triggered screen
+      {
+        Serial.println(F("**** Show Alarm Triggered Screen ****"));
+        // start alarm triggered page
+        SetPage(kAlarmTriggeredPage);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 24);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 13);
+        delay(1000);
+        display->AlarmTriggeredScreen(false, 14);
+        delay(1000);
+        // set main page back
+        SetPage(kMainPage);
+        inactivity_millis = 0;
       }
       break;
     default:
