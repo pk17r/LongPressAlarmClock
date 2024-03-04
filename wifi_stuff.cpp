@@ -311,10 +311,16 @@ void WiFiStuff::StartSetWiFiSoftAP() {
 
   extern AsyncWebServer* server;
 
+  TurnWiFiOff();
+  delay(100);
+
   if(server != NULL) {
     delete server;
     server = NULL;
   }
+
+  WiFi.mode(WIFI_AP);
+  delay(100);
 
   server = new AsyncWebServer(80);
 
@@ -345,14 +351,15 @@ void WiFiStuff::StopSetWiFiSoftAP() {
   Serial.print("PASSWD: ");
   Serial.println(passwd_str);
 
+  TurnWiFiOff();
+  delay(100);
+
   if(server != NULL) {
     server->end();
 
     delete server;
     server = NULL;
   }
-
-  TurnWiFiOff();
 
   wifi_stuff->wifi_ssid_ = ssid_str.c_str();
   wifi_stuff->wifi_password_ = passwd_str.c_str();
@@ -364,14 +371,18 @@ void WiFiStuff::StartSetLocationLocalServer() {
 
   extern AsyncWebServer* server;
 
+  TurnWiFiOff();
+  delay(100);
+
   if(server != NULL) {
     delete server;
     server = NULL;
   }
 
-  server = new AsyncWebServer(80);
-
   TurnWiFiOn();
+  delay(100);
+
+  server = new AsyncWebServer(80);
 
   IPAddress IP = WiFi.localIP();
   Serial.print("Local IP address: ");
@@ -393,14 +404,15 @@ void WiFiStuff::StopSetLocationLocalServer() {
   Serial.print("Country Code: ");
   Serial.println(country_code_str);
 
+  TurnWiFiOff();
+  delay(100);
+
   if(server != NULL) {
     server->end();
 
     delete server;
     server = NULL;
   }
-
-  TurnWiFiOff();
 
   wifi_stuff->location_zip_code_ = std::atoi(zip_pin_str.c_str());
   wifi_stuff->location_country_code_ = country_code_str.c_str();

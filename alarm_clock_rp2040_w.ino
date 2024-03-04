@@ -117,6 +117,12 @@ void setup() {
     pinMode(TS_CS_PIN, OUTPUT);
     digitalWrite(TS_CS_PIN, HIGH);
   #endif
+  // make buzzer pin low
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  // a delay to let currents stabalize
+  delay(1000);
 
   // initialize spi
   #if defined(MCU_IS_RP2040)
