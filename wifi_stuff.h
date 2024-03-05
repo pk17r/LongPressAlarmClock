@@ -46,7 +46,9 @@ public:
   int32_t gmt_offset_sec_ = 0;
 
   bool got_weather_info_ = false;   // whether weather information has been pulled
-  unsigned long got_weather_info_time_ms = 0;
+  unsigned long last_fetch_weather_info_time_ms_ = 0;
+  const unsigned long kFetchWeatherInfoMinIntervalMs = 60*1000;    //  1 minute
+  bool incorrect_zip_code = false;
 
   unsigned long last_ntp_server_time_update_time_ms = 0;
 

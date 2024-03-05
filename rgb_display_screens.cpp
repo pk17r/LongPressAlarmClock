@@ -716,10 +716,18 @@ void RGBDisplay::DisplayWeatherInfo() {
   else {
     tft.setTextColor(kDisplayColorYellow);
     tft.setFont(&FreeMono9pt7b);
-    tft.setCursor(10, 150);
-    tft.print("Could not fetch");
-    tft.setCursor(10, 180);
-    tft.print("Weather info!");
+    if(wifi_stuff->incorrect_zip_code) {
+      tft.setCursor(10, 150);
+      tft.print("Incorrect");
+      tft.setCursor(10, 180);
+      tft.print("Location/ZIP!");
+    }
+    else {
+      tft.setCursor(10, 150);
+      tft.print("Could not fetch");
+      tft.setCursor(10, 180);
+      tft.print("Weather info!");
+    }
   }
 }
 
@@ -1335,10 +1343,12 @@ void RGBDisplay::IncorrectTimeBanner() {
   my_canvas_->setCursor(kDisplayTextGap, 70);
   my_canvas_->print("Time Update Required!");
   my_canvas_->setCursor(kDisplayTextGap, 90);
-  if(!(wifi_stuff->incorrect_wifi_details_))
+  if(!(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code))
     my_canvas_->print("Updating Time using WiFi..");
-  else
+  else if(wifi_stuff->incorrect_wifi_details_)
     my_canvas_->print("Could not connect to WiFi.");
+  else if(wifi_stuff->incorrect_zip_code)
+    my_canvas_->print("Incorrect Location/ZIP");
 }
 
 void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap) {

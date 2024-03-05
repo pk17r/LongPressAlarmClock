@@ -29,6 +29,7 @@ void WiFiStuff::SaveWiFiDetails() {
 
 void WiFiStuff::SaveWeatherLocationDetails() {
   eeprom->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  incorrect_zip_code = false;
 }
 
 void WiFiStuff::SaveWeatherUnits() {
@@ -80,6 +81,11 @@ void WiFiStuff::TurnWiFiOff() {
 void WiFiStuff::GetTodaysWeatherInfo() {
   got_weather_info_ = false;
 
+  // don't fetch frequently otherwise can get banned
+  if(last_fetch_weather_info_time_ms_ != 0 && millis() - last_fetch_weather_info_time_ms_ < kFetchWeatherInfoMinIntervalMs) {
+    return;
+  }
+
   // turn On Wifi
   if(!wifi_connected_)
     if(!TurnWiFiOn())
@@ -107,6 +113,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     
     // Send HTTP POST request
     int httpResponseCode = http.GET();
+    last_fetch_weather_info_time_ms_ = millis();
     
     String jsonBuffer = "{}"; 
     
@@ -126,14 +133,13 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     JSONVar myObject = JSON.parse(jsonBuffer);
 
     // JSON.typeof(jsonVar) can be used to get the type of the var
-    if (JSON.typeof(myObject) == "undefined" || httpResponseCode <= 0) {
-      Serial.println("Parsing input failed!");
-    }
-    else 
+    // if (JSON.typeof(myObject) == "undefined" || httpResponseCode <= 0) {
+    //   Serial.println("Parsing input failed!");
+    // }
+    if(httpResponseCode >= 200 && httpResponseCode < 300)
     {
       // got response
       got_weather_info_ = true;
-      got_weather_info_time_ms = millis();
 
       Serial.print("JSON object = ");
       Serial.println(myObject);
@@ -170,6 +176,13 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       Serial.print("city_ "); Serial.println(city_.c_str());
       Serial.print("gmt_offset_sec_ "); Serial.println(gmt_offset_sec_);
 
+    }
+    else if(httpResponseCode >= 400) {
+      Serial.println("Incorrect zip code!");
+      incorrect_zip_code = true;
+    }
+    else {
+      Serial.println("Parsing input failed!");
     }
   }
   else {

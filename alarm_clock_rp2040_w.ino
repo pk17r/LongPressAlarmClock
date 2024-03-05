@@ -388,7 +388,7 @@ void loop() {
     rtc->rtc_hw_sec_update_ = false;
 
     // if time is lost because of power failure
-    if(rtc->year() < 2024 && !(wifi_stuff->incorrect_wifi_details_)) {
+    if(rtc->year() < 2024 && !(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code)) {
       PrintLn("**** Update RTC HW Time from NTP Server ****");
       // update time from NTP server
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
@@ -423,14 +423,14 @@ void loop() {
 
       #if defined(WIFI_IS_USED)
         // try to get weather info 5 mins before alarm time and every 60 minutes
-        if((inactivity_millis > kInactivityMillisLimit) && (wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
-          // get updated weather info every 60 minutes and as well as 5 minutes before alarm time
+        if((inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (wifi_stuff->last_fetch_weather_info_time_ms_ == 0 || millis() - wifi_stuff->last_fetch_weather_info_time_ms_ > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
+          // get updated weather info every 60 minutes and as well as 10 minutes before alarm time
           AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
           PrintLn("Get Weather Info!");
         }
 
         // auto update time at 2AM every morning
-        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
+        if(!(wifi_stuff->incorrect_zip_code) && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 0) {
           // update time from NTP server
           AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
           PrintLn("Get Time Update from NTP Server");
@@ -498,7 +498,7 @@ void loop1() {
 
     bool success = false;
 
-    if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->got_weather_info_time_ms == 0 || millis() - wifi_stuff->got_weather_info_time_ms > 60*1000)) {
+    if(current_task == kGetWeatherInfo && (!wifi_stuff->got_weather_info_ || wifi_stuff->last_fetch_weather_info_time_ms_ == 0 || millis() - wifi_stuff->last_fetch_weather_info_time_ms_ > wifi_stuff->kFetchWeatherInfoMinIntervalMs)) {
       // get today's weather info
       wifi_stuff->GetTodaysWeatherInfo();
       success = wifi_stuff->got_weather_info_;
@@ -513,12 +513,13 @@ void loop1() {
     else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000)) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
-
       // try once more if did not get info
       if(!success) {
         delay(1000);
         success = wifi_stuff->GetTimeFromNtpServer();
       }
+      if(success)
+        display->redraw_display_ = true;
     }
     else if(current_task == kConnectWiFi) {
       wifi_stuff->TurnWiFiOn();
