@@ -170,16 +170,21 @@ uint8_t RTC::hour() {
  */
 void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year) {
   // set RTC HW into 24 hour mode
-  rtc_hw_.set_12hour_mode(false);
-  delay(100);
+  Serial.println("Time Update Values: ");
+  Serial.print("hour_24_hr_mode: "); Serial.println(hour_24_hr_mode);
+  Serial.print("minute: "); Serial.println(minute);
+  Serial.print("second: "); Serial.println(second);
+  Serial.print("dayOfWeek_Sun_is_1: "); Serial.println(dayOfWeek_Sun_is_1);
+  Serial.print("day: "); Serial.println(day);
+  Serial.print("month_Jan_is_1: "); Serial.println(month_Jan_is_1);
+  Serial.print("year: "); Serial.println(year);
   // Set current time and date
   // RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   rtc_hw_.set(second, minute, hour_24_hr_mode, dayOfWeek_Sun_is_1, day, month_Jan_is_1, year - 2000);
-  delay(500);
-  // set RTC HW back into 12 hour mode
-  rtc_hw_.set_12hour_mode(true);
-  delay(100);
   // refresh time from RTC HW
   Refresh();
+  // set RTC HW back into 12 hour mode
+  rtc_hw_.set_12hour_mode(true);
   PrintLn("Time set");
+  Refresh();
 }
