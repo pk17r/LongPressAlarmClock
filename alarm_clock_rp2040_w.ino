@@ -234,7 +234,7 @@ void loop() {
 
     // push/big button click action
     if(push_button->buttonActiveDebounced()) {
-      // PrintLn("push_button");
+      PrintLn("push_button");
       if(current_page == kAlarmSetPage)
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
       else {
