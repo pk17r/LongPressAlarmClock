@@ -429,8 +429,12 @@ void loop() {
           PrintLn("Get Weather Info!");
         }
 
-        // auto update time at 2AM 1 minute every morning (also accounts for day light savings that kicks in and ends at 2AM in March and November once every year)
-        if(!(wifi_stuff->incorrect_zip_code) && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 1) {
+        // reset time updated today to false every new day, for auto update of time at 2:01AM
+        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 12)
+          wifi_stuff->updated_time_today_ = false;
+
+        // auto update time at 2AM 1 minute every morning (also accounts for day light savings that kicks in and ends at 2AM in March and November once every year, try for upto 59 times - once per min until successful time update)
+        if(!(wifi_stuff->incorrect_zip_code) && !(wifi_stuff->updated_time_today_) && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() >= 1) {
           // update time from NTP server
           AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
           PrintLn("Get Time Update from NTP Server");

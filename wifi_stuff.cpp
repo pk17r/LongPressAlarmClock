@@ -239,6 +239,9 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
 
       last_ntp_server_time_update_time_ms = millis();
+      // auto update time today at 2:01AM success
+      if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() >= 1)
+        updated_time_today_ = true;
     }
 
     ntpClient.end();
