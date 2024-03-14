@@ -371,14 +371,14 @@ void WiFiStuff::StartSetWiFiSoftAP() {
 void WiFiStuff::StopSetWiFiSoftAP() {
   PrintLn("WiFiStuff::StopSetWiFiSoftAP()");
   extern AsyncWebServer* server;
-  extern String ssid_str, passwd_str;
+  extern String temp_ssid_str, temp_passwd_str;
 
   // To access your stored values on ssid_str, passwd_str
   Serial.print("SSID: ");
-  Serial.println(ssid_str);
+  Serial.println(temp_ssid_str);
 
   Serial.print("PASSWD: ");
-  Serial.println(passwd_str);
+  Serial.println(temp_passwd_str);
 
   TurnWiFiOff();
   delay(100);
@@ -390,8 +390,8 @@ void WiFiStuff::StopSetWiFiSoftAP() {
     server = NULL;
   }
 
-  wifi_stuff->wifi_ssid_ = ssid_str.c_str();
-  wifi_stuff->wifi_password_ = passwd_str.c_str();
+  wifi_stuff->wifi_ssid_ = temp_ssid_str.c_str();
+  wifi_stuff->wifi_password_ = temp_passwd_str.c_str();
 }
 
 void WiFiStuff::StartSetLocationLocalServer() {
@@ -427,14 +427,14 @@ void WiFiStuff::StartSetLocationLocalServer() {
 void WiFiStuff::StopSetLocationLocalServer() {
   PrintLn("WiFiStuff::StopSetLocationLocalServer()");
   extern AsyncWebServer* server;
-  extern String zip_pin_str, country_code_str;
+  extern String temp_zip_pin_str, temp_country_code_str;
 
   // To access your stored values on ssid_str, passwd_str
   Serial.print("ZIP/PIN: ");
-  Serial.println(zip_pin_str);
+  Serial.println(temp_zip_pin_str);
 
   Serial.print("Country Code: ");
-  Serial.println(country_code_str);
+  Serial.println(temp_country_code_str);
 
   TurnWiFiOff();
   delay(100);
@@ -446,21 +446,21 @@ void WiFiStuff::StopSetLocationLocalServer() {
     server = NULL;
   }
 
-  wifi_stuff->location_zip_code_ = std::atoi(zip_pin_str.c_str());
-  wifi_stuff->location_country_code_ = country_code_str.c_str();
+  wifi_stuff->location_zip_code_ = std::atoi(temp_zip_pin_str.c_str());
+  wifi_stuff->location_country_code_ = temp_country_code_str.c_str();
 }
 
 AsyncWebServer* server = NULL;
 
-const char* PARAM_ssid = "html_ssid";
-const char* PARAM_passwd = "html_passwd";
-const char* PARAM_zip_pin = "html_zip_pin";
-const char* PARAM_country_code = "html_country_code";
+const char* kHtmlParamKeySsid = "html_ssid";
+const char* kHtmlParamKeyPasswd = "html_passwd";
+const char* kHtmlParamKeyZipPin = "html_zip_pin";
+const char* kHtmlParamKeyCountryCode = "html_country_code";
 
-String ssid_str = "Enter SSID";
-String passwd_str = "Enter Passwd";
-String zip_pin_str = "Enter ZIP/PIN";
-String country_code_str = "Enter Country Code";
+String temp_ssid_str = "Enter SSID";
+String temp_passwd_str = "Enter Passwd";
+String temp_zip_pin_str = "Enter ZIP/PIN";
+String temp_country_code_str = "Enter Country Code";
 
 // HTML web page to handle 2 input fields (html_ssid, html_passwd)
 const char index_html_wifi_details[] PROGMEM = R"rawliteral(
@@ -512,25 +512,25 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
 
 // Replaces placeholder with stored values
 String processor(const String& var){
-  if(strcmp(var.c_str(), PARAM_ssid) == 0){
-    return ssid_str;
+  if(strcmp(var.c_str(), kHtmlParamKeySsid) == 0){
+    return temp_ssid_str;
   }
-  else if(strcmp(var.c_str(), PARAM_passwd) == 0){
-    return passwd_str;
+  else if(strcmp(var.c_str(), kHtmlParamKeyPasswd) == 0){
+    return temp_passwd_str;
   }
-  else if(strcmp(var.c_str(), PARAM_zip_pin) == 0){
-    return zip_pin_str;
+  else if(strcmp(var.c_str(), kHtmlParamKeyZipPin) == 0){
+    return temp_zip_pin_str;
   }
-  else if(strcmp(var.c_str(), PARAM_country_code) == 0){
-    return country_code_str;
+  else if(strcmp(var.c_str(), kHtmlParamKeyCountryCode) == 0){
+    return temp_country_code_str;
   }
   return String();
 }
 
 void _SoftAPWiFiDetails() {
 
-  ssid_str = wifi_stuff->wifi_ssid_.c_str();
-  passwd_str = wifi_stuff->wifi_password_.c_str();
+  temp_ssid_str = wifi_stuff->wifi_ssid_.c_str();
+  temp_passwd_str = wifi_stuff->wifi_password_.c_str();
 
   extern String processor(const String& var);
 
@@ -543,14 +543,14 @@ void _SoftAPWiFiDetails() {
   server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputMessage;
     // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
-    if (request->hasParam(PARAM_ssid)) {
-      inputMessage = request->getParam(PARAM_ssid)->value();
-      ssid_str = inputMessage;
+    if (request->hasParam(kHtmlParamKeySsid)) {
+      inputMessage = request->getParam(kHtmlParamKeySsid)->value();
+      temp_ssid_str = inputMessage;
     }
     // GET html_passwd value on <ESP_IP>/get?html_passwd=<inputMessage>
-    if (request->hasParam(PARAM_passwd)) {
-      inputMessage = request->getParam(PARAM_passwd)->value();
-      passwd_str = inputMessage;
+    if (request->hasParam(kHtmlParamKeyPasswd)) {
+      inputMessage = request->getParam(kHtmlParamKeyPasswd)->value();
+      temp_passwd_str = inputMessage;
     }
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);
@@ -560,11 +560,10 @@ void _SoftAPWiFiDetails() {
   server->begin();
 }
 
-
 void _LocalServerLocationInputs() {
 
-  zip_pin_str = std::to_string(wifi_stuff->location_zip_code_).c_str();
-  country_code_str = wifi_stuff->location_country_code_.c_str();
+  temp_zip_pin_str = std::to_string(wifi_stuff->location_zip_code_).c_str();
+  temp_country_code_str = wifi_stuff->location_country_code_.c_str();
 
   extern String processor(const String& var);
 
@@ -577,14 +576,14 @@ void _LocalServerLocationInputs() {
   server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputMessage;
     // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
-    if (request->hasParam(PARAM_zip_pin)) {
-      inputMessage = request->getParam(PARAM_zip_pin)->value();
-      zip_pin_str = inputMessage;
+    if (request->hasParam(kHtmlParamKeyZipPin)) {
+      inputMessage = request->getParam(kHtmlParamKeyZipPin)->value();
+      temp_zip_pin_str = inputMessage;
     }
     // GET html_passwd value on <ESP_IP>/get?html_passwd=<inputMessage>
-    if (request->hasParam(PARAM_country_code)) {
-      inputMessage = request->getParam(PARAM_country_code)->value();
-      country_code_str = inputMessage;
+    if (request->hasParam(kHtmlParamKeyCountryCode)) {
+      inputMessage = request->getParam(kHtmlParamKeyCountryCode)->value();
+      temp_country_code_str = inputMessage;
     }
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);
