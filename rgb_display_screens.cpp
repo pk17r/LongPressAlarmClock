@@ -713,39 +713,50 @@ void RGBDisplay::LocationInputsLocalServerPage() {
 
 void RGBDisplay::DisplayWeatherInfo() {
 
-  int16_t title_y0 = 50;
-  int16_t w_x0 = 5, s_y0 = title_y0 + 48;
+  const int16_t alarm_triggered_page_title_y0 = 50;
+  const int16_t long_press_alarm_seconds_y0 = alarm_triggered_page_title_y0 + 48;
+  const int16_t city_x0 = 200, city_y0 = alarm_triggered_page_title_y0 + 88;
+  const int16_t weather_x0 = 5, weather_main_y0 = long_press_alarm_seconds_y0 + 65;
+  const int16_t weather_row2_y0 = weather_main_y0 + 30, weather_row3_y0 = weather_row2_y0 + 20, weather_row4_y0 = weather_row3_y0 + 20;
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
     // tft.setFont(&FreeMonoBold9pt7b);
     tft.setFont(&FreeSans12pt7b);
-    tft.setCursor(200, s_y0 + 40);
+    tft.setCursor(city_x0, city_y0);
     tft.setTextColor(kDisplayColorOrange);
     tft.print(wifi_stuff->city_.c_str());
-    tft.setCursor(w_x0, s_y0 + 65);
+    tft.setCursor(weather_x0, weather_main_y0);
     tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
     tft.setFont(&FreeMono9pt7b);
-    tft.setCursor(w_x0, s_y0 + 85);
+    tft.setCursor(weather_x0, weather_row2_y0);
     tft.print("Temp: "); tft.print(wifi_stuff->weather_temp_.c_str()); tft.print("  Feels: "); tft.print(wifi_stuff->weather_temp_feels_like_.c_str());
-    tft.setCursor(w_x0, s_y0 + 105);
+    tft.setCursor(weather_x0, weather_row3_y0);
     tft.print("Max : "); tft.print(wifi_stuff->weather_temp_max_.c_str()); tft.print("  Min: "); tft.print(wifi_stuff->weather_temp_min_.c_str());
-    tft.setCursor(w_x0, s_y0 + 125);
+    tft.setCursor(weather_x0, weather_row4_y0);
     tft.print("Wind: "); tft.print(wifi_stuff->weather_wind_speed_.c_str()); tft.print(" Humidity: "); tft.print(wifi_stuff->weather_humidity_.c_str());
   }
   else {
     tft.setTextColor(kDisplayColorYellow);
     tft.setFont(&FreeMono9pt7b);
-    if(wifi_stuff->incorrect_zip_code) {
-      tft.setCursor(10, 150);
+    if(wifi_stuff->get_weather_info_wait_seconds_ > 0) {
+      tft.setCursor(weather_x0, weather_row2_y0);
+      tft.print("Wait for ");
+      tft.print(wifi_stuff->get_weather_info_wait_seconds_);
+      tft.print(" seconds");
+      tft.setCursor(weather_x0, weather_row3_y0);
+      tft.print("before next Fetch.");
+    }
+    else if(wifi_stuff->incorrect_zip_code) {
+      tft.setCursor(weather_x0, weather_row2_y0);
       tft.print("Incorrect");
-      tft.setCursor(10, 180);
+      tft.setCursor(weather_x0, weather_row3_y0);
       tft.print("Location/ZIP!");
     }
     else {
-      tft.setCursor(10, 150);
+      tft.setCursor(weather_x0, weather_row2_y0);
       tft.print("Could not fetch");
-      tft.setCursor(10, 180);
+      tft.setCursor(weather_x0, weather_row3_y0);
       tft.print("Weather info!");
     }
   }

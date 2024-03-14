@@ -83,8 +83,10 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // don't fetch frequently otherwise can get banned
   if(last_fetch_weather_info_time_ms_ != 0 && millis() - last_fetch_weather_info_time_ms_ < kFetchWeatherInfoMinIntervalMs) {
+    get_weather_info_wait_seconds_ = (kFetchWeatherInfoMinIntervalMs - (millis() - last_fetch_weather_info_time_ms_)) / 1000;
     return;
   }
+  get_weather_info_wait_seconds_ = 0;
 
   // turn On Wifi
   if(!wifi_connected_)
