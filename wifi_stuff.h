@@ -51,7 +51,8 @@ public:
   const unsigned long kFetchWeatherInfoMinIntervalMs = 60*1000;    //  1 minute
   bool incorrect_zip_code = false;
 
-  bool updated_time_today_ = false;   // auto update time once every day at 2:01 AM
+  bool auto_updated_time_today_ = false;   // auto update time once every day at 2:01 AM
+  bool manual_time_update_successful_ = false;   // flag used to know if manual time update fetch was success
   unsigned long last_ntp_server_time_update_time_ms = 0;
 
   uint32_t location_zip_code_ = 92104;

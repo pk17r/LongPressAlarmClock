@@ -196,6 +196,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 }
 
 bool WiFiStuff::GetTimeFromNtpServer() {
+  manual_time_update_successful_ = false;
 
   if(!got_weather_info_) { // we need gmt_offset_sec_ before getting time update!
     GetTodaysWeatherInfo();
@@ -243,7 +244,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       last_ntp_server_time_update_time_ms = millis();
       // auto update time today at 2:01AM success
       if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() >= 1)
-        updated_time_today_ = true;
+        auto_updated_time_today_ = true;
     }
 
     ntpClient.end();
@@ -267,6 +268,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   // turn off WiFi
   // TurnWiFiOff();
 
+  manual_time_update_successful_ = returnVal;
   return returnVal;
 }
 
