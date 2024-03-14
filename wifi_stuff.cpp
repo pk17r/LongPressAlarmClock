@@ -463,41 +463,46 @@ String country_code_str = "Enter Country Code";
 // HTML web page to handle 2 input fields (html_ssid, html_passwd)
 const char index_html_wifi_details[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
-  <title>Long Press Alarm WiFi Details Form</title>
+  <title>Long Press Alarm Clock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent to device!");
+      alert("Sent! Press 'Save' on device to set!");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
-    <label>ssid:</label>
+  	<h3>Long Press Alarm Clock</h3>
+    <h4>Enter WiFi Details:</h4>
+    <label>WiFi SSID:</label><br>
     <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
-    <label>password:</label>
+    <label>WiFi Password:</label><br>
     <input type="text" name="html_passwd" value="%html_passwd%"><br><br>
     <input type="submit" value="Submit" onclick="submitMessage()">
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
 
-// HTML web page to handle 2 input fields (html_ssid, html_passwd)
+// HTML web page to handle 2 input fields (html_zip_pin, html_country_code)
 const char index_html_location_details[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html><head>
-  <title>Long Press Alarm WiFi Details Form</title>
+  <title>Long Press Alarm Clock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent to device!");
+      alert("Sent! Press 'Save' on device to set!");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
-    <label>Location ZIP/PIN Code:</label>
+  	<h3>Long Press Alarm Clock</h3>
+    <h4>Enter Location Details:</h4>
+    <label>Location ZIP/PIN Code:</label><br>
     <input type="number" name="html_zip_pin" value="%html_zip_pin%" min="10000" max="999999"><br><br>
-    <label>2-Letter Country Code:</label>
-    <input type="text" name="html_country_code" value="%html_country_code%"><br><br>
-    <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes" target="_blank">2-Letter Country Codes List</a> 
+    <label>2-Letter Country Code (</label>
+    <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes#Current_ISO_3166_country_codes" target="_blank">List</a>
+    <label>):</label><br>
+    <input type="text" name="html_country_code" value="%html_country_code%" oninput="this.value = this.value.toUpperCase()"><br><br>
     <input type="submit" value="Submit" onclick="submitMessage()">
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
