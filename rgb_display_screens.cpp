@@ -447,6 +447,9 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
 void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_long_press_secs) {
 
   if(!inc_alarm_long_press_secs && !dec_alarm_long_press_secs) {
+
+    // Settings page body
+
     tft.fillScreen(kDisplayBackroundColor);
     tft.setTextColor(kDisplayColorYellow);
     tft.setFont(&FreeSans12pt7b);
@@ -482,8 +485,25 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
 
     // Cancel button
     DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+    // Software Version and Date
+    uint8_t software_version = 0;
+    std::string software_date = "";
+    eeprom->GetSoftVersionAndDate(software_version, software_date);
+    tft.setFont(&FreeMono9pt7b);
+    tft.setTextColor(kDisplayColorYellow);
+    tft.setCursor(10, kTftHeight - 20);
+    tft.print("Software Version: ");
+    tft.print(software_version);
+    tft.setCursor(10, kTftHeight - 5);
+    tft.print("Date: ");
+    tft.print(software_date.c_str());
+    
   }
   else {
+
+    // Increase / Decrease alarm_long_press_seconds_
+
     // clear current alarm long press seconds
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayBackroundColor);

@@ -1,9 +1,11 @@
+#include <string>
 #include <sys/_stdint.h>
 #ifndef EEPROM_H
 #define EEPROM_H
 
 #include "common.h"
 #include "uEEPROMLib.h"
+#include "secrets.h"
 
 class EEPROM {
 
@@ -18,6 +20,7 @@ public:
   void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
   void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
+  void GetSoftVersionAndDate(uint8_t &software_version, std::string &software_date);
 
 private:
 
@@ -39,6 +42,7 @@ private:
   // ADDRESSES
 
   const uint8_t kDataModelVersion = 101;    //  data model version : if this is not there on EEPROM, then defaults will be saved.
+  const std::string kSoftVersionDate = "Mar 14, 2024";
   const uint16_t kDataModelVersionAddress = 0;  // data model address
   const uint16_t kAlarmHrAddress = 1;
   const uint16_t kAlarmMinAddress = 2;
@@ -64,13 +68,20 @@ private:
   const uint8_t kAlarmMin = 30;
   const bool kAlarmIsAm = true;
   const bool kAlarmOn = false;
-  const std::string kWiFiSsid = "Enter SSID";
-  const std::string kWiFiPasswd = "Enter Passwd";
+  #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
+    std::string kWiFiSsid = MY_WIFI_SSID;
+  #else
+    std::string kWiFiSsid = "Enter SSID";
+  #endif
+  #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
+    std::string kWiFiPasswd = MY_WIFI_PASSWD;
+  #else
+    std::string kWiFiPasswd = "Enter Passwd";
+  #endif
   const uint32_t kWeatherZipCode = 92104;
   const std::string kWeatherCountryCode = "US";
   const bool kWeatherUnitsMetricNotImperial = false;
-  const uint8_t kAlarmLongPressSeconds = 25;
-
+  const uint8_t kAlarmLongPressSeconds = 20;
 
 };
 

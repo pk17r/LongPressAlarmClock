@@ -74,7 +74,7 @@ void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_passw
   wifi_ssid = FetchString(kWiFiSsidLengthAddress, kWiFiSsidAddress);
   wifi_password = FetchString(kWiFiPasswdLengthAddress, kWiFiPasswdAddress);
   PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
-  PrintLn("EEPROM wifi_password: ", wifi_password);
+  // PrintLn("EEPROM wifi_password: ", wifi_password);
   PrintLn("WiFi details retrieved from EEPROM.");
 }
 
@@ -163,4 +163,9 @@ void EEPROM::Save1Byte(uint16_t address, uint8_t value) {
   if (!eeprom_.eeprom_write(address, value)) {
     PrintLn("Failed to save to EEPROM!");
   }
+}
+
+void EEPROM::GetSoftVersionAndDate(uint8_t &software_version, std::string &software_date) {
+  software_version = kDataModelVersion;
+  software_date = kSoftVersionDate;
 }
