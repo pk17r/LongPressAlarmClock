@@ -1,17 +1,23 @@
 /**************************************************************************
 
-  # Touchscreen Long Press Alarm Clock
+# Long Press Alarm Clock
 
 
 - Hardware:
-  - MCU: Raspberry Pi Pico W
-  - Display: 2.8" ST7789V touchscreen display, other selectable options: ST7735, ILI9341 and ILI9488
+  - MCU: ESP32 S2 Mini (Default) or ESP32 WROOM or Raspberry Pi Pico W
+  - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
+  - Touchscreen XPT2046 (not enabled by default)
   - DS3231 RTC Clock
+  - AT24C32 EEPROM on DS3231 RTC Clock Module
   - A push button with LED
+  - 2 push buttons for increase and decrease functions
   - A quite powerful 85dB passive buzzer for alarm
 
 
 - Software:
+  - All modules fully distributed in separate classes and files
+  - Arduino setup and loop functions in .ino file
+  - MCU Selection, Pin definitions and Module selections in pin_defs.h file
   - A fast low RAM usage FastDrawBitmap function is implement that converts monochrome image into RGB565 with 2 colors and sends image to display via SPI row by row
   - Adafruit Library used for GFX functions
   - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
@@ -27,7 +33,7 @@
   - Get Weather info using WiFi and display today's weather after alarm
   - Get user input of WiFi details via an on-screen keyboard
   - Colorful smooth Screensaver with a big clock
-  - Touchscreen based alarm set page
+  - Touchscreen based alarm set page (touchscreen not on by default)
   - Settings saved in EEPROM so not lost on power loss
   - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
