@@ -3,7 +3,7 @@
 #define WIFI_STUFF_H
 
 #include "common.h"
-// #include "secrets.h"
+#include "secrets.h"
 #include <sys/_stdint.h>      // try removing it, don't know why it is here
 
 class WiFiStuff {
@@ -22,12 +22,12 @@ public:
   void StartSetLocationLocalServer();
   void StopSetLocationLocalServer();
 
-  #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
+  #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
     std::string wifi_ssid_ = MY_WIFI_SSID;
   #else
     std::string wifi_ssid_ = "";
   #endif
-  #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
+  #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD
     std::string wifi_password_ = MY_WIFI_PASSWD;
   #else
     std::string wifi_password_ = "";
@@ -73,6 +73,12 @@ public:
 private:
 
   void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
+
+  #if defined(MY_OPEN_WEATHER_MAP_API_KEY)   // create a secrets.h file with #define for MY_OPEN_WEATHER_MAP_API_KEY
+    std::string openWeatherMapApiKey = MY_OPEN_WEATHER_MAP_API_KEY;
+  #else
+    std::string openWeatherMapApiKey = "";
+  #endif
 
 };
 

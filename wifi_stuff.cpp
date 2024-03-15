@@ -94,9 +94,9 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       return;
 
   // Your Domain name with URL path or IP address with path
-  std::string openWeatherMapApiKey = "0fad3740b3a6b502ad57504f6fc3521e";
+  // std::string openWeatherMapApiKey = 
 
-  //https://api.openweathermap.org/data/2.5/weather?zip=92104,US&appid=0fad3740b3a6b502ad57504f6fc3521e
+  //https://api.openweathermap.org/data/2.5/weather?zip=92104,US&appid=
   //{"coord":{"lon":-117.1272,"lat":32.7454},"weather":[{"id":701,"main":"Mist","description":"mist","icon":"50n"}],"base":"stations","main":{"temp":284.81,"feels_like":284.41,"temp_min":283.18,"temp_max":286.57,"pressure":1020,"humidity":91},"visibility":10000,"wind":{"speed":3.09,"deg":0},"clouds":{"all":75},"dt":1708677188,"sys":{"type":2,"id":2019527,"country":"US","sunrise":1708698233,"sunset":1708738818},"timezone":-28800,"id":0,"name":"San Diego","cod":200}
 
   // Replace with your country code and city
