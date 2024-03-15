@@ -211,8 +211,10 @@ void setup() {
   // pick random afternoon time to update firmware
   random_afternoon_hour = random(1, 6);
   random_afternoon_min = random(0, 59);
-  Serial.print("random_afternoon_hour "); Serial.println(random_afternoon_hour);
-  Serial.print("random_afternoon_min "); Serial.println(random_afternoon_min);
+  Serial.print("OTA Update random_afternoon_hour "); Serial.println(random_afternoon_hour);
+  Serial.print("OTA Update random_afternoon_min "); Serial.println(random_afternoon_min);
+  Serial.print("Active Firmware Version "); Serial.println(kFirmwareVersion.c_str());
+  Serial.print("Active Firmware Date "); Serial.println(kFirmwareDate.c_str());
 
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
