@@ -451,18 +451,21 @@ void loop() {
         }
 
         // check for firmware update everyday at 2:05 AM
-        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 59) {
-          wifi_stuff->FirmwareVersionCheck();
-          if(wifi_stuff->firmware_update_available_) {
-            ResetWatchdog();
-            PrintLn("**** Web OTA Update ****");
-            // set Web OTA Update Pagte
-            SetPage(kFirmwareUpdatePage);
-            // Firmware Update
-            wifi_stuff->UpdateFirmware();
-            // set back main page if Web OTA Update unsuccessful
-            SetPage(kMainPage);
-          }
+        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 3 && rtc->minute() == 14) {
+          PrintLn("**** Web OTA Firmware Update Check ****");
+          AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+          WaitForExecutionOfSecondCoreTask();
+        }
+
+        // update firmware
+        if(wifi_stuff->firmware_update_available_) {
+          PrintLn("**** Web OTA Firmware Update ****");
+          // set Web OTA Update Pagte
+          SetPage(kFirmwareUpdatePage);
+          // Firmware Update
+          wifi_stuff->UpdateFirmware();
+          // set back main page if Web OTA Update unsuccessful
+          SetPage(kMainPage);
         }
       #endif
 
@@ -572,6 +575,15 @@ void loop1() {
     }
     else if(current_task == kStopLocationInputsLocalServer) {
       wifi_stuff->StopSetLocationLocalServer();
+      success = true;
+    }
+    else if(current_task == kFirmwareVersionCheck) {
+      wifi_stuff->TurnWiFiOn();
+      ResetWatchdog();
+      if(!(wifi_stuff->wifi_connected_))
+        wifi_stuff->TurnWiFiOn();
+      ResetWatchdog();
+      wifi_stuff->FirmwareVersionCheck();
       success = true;
     }
 

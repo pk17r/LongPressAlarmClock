@@ -123,6 +123,7 @@ enum SecondCoreTask {
   kUpdateTimeFromNtpServer,
   kConnectWiFi,
   kDisconnectWiFi,
+  kFirmwareVersionCheck,
   kNoTask,
   };
 
