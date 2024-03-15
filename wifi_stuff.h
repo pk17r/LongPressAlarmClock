@@ -21,9 +21,8 @@ public:
   void StopSetWiFiSoftAP();
   void StartSetLocationLocalServer();
   void StopSetLocationLocalServer();
-  void WebOtaUpdate();
-  void firmwareUpdate(void);
-  int FirmwareVersionCheck(void);
+  void UpdateFirmware();
+  bool FirmwareVersionCheck();
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -70,6 +69,9 @@ public:
   bool incorrect_wifi_details_ = false;
 
   std::string soft_AP_IP = "";
+
+  // flag to to know if new firmware update is available
+  bool firmware_update_available_ = false;
 
   // DigiCert root certificate has expiry date of 10 Nov 2031
   // from https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master

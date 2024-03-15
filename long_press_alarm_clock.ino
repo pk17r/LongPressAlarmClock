@@ -449,6 +449,21 @@ void loop() {
           AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
           PrintLn("Get Time Update from NTP Server");
         }
+
+        // check for firmware update everyday at 2:05 AM
+        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() == 59) {
+          wifi_stuff->FirmwareVersionCheck();
+          if(wifi_stuff->firmware_update_available_) {
+            ResetWatchdog();
+            PrintLn("**** Web OTA Update ****");
+            // set Web OTA Update Pagte
+            SetPage(kFirmwareUpdatePage);
+            // Firmware Update
+            wifi_stuff->UpdateFirmware();
+            // set back main page if Web OTA Update unsuccessful
+            SetPage(kMainPage);
+          }
+        }
       #endif
 
     }
@@ -899,14 +914,18 @@ void ProcessSerialInput() {
       break;
     case 'u':   // Web OTA Update
       {
-        Serial.println(F("**** Web OTA Update ****"));
-        // set Web OTA Update Pagte
-        SetPage(kWebOtaUpdatePage);
-        inactivity_millis = 0;
-        // Web OTA Update
-        wifi_stuff->WebOtaUpdate();
-        // set back main page if Web OTA Update unsuccessful
-        SetPage(kMainPage);
+        Serial.println(F("**** Web OTA Update Check ****"));
+        wifi_stuff->FirmwareVersionCheck();
+        if(wifi_stuff->firmware_update_available_) {
+          ResetWatchdog();
+          PrintLn("**** Web OTA Update Available ****");
+          // set Web OTA Update Pagte
+          SetPage(kFirmwareUpdatePage);
+          // Firmware Update
+          wifi_stuff->UpdateFirmware();
+          // set back main page if Web OTA Update unsuccessful
+          SetPage(kMainPage);
+        }
       }
       break;
     case 'w':   // get today's weather info
@@ -954,9 +973,9 @@ void SetPage(ScreenPage page) {
       display->ScreensaverControl(true);
       highlight = kCursorNoSelection;
       break;
-    case kWebOtaUpdatePage:
-      current_page = kWebOtaUpdatePage;
-      display->WebOtaUpdatePage();
+    case kFirmwareUpdatePage:
+      current_page = kFirmwareUpdatePage;
+      display->FirmwareUpdatePage();
       display->SetMaxBrightness();
       break;
     case kAlarmSetPage:

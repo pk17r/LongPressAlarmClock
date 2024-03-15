@@ -601,47 +601,14 @@ void _LocalServerLocationInputs() {
 
 // ESP32 Web OTA Update
 
+// check for available firmware update
 // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
-void WiFiStuff::WebOtaUpdate() {
-
-  Serial.print("Active firmware version:");
-  Serial.println(kFirmwareVersion.c_str());
-  
+bool WiFiStuff::FirmwareVersionCheck() {
   // turn On Wifi
   if(!wifi_connected_)
     if(!TurnWiFiOn())
-      return;
+      return false;
 
-  // extern void firmwareUpdate(void);
-  // extern int FirmwareVersionCheck(void);
-
-  FirmwareVersionCheck();
-  // if (FirmwareVersionCheck())
-  //   firmwareUpdate();
-}
-
-void WiFiStuff::firmwareUpdate(void) {
-  WiFiClientSecure client;
-  client.setCACert(rootCACertificate);
-  httpUpdate.setLedPin(LED_PIN, HIGH);
-  t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
-
-  switch (ret) {
-  case HTTP_UPDATE_FAILED:
-    Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
-    break;
-
-  case HTTP_UPDATE_NO_UPDATES:
-    Serial.println("HTTP_UPDATE_NO_UPDATES");
-    break;
-
-  case HTTP_UPDATE_OK:
-    Serial.println("HTTP_UPDATE_OK");
-    break;
-  }
-}
-
-int WiFiStuff::FirmwareVersionCheck(void) {
   String payload;
   int httpCode;
   String fwurl = "";
@@ -706,12 +673,41 @@ int WiFiStuff::FirmwareVersionCheck(void) {
 
     if(strcmp(fw_str.c_str(), kFirmwareVersion.c_str()) != 0) {
       Serial.println("New firmware detected");
-      return 1;
+      firmware_update_available_ = true;
+      return true;
     }
     else {
       Serial.printf("\nDevice already on latest firmware version:%s\n", kFirmwareVersion);
-      return 0;
+      return false;
     }
   }
-  return 0;
+  return false;
+}
+
+// update firmware
+// Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
+void WiFiStuff::UpdateFirmware() {
+  // turn On Wifi
+  if(!wifi_connected_)
+    if(!TurnWiFiOn())
+      return;
+
+  WiFiClientSecure client;
+  client.setCACert(rootCACertificate);
+  httpUpdate.setLedPin(LED_PIN, HIGH);
+  t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
+
+  switch (ret) {
+  case HTTP_UPDATE_FAILED:
+    Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+    break;
+
+  case HTTP_UPDATE_NO_UPDATES:
+    Serial.println("HTTP_UPDATE_NO_UPDATES");
+    break;
+
+  case HTTP_UPDATE_OK:
+    Serial.println("HTTP_UPDATE_OK");
+    break;
+  }
 }
