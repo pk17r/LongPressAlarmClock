@@ -677,10 +677,6 @@ int WiFiStuff::FirmwareVersionCheck(void) {
     delete client;
   }
 
-  Serial.print("Payload = ");
-  Serial.println(payload.c_str());
-  Serial.println();
-
   std::string payload_str = payload.c_str();
 
   Serial.print("payload_str = ");

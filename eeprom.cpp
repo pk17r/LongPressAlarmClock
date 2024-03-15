@@ -164,8 +164,3 @@ void EEPROM::Save1Byte(uint16_t address, uint8_t value) {
     PrintLn("Failed to save to EEPROM!");
   }
 }
-
-void EEPROM::GetSoftVersionAndDate(uint8_t &software_version, std::string &software_date) {
-  software_version = kDataModelVersion;
-  software_date = kSoftVersionDate;
-}

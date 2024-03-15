@@ -145,7 +145,6 @@ struct DisplayData {
 // Display Visible Data Struct
 extern DisplayData new_display_data_, displayed_data_;
 
-
 // extern all global functions
 extern void AddSecondCoreTaskIfNotThere(SecondCoreTask task);
 extern void WaitForExecutionOfSecondCoreTask();

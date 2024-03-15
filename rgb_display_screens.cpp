@@ -486,18 +486,15 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     // Cancel button
     DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-    // Software Version and Date
-    uint8_t software_version = 0;
-    std::string software_date = "";
-    eeprom->GetSoftVersionAndDate(software_version, software_date);
+    // Firmware Version and Date
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorYellow);
     tft.setCursor(10, kTftHeight - 20);
-    tft.print("Software Version: ");
-    tft.print(software_version);
+    tft.print("Firmware Version: ");
+    tft.print(kFirmwareVersion.c_str());
     tft.setCursor(10, kTftHeight - 5);
     tft.print("Date: ");
-    tft.print(software_date.c_str());
+    tft.print(kFirmwareDate.c_str());
     
   }
   else {

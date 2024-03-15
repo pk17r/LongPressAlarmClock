@@ -20,7 +20,6 @@ public:
   void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
   void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
-  void GetSoftVersionAndDate(uint8_t &software_version, std::string &software_date);
 
 private:
 
@@ -42,8 +41,7 @@ private:
   // ADDRESSES
 
   const uint8_t kDataModelVersion = 101;    //  data model version : if this is not there on EEPROM, then defaults will be saved.
-  const std::string kSoftVersionDate = "Mar 14, 2024";
-  const uint16_t kDataModelVersionAddress = 0;  // data model address
+    const uint16_t kDataModelVersionAddress = 0;  // data model address
   const uint16_t kAlarmHrAddress = 1;
   const uint16_t kAlarmMinAddress = 2;
   const uint16_t kAlarmIsAmAddress = 3;

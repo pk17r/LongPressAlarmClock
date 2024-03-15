@@ -98,7 +98,6 @@ public:
   "-----END CERTIFICATE-----\n";
 
   #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h"
-  std::string kFwSearchStr = "kFirmwareVersion";
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/alarm_clock_rp2040_w.ino.bin"
   #elif defined(MCU_IS_ESP32_S2_MINI)
