@@ -896,6 +896,16 @@ void ProcessSerialInput() {
         inactivity_millis = 0;
       }
       break;
+    case 'u':   // Web OTA Update
+      {
+        Serial.println(F("**** Web OTA Update ****"));
+        // go to buzz alarm function
+        wifi_stuff->WebOtaUpdate();
+        // // set main page back
+        // SetPage(kMainPage);
+        // inactivity_millis = 0;
+      }
+      break;
     case 'w':   // get today's weather info
       {
         Serial.println(F("**** Get Weather Info ****"));
