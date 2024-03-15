@@ -22,6 +22,8 @@ public:
   void StartSetLocationLocalServer();
   void StopSetLocationLocalServer();
   void WebOtaUpdate();
+  void firmwareUpdate(void);
+  int FirmwareVersionCheck(void);
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -95,13 +97,16 @@ public:
   "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n" \
   "-----END CERTIFICATE-----\n";
 
-  #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/alarm_clock_rp2040_w/main/fw_version.txt"
+  // #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/fw_version.txt"
+  #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h"
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/alarm_clock_rp2040_w/main/build/esp32.esp32.esp32da/alarm_clock_rp2040_w.ino.bin"
-    String kFirmwareVersion = { "1.1" };
+    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/alarm_clock_rp2040_w.ino.bin"
+    String kFirmwareVersion = { ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION };
+    std::string kFwSearchStr = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
   #elif defined(MCU_IS_ESP32_S2_MINI)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/alarm_clock_rp2040_w/main/build/esp32.esp32.lolin_s2_mini/alarm_clock_rp2040_w.ino.bin"
-    String kFirmwareVersion = { "1.1" };
+    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/alarm_clock_rp2040_w.ino.bin"
+    String kFirmwareVersion = { ESP32_S2_MINI_FIRMWARE_VERSION };
+    std::string kFwSearchStr = ESP32_S2_MINI_FIRMWARE_VERSION;
   #endif
 
 // PRIVATE VARIABLES

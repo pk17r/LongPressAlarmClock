@@ -53,6 +53,7 @@ public:
   void InstantHighlightResponse(Cursor color_button);
   void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
   void IncorrectTimeBanner();
+  void WebOtaUpdatePage();
 
   // functions
   void Setup();

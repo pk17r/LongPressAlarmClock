@@ -1,3 +1,4 @@
+#include <string.h>
 #include <string>
 #include <cstddef>
 #include "wifi_stuff.h"
@@ -611,16 +612,17 @@ void WiFiStuff::WebOtaUpdate() {
     if(!TurnWiFiOn())
       return;
 
-  extern void firmwareUpdate(void);
-  extern int FirmwareVersionCheck(void);
+  // extern void firmwareUpdate(void);
+  // extern int FirmwareVersionCheck(void);
 
-  if (FirmwareVersionCheck())
-    firmwareUpdate();
+  FirmwareVersionCheck();
+  // if (FirmwareVersionCheck())
+  //   firmwareUpdate();
 }
 
-void firmwareUpdate(void) {
+void WiFiStuff::firmwareUpdate(void) {
   WiFiClientSecure client;
-  client.setCACert(wifi_stuff->rootCACertificate);
+  client.setCACert(rootCACertificate);
   httpUpdate.setLedPin(LED_PIN, HIGH);
   t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
 
@@ -639,7 +641,7 @@ void firmwareUpdate(void) {
   }
 }
 
-int FirmwareVersionCheck(void) {
+int WiFiStuff::FirmwareVersionCheck(void) {
   String payload;
   int httpCode;
   String fwurl = "";
@@ -651,7 +653,7 @@ int FirmwareVersionCheck(void) {
 
   if (client) 
   {
-    client -> setCACert(wifi_stuff->rootCACertificate);
+    client -> setCACert(rootCACertificate);
 
     // Add a scoping block for HTTPClient https to make sure it is destroyed before WiFiClientSecure *client is 
     HTTPClient https;
@@ -674,20 +676,30 @@ int FirmwareVersionCheck(void) {
     }
     delete client;
   }
-      
-  if (httpCode == HTTP_CODE_OK) // if version received
-  {
-    payload.trim();
-    if (payload.equals(wifi_stuff->kFirmwareVersion)) {
-      Serial.printf("\nDevice already on latest firmware version:%s\n", wifi_stuff->kFirmwareVersion);
-      return 0;
-    } 
-    else 
-    {
-      Serial.println(payload);
+
+  Serial.print("Payload = ");
+  Serial.println(payload.c_str());
+  Serial.println();
+
+  std::string payload_str = payload.c_str();
+  int search_str_index = payload_str.find(kFwSearchStr);
+  if(search_str_index >= 0) {
+    int fw_start_index = payload_str.find('"', search_str_index) + 1;
+    int fw_end_index = payload_str.find('"', fw_start_index);
+    std::string fw_str = payload_str.substr(fw_start_index, fw_end_index - fw_start_index);
+    Serial.print("Web fw_str = ");
+    Serial.println(fw_str.c_str());
+    Serial.print("Active kFirmwareVersion = ");
+    Serial.println(kFirmwareVersion.c_str());
+
+    if(strcmp(fw_str.c_str(), kFirmwareVersion.c_str()) != 0) {
       Serial.println("New firmware detected");
       return 1;
     }
-  } 
-  return 0;  
+    else {
+      Serial.printf("\nDevice already on latest firmware version:%s\n", kFirmwareVersion);
+      return 0;
+    }
+  }
+  return 0;
 }

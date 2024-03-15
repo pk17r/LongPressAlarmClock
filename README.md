@@ -17,10 +17,11 @@
 - Software:
   - All modules fully distributed in separate classes and files
   - Arduino setup and loop functions in .ino file
-  - MCU Selection, Pin definitions and Module selections in pin_defs.h file
+  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
   - A fast low RAM usage FastDrawBitmap function is implement that converts monochrome image into RGB565 with 2 colors and sends image to display via SPI row by row
   - Adafruit Library used for GFX functions
   - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - Web OTA Firmware Update Functionality
 
 
 - Salient Features

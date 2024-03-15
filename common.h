@@ -52,6 +52,7 @@ enum ScreenPage {
   kLocationInputsPage,
   kEnterWeatherLocationZipPage,
   kEnterWeatherLocationCountryCodePage,
+  kWebOtaUpdatePage,
   kNoPageSelected
   };
 

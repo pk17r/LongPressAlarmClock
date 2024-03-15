@@ -17,10 +17,11 @@
 - Software:
   - All modules fully distributed in separate classes and files
   - Arduino setup and loop functions in .ino file
-  - MCU Selection, Pin definitions and Module selections in pin_defs.h file
+  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
   - A fast low RAM usage FastDrawBitmap function is implement that converts monochrome image into RGB565 with 2 colors and sends image to display via SPI row by row
   - Adafruit Library used for GFX functions
   - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - Web OTA Firmware Update Functionality
 
 
 - Salient Features
@@ -899,11 +900,13 @@ void ProcessSerialInput() {
     case 'u':   // Web OTA Update
       {
         Serial.println(F("**** Web OTA Update ****"));
-        // go to buzz alarm function
+        // set Web OTA Update Pagte
+        SetPage(kWebOtaUpdatePage);
+        inactivity_millis = 0;
+        // Web OTA Update
         wifi_stuff->WebOtaUpdate();
-        // // set main page back
-        // SetPage(kMainPage);
-        // inactivity_millis = 0;
+        // set back main page if Web OTA Update unsuccessful
+        SetPage(kMainPage);
       }
       break;
     case 'w':   // get today's weather info
@@ -950,6 +953,11 @@ void SetPage(ScreenPage page) {
       current_page = kScreensaverPage;      // new page needs to be set before any action
       display->ScreensaverControl(true);
       highlight = kCursorNoSelection;
+      break;
+    case kWebOtaUpdatePage:
+      current_page = kWebOtaUpdatePage;
+      display->WebOtaUpdatePage();
+      display->SetMaxBrightness();
       break;
     case kAlarmSetPage:
       current_page = kAlarmSetPage;     // new page needs to be set before any action

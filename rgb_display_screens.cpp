@@ -762,6 +762,16 @@ void RGBDisplay::DisplayWeatherInfo() {
   }
 }
 
+void RGBDisplay::WebOtaUpdatePage() {
+  tft.fillScreen(kDisplayBackroundColor);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&Satisfy_Regular18pt7b);
+  tft.setCursor(20, 100);
+  tft.print("Over the Air");
+  tft.setCursor(20, 200);
+  tft.print("Firmware Update...");
+}
+
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {
 
   int16_t title_x0 = 30, title_y0 = 40;
