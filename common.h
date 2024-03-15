@@ -124,7 +124,7 @@ enum SecondCoreTask {
   kConnectWiFi,
   kDisconnectWiFi,
   kFirmwareVersionCheck,
-  kNoTask,
+  kNoTask    // needs to be last entry ibn the enum -> used to create second_core_task_added_flag_array
   };
 
 // second core current task

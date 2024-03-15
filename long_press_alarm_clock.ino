@@ -88,6 +88,9 @@ bool _debug_mode = false;
 
 SPIClass* spi_obj = NULL;
 
+// random afternoon hour and minute to update firmware
+uint8_t random_afternoon_hour = 1, random_afternoon_min = 0;
+
 // watchdog timeout time
 #if defined(MCU_IS_RP2040)
 const unsigned long kWatchdogTimeoutMs = 8300;
@@ -200,6 +203,16 @@ void setup() {
   // second core task added flag array
   for (int i = 0; i < kNoTask; i++)
     second_core_task_added_flag_array[i] = false;
+
+  // initialize random seed
+  unsigned long seed = (rtc->hour() * 60 + rtc->minute()) * 60 + rtc->second();
+  randomSeed(seed);
+
+  // pick random afternoon time to update firmware
+  random_afternoon_hour = random(1, 6);
+  random_afternoon_min = random(0, 59);
+  Serial.print("random_afternoon_hour "); Serial.println(random_afternoon_hour);
+  Serial.print("random_afternoon_min "); Serial.println(random_afternoon_min);
 
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
@@ -450,14 +463,14 @@ void loop() {
           PrintLn("Get Time Update from NTP Server");
         }
 
-        // check for firmware update everyday at 2:05 AM
-        if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 3 && rtc->minute() == 14) {
+        // check for firmware update everyday afternoon time at a random time based on program start time
+        if(rtc->hourModeAndAmPm() == 2 && rtc->hour() == random_afternoon_hour && rtc->minute() == random_afternoon_min) {
           PrintLn("**** Web OTA Firmware Update Check ****");
-          AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+          AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
         }
 
-        // update firmware
+        // update firmware if available
         if(wifi_stuff->firmware_update_available_) {
           PrintLn("**** Web OTA Firmware Update ****");
           // set Web OTA Update Pagte

@@ -59,9 +59,6 @@ void RGBDisplay::Setup() {
   tft.fillScreen(kDisplayColorBlack);
   tft.setTextWrap(false);
 
-  unsigned long seed = (((((rtc->year()) * 12 + rtc->month()) * 30 + rtc->day()) * 24 + rtc->hour()) * 60 + rtc->minute()) * 60 + rtc->second();
-  randomSeed(seed);
-
   // update TFT display
   DisplayTimeUpdate();
 
