@@ -205,7 +205,7 @@ void setup() {
     second_core_task_added_flag_array[i] = false;
 
   // initialize random seed
-  unsigned long seed = (rtc->hour() * 60 + rtc->minute()) * 60 + rtc->second();
+  unsigned long seed = rtc->minute() * 60 + rtc->second();
   randomSeed(seed);
 
   // pick random afternoon time to update firmware
