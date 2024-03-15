@@ -101,9 +101,9 @@ public:
 
   #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h"
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.ino.bin"
+    #define URL_fw_Bin "https://github.com/pk17r/Long_Press_Alarm_Clock/raw/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin"
   #elif defined(MCU_IS_ESP32_S2_MINI)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.ino.bin"
+    #define URL_fw_Bin "https://github.com/pk17r/Long_Press_Alarm_Clock/raw/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin"
   #endif
 
 // PRIVATE VARIABLES
