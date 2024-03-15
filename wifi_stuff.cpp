@@ -605,7 +605,7 @@ void _LocalServerLocationInputs() {
 void WiFiStuff::WebOtaUpdate() {
 
   Serial.print("Active firmware version:");
-  Serial.println(kFirmwareVersion);
+  Serial.println(kFirmwareVersion.c_str());
   
   // turn On Wifi
   if(!wifi_connected_)
@@ -682,10 +682,26 @@ int WiFiStuff::FirmwareVersionCheck(void) {
   Serial.println();
 
   std::string payload_str = payload.c_str();
+
+  Serial.print("payload_str = ");
+  Serial.println(payload_str.c_str());
+  Serial.println();
+
+  Serial.print("kFwSearchStr = ");
+  Serial.println(kFwSearchStr.c_str());
+  Serial.println();
+
   int search_str_index = payload_str.find(kFwSearchStr);
+  Serial.print("search_str_index = ");
+  Serial.println(search_str_index);
+
   if(search_str_index >= 0) {
     int fw_start_index = payload_str.find('"', search_str_index) + 1;
     int fw_end_index = payload_str.find('"', fw_start_index);
+    Serial.print("fw_start_index = ");
+    Serial.println(fw_start_index);
+    Serial.print("fw_end_index = ");
+    Serial.println(fw_end_index);
     std::string fw_str = payload_str.substr(fw_start_index, fw_end_index - fw_start_index);
     Serial.print("Web fw_str = ");
     Serial.println(fw_str.c_str());

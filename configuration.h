@@ -10,9 +10,7 @@
 
 
 // FIRMWARE VERSION
-
-#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "1.1"
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "1.1"
+const std::string kFirmwareVersion = "1.0";
 
 
 // SELECT DISPLAY
