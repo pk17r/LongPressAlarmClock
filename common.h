@@ -167,6 +167,7 @@ extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void SetPage(ScreenPage page);
+extern void SetWatchdogTime(unsigned long ms);
 extern void ResetWatchdog();
 extern void PrintLn(const char* someText1, const char* someText2);
 extern void PrintLn(const char* someText1);

@@ -72,6 +72,7 @@ public:
 
   // flag to to know if new firmware update is available
   bool firmware_update_available_ = false;
+  std::string firmware_update_available_str_ = "";
 
   // DigiCert root certificate has expiry date of 10 Nov 2031
   // from https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master

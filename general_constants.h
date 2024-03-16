@@ -7,6 +7,10 @@ const uint32_t kInactivityMillisLimit = 60000;
 // user input delay
 const uint32_t kUserInputDelayMs = 200;
 
+// watchdog timeout time (RP2040 has a max watchdog timeout time of 8.3 seconds)
+const unsigned long kWatchdogTimeoutMs = 8300;
+const unsigned long kWatchdogTimeoutOtaUpdateMs = 90000;
+
 // char array sizes for time, date and alarm texts
 const int kHHMM_ArraySize = 6, kSS_ArraySize = 4, kDateArraySize = 13, kAlarmArraySize = 10;
 

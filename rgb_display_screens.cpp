@@ -763,10 +763,20 @@ void RGBDisplay::FirmwareUpdatePage() {
   tft.fillScreen(kDisplayBackroundColor);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeSans18pt7b);
-  tft.setCursor(20, 100);
+  tft.setCursor(20, 80);
   tft.print("Updating Firmware");
-  tft.setCursor(20, 200);
+  tft.setCursor(20, 140);
   tft.print("Over the Air..!");
+
+  // Firmware Version and Date
+  tft.setFont(&FreeMono9pt7b);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setCursor(10, kTftHeight - 20);
+  tft.print("Active Firmware: ");
+  tft.print(kFirmwareVersion.c_str());
+  tft.setCursor(10, kTftHeight - 5);
+  tft.print("Available Firmware: ");
+  tft.print(wifi_stuff->firmware_update_available_str_.c_str());
 }
 
 void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsCounter) {

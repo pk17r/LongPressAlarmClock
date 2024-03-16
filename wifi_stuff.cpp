@@ -480,7 +480,7 @@ const char index_html_wifi_details[] PROGMEM = R"rawliteral(
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
-  	<h3>Long Press Alarm Clock</h3>
+  	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <h4>Enter WiFi Details:</h4>
     <label>WiFi SSID:</label><br>
     <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
@@ -503,7 +503,7 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
-  	<h3>Long Press Alarm Clock</h3>
+  	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <h4>Enter Location Details:</h4>
     <label>Location ZIP/PIN Code:</label><br>
     <input type="number" name="html_zip_pin" value="%html_zip_pin%" min="10000" max="999999"><br><br>
@@ -678,6 +678,7 @@ bool WiFiStuff::FirmwareVersionCheck() {
     if(strcmp(fw_str.c_str(), kFirmwareVersion.c_str()) != 0) {
       Serial.println("New firmware detected");
       firmware_update_available_ = true;
+      firmware_update_available_str_ = fw_str;
       return true;
     }
     else {
@@ -706,6 +707,9 @@ void WiFiStuff::UpdateFirmware() {
 
   httpUpdate.setLedPin(LED_PIN, HIGH);
 
+  // increase watchdog timeout to 90s to accomodate OTA update
+  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
+
   t_httpUpdate_return ret = httpUpdate.update(client, (_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
 
   switch (ret) {
@@ -721,4 +725,6 @@ void WiFiStuff::UpdateFirmware() {
     Serial.println("HTTP_UPDATE_OK");
     break;
   }
+  PrintLn("UpdateFirmware() unsuccessful.");
+  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 }

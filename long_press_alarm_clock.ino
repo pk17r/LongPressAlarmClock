@@ -90,15 +90,12 @@ SPIClass* spi_obj = NULL;
 // random afternoon hour and minute to update firmware
 uint8_t random_afternoon_hour = 1, random_afternoon_min = 0;
 
-// watchdog timeout time
-#if defined(MCU_IS_RP2040)
-const unsigned long kWatchdogTimeoutMs = 8300;
-#elif defined(MCU_IS_ESP32)
-const unsigned long kWatchdogTimeoutMs = 10000;
-#endif
-
 // setup core0
 void setup() {
+  #if defined(MCU_IS_ESP32)
+    // slow the ESP32 CPU to reduce power consumption
+    setCpuFrequencyMhz(80);
+  #endif
 
   // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -136,29 +133,15 @@ void setup() {
 
   // check if in debug mode
   bool _debug_mode = !digitalRead(DEBUG_PIN);
-  delayMicroseconds(20);
-  while(digitalRead(DEBUG_PIN) == _debug_mode) {
-    _debug_mode = !digitalRead(DEBUG_PIN);
-    delayMicroseconds(20);
-  }
+  // delayMicroseconds(20);
+  // while(digitalRead(DEBUG_PIN) == _debug_mode) {
+  //   _debug_mode = !digitalRead(DEBUG_PIN);
+  //   delayMicroseconds(20);
+  // }
   if(_debug_mode) Serial.println(F("******** DEBUG MODE ******** : watchdog disabled!"));
 
-  #if defined(MCU_IS_RP2040)
-    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    if(!_debug_mode)  // enable watchdog reset if not in debug mode
-      rp2040.wdt_begin(kWatchdogTimeoutMs);
-  #elif defined(MCU_IS_ESP32)
-    // slow the ESP32 CPU to reduce power consumption
-    setCpuFrequencyMhz(80);
-    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
-    if(!_debug_mode) {  // enable watchdog reset if not in debug mode
-      esp_task_wdt_init(kWatchdogTimeoutMs / 1000, true); //enable panic so ESP32 restarts
-      esp_task_wdt_add(NULL); //add current thread to WDT watch
-    }
-  #endif
+  // enable watchdog reset if not in debug mode
+  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 
   // initialize spi
   #if defined(MCU_IS_RP2040)
@@ -806,6 +789,22 @@ void SerialPrintRtcDateTime() {
   Serial.print(kCharSpace);
   Serial.println(new_display_data_.alarm_str);
   Serial.flush();
+}
+
+// set watchdog time
+void SetWatchdogTime(unsigned long ms) {
+  PrintLn("SetWatchdogTime ms = ", ms);
+  #if defined(MCU_IS_RP2040)
+    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
+    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
+    rp2040.wdt_begin(ms);
+  #elif defined(MCU_IS_ESP32)
+    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
+    esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
+    esp_task_wdt_add(NULL); //add current thread to WDT watch
+  #endif
 }
 
 // reset watchdog within time so it does not reboot system
