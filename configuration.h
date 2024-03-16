@@ -31,16 +31,6 @@
 
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "1.2"
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "1.2"
-
 const std::string kFirmwareDate = "Mar 16, 2024";
-
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-  const std::string kFirmwareVersion = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
-  const std::string kFwSearchStr = "ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION";
-#elif defined(MCU_IS_ESP32_S2_MINI)
-  const std::string kFirmwareVersion = ESP32_S2_MINI_FIRMWARE_VERSION;
-  const std::string kFwSearchStr = "ESP32_S2_MINI_FIRMWARE_VERSION";
-#endif
-
 
 #endif  // CONFIGURATION_H

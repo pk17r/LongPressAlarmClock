@@ -613,7 +613,7 @@ bool WiFiStuff::FirmwareVersionCheck() {
   String payload;
   int httpCode;
   String fwurl = "";
-  fwurl += URL_fw_Version;
+  fwurl += (_debug_mode ? URL_fw_Version_debug_mode.c_str() : URL_fw_Version_release.c_str());
   fwurl += "?";
   fwurl += String(rand());
   Serial.println(fwurl);
@@ -665,12 +665,12 @@ bool WiFiStuff::FirmwareVersionCheck() {
   if(search_str_index >= 0) {
     int fw_start_index = payload_str.find('"', search_str_index) + 1;
     int fw_end_index = payload_str.find('"', fw_start_index);
-    Serial.print("fw_start_index = ");
-    Serial.println(fw_start_index);
-    Serial.print("fw_end_index = ");
-    Serial.println(fw_end_index);
+    // Serial.print("fw_start_index = ");
+    // Serial.println(fw_start_index);
+    // Serial.print("fw_end_index = ");
+    // Serial.println(fw_end_index);
     std::string fw_str = payload_str.substr(fw_start_index, fw_end_index - fw_start_index);
-    Serial.print("Web fw_str = ");
+    Serial.print("Web kFirmwareVersion = ");
     Serial.println(fw_str.c_str());
     Serial.print("Active kFirmwareVersion = ");
     Serial.println(kFirmwareVersion.c_str());
@@ -705,7 +705,8 @@ void WiFiStuff::UpdateFirmware() {
     client.setInsecure();//skip verification
 
   httpUpdate.setLedPin(LED_PIN, HIGH);
-  t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
+
+  t_httpUpdate_return ret = httpUpdate.update(client, (_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
 
   switch (ret) {
   case HTTP_UPDATE_FAILED:

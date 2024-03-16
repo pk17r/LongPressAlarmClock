@@ -10,6 +10,14 @@
 #include "SPI.h"
 #include <elapsedMillis.h>
 
+#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+  const std::string kFirmwareVersion = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION";
+#elif defined(MCU_IS_ESP32_S2_MINI)
+  const std::string kFirmwareVersion = ESP32_S2_MINI_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "ESP32_S2_MINI_FIRMWARE_VERSION";
+#endif
+
 // forward decleration of classes
 class RTC;
 class RGBDisplay;
@@ -32,6 +40,9 @@ extern PushButtonTaps* push_button;
 extern PushButtonTaps* inc_button;
 extern PushButtonTaps* dec_button;
 extern Touchscreen* ts;
+
+// debug mode turned On by pulling debug pin Low
+extern bool _debug_mode;
 
 // counter to note user inactivity seconds
 extern elapsedMillis inactivity_millis;

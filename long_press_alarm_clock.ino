@@ -84,7 +84,6 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
   TaskHandle_t Task1;
 #endif
-bool _debug_mode = false;
 
 SPIClass* spi_obj = NULL;
 
@@ -634,6 +633,9 @@ void WaitForExecutionOfSecondCoreTask() {
 }
 
 // GLOBAL VARIABLES AND FUNCTIONS
+
+// debug mode turned On by pulling debug pin Low
+bool _debug_mode = false;
 
 // counter to note user inactivity seconds
 elapsedMillis inactivity_millis = 0;

@@ -104,11 +104,14 @@ public:
 
   // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
   // ESP32 WiFiClientSecure examples: WiFiClientInsecure.ino WiFiClientSecure.ino
-  #define URL_fw_Version "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h"
+  const std::string URL_fw_Version_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h";
+  const std::string URL_fw_Version_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/configuration.h";
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin"
+    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
   #elif defined(MCU_IS_ESP32_S2_MINI)
-    #define URL_fw_Bin "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin"
+    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
   #endif
 
 // PRIVATE VARIABLES
