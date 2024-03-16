@@ -603,6 +603,7 @@ void _LocalServerLocationInputs() {
 
 // check for available firmware update
 // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
+// ESP32 WiFiClientSecure examples: WiFiClientInsecure.ino WiFiClientSecure.ino
 bool WiFiStuff::FirmwareVersionCheck() {
   // turn On Wifi
   if(!wifi_connected_)
@@ -620,7 +621,10 @@ bool WiFiStuff::FirmwareVersionCheck() {
 
   if (client) 
   {
-    client -> setCACert(rootCACertificate);
+    if(use_secure_connection)
+      client->setCACert(rootCACertificate);
+    else
+      client->setInsecure();//skip verification
 
     // Add a scoping block for HTTPClient https to make sure it is destroyed before WiFiClientSecure *client is 
     HTTPClient https;
@@ -686,6 +690,7 @@ bool WiFiStuff::FirmwareVersionCheck() {
 
 // update firmware
 // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
+// ESP32 WiFiClientSecure examples: WiFiClientInsecure.ino WiFiClientSecure.ino
 void WiFiStuff::UpdateFirmware() {
   // turn On Wifi
   if(!wifi_connected_)
@@ -693,7 +698,12 @@ void WiFiStuff::UpdateFirmware() {
       return;
 
   WiFiClientSecure client;
-  client.setCACert(rootCACertificate);
+
+  if(use_secure_connection)
+    client.setCACert(rootCACertificate);
+  else
+    client.setInsecure();//skip verification
+
   httpUpdate.setLedPin(LED_PIN, HIGH);
   t_httpUpdate_return ret = httpUpdate.update(client, URL_fw_Bin);
 

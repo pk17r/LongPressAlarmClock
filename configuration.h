@@ -4,8 +4,8 @@
 
 // SELECT MCU
 
-// #define MCU_IS_ESP32_WROOM_DA_MODULE
-#define MCU_IS_ESP32_S2_MINI
+#define MCU_IS_ESP32_WROOM_DA_MODULE
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_RASPBERRY_PI_PICO_W
 
 
@@ -29,10 +29,10 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "1.0"
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "1.0"
+#define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "1.2"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "1.2"
 
-const std::string kFirmwareDate = "Mar 15, 2024";
+const std::string kFirmwareDate = "Mar 16, 2024";
 
 #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
   const std::string kFirmwareVersion = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
