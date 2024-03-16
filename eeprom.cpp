@@ -45,6 +45,9 @@ void EEPROM::SaveDefaults() {
   Save1Byte(kWeatherUnitsMetricNotImperialAddress, kWeatherUnitsMetricNotImperial);
   delay(delay_ms);
   Save1Byte(kAlarmLongPressSecondsAddress, kAlarmLongPressSeconds);
+  delay(delay_ms);
+  SaveCurrentFirmwareVersion();
+
   PrintLn("Defaults saved to EEPROM!");
 }
 
@@ -82,7 +85,16 @@ void EEPROM::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password) {
   SaveString(kWiFiSsidLengthAddress, kWiFiSsidLengthMax, kWiFiSsidAddress, wifi_ssid);
   SaveString(kWiFiPasswdLengthAddress, kWiFiPasswdLengthMax, kWiFiPasswdAddress, wifi_password);
   PrintLn("WiFi ssid and password written to EEPROM");
+}
 
+void EEPROM::RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion) {
+  savedFirmwareVersion = FetchString(kFirmwareVersionLengthAddress, kFirmwareVersionAddress);
+  PrintLn("Saved Firmware Version: ", savedFirmwareVersion);
+}
+
+void EEPROM::SaveCurrentFirmwareVersion() {
+  SaveString(kFirmwareVersionLengthAddress, kFirmwareVersionLengthMax, kFirmwareVersionAddress, kFirmwareVersion);
+  PrintLn("Current Firmware Version written to EEPROM");
 }
 
 void EEPROM::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {

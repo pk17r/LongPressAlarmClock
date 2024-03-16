@@ -20,6 +20,8 @@ public:
   void RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial);
   void SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial);
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
+  void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
+  void SaveCurrentFirmwareVersion();
 
 private:
 
@@ -48,16 +50,19 @@ private:
   const uint16_t kAlarmOnAddress = 4;
   const uint8_t kWiFiSsidLengthAddress = 5;
   const uint8_t kWiFiSsidLengthMax = kWifiSsidPasswordLengthMax;
-  const uint16_t kWiFiSsidAddress = 6;
+  const uint16_t kWiFiSsidAddress = 6;  // kWifiSsidPasswordLengthMax bytes
   const uint16_t kWiFiPasswdLengthAddress = 38;
   const uint8_t kWiFiPasswdLengthMax = kWifiSsidPasswordLengthMax;
-  const uint16_t kWiFiPasswdAddress = 39;
+  const uint16_t kWiFiPasswdAddress = 39; // kWifiSsidPasswordLengthMax bytes
   const uint16_t kWeatherZipCodeAddress = 71;
   const uint8_t kWeatherZipCodeBytes = 4;
   const uint16_t kWeatherCountryCodeAddress = 75;
   const uint8_t kWeatherCountryCodeBytes = 2;
   const uint16_t kWeatherUnitsMetricNotImperialAddress = 77;
   const uint16_t kAlarmLongPressSecondsAddress = 79;
+  const uint8_t kFirmwareVersionLengthAddress = 80;
+    const uint8_t kFirmwareVersionLengthMax = 6;
+  const uint16_t kFirmwareVersionAddress = 81;  // 6 bytes
 
 
   // DEFAULTS

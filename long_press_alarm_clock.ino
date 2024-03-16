@@ -127,7 +127,7 @@ void setup() {
   delay(500);
 
   // if(!digitalRead(DEBUG_PIN))
-  //   while(!Serial) { delay(20); };
+    // while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
   Serial.flush();
 
@@ -163,6 +163,15 @@ void setup() {
 
   // initialize modules
   eeprom = new EEPROM();
+  // check if firmware was updated
+  std::string saved_firmware_version = "";
+  eeprom->RetrieveSavedFirmwareVersion(saved_firmware_version);
+  if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
+    firmware_updated_flag_user_information = true;
+    Serial.print("Firmware updated from "); Serial.print(saved_firmware_version.c_str()); Serial.print(" to "); Serial.println(kFirmwareVersion.c_str());
+    eeprom->SaveCurrentFirmwareVersion();
+  }
+  // initialize wifi
   #if defined(WIFI_IS_USED)
     wifi_stuff = new WiFiStuff();
   #endif
@@ -219,6 +228,7 @@ void loop() {
     display->SetMaxBrightness();
 
     inactivity_millis = 0;
+    firmware_updated_flag_user_information = false;
 
     // instant page change action
     if(current_page == kScreensaverPage)
@@ -619,6 +629,9 @@ void WaitForExecutionOfSecondCoreTask() {
 
 // debug mode turned On by pulling debug pin Low
 bool _debug_mode = false;
+
+// firmware updated flag user information
+bool firmware_updated_flag_user_information = false;
 
 // counter to note user inactivity seconds
 elapsedMillis inactivity_millis = 0;

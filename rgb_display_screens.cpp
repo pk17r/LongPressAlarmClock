@@ -900,10 +900,19 @@ void RGBDisplay::Screensaver() {
       my_canvas_->setFont(&Satisfy_Regular18pt7b);
     my_canvas_->setTextColor(randomColor);
     my_canvas_->setCursor(date_x0 + GAP_BAND, screensaver_h_ - 3 * GAP_BAND);
-    my_canvas_->print(new_display_data_.date_str);
 
-    // draw bell
-    my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
+    if(!firmware_updated_flag_user_information) {
+      my_canvas_->print(new_display_data_.date_str);
+
+      // draw bell
+      my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
+    }
+    else {
+      my_canvas_->setFont(&FreeMonoBold9pt7b);
+      // print firmware updated string
+      std::string fw_updated_str = "Firmware Updated " + kFirmwareVersion + "!";
+      my_canvas_->print(fw_updated_str.c_str());
+    }
 
     // get visual bounds of created canvas and time string
     // myCanvas->drawRect(tft_HHMM_x0 + GAP_BAND, GAP_BAND, tft_HHMM_w, tft_HHMM_h, Display_Color_Green);  // time border
@@ -1287,12 +1296,6 @@ void RGBDisplay::DisplayTimeUpdate() {
     }
   }
 
-  // // settings wheel cursor highlight
-  // if(highlight == kMainPageSettingsWheel)
-  //   tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
-  // else
-  //   tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
-
   // alarm string center aligned
   if (strcmp(new_display_data_.alarm_str, displayed_data_.alarm_str) != 0 || new_display_data_.alarm_ON != displayed_data_.alarm_ON || redraw_display_) {
     // set font
@@ -1368,11 +1371,17 @@ void RGBDisplay::DisplayTimeUpdate() {
     displayed_data_.alarm_ON = new_display_data_.alarm_ON;
   }
 
-  // // alarm cursor highlight
-  // if(highlight == kMainPageSetAlarm)
-  //   tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayColorCyan);
-  // else
-  //   tft.drawRoundRect(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  if(redraw_display_ && firmware_updated_flag_user_information) {
+    // set font
+    tft.setFont(&FreeSansBold12pt7b);
+    // color
+    tft.setTextColor(kDisplayColorYellow);
+    // home the cursor
+    tft.setCursor(alarm_icon_x0_, alarm_icon_y0_);
+    // print firmware updated string
+    std::string fw_updated_str = "Firmware Updated " + kFirmwareVersion + "!";
+    tft.print(fw_updated_str.c_str());
+  }
 
   redraw_display_ = false;
 }

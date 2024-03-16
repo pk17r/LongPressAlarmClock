@@ -80,7 +80,7 @@ public:
   #endif
 
   // redraw full display flag
-  bool redraw_display_ = false;
+  bool redraw_display_ = true;
 
   // refresh screensaver canvas
   bool refresh_screensaver_canvas_ = true;

@@ -44,6 +44,9 @@ extern Touchscreen* ts;
 // debug mode turned On by pulling debug pin Low
 extern bool _debug_mode;
 
+// firmware updated flag user information
+extern bool firmware_updated_flag_user_information;
+
 // counter to note user inactivity seconds
 extern elapsedMillis inactivity_millis;
 
