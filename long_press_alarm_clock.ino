@@ -11,7 +11,7 @@
   - AT24C32 EEPROM on DS3231 RTC Clock Module
   - A push button with LED
   - 2 push buttons for increase and decrease functions
-  - A quite powerful 85dB passive buzzer for alarm
+  - An 85dB passive buzzer for alarm and different frequency tones
 
 
 - Software:
