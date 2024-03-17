@@ -637,30 +637,21 @@ bool WiFiStuff::FirmwareVersionCheck() {
       httpCode = https.GET();
       delay(100);
       if (httpCode == HTTP_CODE_OK) // if version received
-      {
         payload = https.getString(); // save received version
-      } else {
-        Serial.print("error in downloading version file:");
-        Serial.println(httpCode);
-      }
+      else
+        Serial.printf("error in downloading version file: %d\n", httpCode);
       https.end();
     }
     delete client;
   }
 
   std::string payload_str = payload.c_str();
-
-  Serial.print("payload_str = ");
-  Serial.println(payload_str.c_str());
-  Serial.println();
-
-  Serial.print("kFwSearchStr = ");
-  Serial.println(kFwSearchStr.c_str());
-  Serial.println();
+  Serial.printf("payload_str: %s\n\n", payload_str.c_str());
+  Serial.printf("kFwSearchStr: %s\n", kFwSearchStr.c_str());
 
   int search_str_index = payload_str.find(kFwSearchStr);
-  Serial.print("search_str_index = ");
-  Serial.println(search_str_index);
+  // Serial.print("search_str_index = ");
+  // Serial.println(search_str_index);
 
   if(search_str_index >= 0) {
     int fw_start_index = payload_str.find('"', search_str_index) + 1;
@@ -670,19 +661,17 @@ bool WiFiStuff::FirmwareVersionCheck() {
     // Serial.print("fw_end_index = ");
     // Serial.println(fw_end_index);
     std::string fw_str = payload_str.substr(fw_start_index, fw_end_index - fw_start_index);
-    Serial.print("Web kFirmwareVersion = ");
-    Serial.println(fw_str.c_str());
-    Serial.print("Active kFirmwareVersion = ");
-    Serial.println(kFirmwareVersion.c_str());
+    Serial.printf("Available kFirmwareVersion: %s\n", fw_str.c_str());
+    Serial.printf("Active kFirmwareVersion: %s\n", kFirmwareVersion.c_str());
+    firmware_update_available_str_ = fw_str;
 
     if(strcmp(fw_str.c_str(), kFirmwareVersion.c_str()) != 0) {
       Serial.println("New firmware detected");
       firmware_update_available_ = true;
-      firmware_update_available_str_ = fw_str;
       return true;
     }
     else {
-      Serial.printf("\nDevice already on latest firmware version:%s\n", kFirmwareVersion);
+      Serial.printf("Device already on latest firmware version: %s\n", kFirmwareVersion.c_str());
       return false;
     }
   }
@@ -710,6 +699,7 @@ void WiFiStuff::UpdateFirmware() {
   // increase watchdog timeout to 90s to accomodate OTA update
   if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
 
+  Serial.println(_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str());
   t_httpUpdate_return ret = httpUpdate.update(client, (_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
 
   switch (ret) {

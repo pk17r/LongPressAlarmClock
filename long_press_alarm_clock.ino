@@ -439,9 +439,8 @@ void loop() {
       }
 
       #if defined(WIFI_IS_USED)
-        // try to get weather info 5 mins before alarm time and every 60 minutes
-        if((inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (wifi_stuff->last_fetch_weather_info_time_ms_ == 0 || millis() - wifi_stuff->last_fetch_weather_info_time_ms_ > 60*60*1000 || alarm_clock->MinutesToAlarm() == 10)) {
-          // get updated weather info every 60 minutes and as well as 10 minutes before alarm time
+        // try to get weather info 5 mins before alarm time
+        if(alarm_clock->alarm_ON_ && (inactivity_millis > kInactivityMillisLimit) && !(wifi_stuff->incorrect_zip_code) && (alarm_clock->MinutesToAlarm() == 5)) {
           AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
           PrintLn("Get Weather Info!");
         }
