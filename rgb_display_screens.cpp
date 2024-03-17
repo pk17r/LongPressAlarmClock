@@ -18,7 +18,7 @@
     @param  w        Width of bitmap in pixels.
     @param  h        Height of bitmap in pixels.
 */
-void RGBDisplay::FastDrawBitmapSpi(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+void RGBDisplay::FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
   int16_t x2, y2;                 // Lower-right coord
   if ((x >= kTftWidth) ||            // Off-edge right
       (y >= kTftHeight) ||           // " top
@@ -982,7 +982,7 @@ void RGBDisplay::Screensaver() {
   // paste the canvas on screen
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
-  FastDrawBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
+  FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
 }
 
 void RGBDisplay::PickNewRandomColor() {
@@ -1021,7 +1021,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       IncorrectTimeBanner();
 
       // draw canvas to tft   fastDrawBitmap
-      FastDrawBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      FastDrawTwoColorBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
     else {
       my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
@@ -1086,7 +1086,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
 
       // draw canvas to tft   fastDrawBitmap
-      FastDrawBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      FastDrawTwoColorBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
 
     // delete created canvas and null the pointer

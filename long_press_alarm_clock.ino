@@ -2,8 +2,30 @@
 
 # Long Press Alarm Clock
 
+When alarm time hits, program requires user to press and hold the main LED push button for 20 (adjustable) seconds continously to turn off the alarm, making sure the user wakes up.
+Without the button press, buzzer keeps buzzing. If user lets go of the push button before alarm end time, the buzzer restarts. Max buzzer time of 120 seconds.
+
 
 Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
+
+
+- Software:
+  - A fast very low RAM usage FastDrawTwoColorBitmapSpi display function is implemented that converts a full or section of a monochrome frame into 16-bit RGB565 frame with 2 colors 
+  and sends data to display via SPI row by row in under 50ms for a full 320x240px frame and in only 20ms for 40% sized frame. This achieves a FPS of 20 frames per second for a
+  full frame and a whooping 50 frames per second for 40% sized frames. Using this way of converting a monochrome image into 2 colors row by row saves a lot of RAM on the MCU as now
+  we don't have to populate the whole 16-bit RGB565 frame, but only a 1-bit monochrome frame. This way a 153kB RGB565 frame on a 320x240px display is reduced to just 9.6kB, allowing 
+  usage of lower RAM MCUs and much faster processing times per frame. A 40% sized canvas of a 320x240px display is made within 7ms on a 240MHz esp32. The screensaver implemented on
+  this device achieves a whooping 45-50 frames per second speeds.
+  - C++ OOP Based Project
+  - All modules fully distributed in independent classes and header files
+  - Arduino setup and loop functions in .ino file
+  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
+  - A common header containing pointers to objects of every module and global functions
+  - Adafruit Library used for GFX functions
+  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - Secure Web OTA Firmware Update Functionality
+  - Watchdog keeps a check on the program and reboots MCU if it gets stuck
+  - Modular programming that fits single core or dual core microcontrollers
 
 
 - Hardware:
@@ -17,35 +39,20 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - An 85dB passive buzzer for alarm and different frequency tones
 
 
-- Software:
-  - All modules fully distributed in separate classes and files
-  - Arduino setup and loop functions in .ino file
-  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
-  - A fast very low RAM usage FastDrawBitmapSpi display function is implemented that converts a monochrome frame into RGB565 with 2 colors and sends a full frame to display via SPI row by row in only 50ms, achieving a FPS of 20 frames per second. This saves a lot of RAM on MCU. This way a 153kB RGB565 frame on a 320x240px display is reduced to just 9.6kB, allowing usage of lower RAM MCUs and faster processing times per frame.
-  - Adafruit Library used for GFX functions
-  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
-  - Secure Web OTA Firmware Update Functionality
-
-
 - Salient Features
-  - Long Press Alarm Clock: Program requires user to press and hold the main LED push button for 20 adjustable seconds continously to turn off alarm and buzzer, making sure user wakes up. There is no alarm snooze button.
-  - C++ OOP Based Project
-  - All modules have their own independent definition header files
-  - A common header containing pointers to objects of every module and global functions
+  - There is no alarm snooze button.
   - Time update via NTP server using WiFi once every day to maintain high accuracy
   - DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
   - Time auto adjusts for time zone and day light savings with location ZIP/PIN and country code
   - Get Weather info using WiFi and display today's weather after alarm
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)
-  - Colorful smooth Screensaver with a big clock
+  - Colorful Smooth Screensaver with a big clock
   - Touchscreen based alarm set page (touchscreen not on by default)
   - Settings saved in EEPROM so not lost on power loss
-  - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
-  - Modular programming that fits single core or dual core microcontrollers
   - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
   - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
-  - Very Low Power usage of 0.4W during day and 0.3W during night time
+  - Very Low Power usage of 0.5W during day and 0.3W during night time
 
 
 - Datasheets:
@@ -93,13 +100,13 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 SPIClass* spi_obj = NULL;
 
 // random afternoon hour and minute to update firmware
-uint8_t random_afternoon_hour = 1, random_afternoon_min = 0;
+uint8_t ota_update_afternoon_hour = 1, ota_update_afternoon_min = 0;
 
 // setup core0
 void setup() {
   #if defined(MCU_IS_ESP32)
     // slow the ESP32 CPU to reduce power consumption
-    setCpuFrequencyMhz(80);
+    // setCpuFrequencyMhz(80);
   #endif
 
   // make all spi CS pins high
@@ -129,25 +136,24 @@ void setup() {
   Serial.begin(115200);
 
   // a delay to let currents stabalize
-  delay(500);
-
-  // while(!Serial) { delay(20); };
-  Serial.println(F("\nSerial OK"));
-  Serial.flush();
+  // delay(500);
 
   // check if in debug mode
-  bool debug_mode = !digitalRead(DEBUG_PIN);
-  // delayMicroseconds(20);
-  // while(digitalRead(DEBUG_PIN) == debug_mode) {
-  //   debug_mode = !digitalRead(DEBUG_PIN);
-  //   delayMicroseconds(20);
-  // }
-  if(debug_mode) Serial.println(F("******** DEBUG MODE ******** : watchdog disabled!"));
+  debug_mode = !digitalRead(DEBUG_PIN);
+  if(debug_mode) {
+    while(!Serial) { delay(20); };
+    Serial.println(F("\nSerial OK"));
+    Serial.println(F("******** DEBUG MODE ******** : watchdog won't be activated!"));
+    Serial.flush();
+  }
+  else {
+    Serial.println(F("\nSerial OK"));
+    Serial.flush();
+    // enable watchdog reset if not in debug mode
+    SetWatchdogTime(kWatchdogTimeoutMs);
+  }
 
-  // enable watchdog reset if not in debug mode
-  if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
-
-  // initialize spi
+  // initialize hardware spi
   #if defined(MCU_IS_RP2040)
     spi_obj = &SPI;
     spi_obj->begin();   // Hardware SPI
@@ -175,10 +181,6 @@ void setup() {
     Serial.print("Firmware updated from "); Serial.print(saved_firmware_version.c_str()); Serial.print(" to "); Serial.println(kFirmwareVersion.c_str());
     eeprom->SaveCurrentFirmwareVersion();
   }
-  // initialize wifi
-  #if defined(WIFI_IS_USED)
-    wifi_stuff = new WiFiStuff();
-  #endif
   // setup ds3231 rtc module
   rtc = new RTC();
   // setup alarm clock
@@ -194,6 +196,10 @@ void setup() {
   #if defined(TOUCHSCREEN_IS_XPT2046)
     ts = new Touchscreen();
   #endif
+  // initialize wifi
+  #if defined(WIFI_IS_USED)
+    wifi_stuff = new WiFiStuff();
+  #endif
 
   // second core task added flag array
   for (int i = 0; i < kNoTask; i++)
@@ -203,13 +209,12 @@ void setup() {
   unsigned long seed = rtc->minute() * 60 + rtc->second();
   randomSeed(seed);
 
-  // pick random afternoon time to update firmware
-  random_afternoon_hour = random(1, 6);
-  random_afternoon_min = random(0, 59);
-  Serial.print("OTA Update random_afternoon_hour "); Serial.println(random_afternoon_hour);
-  Serial.print("OTA Update random_afternoon_min "); Serial.println(random_afternoon_min);
-  Serial.print("Active Firmware Version "); Serial.println(kFirmwareVersion.c_str());
-  Serial.print("Active Firmware Date "); Serial.println(kFirmwareDate.c_str());
+  // pick random afternoon time for firmware OTA update
+  ota_update_afternoon_hour = random(1, 6);
+  ota_update_afternoon_min = random(0, 59);
+  Serial.printf("OTA Update random afternoon time %02d:%02d PM\n", ota_update_afternoon_hour, ota_update_afternoon_min);
+  Serial.printf("Active Firmware Version %s\n", kFirmwareVersion.c_str());
+  Serial.printf("Active Firmware Date %s\n", kFirmwareDate.c_str());
 
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
@@ -469,7 +474,7 @@ void loop() {
         }
 
         // check for firmware update everyday afternoon time at a random time based on program start time
-        if(rtc->hourModeAndAmPm() == 2 && rtc->hour() == random_afternoon_hour && rtc->minute() == random_afternoon_min) {
+        if(rtc->hourModeAndAmPm() == 2 && rtc->hour() == ota_update_afternoon_hour && rtc->minute() == ota_update_afternoon_min) {
           PrintLn("**** Web OTA Firmware Update Check ****");
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
@@ -691,17 +696,20 @@ int AvailableRam() {
   #endif
 }
 
+void SerialInputWait() {
+  while (Serial.available() == 0) // delay until something is received via serial
+    delay(20);
+  delay(20);  // give sometime to MCU to read serial input
+}
+
 void SerialInputFlush() {
-  while (true) {
-    delay(20);  // give data a chance to arrive
-    if (Serial.available()) {
-      // we received something, get all of it and discard it
-      while (Serial.available())
-        Serial.read();
-      continue;  // stay in the main loop
-    } else
-      break;  // nothing arrived for 20 ms
+  delay(20);  // give sometime to MCU to read serial input
+  // if MCU received something, get all of it and discard it
+  while (Serial.available()) {
+    Serial.read();
+    delay(20);  // give sometime to MCU to read next serial input
   }
+  // nothing arrived for 20 ms, break off
 }
 
 void SerialTimeStampPrefix() {
@@ -875,23 +883,19 @@ void ProcessSerialInput() {
     case 'b':   // brightness
       {
         Serial.println(F("**** Set Brightness [0-255] ****"));
-        while (Serial.available() == 0) {};
+        SerialInputWait();
         int brightnessVal = Serial.parseInt();
         SerialInputFlush();
         display->SetBrightness(brightnessVal);
       }
       break;
     case 'c':   // connect to WiFi
-      {
-        Serial.println(F("**** Connect to WiFi ****"));
-        AddSecondCoreTaskIfNotThere(kConnectWiFi);
-      }
+      Serial.println(F("**** Connect to WiFi ****"));
+      AddSecondCoreTaskIfNotThere(kConnectWiFi);
       break;
     case 'd':   // disconnect WiFi
-      {
-        Serial.println(F("**** Disconnect WiFi ****"));
-        AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
-      }
+      Serial.println(F("**** Disconnect WiFi ****"));
+      AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
       break;
     case 'e':   // setup ds3231 rtc
       Serial.println(F("**** setup ds3231 rtc ****"));
@@ -907,45 +911,35 @@ void ProcessSerialInput() {
       Serial.print(F("RTC hourModeAndAmPm() = ")); Serial.println(rtc->hourModeAndAmPm());
       break;
     case 'g':   // good morning
-      {
-        display->GoodMorningScreen();
-      }
+      display->GoodMorningScreen();
       break;
     case 'i':   // set WiFi details
       {
         Serial.println(F("**** Enter WiFi Details ****"));
         String inputStr;
         Serial.print("SSID: ");
-        while(Serial.available() == 0) {
-          delay(20);
-        }
-        delay(20);
+        SerialInputWait();
         inputStr = Serial.readString();
         wifi_stuff->wifi_ssid_ = "";
         for (int i = 0; i < min(inputStr.length(), kWifiSsidPasswordLengthMax); i++)
-          if(inputStr[i] != '\0' || inputStr[i] != '\n')
+          if(inputStr[i] != '\0' && inputStr[i] != '\n')
             wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + inputStr[i];
         Serial.println(wifi_stuff->wifi_ssid_.c_str());
         Serial.print("PASSWORD: ");
-        while(Serial.available() == 0) {
-          delay(20);
-        }
-        delay(20);
+        SerialInputWait();
         inputStr = Serial.readString();
         wifi_stuff->wifi_password_ = "";
         for (int i = 0; i < min(inputStr.length(), kWifiSsidPasswordLengthMax); i++)
-          if(inputStr[i] != '\0' || inputStr[i] != '\n')
+          if(inputStr[i] != '\0' && inputStr[i] != '\n')
             wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + inputStr[i];
         Serial.println(wifi_stuff->wifi_password_.c_str());
         wifi_stuff->SaveWiFiDetails();
       }
       break;
     case 'n':   // get time from NTP server and set on RTC HW
-      {
-        Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
-        // update time from NTP server
-        AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-      }
+      Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
+      // update time from NTP server
+      AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       break;
     case 'o':   // On Screen User Text Input
       {
@@ -961,61 +955,66 @@ void ProcessSerialInput() {
       }
       break;
     case 's':   // screensaver
-      {
-        Serial.println(F("**** Screensaver ****"));
-        SetPage(kScreensaverPage);
-      }
+      Serial.println(F("**** Screensaver ****"));
+      SetPage(kScreensaverPage);
       break;
     case 't':   // go to buzzAlarm Function
-      {
-        Serial.println(F("**** buzzAlarm Function ****"));
-        // go to buzz alarm function
-        alarm_clock->BuzzAlarmFn();
-        // set main page back
-        SetPage(kMainPage);
-        inactivity_millis = 0;
-      }
+      Serial.println(F("**** buzzAlarm Function ****"));
+      // go to buzz alarm function
+      alarm_clock->BuzzAlarmFn();
+      // set main page back
+      SetPage(kMainPage);
+      inactivity_millis = 0;
       break;
     case 'u':   // Web OTA Update
-      {
-        Serial.println(F("**** Web OTA Update Check ****"));
-        #if defined(MCU_IS_ESP32)
-          wifi_stuff->FirmwareVersionCheck();
-          // if(wifi_stuff->firmware_update_available_) {
-            ResetWatchdog();
-            PrintLn("**** Web OTA Update Available ****");
-            // set Web OTA Update Pagte
-            SetPage(kFirmwareUpdatePage);
-            // Firmware Update
-            wifi_stuff->UpdateFirmware();
-            // set back main page if Web OTA Update unsuccessful
-            SetPage(kMainPage);
-          // }
-        #endif
-      }
+      Serial.println(F("**** Web OTA Update Check ****"));
+      #if defined(MCU_IS_ESP32)
+        wifi_stuff->FirmwareVersionCheck();
+        // if(wifi_stuff->firmware_update_available_) {
+          ResetWatchdog();
+          PrintLn("**** Web OTA Update Available ****");
+          // set Web OTA Update Pagte
+          SetPage(kFirmwareUpdatePage);
+          // Firmware Update
+          wifi_stuff->UpdateFirmware();
+          // set back main page if Web OTA Update unsuccessful
+          SetPage(kMainPage);
+        // }
+      #endif
       break;
     case 'w':   // get today's weather info
-      {
-        Serial.println(F("**** Get Weather Info ****"));
-        // get today's weather info
-        AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
-      }
+      Serial.println(F("**** Get Weather Info ****"));
+      // get today's weather info
+      AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       break;
     case 'y':   // show alarm triggered screen
+      Serial.println(F("**** Show Alarm Triggered Screen ****"));
+      // start alarm triggered page
+      SetPage(kAlarmTriggeredPage);
+      delay(1000);
+      display->AlarmTriggeredScreen(false, 24);
+      delay(1000);
+      display->AlarmTriggeredScreen(false, 12);
+      delay(1000);
+      display->AlarmTriggeredScreen(false, 5);
+      delay(1000);
+      // set main page back
+      SetPage(kMainPage);
+      inactivity_millis = 0;
+      break;
+    case 'z':   // screensaver settings
       {
-        Serial.println(F("**** Show Alarm Triggered Screen ****"));
-        // start alarm triggered page
-        SetPage(kAlarmTriggeredPage);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 24);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 13);
-        delay(1000);
-        display->AlarmTriggeredScreen(false, 14);
-        delay(1000);
-        // set main page back
-        SetPage(kMainPage);
-        inactivity_millis = 0;
+        Serial.println(F("**** Screensaver Settings ****"));
+        Serial.println(F("Fly Screensaver? (0/1):"));
+        SerialInputWait();
+        int userInput = Serial.parseInt();
+        SerialInputFlush();
+        display->fly_screensaver_horizontally_ = (userInput == 0 ? false : true);
+        Serial.println(F("Colored Border? (0/1):"));
+        SerialInputWait();
+        userInput = Serial.parseInt();
+        SerialInputFlush();
+        display->show_colored_edge_screensaver_ = (userInput == 0 ? false : true);
       }
       break;
     default:

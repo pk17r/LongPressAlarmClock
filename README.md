@@ -1,9 +1,31 @@
 # Long Press Alarm Clock
 
+When alarm time hits, program requires user to press and hold the main LED push button for 20 (adjustable) seconds continously to turn off the alarm, making sure the user wakes up.
+Without the button press, buzzer keeps buzzing. If user lets go of the push button before alarm end time, the buzzer restarts. Max buzzer time of 120 seconds.
+
 ![Alt text](resources/image_main.JPG?raw=true "Main Page")
 ![Alt text](resources/image_screensaver.JPG?raw=true "Screensaver Page")
 
 Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
+
+
+- Software:
+  - A fast very low RAM usage FastDrawTwoColorBitmapSpi display function is implemented that converts a full or section of a monochrome frame into 16-bit RGB565 frame with 2 colors 
+  and sends data to display via SPI row by row in under 50ms for a full 320x240px frame and in only 20ms for 40% sized frame. This achieves a FPS of 20 frames per second for a
+  full frame and a whooping 50 frames per second for 40% sized frames. Using this way of converting a monochrome image into 2 colors row by row saves a lot of RAM on the MCU as now
+  we don't have to populate the whole 16-bit RGB565 frame, but only a 1-bit monochrome frame. This way a 153kB RGB565 frame on a 320x240px display is reduced to just 9.6kB, allowing 
+  usage of lower RAM MCUs and much faster processing times per frame. A 40% sized canvas of a 320x240px display is made within 7ms on a 240MHz esp32. The screensaver implemented on
+  this device achieves a whooping 45-50 frames per second speeds.
+  - C++ OOP Based Project
+  - All modules fully distributed in independent classes and header files
+  - Arduino setup and loop functions in .ino file
+  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
+  - A common header containing pointers to objects of every module and global functions
+  - Adafruit Library used for GFX functions
+  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
+  - Secure Web OTA Firmware Update Functionality
+  - Watchdog keeps a check on the program and reboots MCU if it gets stuck
+  - Modular programming that fits single core or dual core microcontrollers
 
 
 - Hardware:
@@ -17,35 +39,20 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - An 85dB passive buzzer for alarm and different frequency tones
 
 
-- Software:
-  - All modules fully distributed in separate classes and files
-  - Arduino setup and loop functions in .ino file
-  - MCU Selection and Module selections in configuration.h file, pin definitions in pin_defs.h file
-  - A fast very low RAM usage FastDrawBitmapSpi display function is implemented that converts a monochrome frame into RGB565 with 2 colors and sends a full frame to display via SPI row by row in only 50ms, achieving a FPS of 20 frames per second. This saves a lot of RAM on MCU. This way a 153kB RGB565 frame on a 320x240px display is reduced to just 9.6kB, allowing usage of lower RAM MCUs and faster processing times per frame.
-  - Adafruit Library used for GFX functions
-  - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
-  - Secure Web OTA Firmware Update Functionality
-
-
 - Salient Features
-  - Long Press Alarm Clock: Program requires user to press and hold the main LED push button for 20 adjustable seconds continously to turn off alarm and buzzer, making sure user wakes up. There is no alarm snooze button.
-  - C++ OOP Based Project
-  - All modules have their own independent definition header files
-  - A common header containing pointers to objects of every module and global functions
+  - There is no alarm snooze button.
   - Time update via NTP server using WiFi once every day to maintain high accuracy
   - DS3231 RTC itself is high accuracy clock having deviation of +/-2 minutes per year
   - Time auto adjusts for time zone and day light savings with location ZIP/PIN and country code
   - Get Weather info using WiFi and display today's weather after alarm
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)
-  - Colorful smooth Screensaver with a big clock
+  - Colorful Smooth Screensaver with a big clock
   - Touchscreen based alarm set page (touchscreen not on by default)
   - Settings saved in EEPROM so not lost on power loss
-  - RP2040 watchdog keeps check on program not getting stuck, reboots if stuck
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
-  - Modular programming that fits single core or dual core microcontrollers
   - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
   - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
-  - Very Low Power usage of 0.4W during day and 0.3W during night time
+  - Very Low Power usage of 0.5W during day and 0.3W during night time
 
 
 - Datasheets:

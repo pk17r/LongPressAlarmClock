@@ -77,7 +77,6 @@ void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_passw
   wifi_ssid = FetchString(kWiFiSsidLengthAddress, kWiFiSsidAddress);
   wifi_password = FetchString(kWiFiPasswdLengthAddress, kWiFiPasswdAddress);
   PrintLn("EEPROM wifi_ssid: ", wifi_ssid.c_str());
-  PrintLn("EEPROM wifi_password: ", wifi_password.c_str());
   if(debug_mode) PrintLn("EEPROM wifi_password: ", wifi_password.c_str());
   PrintLn("WiFi details retrieved from EEPROM.");
 }

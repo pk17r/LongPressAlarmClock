@@ -85,6 +85,10 @@ public:
   // refresh screensaver canvas
   bool refresh_screensaver_canvas_ = true;
 
+  // screensaver color and motion flags
+  bool show_colored_edge_screensaver_ = true;
+  bool fly_screensaver_horizontally_ = false;
+
   // tft dimensions
   const uint16_t kTftWidth = 320, kTftHeight = 240;
 
@@ -99,7 +103,7 @@ private:
   void PickNewRandomColor();  // for screensaver
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
-  void FastDrawBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+  void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
   void MakeKeyboard(const char type[][13], char* label);
   void DrawKeyboardButton(int x, int y, int w, int h);
@@ -116,8 +120,6 @@ private:
   bool screensaver_move_down_ = true, screensaver_move_right_ = true;
   int current_random_color_index_ = 0;
   GFXcanvas1* my_canvas_ = NULL;
-  bool show_colored_edge_screensaver_ = true;
-  bool fly_screensaver_horizontally_ = false;
 
   // location of various display text strings
   int16_t gap_right_x_ = 0, gap_up_y_ = 0;
