@@ -75,6 +75,13 @@ public:
   std::string firmware_update_available_str_ = "";
 
   // https://raw.githubusercontent.com DigiCert root certificate has expiry date of Fri, 15 Jan 2038 12:00:00 GMT
+  // download process:
+  // Open Mozilla Firefox
+  // Go to https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h
+  // Click Lock Icon on Address Bar -> Connection secure -> More information
+  // In newly opened Page Info Window, click Security Tab -> View Certificate
+  // In newly opened Certificate for *.github.io tab on Firefox click DigiCert Global Root G2 Tab -> Go to Miscellaneous -> Download PEM(cert)
+  // Open github-io.pem in Notepad++ and format it like below
   const char* rootCACertificate = \
   "-----BEGIN CERTIFICATE-----\n" \
   "MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh\n" \
