@@ -131,16 +131,16 @@ void setup() {
   Serial.flush();
 
   // check if in debug mode
-  bool _debug_mode = !digitalRead(DEBUG_PIN);
+  bool debug_mode = !digitalRead(DEBUG_PIN);
   // delayMicroseconds(20);
-  // while(digitalRead(DEBUG_PIN) == _debug_mode) {
-  //   _debug_mode = !digitalRead(DEBUG_PIN);
+  // while(digitalRead(DEBUG_PIN) == debug_mode) {
+  //   debug_mode = !digitalRead(DEBUG_PIN);
   //   delayMicroseconds(20);
   // }
-  if(_debug_mode) Serial.println(F("******** DEBUG MODE ******** : watchdog disabled!"));
+  if(debug_mode) Serial.println(F("******** DEBUG MODE ******** : watchdog disabled!"));
 
   // enable watchdog reset if not in debug mode
-  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
+  if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 
   // initialize spi
   #if defined(MCU_IS_RP2040)

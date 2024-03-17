@@ -616,7 +616,7 @@ bool WiFiStuff::FirmwareVersionCheck() {
   String payload;
   int httpCode;
   String fwurl = "";
-  fwurl += (_debug_mode ? URL_fw_Version_debug_mode.c_str() : URL_fw_Version_release.c_str());
+  fwurl += (debug_mode ? URL_fw_Version_debug_mode.c_str() : URL_fw_Version_release.c_str());
   fwurl += "?";
   fwurl += String(rand());
   Serial.println(fwurl);
@@ -700,10 +700,10 @@ void WiFiStuff::UpdateFirmware() {
   httpUpdate.setLedPin(LED_PIN, HIGH);
 
   // increase watchdog timeout to 90s to accomodate OTA update
-  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
+  if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
 
-  Serial.println(_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str());
-  t_httpUpdate_return ret = httpUpdate.update(client, (_debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
+  Serial.println(debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str());
+  t_httpUpdate_return ret = httpUpdate.update(client, (debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
 
   switch (ret) {
   case HTTP_UPDATE_FAILED:
@@ -719,6 +719,6 @@ void WiFiStuff::UpdateFirmware() {
     break;
   }
   PrintLn("UpdateFirmware() unsuccessful.");
-  if(!_debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
+  if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 }
 #endif
