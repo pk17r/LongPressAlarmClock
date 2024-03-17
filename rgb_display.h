@@ -99,7 +99,7 @@ private:
   void PickNewRandomColor();  // for screensaver
   void DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn);
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
-  void FastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
+  void FastDrawBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
   void MakeKeyboard(const char type[][13], char* label);
   void DrawKeyboardButton(int x, int y, int w, int h);

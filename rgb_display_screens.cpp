@@ -18,7 +18,7 @@
     @param  w        Width of bitmap in pixels.
     @param  h        Height of bitmap in pixels.
 */
-void RGBDisplay::FastDrawBitmap(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
+void RGBDisplay::FastDrawBitmapSpi(int16_t x, int16_t y, uint8_t *bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
   int16_t x2, y2;                 // Lower-right coord
   if ((x >= kTftWidth) ||            // Off-edge right
       (y >= kTftHeight) ||           // " top
@@ -845,17 +845,16 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 }
 
 void RGBDisplay::Screensaver() {
-  // elapsedMillis timer1;
   const int16_t GAP_BAND = 5;
   if(refresh_screensaver_canvas_) {
+    // map time
+    elapsedMillis timer1;
 
     // delete created canvas and null the pointer
     if(my_canvas_ != NULL) {
       delete my_canvas_;
       my_canvas_ = NULL;
-      // myCanvas.reset(nullptr);
     }
-    // alarmClock->serialTimeStampPrefix(); Serial.println("After deleting myCanvas."); Serial.flush();
 
     // get bounds of HH:MM text on screen
     tft.setFont(&ComingSoon_Regular70pt7b);
@@ -882,15 +881,10 @@ void RGBDisplay::Screensaver() {
     date_x0 = (screensaver_w_ - date_row_w) / 2 - date_gap_x;
     
     // create canvas
-    // myCanvas = new GFXcanvas16(screensaver_w, screensaver_h);
     my_canvas_ = new GFXcanvas1(screensaver_w_, screensaver_h_);
-
-    // alarmClock->serialTimeStampPrefix(); Serial.println("After creating canvas."); Serial.flush();
 
     my_canvas_->setTextWrap(false);
     my_canvas_->fillScreen(kDisplayBackroundColor);
-
-    // alarmClock->serialTimeStampPrefix(); Serial.println("After clearing canvas."); Serial.flush();
 
     // picknew random color
     PickNewRandomColor();
@@ -936,7 +930,10 @@ void RGBDisplay::Screensaver() {
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
     refresh_screensaver_canvas_ = false;
 
-    // alarmClock->serialTimeStampPrefix(); Serial.println("After completing canvas."); Serial.flush();
+    if(debug_mode) {
+      unsigned long time1 = timer1;
+      Serial.printf("Screensave re-canvas time: %lums\n", time1);
+    }
   }
   else {
 
@@ -983,12 +980,9 @@ void RGBDisplay::Screensaver() {
   }
 
   // paste the canvas on screen
-  // unsigned long time1 = timer1; timer1 = 0;
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
-  FastDrawBitmap(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
-  // unsigned long time2 = timer1;
-  // Serial.print("Screensaver canvas and drawRGBBitmap times (ms): "); Serial.print(time1); Serial.print(' '); Serial.println(time2);
+  FastDrawBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
 }
 
 void RGBDisplay::PickNewRandomColor() {
@@ -1027,7 +1021,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       IncorrectTimeBanner();
 
       // draw canvas to tft   fastDrawBitmap
-      FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      FastDrawBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0IncorrectTime, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
     else {
       my_canvas_ = new GFXcanvas1(kTftWidth, kTimeRowY0 + 6);
@@ -1092,7 +1086,7 @@ void RGBDisplay::DisplayTimeUpdate() {
       strcpy(displayed_data_.time_SS, new_display_data_.time_SS);
 
       // draw canvas to tft   fastDrawBitmap
-      FastDrawBitmap(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
+      FastDrawBitmapSpi(0, 0, my_canvas_->getBuffer(), kTftWidth, kTimeRowY0 + 6, kDisplayTimeColor, kDisplayBackroundColor); // Copy to screen
     }
 
     // delete created canvas and null the pointer
