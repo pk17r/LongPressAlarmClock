@@ -18,7 +18,11 @@ void RGBDisplay::Setup() {
   tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
   // make display landscape orientation
-  tft.setRotation(1);
+  #if defined(TOUCHSCREEN_IS_XPT2046)   // touchscreen version display has things rotated 180 deg
+    tft.setRotation(3);
+  #else
+    tft.setRotation(1);
+  #endif
 
 #elif defined(DISPLAY_IS_ST7735)
 

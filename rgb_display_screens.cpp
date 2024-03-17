@@ -1503,6 +1503,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
   ScreenPage returnVal = kNoPageSelected;
+  Serial.printf("ts_x=%d, ts_y=%d\n", ts_x, ts_y);
 
   // main page touch input
   if(current_page == kMainPage) {

@@ -5,7 +5,6 @@
 #include <Arduino.h>
 #include "pin_defs.h"
 #include "general_constants.h"
-#include <string>
 #include <queue>          // std::queue
 #include "SPI.h"
 #include <elapsedMillis.h>
@@ -16,6 +15,9 @@
 #elif defined(MCU_IS_ESP32_S2_MINI)
   const std::string kFirmwareVersion = ESP32_S2_MINI_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "ESP32_S2_MINI_FIRMWARE_VERSION";
+#elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
+  const std::string kFirmwareVersion = RASPBERRY_PI_PICO_W_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "RASPBERRY_PI_PICO_W_FIRMWARE_VERSION";
 #endif
 
 // forward decleration of classes
@@ -42,7 +44,7 @@ extern PushButtonTaps* dec_button;
 extern Touchscreen* ts;
 
 // debug mode turned On by pulling debug pin Low
-extern bool _debug_mode;
+extern bool debug_mode;
 
 // firmware updated flag user information
 extern bool firmware_updated_flag_user_information;

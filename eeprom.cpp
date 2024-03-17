@@ -76,20 +76,25 @@ void EEPROM::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool a
 void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password) {
   wifi_ssid = FetchString(kWiFiSsidLengthAddress, kWiFiSsidAddress);
   wifi_password = FetchString(kWiFiPasswdLengthAddress, kWiFiPasswdAddress);
-  PrintLn("EEPROM wifi_ssid: ", wifi_ssid);
-  // PrintLn("EEPROM wifi_password: ", wifi_password);
+  PrintLn("EEPROM wifi_ssid: ", wifi_ssid.c_str());
+  PrintLn("EEPROM wifi_password: ", wifi_password.c_str());
+  if(debug_mode) PrintLn("EEPROM wifi_password: ", wifi_password.c_str());
   PrintLn("WiFi details retrieved from EEPROM.");
 }
 
 void EEPROM::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password) {
   SaveString(kWiFiSsidLengthAddress, kWiFiSsidLengthMax, kWiFiSsidAddress, wifi_ssid);
   SaveString(kWiFiPasswdLengthAddress, kWiFiPasswdLengthMax, kWiFiPasswdAddress, wifi_password);
+  if(debug_mode) {
+    PrintLn("EEPROM wifi_ssid: ", wifi_ssid.c_str());
+    PrintLn("EEPROM wifi_password: ", wifi_password.c_str());
+  }
   PrintLn("WiFi ssid and password written to EEPROM");
 }
 
 void EEPROM::RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion) {
   savedFirmwareVersion = FetchString(kFirmwareVersionLengthAddress, kFirmwareVersionAddress);
-  PrintLn("Saved Firmware Version: ", savedFirmwareVersion);
+  PrintLn("Saved Firmware Version: ", savedFirmwareVersion.c_str());
 }
 
 void EEPROM::SaveCurrentFirmwareVersion() {

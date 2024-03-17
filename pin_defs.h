@@ -100,9 +100,12 @@
   const int SDA_PIN = 4;
   const int SCL_PIN = 5;
   const int BUTTON_PIN = 14;
+  const int INC_BUTTON_PIN = 12;
+  const int DEC_BUTTON_PIN = 13;
   const int LED_PIN = 15;
   // const int LED_BUILTIN = 25;    // pre-defined
   const int BUZZER_PIN = 11;
+  const int DEBUG_PIN = 10;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
 
 
 #endif

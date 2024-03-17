@@ -17,12 +17,14 @@ public:
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
+#if defined(MCU_IS_ESP32)
   void StartSetWiFiSoftAP();
   void StopSetWiFiSoftAP();
   void StartSetLocationLocalServer();
   void StopSetLocationLocalServer();
   void UpdateFirmware();
   bool FirmwareVersionCheck();
+#endif
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
     std::string wifi_ssid_ = MY_WIFI_SSID;

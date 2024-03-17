@@ -126,8 +126,7 @@ void setup() {
   // a delay to let currents stabalize
   delay(500);
 
-  // if(!digitalRead(DEBUG_PIN))
-    // while(!Serial) { delay(20); };
+  // while(!Serial) { delay(20); };
   Serial.println(F("\nSerial OK"));
   Serial.flush();
 
@@ -239,7 +238,7 @@ void loop() {
     { // if on alarm page, then take alarm set page user inputs
       display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
     }
-    else if(ts_input && current_page != kAlarmSetPage && inactivity_millis >= kUserInputDelayMs)
+    else if(ts_input && current_page != kAlarmSetPage)// && inactivity_millis >= kUserInputDelayMs)
     { // if not on alarm page and user clicked somewhere, get touch input
       ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
       if(userTouchRegion != kNoPageSelected)
@@ -466,12 +465,14 @@ void loop() {
         // update firmware if available
         if(wifi_stuff->firmware_update_available_) {
           PrintLn("**** Web OTA Firmware Update ****");
-          // set Web OTA Update Pagte
-          SetPage(kFirmwareUpdatePage);
-          // Firmware Update
-          wifi_stuff->UpdateFirmware();
-          // set back main page if Web OTA Update unsuccessful
-          SetPage(kMainPage);
+          #if defined(MCU_IS_ESP32)
+            // set Web OTA Update Pagte
+            SetPage(kFirmwareUpdatePage);
+            // Firmware Update
+            wifi_stuff->UpdateFirmware();
+            // set back main page if Web OTA Update unsuccessful
+            SetPage(kMainPage);
+          #endif
         }
       #endif
 
@@ -567,6 +568,7 @@ void loop1() {
       wifi_stuff->TurnWiFiOff();
       success = !(wifi_stuff->wifi_connected_);
     }
+  #if defined(MCU_IS_ESP32)
     else if(current_task == kStartSetWiFiSoftAP) {
       wifi_stuff->StartSetWiFiSoftAP();
       success = true;
@@ -592,6 +594,7 @@ void loop1() {
       wifi_stuff->FirmwareVersionCheck();
       success = true;
     }
+  #endif
 
     // done processing the task
     // if(success) {
@@ -627,7 +630,7 @@ void WaitForExecutionOfSecondCoreTask() {
 // GLOBAL VARIABLES AND FUNCTIONS
 
 // debug mode turned On by pulling debug pin Low
-bool _debug_mode = false;
+bool debug_mode = false;
 
 // firmware updated flag user information
 bool firmware_updated_flag_user_information = false;
@@ -822,7 +825,7 @@ void SetWatchdogTime(unsigned long ms) {
 // reset watchdog within time so it does not reboot system
 void ResetWatchdog() {
   // reset MCU if not in debug mode
-  if(!_debug_mode) {
+  if(!debug_mode) {
     #if defined(MCU_IS_RP2040)
       // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
       rp2040.wdt_reset();
@@ -955,17 +958,19 @@ void ProcessSerialInput() {
     case 'u':   // Web OTA Update
       {
         Serial.println(F("**** Web OTA Update Check ****"));
-        wifi_stuff->FirmwareVersionCheck();
-        // if(wifi_stuff->firmware_update_available_) {
-          ResetWatchdog();
-          PrintLn("**** Web OTA Update Available ****");
-          // set Web OTA Update Pagte
-          SetPage(kFirmwareUpdatePage);
-          // Firmware Update
-          wifi_stuff->UpdateFirmware();
-          // set back main page if Web OTA Update unsuccessful
-          SetPage(kMainPage);
-        // }
+        #if defined(MCU_IS_ESP32)
+          wifi_stuff->FirmwareVersionCheck();
+          // if(wifi_stuff->firmware_update_available_) {
+            ResetWatchdog();
+            PrintLn("**** Web OTA Update Available ****");
+            // set Web OTA Update Pagte
+            SetPage(kFirmwareUpdatePage);
+            // Firmware Update
+            wifi_stuff->UpdateFirmware();
+            // set back main page if Web OTA Update unsuccessful
+            SetPage(kMainPage);
+          // }
+        #endif
       }
       break;
     case 'w':   // get today's weather info
