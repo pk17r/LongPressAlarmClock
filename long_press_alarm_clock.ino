@@ -957,7 +957,7 @@ void ProcessSerialInput() {
       {
         Serial.println(F("**** Web OTA Update Check ****"));
         wifi_stuff->FirmwareVersionCheck();
-        if(wifi_stuff->firmware_update_available_) {
+        // if(wifi_stuff->firmware_update_available_) {
           ResetWatchdog();
           PrintLn("**** Web OTA Update Available ****");
           // set Web OTA Update Pagte
@@ -966,7 +966,7 @@ void ProcessSerialInput() {
           wifi_stuff->UpdateFirmware();
           // set back main page if Web OTA Update unsuccessful
           SetPage(kMainPage);
-        }
+        // }
       }
       break;
     case 'w':   // get today's weather info
