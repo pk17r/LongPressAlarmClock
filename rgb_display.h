@@ -147,7 +147,7 @@ private:
   const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
   const int16_t kRadiusButtonRoundRect = 5;
 
-  const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[15] = "WEATHER & TIME", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
+  const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[15] = "WEATHER & TIME", screensaverStr[12] = "SCREENSAVER", fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipPinCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY", unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
 
   const int16_t kCancelButtonSize = 40, kCancelButtonX1 = kTftWidth - kCancelButtonSize - 5, kCancelButtonY1 = kTftHeight - kCancelButtonSize - 5;
   const int16_t kSaveButtonW = 80, kSaveButtonH = 40, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 15, kSaveButtonY1 = kTftHeight - kSaveButtonH - 5;
@@ -163,6 +163,7 @@ private:
   const int16_t kDisconnectWiFiButtonW = 170, kDisconnectWiFiButtonX1 = kTftWidth - kDisconnectWiFiButtonW - 5, kDisconnectWiFiButtonY1 = 90, kDisconnectWiFiButtonH = 25;
 
   const int16_t kSetLocationButtonW = 100, kSetLocationButtonX1 = kTftWidth - kSetLocationButtonW - 5, kSetLocationButtonY1 = 0, kSetLocationButtonH = 25;
+  const int16_t kSetCountryCodeButtonW = 130, kSetCountryCodeButtonX1 = kTftWidth - kSetCountryCodeButtonW - 5, kSetCountryCodeButtonY1 = 30, kSetCountryCodeButtonH = 25;
   const int16_t kUnitsButtonW = 120, kUnitsButtonX1 = kTftWidth - kUnitsButtonW - 5, kUnitsButtonY1 = 60, kUnitsButtonH = 25;
   const int16_t kFetchWeatherButtonW = 110, kFetchWeatherButtonX1 = 5, kFetchWeatherButtonY1 = 90, kFetchWeatherButtonH = 25;
   const int16_t kUpdateTimeButtonW = 180, kUpdateTimeButtonX1 = kTftWidth - kUpdateTimeButtonW - 5, kUpdateTimeButtonY1 = 90, kUpdateTimeButtonH = 25;

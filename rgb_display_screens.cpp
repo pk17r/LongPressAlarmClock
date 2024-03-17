@@ -647,8 +647,17 @@ void RGBDisplay::WeatherSettingsPage() {
   tft.setCursor(10, 80);
   tft.print("Units: "); tft.print(wifi_stuff->weather_units_metric_not_imperial_ ? metricUnitStr : imperialUnitStr);
   
-  // Set Location button
-  DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    // set ZIP/PIN button
+    DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, zipPinCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+    // set Country Code button
+    DrawButton(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  #else
+    // Set Location button
+    DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  #endif
+
 
   // Toggle Units Metric/Imperial button
   DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1470,9 +1479,19 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
   else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
-    // set location button
-    ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
-    if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    #if defined(TOUCHSCREEN_IS_XPT2046)
+      // set ZIP/PIN button
+      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
+      if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, zipPinCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+      // set Country Code button
+      ButtonHighlight(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, (highlight == kWeatherSettingsPageSetCountryCode), 5);
+      if(color_button == kWeatherSettingsPageSetCountryCode) DrawButton(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    #else
+      // set location button
+      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
+      if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    #endif
 
     // Toggle Units Metric/Imperial button
     ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (highlight == kWeatherSettingsPageUnits), 5);
@@ -1506,7 +1525,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
   Serial.printf("ts_x=%d, ts_y=%d\n", ts_x, ts_y);
 
   // main page touch input
-  if(current_page == kMainPage) {
+  if(current_page == kMainPage) {          // MAIN PAGE
     // if settings gear is touched
     if(ts_x >= kSettingsGearX1 && ts_x <= kSettingsGearX1 + kSettingsGearWidth && ts_y >= kSettingsGearY1 && ts_y <= kSettingsGearY1 + kSettingsGearHeight) {
       tft.drawRoundRect(kSettingsGearX1 - 1, kSettingsGearY1 - 1, kSettingsGearWidth + 2, kSettingsGearHeight + 2, kRadiusButtonRoundRect, kDisplayColorCyan);
@@ -1591,9 +1610,16 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
 
     // update kEnterWeatherLocationZipPage button
     if(ts_x >= kSetLocationButtonX1 && ts_x <= kSetLocationButtonX1 + kSetLocationButtonW && ts_y >= kSetLocationButtonY1 && ts_y <= kSetLocationButtonY1 + kSetLocationButtonH) {
-      DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, zipCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, zipPinCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kEnterWeatherLocationZipPage;
+    }
+
+    // update kEnterWeatherLocationCountryCodePage button
+    if(ts_x >= kSetCountryCodeButtonX1 && ts_x <= kSetCountryCodeButtonX1 + kSetCountryCodeButtonW && ts_y >= kSetCountryCodeButtonY1 && ts_y <= kSetCountryCodeButtonY1 + kSetCountryCodeButtonH) {
+      DrawButton(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kEnterWeatherLocationCountryCodePage;
     }
 
     // Toggle Units Metric/Imperial button

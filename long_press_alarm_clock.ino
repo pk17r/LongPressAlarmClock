@@ -328,6 +328,12 @@ void loop() {
             WaitForExecutionOfSecondCoreTask();
             SetPage(kLocationInputsPage);
           }
+          else if(highlight == kWeatherSettingsPageSetCountryCode) {
+            display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageSetCountryCode);
+            AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
+            WaitForExecutionOfSecondCoreTask();
+            SetPage(kLocationInputsPage);
+          }
           else if(highlight == kWeatherSettingsPageUnits) {
             wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;
             display->InstantHighlightResponse(/* color_button = */ kWeatherSettingsPageUnits);

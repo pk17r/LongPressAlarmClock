@@ -99,6 +99,7 @@ enum Cursor {
   kSoftApInputsPageSave,
   kSoftApInputsPageCancel,
   kWeatherSettingsPageSetLocation,
+  kWeatherSettingsPageSetCountryCode,
   kWeatherSettingsPageUnits,
   kWeatherSettingsPageFetch,
   kWeatherSettingsPageUpdateTime,
