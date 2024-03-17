@@ -1,7 +1,7 @@
 # Long Press Alarm Clock
 
-![Alt text](image_main.JPG?raw=true "Main Page")
-![Alt text](image_screensaver.JPG?raw=true "Screensaver Page")
+![Alt text](resources/image_main.JPG?raw=true "Main Page")
+![Alt text](resources/image_screensaver.JPG?raw=true "Screensaver Page")
 
 - Hardware:
   - MCU: ESP32 S2 Mini (Default) or ESP32 WROOM or Raspberry Pi Pico W
@@ -11,7 +11,7 @@
   - AT24C32 EEPROM on DS3231 RTC Clock Module
   - A push button with LED
   - 2 push buttons for increase and decrease functions
-  - A quite powerful 85dB passive buzzer for alarm
+  - An 85dB passive buzzer for alarm and different frequency tones
 
 
 - Software:
