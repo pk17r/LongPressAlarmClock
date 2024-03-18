@@ -477,8 +477,13 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
 
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorYellow);
-    tft.setCursor(10, kRunScreensaverButtonY1 + kRunScreensaverButtonH * 3 / 4);
-    tft.print("Screensaver:");
+    tft.setCursor(10, kAlarmLongPressSecondsY0 + 40);
+    tft.print("Screen");
+    tft.setCursor(10, kAlarmLongPressSecondsY0 + 60);
+    tft.print("saver:");
+
+    // Screensaver Motion Button
+    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (fly_screensaver_horizontally_ ? flyScreensaverStr : bounceScreensaverStr), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
     // Screensaver Speed Button
     DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1443,6 +1448,10 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     // Alarm Long Press Seconds Set button
     ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (highlight == kSettingsPageSet), 5);
     DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageSet ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+
+    // Screensaver Motion Button
+    ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (highlight == kSettingsPageScreensaverMotion), 5);
+    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (fly_screensaver_horizontally_ ? flyScreensaverStr : bounceScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Speed Button
     ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (highlight == kSettingsPageScreensaverSpeed), 5);

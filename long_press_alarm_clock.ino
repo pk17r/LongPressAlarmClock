@@ -302,6 +302,13 @@ void loop() {
             delay(kUserInputDelayMs);
             display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
           }
+          else if(highlight == kSettingsPageScreensaverMotion) {
+            highlight = kSettingsPageScreensaverMotion;
+            display->fly_screensaver_horizontally_ = !display->fly_screensaver_horizontally_;
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageScreensaverMotion);
+            delay(kUserInputDelayMs);
+            display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+          }
           else if(highlight == kSettingsPageScreensaverSpeed) {
             highlight = kSettingsPageScreensaverSpeed;
             CycleCpuFrequency();
