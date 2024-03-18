@@ -5,9 +5,12 @@ Without the button press, buzzer keeps buzzing. If user lets go of the push butt
 
 ![Alt text](resources/image_main.JPG?raw=true "Main Page")
 
-## Along with Super fast & Low RAM usage 16-bit RGB565 SPI frame transfer:
-Upto 50fps for 40% frames and 20fps for full frames (320x240px), in just 9.6kB RAM usage for 2 colors only. (Video. Open in new tab)
+### Along with Super fast 50 FPS & Low RAM usage 16-bit RGB565 SPI frame transfer:
+Upto 50 fps! for 40% sized frames and 20fps for full frames (320x240px), in just 9.6kB RAM usage with constraint of only 2 colors per frame.
+Bounce: (Video. Open in new tab)
 [![Video](resources/Screensaver_Bounce.png)](https://youtu.be/DzpbRKPJZnU?si=j4roX7BVXBLMQjwz)
+Fly In & Out:
+[![Video](resources/Screensaver_Fly_in_out.png)](https://youtu.be/Ve2rfpRr-to?si=R1Xj-QtfCcbP3Oyd)
 
 Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 
@@ -63,6 +66,14 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - ESP32 Lolin S2 Mini Pinouts https://www.studiopieters.nl/wp-content/uploads/2022/08/WEMOS-ESP32-S2-MINI.png
   - 2.8" Touchscreen ST7789V driver https://www.aliexpress.us/item/3256805747165796.html
   - 2.8" Touchscreen ILI9341 driver http://www.lcdwiki.com/2.8inch_SPI_Module_ILI9341_SKU:MSP2807
+<br>
 
+Prashant Kumar
 
-  Prashant Kumar
+<br>
+<br>
+
+Bounce with Black Background:
+[![Video](resources/Screensaver_Bounce_black_bg.png)](https://youtu.be/TZh4dyWv5IA?si=s0DFCxvyo68ziwVC)
+Fly In & Out with Black Background:
+[![Video](resources/Screensaver_Fly_in_out_black_bg.png)](https://youtu.be/e-dc37-eSqQ?si=WkW9plOmQq_JkzEE)
