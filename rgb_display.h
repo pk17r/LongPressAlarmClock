@@ -185,6 +185,7 @@ private:
   const uint16_t  kDisplayColorMagenta      = 0xF81F;
   const uint16_t  kDisplayColorYellow       = 0xFFE0;
   const uint16_t  kDisplayColorWhite        = 0xFFFF;
+  const uint16_t  kDisplayColorGrey         = 0xBDD7;
   
   // https://github.com/newdigate/rgb565_colors
   #define RGB565_Argentinian_blue                                            		0x6D9D         // Argentinian Blue                        	#6CB4EE			https://en.wikipedia.org/wiki/Shades_of_azure#Argentinian_blue

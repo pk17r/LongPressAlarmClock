@@ -104,10 +104,6 @@ uint8_t ota_update_afternoon_hour = 1, ota_update_afternoon_min = 0;
 
 // setup core0
 void setup() {
-  #if defined(MCU_IS_ESP32)
-    // slow the ESP32 CPU to reduce power consumption
-    // setCpuFrequencyMhz(80);
-  #endif
 
   // make all spi CS pins high
   pinMode(TFT_CS, OUTPUT);
@@ -253,26 +249,27 @@ void loop() {
     display->SetMaxBrightness();
 
     inactivity_millis = 0;
-    firmware_updated_flag_user_information = false;
 
     // instant page change action
     if(current_page == kScreensaverPage)
     { // turn off screensaver if on
       SetPage(kMainPage);
     }
-    else if(ts_input && current_page == kAlarmSetPage)
-    { // if on alarm page, then take alarm set page user inputs
-      display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
+    else if(ts_input) {
+      // Touch screen input
+      if(current_page == kAlarmSetPage)
+      { // if on alarm page, then take alarm set page user inputs
+        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
+      }
+      else // all other pages
+      { // if not on alarm page and user clicked somewhere, get touch input
+        ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
+        if(userTouchRegion != kNoPageSelected)
+          SetPage(userTouchRegion);
+      }
     }
-    else if(ts_input && current_page != kAlarmSetPage)// && inactivity_millis >= kUserInputDelayMs)
-    { // if not on alarm page and user clicked somewhere, get touch input
-      ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
-      if(userTouchRegion != kNoPageSelected)
-        SetPage(userTouchRegion);
-    }
-
-    // push/big button click action
-    if(push_button->buttonActiveDebounced()) {
+    // push/big LED button click action
+    else if(push_button->buttonActiveDebounced()) {
       PrintLn("push_button");
       if(current_page == kAlarmSetPage)
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
@@ -438,6 +435,9 @@ void loop() {
       else
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ true, /* push_button_pressed */ false);
     }
+
+    // show firmware updated info only for the first time user uses the device
+    firmware_updated_flag_user_information = false;
   }
 
   // if user presses button, show instant response by turning On LED
@@ -972,6 +972,10 @@ void ProcessSerialInput() {
       Serial.println(F("**** cycle through CPU speeds ****"));
       CycleCpuFrequency();
       break;
+    case 'k':   // set firmware updated flag true
+      Serial.println(F("**** set firmware updated flag true ****"));
+      firmware_updated_flag_user_information = true;
+      break;
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
       // update time from NTP server
@@ -990,9 +994,12 @@ void ProcessSerialInput() {
         SetPage(kSettingsPage);
       }
       break;
-    case 's':   // screensaver
-      Serial.println(F("**** Screensaver ****"));
-      SetPage(kScreensaverPage);
+    case 's':   // toggle screensaver
+      Serial.println(F("**** toggle Screensaver ****"));
+      if(current_page != kScreensaverPage)
+        SetPage(kScreensaverPage);
+      else
+        SetPage(kMainPage);
       break;
     case 't':   // go to buzzAlarm Function
       Serial.println(F("**** buzzAlarm Function ****"));
@@ -1085,6 +1092,7 @@ void SetPage(ScreenPage page) {
       highlight = kCursorNoSelection;
       display->redraw_display_ = true;
       display->DisplayTimeUpdate();
+      delay(kUserInputDelayMs);
       break;
     case kScreensaverPage:
       current_page = kScreensaverPage;      // new page needs to be set before any action
@@ -1094,7 +1102,6 @@ void SetPage(ScreenPage page) {
     case kFirmwareUpdatePage:
       current_page = kFirmwareUpdatePage;
       display->FirmwareUpdatePage();
-      display->SetMaxBrightness();
       break;
     case kAlarmSetPage:
       current_page = kAlarmSetPage;     // new page needs to be set before any action
@@ -1109,29 +1116,25 @@ void SetPage(ScreenPage page) {
     case kAlarmTriggeredPage:
       current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
       display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
-      display->SetMaxBrightness();
       break;
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
       highlight = kSettingsPageWiFi;
       display->SettingsPage(false, false);
-      display->SetMaxBrightness();
+      delay(kUserInputDelayMs);
       break;
     case kWiFiSettingsPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
       highlight = kWiFiSettingsPageConnect;
       display->WiFiSettingsPage();
-      display->SetMaxBrightness();
       break;
     case kSoftApInputsPage:
       current_page = kSoftApInputsPage;     // new page needs to be set before any action
       highlight = kSoftApInputsPageSave;
       display->SoftApInputsPage();
-      display->SetMaxBrightness();
       break;
     case kEnterWiFiSsidPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-      display->SetMaxBrightness();
       {
         PrintLn("**** On Screen WiFi SSID Text Input ****");
         // user input string
@@ -1156,7 +1159,6 @@ void SetPage(ScreenPage page) {
       break;
     case kEnterWiFiPasswdPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-      display->SetMaxBrightness();
       {
         PrintLn("**** On Screen WiFi PASSWD Text Input ****");
         // user input string
@@ -1183,17 +1185,14 @@ void SetPage(ScreenPage page) {
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
       highlight = kWeatherSettingsPageFetch;
       display->WeatherSettingsPage();
-      display->SetMaxBrightness();
       break;
     case kLocationInputsPage:
       current_page = kLocationInputsPage;     // new page needs to be set before any action
       highlight = kLocationInputsPageSave;
       display->LocationInputsLocalServerPage();
-      display->SetMaxBrightness();
       break;
     case kEnterWeatherLocationZipPage:
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
-      display->SetMaxBrightness();
       {
         PrintLn("**** On Screen ZIP/PIN Code Text Input ****");
         // user input string
@@ -1213,7 +1212,6 @@ void SetPage(ScreenPage page) {
       break;
     case kEnterWeatherLocationCountryCodePage:
       current_page = kWeatherSettingsPage;     // new page needs to be set before any action
-      display->SetMaxBrightness();
       {
         PrintLn("**** On Screen Country Code Text Input ****");
         // user input string
@@ -1234,7 +1232,6 @@ void SetPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
-  display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
 }
 
 void MoveCursor(bool increment) {

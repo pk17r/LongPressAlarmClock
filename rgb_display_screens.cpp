@@ -1352,6 +1352,10 @@ void RGBDisplay::DisplayTimeUpdate() {
     // home the cursor
     tft.setCursor(alarm_icon_x0_, kAlarmRowY0);
 
+    // highlight background while showing change log and firmware update info
+    if(firmware_updated_flag_user_information)
+      tft.fillRect(0, kDateRow_Y0 + 10, kTftWidth, kTftHeight - kDateRow_Y0 - 10, kDisplayColorGrey);
+
     // record alarm_row_w to calculate center aligned alarm_row_x0 value
     int16_t alarm_row_y1;
     uint16_t alarm_row_w, alarm_row_h;
@@ -1386,12 +1390,16 @@ void RGBDisplay::DisplayTimeUpdate() {
     // set font
     tft.setFont(&FreeSansBold12pt7b);
     // color
-    tft.setTextColor(kDisplayColorYellow);
+    tft.setTextColor(kDisplayColorOrange);
     // home the cursor
-    tft.setCursor(alarm_icon_x0_, alarm_icon_y0_);
+    tft.setCursor(alarm_icon_x0_, alarm_icon_y0_ + 10);
     // print firmware updated string
     std::string fw_updated_str = "Firmware Updated " + kFirmwareVersion + "!";
-    tft.print(fw_updated_str.c_str());
+    tft.println(fw_updated_str.c_str());
+    // color for changelog
+    tft.setTextColor(kDisplayColorBlue);
+    tft.setFont(&FreeMonoBold9pt7b);
+    tft.print(kChangeLog.c_str());
   }
 
   redraw_display_ = false;
