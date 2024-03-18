@@ -93,7 +93,8 @@ enum Cursor {
   kSettingsPageWiFi,
   kSettingsPageWeather,
   kSettingsPageSet,
-  kSettingsPageScreensaver,
+  kSettingsPageScreensaverSpeed,
+  kSettingsPageRunScreensaver,
   kSettingsPageCancel,
   kWiFiSettingsPageSetSsidPasswd,
   kWiFiSettingsPageConnect,
@@ -176,6 +177,7 @@ extern void SerialTimeStampPrefix();
 extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
+extern void CycleCpuFrequency();
 extern void SetPage(ScreenPage page);
 extern void SetWatchdogTime(unsigned long ms);
 extern void ResetWatchdog();

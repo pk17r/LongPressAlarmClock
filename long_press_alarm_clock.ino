@@ -302,7 +302,14 @@ void loop() {
             delay(kUserInputDelayMs);
             display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
           }
-          else if(highlight == kSettingsPageScreensaver)
+          else if(highlight == kSettingsPageScreensaverSpeed) {
+            highlight = kSettingsPageScreensaverSpeed;
+            CycleCpuFrequency();
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageScreensaverSpeed);
+            delay(kUserInputDelayMs);
+            display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+          }
+          else if(highlight == kSettingsPageRunScreensaver)
             SetPage(kScreensaverPage);
           else if(highlight == kSettingsPageCancel)
             SetPage(kMainPage);
@@ -952,19 +959,7 @@ void ProcessSerialInput() {
       break;
     case 'j':   // cycle through CPU speeds
       Serial.println(F("**** cycle through CPU speeds ****"));
-      {
-      #if defined(MCU_IS_ESP32)
-        cpu_speed_mhz = getCpuFrequencyMhz();
-        Serial.printf("Current CPU Speed %u MHz\n", cpu_speed_mhz);
-        // cycle through 80, 160 and 240
-        if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
-        else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
-        else setCpuFrequencyMhz(160);
-        cpu_speed_mhz = getCpuFrequencyMhz();
-        eeprom->SaveCpuSpeed();
-        Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
-      #endif
-      }
+      CycleCpuFrequency();
       break;
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
@@ -1053,6 +1048,20 @@ void ProcessSerialInput() {
     default:
       Serial.println(F("Unrecognized user input"));
   }
+}
+
+void CycleCpuFrequency() {
+  #if defined(MCU_IS_ESP32)
+    cpu_speed_mhz = getCpuFrequencyMhz();
+    Serial.printf("Current CPU Speed %u MHz\n", cpu_speed_mhz);
+    // cycle through 80, 160 and 240
+    if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
+    else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
+    else setCpuFrequencyMhz(160);
+    cpu_speed_mhz = getCpuFrequencyMhz();
+    eeprom->SaveCpuSpeed();
+    Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
+  #endif
 }
 
 void SetPage(ScreenPage page) {

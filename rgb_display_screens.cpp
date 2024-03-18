@@ -477,11 +477,14 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
 
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorYellow);
-    tft.setCursor(10, kScreensaverButtonY1 + kScreensaverButtonH * 3 / 4);
-    tft.print("Run:");
+    tft.setCursor(10, kRunScreensaverButtonY1 + kRunScreensaverButtonH * 3 / 4);
+    tft.print("Screensaver:");
 
-    // Start Screensaver Button
-    DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    // Screensaver Speed Button
+    DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+    // Run Screensaver Button
+    DrawButton(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, runScreensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
     // Cancel button
     DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -1432,7 +1435,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 
     // Update Weather and Location button
     ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (highlight == kSettingsPageWeather), 5);
-    if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, (color_button == kSettingsPageWeather ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Alarm Long Press Seconds Text
     ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (highlight == kSettingsPageAlarmLongPressSeconds), 5);
@@ -1441,8 +1444,12 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (highlight == kSettingsPageSet), 5);
     DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageSet ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
-    // Start Screensaver Button
-    ButtonHighlight(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, (highlight == kSettingsPageScreensaver), 5);
+    // Screensaver Speed Button
+    ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (highlight == kSettingsPageScreensaverSpeed), 5);
+    DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, (color_button == kSettingsPageScreensaverSpeed ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+
+    // Run Screensaver Button
+    ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (highlight == kSettingsPageRunScreensaver), 5);
 
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);
@@ -1550,9 +1557,18 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       return kWeatherSettingsPage;
     }
 
-    // Start Screensaver Button
-    if(ts_x >= kScreensaverButtonX1 && ts_x <= kScreensaverButtonX1 + kScreensaverButtonW && ts_y >= kScreensaverButtonY1 && ts_y <= kScreensaverButtonY1 + kScreensaverButtonH) {
-      DrawButton(kScreensaverButtonX1, kScreensaverButtonY1, kScreensaverButtonW, kScreensaverButtonH, screensaverStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+
+    // Screensaver Speed Button
+    if(ts_x >= kScreensaverSpeedButtonX1 && ts_x <= kScreensaverSpeedButtonX1 + kScreensaverSpeedButtonW && ts_y >= kScreensaverSpeedButtonY1 && ts_y <= kScreensaverSpeedButtonY1 + kScreensaverSpeedButtonH) {
+      DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      delay(100);
+      return kScreensaverPage;
+    }
+
+    // Run Screensaver Button
+    if(ts_x >= kRunScreensaverButtonX1 && ts_x <= kRunScreensaverButtonX1 + kRunScreensaverButtonW && ts_y >= kRunScreensaverButtonY1 && ts_y <= kRunScreensaverButtonY1 + kRunScreensaverButtonH) {
+      DrawButton(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, runScreensaverStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
       return kScreensaverPage;
     }
