@@ -227,6 +227,9 @@ void setup() {
     eeprom->SaveCpuSpeed();
   #endif
 
+  // set screensaver motion
+  display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
+
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
         Task1code, /* Function to implement the task */
@@ -304,7 +307,8 @@ void loop() {
           }
           else if(highlight == kSettingsPageScreensaverMotion) {
             highlight = kSettingsPageScreensaverMotion;
-            display->fly_screensaver_horizontally_ = !display->fly_screensaver_horizontally_;
+            display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
+            eeprom->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
             display->InstantHighlightResponse(/* color_button = */ kSettingsPageScreensaverMotion);
             delay(kUserInputDelayMs);
             display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
@@ -1041,8 +1045,8 @@ void ProcessSerialInput() {
         SerialInputWait();
         int userInput = Serial.parseInt();
         SerialInputFlush();
-        display->fly_screensaver_horizontally_ = (userInput == 0 ? false : true);
-        Serial.printf("fly_screensaver_horizontally_ = %d\n", display->fly_screensaver_horizontally_);
+        display->screensaver_bounce_not_fly_horizontally_ = (userInput == 0 ? false : true);
+        Serial.printf("fly_screensaver_horizontally_ = %d\n", display->screensaver_bounce_not_fly_horizontally_);
         Serial.println(F("Colored Border? (0/1):"));
         SerialInputWait();
         userInput = Serial.parseInt();

@@ -24,6 +24,8 @@ public:
   void SaveCurrentFirmwareVersion();
   uint32_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();
+  bool RetrieveScreensaverBounceNotFlyHorizontally();
+  void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
 
 private:
 
@@ -68,7 +70,8 @@ private:
   const uint16_t kFirmwareVersionLengthAddress = 80;
   const uint8_t kFirmwareVersionLengthMax = 6;
   const uint16_t kFirmwareVersionAddress = 81;  // 6 bytes
-  const uint16_t kCpuSpeedMhzAddress = 87;  // 4 byte
+  const uint16_t kCpuSpeedMhzAddress = 87;  // 4 bytes
+  const uint16_t kScreensaverMotionTypeAddress = 91;  // 1 byte
 
 
   // DEFAULTS

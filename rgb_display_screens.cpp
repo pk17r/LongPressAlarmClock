@@ -477,13 +477,13 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
 
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorYellow);
-    tft.setCursor(10, kAlarmLongPressSecondsY0 + 40);
+    tft.setCursor(10, kAlarmLongPressSecondsY0 + 45);
     tft.print("Screen");
-    tft.setCursor(10, kAlarmLongPressSecondsY0 + 60);
+    tft.setCursor(10, kAlarmLongPressSecondsY0 + 65);
     tft.print("saver:");
 
     // Screensaver Motion Button
-    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (fly_screensaver_horizontally_ ? flyScreensaverStr : bounceScreensaverStr), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
     // Screensaver Speed Button
     DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -960,7 +960,7 @@ void RGBDisplay::Screensaver() {
       }
     }
     else if(screensaver_x1_ + screensaver_w_ - 2 * GAP_BAND >= kTftWidth) {    // right edge
-      if(!fly_screensaver_horizontally_) {
+      if(screensaver_bounce_not_fly_horizontally_) {
         if(screensaver_move_right_) {
           screensaver_move_right_ = false;
           if(rtc->hour() < 10)
@@ -1451,7 +1451,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 
     // Screensaver Motion Button
     ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (highlight == kSettingsPageScreensaverMotion), 5);
-    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (fly_screensaver_horizontally_ ? flyScreensaverStr : bounceScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Speed Button
     ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (highlight == kSettingsPageScreensaverSpeed), 5);

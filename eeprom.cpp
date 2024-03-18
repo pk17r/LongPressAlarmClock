@@ -49,6 +49,8 @@ void EEPROM::SaveDefaults() {
   SaveCurrentFirmwareVersion();
   delay(delay_ms);
   SaveCpuSpeed();
+  delay(delay_ms);
+  SaveScreensaverBounceNotFlyHorizontally(true);
 
   PrintLn("Defaults saved to EEPROM!");
 }
@@ -136,6 +138,18 @@ uint32_t EEPROM::RetrieveSavedCpuSpeed() {
 void EEPROM::SaveCpuSpeed() {
   Save4Bytes(kCpuSpeedMhzAddress, cpu_speed_mhz);
   Serial.printf("EEPROM cpu_speed_mhz: %u MHz saved.\n", cpu_speed_mhz);
+}
+
+bool EEPROM::RetrieveScreensaverBounceNotFlyHorizontally() {
+  uint8_t screensaver_motion_type = Fetch1Byte(kScreensaverMotionTypeAddress);
+  bool screensaver_bounce_not_fly_horiontally = (screensaver_motion_type == 0 ? false : true);
+  Serial.printf("EEPROM screensaver_bounce_not_fly_horiontally: %d retrieved.\n", screensaver_bounce_not_fly_horiontally);
+  return screensaver_bounce_not_fly_horiontally;
+}
+
+void EEPROM::SaveScreensaverBounceNotFlyHorizontally(bool screensaver_bounce_not_fly_horiontally) {
+  Save1Byte(kScreensaverMotionTypeAddress, screensaver_bounce_not_fly_horiontally);
+  Serial.printf("EEPROM screensaver_bounce_not_fly_horiontally: %d saved.\n", screensaver_bounce_not_fly_horiontally);
 }
 
 std::string EEPROM::FetchString(uint16_t length_address, uint16_t data_address) {
