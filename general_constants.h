@@ -52,4 +52,8 @@ const unsigned int kWifiSsidPasswordLengthMax = 32;
 
 const char softApSsid[24] = "Long-Press-Alarm-SoftAP";
 
+const uint16_t kDayTimeMinutes = 420;
+const uint16_t kEveningTimeMinutes = 1080;
+const uint16_t kNightTimeMinutes = 1320;
+
 #endif  // GENERAL_CONSTANTS_H

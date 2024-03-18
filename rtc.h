@@ -20,6 +20,8 @@ public:
   static inline volatile bool rtc_hw_sec_update_ = false;     // seconds flag triggered by interrupt
   static inline volatile bool rtc_hw_min_update_ = false;     // minutes change flag
 
+  uint16_t todays_minutes = 0;
+
   /**
   * \brief Sets RTC HW datetime data with input Hr in 24 hour mode and puts RTC to 12 hour mode
   *
@@ -73,7 +75,6 @@ public:
   */
   void set_12hour_mode(const bool twelveHrMode) { rtc_hw_.set_12hour_mode(twelveHrMode); }
 
-
 private:
 
   // RTC clock object for DC3231 rtc
@@ -94,6 +95,7 @@ private:
   // clock seconds interrupt ISR
   static void IRAM_ATTR SecondsUpdateInterruptISR();
 
+  void SetTodaysMinutes();
 
 };
 

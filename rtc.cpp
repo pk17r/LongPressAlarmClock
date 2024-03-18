@@ -119,6 +119,8 @@ void RTC::Refresh() {
 
   PrintLn("__RTC Refresh__ ");
 
+  SetTodaysMinutes();
+
   // Check whether RTC HW experienced a power loss and thereby know if time is up to date or not
   if (rtc_hw_.lostPower()) {
     PrintLn("RTC POWER FAILED. Time is not up to date!");
@@ -187,4 +189,20 @@ void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_m
   rtc_hw_.set_12hour_mode(true);
   PrintLn("Time set");
   Refresh();
+}
+
+void RTC::SetTodaysMinutes() {
+  uint16_t todays_minutes_temp = minute();
+  if(hourModeAndAmPm() == 0) {
+    // 24 hour mode
+    todays_minutes_temp += hour() * 60;
+  }
+  else {
+    // 12 hour mode
+    if(hour() != 12)
+      todays_minutes_temp += hour() * 60;
+    if(hourModeAndAmPm() == 2)
+      todays_minutes_temp += 12 * 60;
+  }
+  todays_minutes = todays_minutes_temp;
 }

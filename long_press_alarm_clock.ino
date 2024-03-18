@@ -461,6 +461,7 @@ void loop() {
     // new minute!
     if (rtc->rtc_hw_min_update_) {
       rtc->rtc_hw_min_update_ = false;
+
       // PrintLn("New Minute!");
       // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 

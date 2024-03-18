@@ -95,27 +95,14 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
     SetBrightness(kDayBrightness);
   }
   else {
-    // check time of the day and set brightness
-    if (rtc->hourModeAndAmPm() == 1) {  // 12hr AM
-      if (rtc->hour() < 6 || rtc->hour() == 12)
-        SetBrightness(kNightBrightness);
-      else
-        SetBrightness(kDayBrightness);
-    } else if (rtc->hourModeAndAmPm() == 2) {  // 12hr PM
-      if (rtc->hour() > 10 && rtc->hour() != 12)
-        SetBrightness(kNightBrightness);
-      else if(rtc->hour() >= 6)
-        SetBrightness(kEveningBrightness);
-      else
-        SetBrightness(kDayBrightness);
-    } else if (rtc->hourModeAndAmPm() == 0) {  // 24hr
-      if (rtc->hour() > 21 || rtc->hour() < 7)
-        SetBrightness(kNightBrightness);
-      else if(rtc->hour() > 18)
-        SetBrightness(kEveningBrightness);
-      else
-        SetBrightness(kDayBrightness);
-    }
+    if(rtc->todays_minutes > kNightTimeMinutes)
+      SetBrightness(kNightBrightness);
+    else if(rtc->todays_minutes > kEveningTimeMinutes)
+      SetBrightness(kEveningBrightness);
+    else if(rtc->todays_minutes > kDayTimeMinutes)
+      SetBrightness(kDayBrightness);
+    else
+      SetBrightness(kNightBrightness);
   }
 }
 

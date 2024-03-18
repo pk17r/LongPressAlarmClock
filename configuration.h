@@ -35,6 +35,6 @@
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
 const std::string kFirmwareDate = "Mar 17, 2024";
 
-const std::string kChangeLog = "- Screensaver Motion Type\n- CPU Speed Control";
+const std::string kChangeLog = "- Screensaver Motion Type\n- CPU Speed Control\n- Night Brightness @10PM";
 
 #endif  // CONFIGURATION_H
