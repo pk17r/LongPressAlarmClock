@@ -4,7 +4,10 @@ When alarm time hits, program requires user to press and hold the main LED push 
 Without the button press, buzzer keeps buzzing. If user lets go of the push button before alarm end time, the buzzer restarts. Max buzzer time of 120 seconds.
 
 ![Alt text](resources/image_main.JPG?raw=true "Main Page")
-![Alt text](resources/image_screensaver.JPG?raw=true "Screensaver Page")
+
+## Along with Super fast & Low RAM usage 16-bit RGB565 SPI frame transfer:
+Upto 50fps for 40% frames and 20fps for full frames (320x240px), in just 9.6kB RAM usage for 2 colors only. (Video. Open in new tab)
+[![Video](resources/Screensaver_Bounce.png)](https://youtu.be/DzpbRKPJZnU?si=j4roX7BVXBLMQjwz)
 
 Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 
@@ -15,7 +18,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   full frame and a whooping 50 frames per second for 40% sized frames. Using this way of converting a monochrome image into 2 colors row by row saves a lot of RAM on the MCU as now
   we don't have to populate the whole 16-bit RGB565 frame, but only a 1-bit monochrome frame. This way a 153kB RGB565 frame on a 320x240px display is reduced to just 9.6kB, allowing 
   usage of lower RAM MCUs and much faster processing times per frame. A 40% sized canvas of a 320x240px display is made within 7ms on a 240MHz esp32. The screensaver implemented on
-  this device achieves a whooping 45-50 frames per second speeds.
+  this device achieves a whooping 45-50 frames per second speeds. https://github.com/pk17r/Long_Press_Alarm_Clock/blob/release/rgb_display_screens.cpp#l21
   - C++ OOP Based Project
   - All modules fully distributed in independent classes and header files
   - Arduino setup and loop functions in .ino file
@@ -23,7 +26,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - A common header containing pointers to objects of every module and global functions
   - Adafruit Library used for GFX functions
   - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
-  - Secure Web OTA Firmware Update Functionality
+  - Secure Web Over The Air Firmware Update Functionality
   - Watchdog keeps a check on the program and reboots MCU if it gets stuck
   - Modular programming that fits single core or dual core microcontrollers
 

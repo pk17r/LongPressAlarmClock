@@ -23,7 +23,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - A common header containing pointers to objects of every module and global functions
   - Adafruit Library used for GFX functions
   - uRTCLib Library for DS3231 updated with AM/PM mode and class size reduced by 3 bytes while adding additional functionality
-  - Secure Web OTA Firmware Update Functionality
+  - Secure Web Over The Air Firmware Update Functionality
   - Watchdog keeps a check on the program and reboots MCU if it gets stuck
   - Modular programming that fits single core or dual core microcontrollers
 
@@ -1010,11 +1010,14 @@ void ProcessSerialInput() {
         int userInput = Serial.parseInt();
         SerialInputFlush();
         display->fly_screensaver_horizontally_ = (userInput == 0 ? false : true);
+        Serial.printf("fly_screensaver_horizontally_ = %d\n", display->fly_screensaver_horizontally_);
         Serial.println(F("Colored Border? (0/1):"));
         SerialInputWait();
         userInput = Serial.parseInt();
         SerialInputFlush();
         display->show_colored_edge_screensaver_ = (userInput == 0 ? false : true);
+        Serial.printf("show_colored_edge_screensaver_ = %d\n", display->show_colored_edge_screensaver_);
+        display->refresh_screensaver_canvas_ = true;
       }
       break;
     default:
