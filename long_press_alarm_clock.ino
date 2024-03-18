@@ -1092,7 +1092,6 @@ void SetPage(ScreenPage page) {
       highlight = kCursorNoSelection;
       display->redraw_display_ = true;
       display->DisplayTimeUpdate();
-      delay(kUserInputDelayMs);
       break;
     case kScreensaverPage:
       current_page = kScreensaverPage;      // new page needs to be set before any action
@@ -1121,7 +1120,6 @@ void SetPage(ScreenPage page) {
       current_page = kSettingsPage;     // new page needs to be set before any action
       highlight = kSettingsPageWiFi;
       display->SettingsPage(false, false);
-      delay(kUserInputDelayMs);
       break;
     case kWiFiSettingsPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
@@ -1232,6 +1230,9 @@ void SetPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
+  if(current_page != kMainPage)
+    display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+  delay(kUserInputDelayMs);
 }
 
 void MoveCursor(bool increment) {
@@ -1308,12 +1309,20 @@ void MoveCursor(bool increment) {
         highlight = kWeatherSettingsPageSetLocation;
       else
         highlight++;
+      #if !defined(TOUCHSCREEN_IS_XPT2046)
+        if(highlight == kWeatherSettingsPageSetCountryCode)
+          highlight++;
+      #endif
     }
     else {
       if(highlight == kWeatherSettingsPageSetLocation)
         highlight = kWeatherSettingsPageCancel;
       else
         highlight--;
+      #if !defined(TOUCHSCREEN_IS_XPT2046)
+        if(highlight == kWeatherSettingsPageSetCountryCode)
+          highlight--;
+      #endif
     }
   }
   else if(current_page == kLocationInputsPage) {
