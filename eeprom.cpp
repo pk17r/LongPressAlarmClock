@@ -47,6 +47,8 @@ void EEPROM::SaveDefaults() {
   Save1Byte(kAlarmLongPressSecondsAddress, kAlarmLongPressSeconds);
   delay(delay_ms);
   SaveCurrentFirmwareVersion();
+  delay(delay_ms);
+  SaveCpuSpeed();
 
   PrintLn("Defaults saved to EEPROM!");
 }
@@ -123,6 +125,17 @@ void EEPROM::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string 
 void EEPROM::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
   Save1Byte(kWeatherUnitsMetricNotImperialAddress, static_cast<uint8_t>(weather_units_metric_not_imperial));
   PrintLn("Weather Location details written to EEPROM");
+}
+
+uint32_t EEPROM::RetrieveSavedCpuSpeed() {
+  uint32_t saved_cpu_speed_mhz = Fetch4Bytes(kCpuSpeedMhzAddress);
+  Serial.printf("EEPROM saved_cpu_speed_mhz: %u MHz\n", saved_cpu_speed_mhz);
+  return saved_cpu_speed_mhz;
+}
+
+void EEPROM::SaveCpuSpeed() {
+  Save4Bytes(kCpuSpeedMhzAddress, cpu_speed_mhz);
+  Serial.printf("EEPROM cpu_speed_mhz: %u MHz saved.\n", cpu_speed_mhz);
 }
 
 std::string EEPROM::FetchString(uint16_t length_address, uint16_t data_address) {

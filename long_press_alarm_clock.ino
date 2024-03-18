@@ -62,7 +62,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - 2.8" Touchscreen ILI9341 driver http://www.lcdwiki.com/2.8inch_SPI_Module_ILI9341_SKU:MSP2807
 
 
-  Prashant Kumar
+Prashant Kumar
 
 
 ***************************************************************************/
@@ -215,6 +215,17 @@ void setup() {
   Serial.printf("OTA Update random afternoon time %02d:%02d PM\n", ota_update_afternoon_hour, ota_update_afternoon_min);
   Serial.printf("Active Firmware Version %s\n", kFirmwareVersion.c_str());
   Serial.printf("Active Firmware Date %s\n", kFirmwareDate.c_str());
+
+  // set CPU Speed
+  #if defined(MCU_IS_ESP32)
+    uint32_t saved_cpu_speed_mhz = eeprom->RetrieveSavedCpuSpeed();
+    if(saved_cpu_speed_mhz == 80 || saved_cpu_speed_mhz == 160 || saved_cpu_speed_mhz == 240)
+      cpu_speed_mhz = saved_cpu_speed_mhz;
+    setCpuFrequencyMhz(cpu_speed_mhz);
+    cpu_speed_mhz = getCpuFrequencyMhz();
+    Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
+    eeprom->SaveCpuSpeed();
+  #endif
 
   #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
     xTaskCreatePinnedToCore(
@@ -661,6 +672,9 @@ bool debug_mode = false;
 // firmware updated flag user information
 bool firmware_updated_flag_user_information = false;
 
+// CPU Speed for ESP32 CPU
+uint32_t cpu_speed_mhz = 160;
+
 // counter to note user inactivity seconds
 elapsedMillis inactivity_millis = 0;
 
@@ -934,6 +948,22 @@ void ProcessSerialInput() {
             wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + inputStr[i];
         Serial.println(wifi_stuff->wifi_password_.c_str());
         wifi_stuff->SaveWiFiDetails();
+      }
+      break;
+    case 'j':   // cycle through CPU speeds
+      Serial.println(F("**** cycle through CPU speeds ****"));
+      {
+      #if defined(MCU_IS_ESP32)
+        cpu_speed_mhz = getCpuFrequencyMhz();
+        Serial.printf("Current CPU Speed %u MHz\n", cpu_speed_mhz);
+        // cycle through 80, 160 and 240
+        if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
+        else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
+        else setCpuFrequencyMhz(160);
+        cpu_speed_mhz = getCpuFrequencyMhz();
+        eeprom->SaveCpuSpeed();
+        Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
+      #endif
       }
       break;
     case 'n':   // get time from NTP server and set on RTC HW

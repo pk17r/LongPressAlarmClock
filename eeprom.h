@@ -22,6 +22,8 @@ public:
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
   void SaveCurrentFirmwareVersion();
+  uint32_t RetrieveSavedCpuSpeed();
+  void SaveCpuSpeed();
 
 private:
 
@@ -42,13 +44,16 @@ private:
 
   // ADDRESSES
 
+  // Address are uint16_t (2 byte sized)
+  // Each address has 1 byte (uint8_t) of data
+
   const uint8_t kDataModelVersion = 101;    //  data model version : if this is not there on EEPROM, then defaults will be saved.
-    const uint16_t kDataModelVersionAddress = 0;  // data model address
+  const uint16_t kDataModelVersionAddress = 0;  // data model address
   const uint16_t kAlarmHrAddress = 1;
   const uint16_t kAlarmMinAddress = 2;
   const uint16_t kAlarmIsAmAddress = 3;
   const uint16_t kAlarmOnAddress = 4;
-  const uint8_t kWiFiSsidLengthAddress = 5;
+  const uint16_t kWiFiSsidLengthAddress = 5;
   const uint8_t kWiFiSsidLengthMax = kWifiSsidPasswordLengthMax;
   const uint16_t kWiFiSsidAddress = 6;  // kWifiSsidPasswordLengthMax bytes
   const uint16_t kWiFiPasswdLengthAddress = 38;
@@ -60,9 +65,10 @@ private:
   const uint8_t kWeatherCountryCodeBytes = 2;
   const uint16_t kWeatherUnitsMetricNotImperialAddress = 77;
   const uint16_t kAlarmLongPressSecondsAddress = 79;
-  const uint8_t kFirmwareVersionLengthAddress = 80;
-    const uint8_t kFirmwareVersionLengthMax = 6;
+  const uint16_t kFirmwareVersionLengthAddress = 80;
+  const uint8_t kFirmwareVersionLengthMax = 6;
   const uint16_t kFirmwareVersionAddress = 81;  // 6 bytes
+  const uint16_t kCpuSpeedMhzAddress = 87;  // 4 byte
 
 
   // DEFAULTS

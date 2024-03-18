@@ -46,6 +46,9 @@ extern Touchscreen* ts;
 // debug mode turned On by pulling debug pin Low
 extern bool debug_mode;
 
+// CPU Speed for ESP32 CPU
+extern uint32_t cpu_speed_mhz;
+
 // firmware updated flag user information
 extern bool firmware_updated_flag_user_information;
 
