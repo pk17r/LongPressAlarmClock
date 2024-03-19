@@ -491,6 +491,9 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     // Run Screensaver Button
     DrawButton(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, runScreensaverStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
+    // Update button
+    DrawButton(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, updateStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
     // Cancel button
     DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
@@ -498,7 +501,7 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorYellow);
     tft.setCursor(10, kTftHeight - 20);
-    tft.print("Firmware Version: ");
+    tft.print("Firmware: ");
     tft.print(kFirmwareVersion.c_str());
     tft.setCursor(10, kTftHeight - 5);
     tft.print("Date: ");
@@ -1468,6 +1471,10 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
 
     // Run Screensaver Button
     ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (highlight == kSettingsPageRunScreensaver), 5);
+
+    // Update button
+    ButtonHighlight(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, (highlight == kSettingsPageUpdate), 5);
+    DrawButton(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, updateStr, kDisplayColorCyan, (color_button == kSettingsPageUpdate ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Cancel button
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);

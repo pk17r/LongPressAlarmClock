@@ -96,6 +96,7 @@ enum Cursor {
   kSettingsPageScreensaverMotion,
   kSettingsPageScreensaverSpeed,
   kSettingsPageRunScreensaver,
+  kSettingsPageUpdate,
   kSettingsPageCancel,
   kWiFiSettingsPageSetSsidPasswd,
   kWiFiSettingsPageConnect,

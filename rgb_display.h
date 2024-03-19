@@ -150,7 +150,7 @@ private:
   const int16_t kRadiusButtonRoundRect = 5;
 
   const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X", wifiSettingsStr[5] = "WiFi", setWiFiStr[9] = "SET WIFI", weatherStr[15] = "WEATHER & TIME";
-  const char slowStr[5] = "SLOW", medStr[7] = "MEDIUM", fastStr[5] = "FAST", runScreensaverStr[4] = "RUN", flyOutScreensaverStr[8] = "FLY OUT", bounceScreensaverStr[7] = "BOUNCE";
+  const char slowStr[5] = "SLOW", medStr[7] = "MEDIUM", fastStr[5] = "FAST", runScreensaverStr[4] = "RUN", flyOutScreensaverStr[8] = "FLY OUT", bounceScreensaverStr[7] = "BOUNCE", updateStr[3] = "UP";
   const char fetchStr[8] = "FETCH", updateTimeStr[12] = "UPDATE TIME", zipPinCodeStr[8] = "ZIP/PIN", countryCodeStr[8] = "COUNTRY";
   const char unitsStr[7] = "UNITS", metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL", connectWiFiStr[10] = "CONNECT", disconnectWiFiStr[11] = "DISCONNECT";
 
@@ -162,8 +162,10 @@ private:
   const int16_t kAlarmLongPressSecondsX0 = 190, kAlarmLongPressSecondsY0 = 120, kAlarmLongPressSecondsW = 30, kAlarmLongPressSecondsH = 25, kAlarmLongPressSecondsY1 = kAlarmLongPressSecondsY0 - kAlarmLongPressSecondsH, kAlarmLongPressSecondsTriangleButtonsSize = 8;
   const int16_t kAlarmLongPressSecondsSetButtonW = 80, kAlarmLongPressSecondsSetButtonH = 25, kAlarmLongPressSecondsSetButtonX1 = kTftWidth - kAlarmLongPressSecondsSetButtonW - 5, kAlarmLongPressSecondsSetButtonY1 = kAlarmLongPressSecondsY1;
   const int16_t kRunScreensaverButtonW = 60, kRunScreensaverButtonX1 = kTftWidth - kRunScreensaverButtonW - 5, kRunScreensaverButtonY1 = 150, kRunScreensaverButtonH = 25;
-  const int16_t kScreensaverMotionButtonW = 130, kScreensaverMotionButtonX1 = kTftWidth - kRunScreensaverButtonW - kScreensaverMotionButtonW - 15, kScreensaverMotionButtonY1 = 140, kScreensaverMotionButtonH = 25;
-  const int16_t kScreensaverSpeedButtonW = 130, kScreensaverSpeedButtonX1 = kTftWidth - kRunScreensaverButtonW - kScreensaverSpeedButtonW - 15, kScreensaverSpeedButtonY1 = 170, kScreensaverSpeedButtonH = 25;
+  const int16_t kScreensaverMotionButtonW = 130, kScreensaverMotionButtonX1 = kTftWidth - kRunScreensaverButtonW - kScreensaverMotionButtonW - 15, kScreensaverMotionButtonY1 = 130, kScreensaverMotionButtonH = 25;
+  const int16_t kScreensaverSpeedButtonW = 130, kScreensaverSpeedButtonX1 = kTftWidth - kRunScreensaverButtonW - kScreensaverSpeedButtonW - 15, kScreensaverSpeedButtonY1 = 160, kScreensaverSpeedButtonH = 25;
+
+  const int16_t kUpdateButtonW = 40, kUpdateButtonX1 = kTftWidth - kCancelButtonSize - kUpdateButtonW - 20, kUpdateButtonH = 25, kUpdateButtonY1 = kTftHeight - kUpdateButtonH - 5;
 
   const int16_t kSetWiFiButtonW = 150, kSetWiFiButtonX1 = kTftWidth - kSetWiFiButtonW - 5, kSetWiFiButtonY1 = 0, kSetWiFiButtonH = 25;
   const int16_t kConnectWiFiButtonW = 130, kConnectWiFiButtonX1 = 5, kConnectWiFiButtonY1 = 90, kConnectWiFiButtonH = 25;

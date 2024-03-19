@@ -320,6 +320,12 @@ void loop() {
           }
           else if(highlight == kSettingsPageRunScreensaver)
             SetPage(kScreensaverPage);
+          else if(highlight == kSettingsPageUpdate) {
+            highlight = kSettingsPageUpdate;
+            display->InstantHighlightResponse(/* color_button = */ kSettingsPageUpdate);
+            wifi_stuff->FirmwareVersionCheck();
+            display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+          }
           else if(highlight == kSettingsPageCancel)
             SetPage(kMainPage);
         }
@@ -510,19 +516,6 @@ void loop() {
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
         }
-
-        // update firmware if available
-        if(wifi_stuff->firmware_update_available_) {
-          PrintLn("**** Web OTA Firmware Update ****");
-          #if defined(MCU_IS_ESP32)
-            // set Web OTA Update Pagte
-            SetPage(kFirmwareUpdatePage);
-            // Firmware Update
-            wifi_stuff->UpdateFirmware();
-            // set back main page if Web OTA Update unsuccessful
-            SetPage(kMainPage);
-          #endif
-        }
       #endif
 
     }
@@ -550,6 +543,21 @@ void loop() {
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);
     }
+
+    #if defined(WIFI_IS_USED)
+      // update firmware if available
+      if(wifi_stuff->firmware_update_available_) {
+        PrintLn("**** Web OTA Firmware Update ****");
+        #if defined(MCU_IS_ESP32)
+          // set Web OTA Update Pagte
+          SetPage(kFirmwareUpdatePage);
+          // Firmware Update
+          wifi_stuff->UpdateFirmware();
+          // set back main page if Web OTA Update unsuccessful
+          SetPage(kMainPage);
+        #endif
+      }
+    #endif
 
     // watchdog to reboot system if it gets stuck for whatever reason
     ResetWatchdog();
@@ -1015,6 +1023,7 @@ void ProcessSerialInput() {
       Serial.println(F("**** Web OTA Update Available Check ****"));
       #if defined(MCU_IS_ESP32)
         wifi_stuff->FirmwareVersionCheck();
+        wifi_stuff->firmware_update_available_ = false;
       #endif
       break;
     case 'v':   // Web OTA Update
