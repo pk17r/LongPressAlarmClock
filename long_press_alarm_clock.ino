@@ -137,7 +137,7 @@ void setup() {
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
   if(debug_mode) {
-    while(!Serial) { delay(20); };
+    // while(!Serial) { delay(20); };
     Serial.println(F("\nSerial OK"));
     Serial.println(F("******** DEBUG MODE ******** : watchdog won't be activated!"));
     Serial.flush();
@@ -576,8 +576,12 @@ void loop() {
   }
 
   // accept user serial inputs
-  if (Serial.available() != 0)
-    ProcessSerialInput();
+  if (Serial.available() != 0) {
+    // if(millis() > 2000)
+      ProcessSerialInput();
+    // else
+    //   SerialInputFlush();
+  }
 
   #if defined(MCU_IS_ESP32_S2_MINI)
     // ESP32_S2_MINI is single core MCU
@@ -701,7 +705,7 @@ bool debug_mode = false;
 bool firmware_updated_flag_user_information = false;
 
 // CPU Speed for ESP32 CPU
-uint32_t cpu_speed_mhz = 160;
+uint32_t cpu_speed_mhz = 80;
 
 // counter to note user inactivity seconds
 elapsedMillis inactivity_millis = 0;
