@@ -93,7 +93,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 
 // LOCAL PROGRAM VARIABLES
 
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+#if defined(ESP32_DUAL_CORE)
   TaskHandle_t Task1;
 #endif
 
@@ -227,7 +227,7 @@ void setup() {
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
 
-  #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+  #if defined(ESP32_DUAL_CORE)
     xTaskCreatePinnedToCore(
         Task1code, /* Function to implement the task */
         "Task1", /* Name of the task */
@@ -673,7 +673,7 @@ void loop1() {
     wifi_stuff->TurnWiFiOff();
 }
 
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+#if defined(ESP32_DUAL_CORE)
 void Task1code( void * parameter) {
   for(;;) 
     loop1();
@@ -681,10 +681,10 @@ void Task1code( void * parameter) {
 #endif
 
 void WaitForExecutionOfSecondCoreTask() {
-  #if defined(MCU_IS_ESP32_S2_MINI)
+  #if defined(ESP32_SINGLE_CORE)
     // ESP32_S2_MINI is single core MCU
     loop1();
-  #elif defined(MCU_IS_RP2040) || defined(MCU_IS_ESP32)
+  #elif defined(MCU_IS_RP2040) || defined(ESP32_DUAL_CORE)
     unsigned long time_start = millis();
     while (!second_core_tasks_queue.empty() && millis() - time_start <  kWatchdogTimeoutMs - 3000) {
       delay(10);

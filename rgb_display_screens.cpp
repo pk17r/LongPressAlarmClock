@@ -506,7 +506,6 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     tft.setCursor(10, kTftHeight - 5);
     tft.print("Date: ");
     tft.print(kFirmwareDate.c_str());
-    
   }
   else {
 

@@ -10,6 +10,7 @@
   // single core
 
   #define MCU_IS_ESP32
+  #define ESP32_SINGLE_CORE
 
   const int TFT_COPI = 35;
   const int TFT_CLK = 36;
@@ -45,6 +46,7 @@
   // dual core
 
   #define MCU_IS_ESP32
+  #define ESP32_DUAL_CORE
 
   const int TFT_COPI = 23;
   const int TFT_CLK = 18;
@@ -106,6 +108,42 @@
   // const int LED_BUILTIN = 25;    // pre-defined
   const int BUZZER_PIN = 11;
   const int DEBUG_PIN = 10;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
+
+
+
+#elif defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+
+  // FOR ESP32 S3 DECKIT C1 MODULE
+  // dual core
+
+  #define MCU_IS_ESP32
+  #define ESP32_DUAL_CORE
+
+  const int TFT_COPI = 11;
+  const int TFT_CLK = 12;
+  const int TFT_CS = 10;
+  const int TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
+  const int TFT_DC = 46;
+  const int TFT_BL = 3;  //  controls TFT Display backlight as output of PWM pin
+
+  #if defined(TOUCHSCREEN_IS_XPT2046)
+    const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
+    const int TS_CS_PIN = 36;
+    const int TS_IRQ_PIN = 35;
+  #endif
+
+  // Sqw Alarm Interrupt Pin
+  const int SQW_INT_PIN = 17;
+  const int SDA_PIN = 8;
+  const int SCL_PIN = 9;
+  const int BUTTON_PIN = 1;
+  const int INC_BUTTON_PIN = 2;
+  const int DEC_BUTTON_PIN = 42;
+  // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
+  const int LED_PIN = 41;
+  // const int LED_BUILTIN = 38;   // pre-defined
+  const int BUZZER_PIN = 40;
+  const int DEBUG_PIN = 39;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
 
 
 #endif
