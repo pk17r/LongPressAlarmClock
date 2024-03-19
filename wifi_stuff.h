@@ -122,8 +122,8 @@ public:
     const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
     const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
   #elif defined(MCU_IS_ESP32_S3_DEVKIT_C1)
-    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32/long_press_alarm_clock.ino.bin";
-    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
   #endif
 
 // PRIVATE VARIABLES
