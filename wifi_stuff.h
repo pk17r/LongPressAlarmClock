@@ -109,7 +109,7 @@ public:
   "-----END CERTIFICATE-----\n";
 
   // bool to indicate whether Web OTA Update needs to be secure or insecure
-  const bool use_secure_connection = true;
+  const bool use_secure_connection = false;
 
   // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
   // ESP32 WiFiClientSecure examples: WiFiClientInsecure.ino WiFiClientSecure.ino

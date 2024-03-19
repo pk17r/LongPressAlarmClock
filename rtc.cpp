@@ -206,3 +206,37 @@ void RTC::SetTodaysMinutes() {
   }
   todays_minutes = todays_minutes_temp;
 }
+
+void RTC::DaysMinutesToClockTime(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm, uint8_t &hr, uint8_t &min) {
+  if(todays_minutes_val >= 60 * 12) {
+    hour_mode_and_am_pm = 2;
+    todays_minutes_val -= 60 * 12;
+  }
+  else
+    hour_mode_and_am_pm = 1;
+
+  min = todays_minutes_val % 60;
+
+  uint8_t hr_temp = todays_minutes_val / 60;
+
+  if(hr_temp == 0)
+    hr = 12;
+  else
+    hr = hr_temp;
+}
+
+uint16_t RTC::ClockTimeToDaysMinutes(uint8_t hour_mode_and_am_pm, uint8_t hr, uint8_t min) {
+  uint16_t todays_minutes_temp = min;
+  if(hour_mode_and_am_pm == 0) {
+    // 24 hour mode
+    todays_minutes_temp += hr * 60;
+  }
+  else {
+    // 12 hour mode
+    if(hr != 12)
+      todays_minutes_temp += hr * 60;
+    if(hour_mode_and_am_pm == 2)
+      todays_minutes_temp += 12 * 60;
+  }
+  return todays_minutes_temp;
+}

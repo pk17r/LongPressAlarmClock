@@ -75,6 +75,10 @@ public:
   */
   void set_12hour_mode(const bool twelveHrMode) { rtc_hw_.set_12hour_mode(twelveHrMode); }
 
+  void DaysMinutesToClockTime(uint16_t todays_minutes_val, uint8_t &hour_mode_and_am_pm, uint8_t &hr, uint8_t &min);
+
+  uint16_t ClockTimeToDaysMinutes(uint8_t hour_mode_and_am_pm, uint8_t hr, uint8_t min);
+
 private:
 
   // RTC clock object for DC3231 rtc

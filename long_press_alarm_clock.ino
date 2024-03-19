@@ -100,7 +100,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
 SPIClass* spi_obj = NULL;
 
 // random afternoon hour and minute to update firmware
-uint8_t ota_update_afternoon_hour = 1, ota_update_afternoon_min = 0;
+uint16_t ota_update_days_minutes = 0;
 
 // setup core0
 void setup() {
@@ -205,10 +205,11 @@ void setup() {
   unsigned long seed = rtc->minute() * 60 + rtc->second();
   randomSeed(seed);
 
-  // pick random afternoon time for firmware OTA update
-  ota_update_afternoon_hour = random(1, 6);
-  ota_update_afternoon_min = random(0, 59);
-  Serial.printf("OTA Update random afternoon time %02d:%02d PM\n", ota_update_afternoon_hour, ota_update_afternoon_min);
+  // pick random time between 10AM and 6PM for firmware OTA update
+  ota_update_days_minutes = random(600, 1080);
+  uint8_t ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min;
+  rtc->DaysMinutesToClockTime(ota_update_days_minutes, ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min);
+  Serial.printf("OTA Update random 10AM-6PM time %02d:%02d %s\n", ota_update_hr, ota_update_min, (ota_update_hour_mode_and_am_pm == 1 ? kAmLabel : kPmLabel));
   Serial.printf("Active Firmware Version %s\n", kFirmwareVersion.c_str());
   Serial.printf("Active Firmware Date %s\n", kFirmwareDate.c_str());
 
@@ -503,8 +504,8 @@ void loop() {
           PrintLn("Get Time Update from NTP Server");
         }
 
-        // check for firmware update everyday afternoon time at a random time based on program start time
-        if(rtc->hourModeAndAmPm() == 2 && rtc->hour() == ota_update_afternoon_hour && rtc->minute() == ota_update_afternoon_min) {
+        // check for firmware update everyday
+        if(rtc->todays_minutes == ota_update_days_minutes) {
           PrintLn("**** Web OTA Firmware Update Check ****");
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
@@ -1010,10 +1011,15 @@ void ProcessSerialInput() {
       SetPage(kMainPage);
       inactivity_millis = 0;
       break;
-    case 'u':   // Web OTA Update
-      Serial.println(F("**** Web OTA Update Check ****"));
+    case 'u':   // Web OTA Update Available Check
+      Serial.println(F("**** Web OTA Update Available Check ****"));
       #if defined(MCU_IS_ESP32)
         wifi_stuff->FirmwareVersionCheck();
+      #endif
+      break;
+    case 'v':   // Web OTA Update
+      Serial.println(F("**** Web OTA Update Check ****"));
+      #if defined(MCU_IS_ESP32)
         // if(wifi_stuff->firmware_update_available_) {
           ResetWatchdog();
           PrintLn("**** Web OTA Update Available ****");
