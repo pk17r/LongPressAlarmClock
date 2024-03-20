@@ -540,6 +540,15 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
   }
 }
 
+void RGBDisplay::RealTimeOnScreenOutput(std::string text, int width) {
+  int kRectHeight = 20;
+  tft.fillRect(0, 0, width, kRectHeight, kDisplayBackroundColor);
+  tft.setFont(&FreeMono9pt7b);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setCursor(0, kRectHeight);
+  tft.print(text.c_str());
+}
+
 void RGBDisplay::SoftApInputsPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
