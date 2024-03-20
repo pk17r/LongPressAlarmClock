@@ -951,7 +951,8 @@ void RGBDisplay::Screensaver() {
 
     if(debug_mode) {
       unsigned long time1 = timer1;
-      Serial.printf("Screensave re-canvas time: %lums\n", time1);
+      // Serial.printf("Screensave re-canvas time: %lums\n", time1);
+      PrintLn("Screensave re-canvas time (ms): ", time1);
     }
   }
   else {

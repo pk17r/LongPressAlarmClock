@@ -59,13 +59,13 @@ bool WiFiStuff::TurnWiFiOn() {
   }
   if(WiFi.status() == WL_CONNECTED) {
     PrintLn("WiFi Connected.");
-    digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(WIFI_LED, HIGH);
     wifi_connected_ = true;
     incorrect_wifi_details_ = false;
   }
   else {
     PrintLn("Could NOT connect to WiFi.");
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(WIFI_LED, LOW);
     wifi_connected_ = false;
     incorrect_wifi_details_ = true;
   }
@@ -80,7 +80,7 @@ void WiFiStuff::TurnWiFiOff() {
   delay(1);
   WiFi.disconnect();
   PrintLn("WiFi Off.");
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(WIFI_LED, LOW);
   wifi_connected_ = false;
 }
 

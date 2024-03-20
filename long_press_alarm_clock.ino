@@ -126,8 +126,8 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
 
   // BUILTIN LED - we use for WiFi Connect Notification
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  pinMode(WIFI_LED, OUTPUT);
+  digitalWrite(WIFI_LED, LOW);
 
   Serial.begin(115200);
 
@@ -564,7 +564,8 @@ void loop() {
 
     // print fps
     if(debug_mode && current_page == kScreensaverPage) {
-      Serial.printf("FPS: %d\n", frames_per_second);
+      // Serial.printf("FPS: %d\n", frames_per_second);
+      PrintLn("FPS: ", frames_per_second);
       frames_per_second = 0;
     }
   }
