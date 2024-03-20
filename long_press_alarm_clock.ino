@@ -537,8 +537,8 @@ void loop() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-      // set display brightness based on time
-      display->CheckTimeAndSetBrightness();
+      // check photoresistor brightness and adjust display brightness
+      display->CheckPhotoresistorAndSetBrightness();
       // turn screen saver On
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);

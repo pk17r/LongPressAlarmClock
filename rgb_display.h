@@ -59,7 +59,7 @@ public:
   void Setup();
   void SetBrightness(int brightness);
   void SetMaxBrightness();
-  void CheckTimeAndSetBrightness();
+  void CheckPhotoresistorAndSetBrightness();
   void ScreensaverControl(bool turnOn);
   ScreenPage ClassifyUserScreenTouchInput();
 
@@ -91,7 +91,6 @@ public:
 
   // tft dimensions
   const uint16_t kTftWidth = 320, kTftHeight = 240;
-
 
 private:
 
@@ -135,12 +134,11 @@ private:
 
 
 // PRIVATE CONSTANTS
-  
+
   // display brightness constants
-  const int kNightBrightness = 1;
-  const int kEveningBrightness = 100;
-  const int kDayBrightness = 150;
   const int kMaxBrightness = 255;
+  const int kBrightnessInactiveMax = 150;
+  const int kBrightnessBackgroundColorThreshold = 40;
 
   // user defined locations of various text strings on display
   const int16_t kTimeRowX0 = 10, kTimeRowY0 = 80, kAM_PM_row_Y0 = 45, kTimeRowY0IncorrectTime = 100;

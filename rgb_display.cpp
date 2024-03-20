@@ -66,8 +66,13 @@ void RGBDisplay::Setup() {
   // update TFT display
   DisplayTimeUpdate();
 
-  // set display brightness based on time of day
-  CheckTimeAndSetBrightness();
+
+  // configure Photoresistor pin
+  pinMode(PHOTORESISTOR_PIN, INPUT);
+  analogReadResolution(kAdcResolutionBits);
+
+  // set display brightness
+  CheckPhotoresistorAndSetBrightness();
 
   PrintLn("Display Initialized!");
 }
@@ -79,7 +84,7 @@ void RGBDisplay::SetBrightness(int brightness) {
     PrintLn("Display Brightness set to ", brightness);
   }
   current_brightness_ = brightness;
-  show_colored_edge_screensaver_ = (brightness >= kEveningBrightness);
+  show_colored_edge_screensaver_ = (brightness >= kBrightnessBackgroundColorThreshold);
 }
 
 void RGBDisplay::SetMaxBrightness() {
@@ -87,23 +92,12 @@ void RGBDisplay::SetMaxBrightness() {
     SetBrightness(kMaxBrightness);
 }
 
-void RGBDisplay::CheckTimeAndSetBrightness() {
-  // check if RTC is good
-  if(rtc->year() < 2024) {
-    // RTC Time is not set!
-    // Keep screen on day brightness
-    SetBrightness(kDayBrightness);
-  }
-  else {
-    if(rtc->todays_minutes > kNightTimeMinutes)
-      SetBrightness(kNightBrightness);
-    else if(rtc->todays_minutes > kEveningTimeMinutes)
-      SetBrightness(kEveningBrightness);
-    else if(rtc->todays_minutes > kDayTimeMinutes)
-      SetBrightness(kDayBrightness);
-    else
-      SetBrightness(kNightBrightness);
-  }
+void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
+  int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
+  int lcd_brightness_val = photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax;
+  lcd_brightness_val = max((lcd_brightness_val / 10) * 10, 1);
+  // Serial.printf("photodiode_light_raw = %d %0.2f%, lcd_brightness_val = %d\n", photodiode_light_raw, 100.0 * photodiode_light_raw / kPhotodiodeLightRawMax, lcd_brightness_val);
+  SetBrightness(lcd_brightness_val);
 }
 
 void RGBDisplay::ScreensaverControl(bool turnOn) {
