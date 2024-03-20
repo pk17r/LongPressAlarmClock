@@ -35,7 +35,7 @@
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   const int LED_PIN = 5;
   // const int LED_BUILTIN = 15;   // pre-defined
-  const int WIFI_LED = 25;
+  const int WIFI_LED = 15;
   const int BUZZER_PIN = 4;
   const int DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
 
