@@ -30,7 +30,6 @@
   #include <avr/pgmspace.h>
 #endif
 
-
 class RGBDisplay {
 
 public:
@@ -60,7 +59,11 @@ public:
   void Setup();
   void SetBrightness(int brightness);
   void SetMaxBrightness();
-  void CheckPhotoresistorAndSetBrightness();
+  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+    void CheckPhotoresistorAndSetBrightness();
+  #else
+    void CheckTimeAndSetBrightness();
+  #endif
   void ScreensaverControl(bool turnOn);
   ScreenPage ClassifyUserScreenTouchInput();
 
@@ -138,8 +141,14 @@ private:
 
   // display brightness constants
   const int kMaxBrightness = 255;
-  const int kBrightnessInactiveMax = 150;
-  const int kBrightnessBackgroundColorThreshold = 40;
+  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+    const int kBrightnessInactiveMax = 150;
+    const int kBrightnessBackgroundColorThreshold = 40;
+  #else
+    const int kNightBrightness = 1;
+    const int kEveningBrightness = 100;
+    const int kDayBrightness = 150;
+  #endif
 
   // user defined locations of various text strings on display
   const int16_t kTimeRowX0 = 10, kTimeRowY0 = 80, kAM_PM_row_Y0 = 45, kTimeRowY0IncorrectTime = 100;

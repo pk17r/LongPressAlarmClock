@@ -537,8 +537,13 @@ void loop() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-      // check photoresistor brightness and adjust display brightness
-      display->CheckPhotoresistorAndSetBrightness();
+      #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+        // check photoresistor brightness and adjust display brightness
+        display->CheckPhotoresistorAndSetBrightness();
+      #else
+        // set display brightness based on time
+        display->CheckTimeAndSetBrightness();
+      #endif
       // turn screen saver On
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);
