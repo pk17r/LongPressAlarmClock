@@ -444,6 +444,18 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
+void RGBDisplay::UpdatePageItem(Cursor btn_id) {
+  
+}
+
+void RGBDisplay::DisplayPage(ScreenPage page_id) {
+
+}
+
+Cursor RGBDisplay::CheckClickItem() {
+  return kCursorNoSelection;
+}
+
 void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_long_press_secs) {
 
   if(!inc_alarm_long_press_secs && !dec_alarm_long_press_secs) {
@@ -482,7 +494,7 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     tft.setCursor(10, kAlarmLongPressSecondsY0 + 65);
     tft.print("saver:");
 
-    // Screensaver Motion Button
+    // Screensaver Type Button
     DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
     // Screensaver Speed Button
@@ -1470,7 +1482,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (highlight == kSettingsPageSet), 5);
     DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageSet ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
-    // Screensaver Motion Button
+    // Screensaver Type Button
     ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (highlight == kSettingsPageScreensaverMotion), 5);
     DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 

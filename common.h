@@ -6,6 +6,8 @@
 #include "pin_defs.h"
 #include "general_constants.h"
 #include <queue>          // std::queue
+#include <vector>         // std::vector
+#include <map>            // std::map
 #include "SPI.h"
 #include <elapsedMillis.h>
 
@@ -158,6 +160,39 @@ enum SecondCoreTask {
 extern std::queue<SecondCoreTask> second_core_tasks_queue;
 extern bool second_core_task_added_flag_array[];
 
+
+// Display Items
+
+enum ButtonType {
+  kRowClickButton,
+  kRowHighlightOnlyClickButton,
+  kRowValueIncDecButton,
+  kRowOnOffButton,
+  kRowClickCycleButton,
+  kColumnValueIncDecButton,
+  kStandaloneClickButton,
+};
+
+// struct declerations
+struct DisplayButton {
+  const ButtonType btn_type;
+  const int16_t x;
+  const int16_t y;
+  const uint16_t w;
+  const uint16_t h;
+  const std::string label;
+  std::string value;
+  bool isOn;
+  bool isBorderHighlighted;
+};
+
+// struct DisplayPage {
+//   const ScreenPage page_id;
+//   std::vector<DisplayButton> page_buttons_vec;
+// };
+
+extern std::map<ScreenPage,std::map<Cursor, DisplayButton*>> display_pages_map;
+
 // display time data in char arrays
 struct DisplayData {
   char time_HHMM[kHHMM_ArraySize];
@@ -167,7 +202,7 @@ struct DisplayData {
   bool _12_hour_mode;
   bool pm_not_am;
   bool alarm_ON;
-  };
+};
 
 // Display Visible Data Struct
 extern DisplayData new_display_data_, displayed_data_;

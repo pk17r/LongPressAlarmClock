@@ -102,7 +102,10 @@ SPIClass* spi_obj = NULL;
 // random afternoon hour and minute to update firmware
 uint16_t ota_update_days_minutes = 0;
 
-// setup core0
+// LOCAL FUNCTIONS
+void PopulateDisplayPages();
+
+// setup core1
 void setup() {
 
   // make all spi CS pins high
@@ -226,6 +229,8 @@ void setup() {
 
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
+
+  PopulateDisplayPages();
 
   #if defined(ESP32_DUAL_CORE)
     xTaskCreatePinnedToCore(
@@ -596,7 +601,7 @@ void loop() {
 }
 
 #if defined(MCU_IS_RP2040)
-// setup core1
+// setup core0
 void setup1() {
   delay(2000);
 }
@@ -1360,3 +1365,93 @@ void MoveCursor(bool increment) {
   // Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
 }
+
+void PopulateDisplayPages() {
+  // display_pages_map[kMainPage] = std::vector<DisplayButton>{ 
+  //   { /* Settings Wheel */ kRowHighlightOnlyClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+  //   { /* Alarms Row     */ kRowHighlightOnlyClickButton, kMainPageSetAlarm,  1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "", "", false, false },
+  // };
+  // display_pages_map[kSettingsPage] = std::vector<DisplayButton>{ 
+  //   { /* WiFi Details   */ kRowClickButton, kSettingsPageWiFi,  kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, "WiFi Settings", "", false, false },
+  //   { /* Weather Details   */ kRowClickButton, kSettingsPageWeather,  kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, "Weather Settings", "", false, false },
+  //   { /* Alarm Long Press Seconds */ kRowValueIncDecButton, kSettingsPageAlarmLongPressSeconds,  kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, "Alarm Long Press Seconds", "", false, false },
+  //   { /* Screensaver Motion Type */ kRowClickCycleButton, kSettingsPageScreensaverMotion,  kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, "Screensaver Motion Type", "", false, false },
+  //   { /* Screensaver Speed */ kRowClickCycleButton, kSettingsPageScreensaverSpeed,  kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, "Screensaver Speed", "", false, false },
+  //   { /* Run Screensaver */ kRowClickButton, kSettingsPageRunScreensaver,  kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, "Run", "", false, false },
+  //   { /* Firmware Update Button */ kRowClickButton, kSettingsPageUpdate,  kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, "Firmware Update", "", false, false },
+  //   { /* Cancel Button */ kRowClickButton, kSettingsPageCancel,  kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X", "", false, false },
+  // };
+
+  // std::map<Cursor, DisplayButton*> mainPageButtons;
+  // mainPageButtons[kMainPageSettingsWheel] = new DisplayButton{ /* Settings Wheel */ kRowHighlightOnlyClickButton, 270, 105, 40, 40, "", "", false, false };
+  // mainPageButtons[kMainPageSetAlarm] = new DisplayButton{ /* Alarms Row     */ kRowHighlightOnlyClickButton, 1, 160, 318, 79, "", "", false, false };
+  // display_pages_map[kMainPage] = mainPageButtons;
+
+  std::map<Cursor, DisplayButton*> mainPageButtons;
+  mainPageButtons.emplace(kMainPageSettingsWheel, new DisplayButton{ /* Settings Wheel */ kRowHighlightOnlyClickButton, 270, 105, 40, 40, "", "", false, false });
+  mainPageButtons.emplace(kMainPageSetAlarm, new DisplayButton{ /* Alarms Row     */ kRowHighlightOnlyClickButton, 1, 160, 318, 79, "", "", false, false });
+  display_pages_map[kMainPage] = mainPageButtons;
+  std::map<Cursor, DisplayButton*> settingsPageButtons;
+  settingsPageButtons.emplace(kSettingsPageWiFi, new DisplayButton{ /* WiFi Details   */ kRowClickButton, kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, "WiFi Settings", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageWeather, new DisplayButton{ /* Weather Details   */ kRowClickButton, kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, "Weather Settings", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageAlarmLongPressSeconds, new DisplayButton{ /* Alarm Long Press Seconds */ kRowValueIncDecButton, kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, "Alarm Long Press Seconds", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageScreensaverMotion, new DisplayButton{ /* Screensaver Motion Type */ kRowClickCycleButton, kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, "Screensaver Motion Type", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageScreensaverSpeed, new DisplayButton{ /* Screensaver Speed */ kRowClickCycleButton, kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, "Screensaver Speed", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageRunScreensaver, new DisplayButton{ /* Run Screensaver */ kRowClickButton, kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, "Run", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageUpdate, new DisplayButton{ /* Firmware Update Button */ kRowClickButton, kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, "Firmware Update", "", false, false });
+  settingsPageButtons.emplace(kSettingsPageCancel, new DisplayButton{ /* Cancel Button */ kRowClickButton, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X", "", false, false });
+  display_pages_map[kSettingsPage] = settingsPageButtons;
+
+
+}
+
+std::map<ScreenPage,std::map<Cursor, DisplayButton*>> display_pages_map;
+
+// std::vector<DisplayPage> display_pages_vec = {
+//   // {kMainPage, { 
+//   //     { /* Settings Wheel */ kRowHighlightOnlyClickButton, kMainPageSettingsWheel,  270, 105, 40, 40, "", "", false, false },
+//   //     { /* Alarms Row     */ kRowHighlightOnlyClickButton, kMainPageSetAlarm,  1, 160, 318, 79, "", "", false, false },
+//   //   }
+//   // },
+//   {kMainPage, { 
+//       { /* Settings Wheel */ kRowHighlightOnlyClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+//       { /* Alarms Row     */ kRowHighlightOnlyClickButton, kMainPageSetAlarm,  1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "", "", false, false },
+//     }
+//   },
+//   {kSettingsPage, {
+//       { /* WiFi Details   */ kRowClickButton, kSettingsPageWiFi,  kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, "WiFi Settings", "", false, false },
+//       { /* Weather Details   */ kRowClickButton, kSettingsPageWeather,  kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, "Weather Settings", "", false, false },
+//       { /* Alarm Long Press Seconds */ kRowValueIncDecButton, kSettingsPageAlarmLongPressSeconds,  kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, "Alarm Long Press Seconds", "", false, false },
+//       { /* Screensaver Motion Type */ kRowClickCycleButton, kSettingsPageScreensaverMotion,  kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, "Screensaver Motion Type", "", false, false },
+//       { /* Screensaver Speed */ kRowClickCycleButton, kSettingsPageScreensaverSpeed,  kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, "Screensaver Speed", "", false, false },
+//       { /* Run Screensaver */ kRowClickButton, kSettingsPageRunScreensaver,  kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, "Run", "", false, false },
+//       { /* Firmware Update Button */ kRowClickButton, kSettingsPageUpdate,  kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, "Firmware Update", "", false, false },
+//       { /* Cancel Button */ kRowClickButton, kSettingsPageCancel,  kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X", "", false, false },
+//     }
+//   },
+//   // },
+//   // {kSettingsPage, {
+//   //     { /* Settings Wheel */ kRowClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+//   //   }
+//   // },
+//   // {kSettingsPage, {
+//   //     { /* Settings Wheel */ kRowClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+//   //   }
+//   // },
+//   // {kSettingsPage, {
+//   //     { /* Settings Wheel */ kRowClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+//   //   }
+//   // },
+//   // {kSettingsPage, {
+//   //     { /* Settings Wheel */ kRowClickButton, kMainPageSettingsWheel,  kTftWidth - 50, kDateRow_Y0 - 35, 40, 40, "", "", false, false },
+//   //   }
+//   // },
+// };
+
+
+
+
+
+
+
+
