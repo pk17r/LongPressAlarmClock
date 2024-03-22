@@ -56,7 +56,7 @@ public:
   void FirmwareUpdatePage();
   void RealTimeOnScreenOutput(std::string text, int width);
   void DisplayPage(ScreenPage page_id);
-  void UpdatePageItem(Cursor btn_id);
+  void UpdatePageItem(int button_index);
   Cursor CheckClickItem();
 
   // functions
@@ -223,6 +223,10 @@ private:
   const uint16_t  kTextRegularColor          = kDisplayColorWhite;
   const uint16_t  kTextHighLightColor        = kDisplayBackroundColor;
   const uint16_t  kKeyboardButtonFillColor   = kDisplayColorRed;
+
+  const uint16_t kButtonBorderColor = kDisplayColorCyan;
+  const uint16_t kButtonFillColor = kDisplayColorOrange;
+  const uint16_t kButtonClickedFillColor = kDisplayColorRed;
 
   // BIG BELL ICONS
 

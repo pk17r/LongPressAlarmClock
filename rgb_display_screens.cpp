@@ -444,12 +444,106 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-void RGBDisplay::UpdatePageItem(Cursor btn_id) {
-  
+void RGBDisplay::UpdatePageItem(int button_index) {
+
+  DisplayButton* button = display_pages_vec[current_page][button_index];
+
+  const int kRowHeight = 30;
+  const int row_text_y0 = button_index * kRowHeight + 20;
+
+  int space_left = kTftWidth;
+
+  // item button
+
+  // if not an icon button then print its value
+  if(button->btn_type != kIconButton) {
+    if(button->fixed_location) {
+      // pre-fixed location button
+      tft.setFont(&FreeMonoBold9pt7b);
+      tft.setTextColor(kDisplayColorBlack);
+      // make button
+      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (button->is_on ? kButtonClickedFillColor : kButtonFillColor));
+      tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
+      // tft.setTextColor((isOn ? offFill : onFill));
+      tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
+      tft.print(button->btn_value.c_str());
+    }
+    else {
+      // button location to be calculated at runtime
+      tft.setFont(&FreeMonoBold9pt7b);
+      tft.setTextColor(kDisplayColorBlack);
+      int16_t btn_value_x0 = 0, btn_value_y0 = row_text_y0;
+      uint16_t btn_value_w, btn_value_h;
+      tft.setCursor(btn_value_x0, row_text_y0);
+      // get bounds of title on tft display (with background color as this causes a blink)
+      tft.getTextBounds(button->btn_value.c_str(), btn_value_x0, row_text_y0, &btn_value_x0, &btn_value_y0, &btn_value_w, &btn_value_h);
+      // Serial.printf("btn_value_x0 %d, btn_value_y0 %d, btn_value_w %d, btn_value_h %d\n", btn_value_x0, btn_value_y0, btn_value_w, btn_value_h);
+      // calculate size
+      button->btn_x = kTftWidth - btn_value_w - 3 * kDisplayTextGap;
+      button->btn_y = row_text_y0 - btn_value_h - kDisplayTextGap;
+      button->btn_w = btn_value_w + 2 * kDisplayTextGap;
+      button->btn_h = btn_value_h + 2 * kDisplayTextGap;
+      // Serial.printf("button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
+      // make button
+      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (button->is_on ? kButtonClickedFillColor : kButtonFillColor));
+      tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
+      // tft.setTextColor((isOn ? offFill : onFill));
+      tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
+      tft.print(button->btn_value.c_str());
+    }
+
+    space_left = button->btn_x - kDisplayTextGap;
+  }
+
+  // item label
+
+  if(button->row_label.size() > 0) {
+    tft.setFont(&FreeMono9pt7b);
+    tft.setTextColor(kDisplayColorBlack);
+    int16_t row_label_x0 = 0, row_label_y0 = row_text_y0;
+    uint16_t row_label_w, row_label_h;
+    tft.setCursor(row_label_x0, row_text_y0);
+    // get bounds of title on tft display (with background color as this causes a blink)
+    tft.getTextBounds(button->row_label.c_str(), row_label_x0, row_text_y0, &row_label_x0, &row_label_y0, &row_label_w, &row_label_h);
+    // check width and fit in 1 or 2 rows
+    if(row_label_w + kDisplayTextGap <= space_left) {
+      // label fits in 1 row
+      tft.setTextColor(kDisplayColorYellow);
+      tft.setCursor(kDisplayTextGap, row_text_y0);
+      tft.print(button->row_label.c_str());
+    }
+    else {
+      // we give label 2 rows
+      tft.setTextColor(kDisplayColorYellow);
+      // row 1
+      tft.setCursor(kDisplayTextGap, row_text_y0 - 10);
+      int row_1_label_length = button->row_label.size() / 2;
+      std::string row_1_label = button->row_label.substr(0, row_1_label_length);
+      tft.print(row_1_label.c_str());
+      // row 2tft.setTextColor(kDisplayColorYellow);
+      tft.setCursor(kDisplayTextGap, row_text_y0 + 5);
+      std::string row_2_label = button->row_label.substr(row_1_label_length, button->row_label.size() - row_1_label_length);
+      tft.print(row_2_label.c_str());
+    }
+  }
+
+  // button highlight
+
+  if(button->btn_id == highlight) {
+    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  }
+  else{
+    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  }
 }
 
 void RGBDisplay::DisplayPage(ScreenPage page_id) {
-
+  tft.fillScreen(kDisplayBackroundColor);
+  for (int i = 0; i < display_pages_vec[page_id].size(); i++) {
+    UpdatePageItem(i);
+  }
 }
 
 Cursor RGBDisplay::CheckClickItem() {

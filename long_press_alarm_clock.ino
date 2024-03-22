@@ -190,6 +190,7 @@ void setup() {
   // serial print RTC Date Time
   SerialPrintRtcDateTime();
   display = new RGBDisplay();
+  PopulateDisplayPages();
   // setup display
   display->Setup();
   #if defined(TOUCHSCREEN_IS_XPT2046)
@@ -229,8 +230,6 @@ void setup() {
 
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
-
-  PopulateDisplayPages();
 
   #if defined(ESP32_DUAL_CORE)
     xTaskCreatePinnedToCore(
@@ -1150,7 +1149,8 @@ void SetPage(ScreenPage page) {
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
       highlight = kSettingsPageWiFi;
-      display->SettingsPage(false, false);
+      // display->SettingsPage(false, false);
+      display->DisplayPage(kSettingsPage);
       break;
     case kWiFiSettingsPage:
       current_page = kWiFiSettingsPage;     // new page needs to be set before any action
@@ -1261,8 +1261,8 @@ void SetPage(ScreenPage page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
   }
-  if(current_page != kMainPage)
-    display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
+  // if(current_page != kMainPage)
+  //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
   delay(kUserInputDelayMs);
 }
 
@@ -1387,25 +1387,27 @@ void PopulateDisplayPages() {
   // mainPageButtons[kMainPageSetAlarm] = new DisplayButton{ /* Alarms Row     */ kRowHighlightOnlyClickButton, 1, 160, 318, 79, "", "", false, false };
   // display_pages_map[kMainPage] = mainPageButtons;
 
-  std::map<Cursor, DisplayButton*> mainPageButtons;
-  mainPageButtons.emplace(kMainPageSettingsWheel, new DisplayButton{ /* Settings Wheel */ kRowHighlightOnlyClickButton, 270, 105, 40, 40, "", "", false, false });
-  mainPageButtons.emplace(kMainPageSetAlarm, new DisplayButton{ /* Alarms Row     */ kRowHighlightOnlyClickButton, 1, 160, 318, 79, "", "", false, false });
-  display_pages_map[kMainPage] = mainPageButtons;
-  std::map<Cursor, DisplayButton*> settingsPageButtons;
-  settingsPageButtons.emplace(kSettingsPageWiFi, new DisplayButton{ /* WiFi Details   */ kRowClickButton, kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, "WiFi Settings", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageWeather, new DisplayButton{ /* Weather Details   */ kRowClickButton, kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, "Weather Settings", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageAlarmLongPressSeconds, new DisplayButton{ /* Alarm Long Press Seconds */ kRowValueIncDecButton, kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, "Alarm Long Press Seconds", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageScreensaverMotion, new DisplayButton{ /* Screensaver Motion Type */ kRowClickCycleButton, kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, "Screensaver Motion Type", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageScreensaverSpeed, new DisplayButton{ /* Screensaver Speed */ kRowClickCycleButton, kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, "Screensaver Speed", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageRunScreensaver, new DisplayButton{ /* Run Screensaver */ kRowClickButton, kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, "Run", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageUpdate, new DisplayButton{ /* Firmware Update Button */ kRowClickButton, kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, "Firmware Update", "", false, false });
-  settingsPageButtons.emplace(kSettingsPageCancel, new DisplayButton{ /* Cancel Button */ kRowClickButton, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X", "", false, false });
-  display_pages_map[kSettingsPage] = settingsPageButtons;
+
+  display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kIconButton, "", true, 270, 105, 40, 40, "", false },
+    new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kIconButton, "", true, 1, 160, 318, 79, "", false },
+  };
+
+  display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ /* WiFi Details   */ kSettingsPageWiFi, kRowClickButton, "WiFi Settings:", false, 0,0,0,0, "WIFI", false },
+    new DisplayButton{ /* Weather Details   */ kSettingsPageWeather, kRowClickButton, "Weather Settings:", false, 0,0,0,0, "WEATHER", false },
+    new DisplayButton{ /* Alarm Long Press Seconds */ kSettingsPageAlarmLongPressSeconds, kRowClickCycleButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec"), false },
+    new DisplayButton{ /* Screensaver Motion Type */ kSettingsPageScreensaverMotion, kRowClickCycleButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), false },
+    new DisplayButton{ /* Screensaver Speed */ kSettingsPageScreensaverSpeed, kRowClickCycleButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), false },
+    new DisplayButton{ /* Run Screensaver */ kSettingsPageRunScreensaver, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN", false },
+    new DisplayButton{ /* Firmware Update Button */ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UP", false },
+    new DisplayButton{ /* Cancel Button */ kSettingsPageCancel, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X", false },
+  };
 
 
 }
 
-std::map<ScreenPage,std::map<Cursor, DisplayButton*>> display_pages_map;
+std::vector<std::vector<DisplayButton*>> display_pages_vec(kNoPageSelected);
 
 // std::vector<DisplayPage> display_pages_vec = {
 //   // {kMainPage, { 

@@ -7,7 +7,6 @@
 #include "general_constants.h"
 #include <queue>          // std::queue
 #include <vector>         // std::vector
-#include <map>            // std::map
 #include "SPI.h"
 #include <elapsedMillis.h>
 
@@ -164,34 +163,30 @@ extern bool second_core_task_added_flag_array[];
 // Display Items
 
 enum ButtonType {
+  kIconButton,    // kIconButton has hard coded locations and size
+  kStandaloneClickButton,
   kRowClickButton,
-  kRowHighlightOnlyClickButton,
   kRowValueIncDecButton,
   kRowOnOffButton,
   kRowClickCycleButton,
   kColumnValueIncDecButton,
-  kStandaloneClickButton,
 };
 
 // struct declerations
 struct DisplayButton {
+  const Cursor btn_id;
   const ButtonType btn_type;
-  const int16_t x;
-  const int16_t y;
-  const uint16_t w;
-  const uint16_t h;
-  const std::string label;
-  std::string value;
-  bool isOn;
-  bool isBorderHighlighted;
+  const std::string row_label;
+  const bool fixed_location;
+  int16_t btn_x;
+  int16_t btn_y;
+  uint16_t btn_w;
+  uint16_t btn_h;
+  std::string btn_value;
+  bool is_on;
 };
 
-// struct DisplayPage {
-//   const ScreenPage page_id;
-//   std::vector<DisplayButton> page_buttons_vec;
-// };
-
-extern std::map<ScreenPage,std::map<Cursor, DisplayButton*>> display_pages_map;
+extern std::vector<std::vector<DisplayButton*>> display_pages_vec;
 
 // display time data in char arrays
 struct DisplayData {
