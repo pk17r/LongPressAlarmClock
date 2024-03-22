@@ -601,10 +601,45 @@ void RGBDisplay::DisplayCurrentPage() {
       DisplayFirmwareVersionAndDate();
       break;
     case kWiFiSettingsPage:
+      DisplayWiFiConnectionStatus();
       break;
     case kLocationAndWeatherSettingsPage:
       DisplayWeatherInfo();
       break;
+  }
+}
+
+void RGBDisplay::DisplayWiFiConnectionStatus() {
+  // clear any old text
+  tft.setFont(&FreeSans12pt7b);
+  tft.setTextColor(kDisplayBackroundColor);
+  tft.setCursor(kDisplayTextGap, 190);
+  tft.print("WiFi Connected!");
+
+  tft.setFont(&FreeMono9pt7b);
+  tft.setCursor(kDisplayTextGap, 170);
+  tft.print("Not connected.");
+  tft.setCursor(kDisplayTextGap, 190);
+  tft.print("Click CONNECT Button,");
+  tft.setCursor(kDisplayTextGap, 210);
+  tft.print("Wait a few seconds..");
+
+  // write new text
+  if(wifi_stuff->wifi_connected_) {
+    tft.setFont(&FreeSans12pt7b);
+    tft.setTextColor(kDisplayColorBlue);
+    tft.setCursor(kDisplayTextGap, 190);
+    tft.print("WiFi Connected!");
+  }
+  else {
+    tft.setFont(&FreeMono9pt7b);
+    tft.setTextColor(kDisplayColorBlue);
+    tft.setCursor(kDisplayTextGap, 170);
+    tft.print("Not connected.");
+    tft.setCursor(kDisplayTextGap, 190);
+    tft.print("Click CONNECT Button,");
+    tft.setCursor(kDisplayTextGap, 210);
+    tft.print("Wait a few seconds..");
   }
 }
 
@@ -819,23 +854,20 @@ void RGBDisplay::WiFiSettingsPage() {
   // Disconnect WiFi button
   DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  int16_t title_y0 = 50;
-  int16_t w_x0 = 5, s_y0 = title_y0 + 48;
-
   if(wifi_stuff->wifi_connected_) {
     tft.setFont(&FreeSans12pt7b);
     tft.setTextColor(kDisplayColorOrange);
-    tft.setCursor(w_x0, s_y0 + 50);
+    tft.setCursor(kDisplayTextGap, 100);
     tft.print("WiFi Connected!");
   }
   else {
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorOrange);
-    tft.setCursor(w_x0, s_y0 + 40);
+    tft.setCursor(kDisplayTextGap, 90);
     tft.print("Not connected.");
-    tft.setCursor(w_x0, s_y0 + 65);
+    tft.setCursor(kDisplayTextGap, 105);
     tft.print("Click CONNECT Button,");
-    tft.setCursor(w_x0, s_y0 + 90);
+    tft.setCursor(kDisplayTextGap, 140);
     tft.print("Wait a few seconds..");
   }
 

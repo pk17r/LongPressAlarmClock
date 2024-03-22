@@ -1016,17 +1016,18 @@ void SetPage(ScreenPage set_this_page) {
       display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
       break;
     case kSettingsPage:
-    case kScreensaverSettingsPage:
+    case kWiFiSettingsPage:
     case kLocationAndWeatherSettingsPage:
+    case kScreensaverSettingsPage:
       current_page = set_this_page;     // new page needs to be set before any action
       current_cursor = display_pages_vec[current_page][0]->btn_id;
       display->DisplayCurrentPage();
       break;
-    case kWiFiSettingsPage:
-      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-      current_cursor = kWiFiSettingsPageConnect;
-      display->WiFiSettingsPage();
-      break;
+    // case kWiFiSettingsPage:
+    //   current_page = kWiFiSettingsPage;     // new page needs to be set before any action
+    //   current_cursor = kWiFiSettingsPageConnect;
+    //   display->WiFiSettingsPage();
+    //   break;
     case kSoftApInputsPage:
       current_page = kSoftApInputsPage;     // new page needs to be set before any action
       current_cursor = kSoftApInputsPageSave;
@@ -1080,11 +1081,6 @@ void SetPage(ScreenPage set_this_page) {
         SetPage(kWiFiSettingsPage);
       }
       break;
-    // case kLocationAndWeatherSettingsPage:
-    //   current_page = kLocationAndWeatherSettingsPage;     // new page needs to be set before any action
-    //   current_cursor = kLocationAndWeatherSettingsPageFetch;
-    //   display->WeatherSettingsPage();
-    //   break;
     case kLocationInputsPage:
       current_page = kLocationInputsPage;     // new page needs to be set before any action
       current_cursor = kLocationInputsPageSave;
@@ -1153,7 +1149,7 @@ void MoveCursor(bool increment) {
         current_cursor--;
     }
   }
-  else if(current_page == kSettingsPage || current_page == kScreensaverSettingsPage || current_page == kLocationAndWeatherSettingsPage) {
+  else if(current_page == kSettingsPage || current_page == kWiFiSettingsPage || current_page == kLocationAndWeatherSettingsPage || current_page == kScreensaverSettingsPage) {
     if(increment) {
       if(current_cursor == kPageCancelButton)
         current_cursor = display_pages_vec[current_page][0]->btn_id;
@@ -1185,48 +1181,12 @@ void MoveCursor(bool increment) {
         current_cursor--;
     }
   }
-  else if(current_page == kWiFiSettingsPage) {
-    if(increment) {
-      if(current_cursor == kWiFiSettingsPageCancel)
-        current_cursor = kWiFiSettingsPageSetSsidPasswd;
-      else
-        current_cursor++;
-    }
-    else {
-      if(current_cursor == kWiFiSettingsPageSetSsidPasswd)
-        current_cursor = kWiFiSettingsPageCancel;
-      else
-        current_cursor--;
-    }
-  }
   else if(current_page == kSoftApInputsPage) {
     if(current_cursor == kSoftApInputsPageSave)
       current_cursor = kSoftApInputsPageCancel;
     else
       current_cursor = kSoftApInputsPageSave;
   }
-  // else if(current_page == kLocationAndWeatherSettingsPage) {
-  //   if(increment) {
-  //     if(current_cursor == kLocationAndWeatherSettingsPageCancel)
-  //       current_cursor = kLocationAndWeatherSettingsPageSetLocation;
-  //     else
-  //       current_cursor++;
-  //     #if !defined(TOUCHSCREEN_IS_XPT2046)
-  //       if(current_cursor == kLocationAndWeatherSettingsPageSetCountryCode)
-  //         current_cursor++;
-  //     #endif
-  //   }
-  //   else {
-  //     if(current_cursor == kLocationAndWeatherSettingsPageSetLocation)
-  //       current_cursor = kLocationAndWeatherSettingsPageCancel;
-  //     else
-  //       current_cursor--;
-  //     #if !defined(TOUCHSCREEN_IS_XPT2046)
-  //       if(current_cursor == kLocationAndWeatherSettingsPageSetCountryCode)
-  //         current_cursor--;
-  //     #endif
-  //   }
-  // }
   else if(current_page == kLocationInputsPage) {
     if(current_cursor == kLocationInputsPageSave)
       current_cursor = kLocationInputsPageCancel;
@@ -1255,6 +1215,15 @@ void PopulateDisplayPages() {
     new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
     new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Screensaver Set:", false, 0,0,0,0, "SCREENSAVER" },
     new DisplayButton{ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
+    page_cancel_button,
+  };
+
+  // WIFI SETTINGS PAGE
+  display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kRowClickButton, "Ssid Pwd:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
+    new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kRowClickButton, "Clear Ssid Passwd:", false, 0,0,0,0, "CLEAR" },
+    new DisplayButton{ kWiFiSettingsPageConnect, kRowClickButton, "Connect WiFi:", false, 0,0,0,0, "CONNECT" },
+    new DisplayButton{ kWiFiSettingsPageDisconnect, kRowClickButton, "Disconnect WiFi:", false, 0,0,0,0, "DISCONNECT" },
     page_cancel_button,
   };
 
@@ -1363,25 +1332,40 @@ void LedButtonClickAction() {
     }
     else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
       if(current_cursor == kWiFiSettingsPageSetSsidPasswd) {
-        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageSetSsidPasswd);
+        LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kStartSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kSoftApInputsPage);
       }
-      else if(current_cursor == kWiFiSettingsPageConnect) {
-        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageConnect);
-        AddSecondCoreTaskIfNotThere(kConnectWiFi);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kWiFiSettingsPage);
-      }
-      else if(current_cursor == kWiFiSettingsPageDisconnect) {
-        display->InstantHighlightResponse(/* color_button = */ kWiFiSettingsPageDisconnect);
+      else if(current_cursor == kWiFiSettingsPageClearSsidAndPasswd) {
+        LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
+        wifi_stuff->wifi_ssid_ = "Enter SSID";
+        wifi_stuff->wifi_password_ = "Enter Passwd";
+        wifi_stuff->SaveWiFiDetails();
+        int display_pages_vec_wifi_ssid_passwd_button_index = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageSetSsidPasswd);
+        display_pages_vec[kWiFiSettingsPage][display_pages_vec_wifi_ssid_passwd_button_index]->btn_value = wifi_stuff->WiFiDetailsShortString();
         SetPage(kWiFiSettingsPage);
       }
-      else if(current_cursor == kWiFiSettingsPageCancel)
+      else if(current_cursor == kWiFiSettingsPageConnect) {
+        LedButtonClickUiResponse(2);
+        AddSecondCoreTaskIfNotThere(kConnectWiFi);
+        WaitForExecutionOfSecondCoreTask();
+        LedButtonClickUiResponse(3);
+        display->DisplayWiFiConnectionStatus();
+      }
+      else if(current_cursor == kWiFiSettingsPageDisconnect) {
+        LedButtonClickUiResponse(1);
+        AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+        WaitForExecutionOfSecondCoreTask();
+        LedButtonClickUiResponse(3);
+        display->DisplayWiFiConnectionStatus();
+      }
+      else if(current_cursor == kPageCancelButton) {
+        LedButtonClickUiResponse(1);
         SetPage(kSettingsPage);
+      }
     }
     else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
       if(current_cursor == kSoftApInputsPageSave) {
@@ -1389,6 +1373,8 @@ void LedButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->SaveWiFiDetails();
+        int display_pages_vec_wifi_ssid_passwd_button_index = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageSetSsidPasswd);
+        display_pages_vec[kWiFiSettingsPage][display_pages_vec_wifi_ssid_passwd_button_index]->btn_value = wifi_stuff->WiFiDetailsShortString();
         SetPage(kWiFiSettingsPage);
       }
       else if(current_cursor == kSoftApInputsPageCancel) {

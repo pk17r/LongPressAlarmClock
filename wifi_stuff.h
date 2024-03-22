@@ -11,6 +11,7 @@ class WiFiStuff {
 public:
   WiFiStuff();
   void SaveWiFiDetails();
+  std::string WiFiDetailsShortString();
   void SaveWeatherLocationDetails();
   void SaveWeatherUnits();
   bool TurnWiFiOn();

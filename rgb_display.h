@@ -62,6 +62,7 @@ public:
   void DisplayCursorHighlight(bool highlight_On);
   Cursor CheckButtonTouch();
   void DisplayFirmwareVersionAndDate();
+  void DisplayWiFiConnectionStatus();
 
   // functions
   void Setup();
