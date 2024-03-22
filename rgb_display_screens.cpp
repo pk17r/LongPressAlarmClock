@@ -478,16 +478,24 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
 
   // item button
 
-  // if not an icon button then print its value
+  // if not an icon button then make a button
   if(button->btn_type != kIconButton) {
     if(button->fixed_location) {
       // pre-fixed location button
       tft.setFont(&FreeMonoBold9pt7b);
       tft.setTextColor(kDisplayColorBlack);
+      // Serial.printf("fixed button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
+      // int16_t btn_value_x0 = button->btn_x + kDisplayTextGap, btn_value_y0 = button->btn_y + button->btn_h - kDisplayTextGap;
+      // uint16_t btn_value_w, btn_value_h;
+      // tft.setCursor(btn_value_x0, btn_value_y0);
+      // // get bounds of title on tft display (with background color as this causes a blink)
+      // tft.getTextBounds(button->btn_value.c_str(), btn_value_x0, btn_value_y0, &btn_value_x0, &btn_value_y0, &btn_value_w, &btn_value_h);
+      // Serial.printf("X btn btn_value_x0 %d, btn_value_y0 %d, btn_value_w %d, btn_value_h %d\n", btn_value_x0, btn_value_y0, btn_value_w, btn_value_h);
       // make button
       tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
-      tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
+      int16_t btn_value_x0 = button->btn_x + kDisplayTextGap, btn_value_y0 = button->btn_y + button->btn_h - kDisplayTextGap;
+      tft.setCursor(btn_value_x0, btn_value_y0);
       tft.print(button->btn_value.c_str());
     }
     else {
@@ -498,14 +506,14 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       uint16_t btn_value_w, btn_value_h;
       tft.setCursor(btn_value_x0, row_text_y0);
       // get bounds of title on tft display (with background color as this causes a blink)
-      tft.getTextBounds(button->btn_value.c_str(), btn_value_x0, row_text_y0, &btn_value_x0, &btn_value_y0, &btn_value_w, &btn_value_h);
+      tft.getTextBounds(button->btn_value.c_str(), btn_value_x0, btn_value_y0, &btn_value_x0, &btn_value_y0, &btn_value_w, &btn_value_h);
       // Serial.printf("btn_value_x0 %d, btn_value_y0 %d, btn_value_w %d, btn_value_h %d\n", btn_value_x0, btn_value_y0, btn_value_w, btn_value_h);
       // calculate size
       button->btn_x = kTftWidth - btn_value_w - 3 * kDisplayTextGap;
       button->btn_y = row_text_y0 - btn_value_h - kDisplayTextGap;
       button->btn_w = btn_value_w + 2 * kDisplayTextGap;
       button->btn_h = btn_value_h + 2 * kDisplayTextGap;
-      // Serial.printf("button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
+      // Serial.printf("flexible button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
       // make button
       tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
@@ -525,7 +533,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
     uint16_t row_label_w, row_label_h;
     tft.setCursor(row_label_x0, row_text_y0);
     // get bounds of title on tft display (with background color as this causes a blink)
-    tft.getTextBounds(button->row_label.c_str(), row_label_x0, row_text_y0, &row_label_x0, &row_label_y0, &row_label_w, &row_label_h);
+    tft.getTextBounds(button->row_label.c_str(), row_label_x0, row_label_y0, &row_label_x0, &row_label_y0, &row_label_w, &row_label_h);
     // Serial.printf("row_label_x0 %d, row_label_y0 %d, row_label_w %d, row_label_h %d\n", row_label_x0, row_label_y0, row_label_w, row_label_h);
     // check width and fit in 1 or 2 rows
     if(row_label_w + kDisplayTextGap <= space_left) {

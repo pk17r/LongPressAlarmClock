@@ -1014,7 +1014,6 @@ void SetPage(ScreenPage page) {
     case kSettingsPage:
       current_page = kSettingsPage;     // new page needs to be set before any action
       current_cursor = kSettingsPageWiFi;
-      // display->SettingsPage(false, false);
       display->DisplayCurrentPage();
       break;
     case kWiFiSettingsPage:
