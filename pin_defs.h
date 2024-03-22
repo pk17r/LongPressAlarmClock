@@ -126,13 +126,13 @@
   const int TFT_CLK = 12;
   const int TFT_CS = 10;
   const int TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
-  const int TFT_DC = 46;
-  const int TFT_BL = 3;  //  controls TFT Display backlight as output of PWM pin
+  const int TFT_DC = 7;
+  const int TFT_BL = 6;  //  controls TFT Display backlight as output of PWM pin
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
     const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 36;
-    const int TS_IRQ_PIN = 35;
+    const int TS_CS_PIN = 47;
+    const int TS_IRQ_PIN = 48;
   #endif
 
   // Sqw Alarm Interrupt Pin
@@ -148,7 +148,7 @@
   const int WIFI_LED = 37;
   const int BUZZER_PIN = 40;
   const int DEBUG_PIN = 39;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  const int PHOTORESISTOR_PIN = 4;
+  const int PHOTORESISTOR_PIN = 5;
 
 
 #endif

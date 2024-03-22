@@ -451,12 +451,8 @@ void loop() {
   }
 
   // accept user serial inputs
-  if (Serial.available() != 0) {
-    // if(millis() > 2000)
-      ProcessSerialInput();
-    // else
-    //   SerialInputFlush();
-  }
+  if (Serial.available() != 0)
+    ProcessSerialInput();
 
   #if defined(MCU_IS_ESP32_S2_MINI)
     // ESP32_S2_MINI is single core MCU
@@ -797,6 +793,11 @@ void ProcessSerialInput() {
   // acceptable user input
   Serial.print(F("User input: "));
   Serial.println(input);
+
+  if(millis() < 2000) {
+    Serial.println("Serial Input Ignored..");
+    return;
+  }
   // process user input
   switch (input) {
     case 'a':   // toggle alarm On Off
