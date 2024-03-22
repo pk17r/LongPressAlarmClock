@@ -97,10 +97,8 @@ enum Cursor {
   kAlarmSetPageCancel,
   kSettingsPageWiFi,
   kSettingsPageWeather,
-  kSettingsPageAlarmLongPressSeconds,
-  kSettingsPageScreensaverMotion,
-  kSettingsPageScreensaverSpeed,
-  kSettingsPageRunScreensaver,
+  kSettingsPageAlarmLongPressTime,
+  kSettingsPageScreensaver,
   kSettingsPageUpdate,
   kSettingsPageCancel,
   kWiFiSettingsPageSetSsidPasswd,
@@ -117,6 +115,10 @@ enum Cursor {
   kWeatherSettingsPageCancel,
   kLocationInputsPageSave,
   kLocationInputsPageCancel,
+  kScreensaverSettingsPageMotion,
+  kScreensaverSettingsPageSpeed,
+  kScreensaverSettingsPageRun,
+  kPageCancelButton,
   kCursorMaxValue,    // inc/dec button scroll won't go above this level
   };
 
@@ -212,7 +214,7 @@ extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void CycleCpuFrequency();
-extern void SetPage(ScreenPage page);
+extern void SetPage(ScreenPage set_this_page);
 extern void SetWatchdogTime(unsigned long ms);
 extern void ResetWatchdog();
 extern void PrintLn(const char* someText1, const char* someText2);

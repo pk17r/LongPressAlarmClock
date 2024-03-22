@@ -1628,22 +1628,22 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, (color_button == kSettingsPageWeather ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Alarm Long Press Seconds Text
-    ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (current_cursor == kSettingsPageAlarmLongPressSeconds), 5);
+    ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (current_cursor == kSettingsPageAlarmLongPressTime), 5);
 
     // Alarm Long Press Seconds Set button
-    ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (current_cursor == kSettingsPageAlarmLongPressSeconds), 5);
-    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageAlarmLongPressSeconds ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (current_cursor == kSettingsPageAlarmLongPressTime), 5);
+    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageAlarmLongPressTime ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Type Button
-    ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (current_cursor == kSettingsPageScreensaverMotion), 5);
-    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (current_cursor == kScreensaverSettingsPageMotion), 5);
+    DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, (color_button == kScreensaverSettingsPageMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Speed Button
-    ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (current_cursor == kSettingsPageScreensaverSpeed), 5);
-    DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, (color_button == kSettingsPageScreensaverSpeed ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (current_cursor == kScreensaverSettingsPageSpeed), 5);
+    DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, (color_button == kScreensaverSettingsPageSpeed ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Run Screensaver Button
-    ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (current_cursor == kSettingsPageRunScreensaver), 5);
+    ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (current_cursor == kScreensaverSettingsPageRun), 5);
 
     // Update button
     ButtonHighlight(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, (current_cursor == kSettingsPageUpdate), 5);

@@ -977,8 +977,8 @@ void CycleCpuFrequency() {
   #endif
 }
 
-void SetPage(ScreenPage page) {
-  switch(page) {
+void SetPage(ScreenPage set_this_page) {
+  switch(set_this_page) {
     case kMainPage:
       // if screensaver is active then clear screensaver canvas to free memory
       if(current_page == kScreensaverPage)
@@ -1012,8 +1012,9 @@ void SetPage(ScreenPage page) {
       display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
       break;
     case kSettingsPage:
-      current_page = kSettingsPage;     // new page needs to be set before any action
-      current_cursor = kSettingsPageWiFi;
+    case kScreensaverSettingsPage:
+      current_page = set_this_page;     // new page needs to be set before any action
+      current_cursor = display_pages_vec[current_page][0]->btn_id;
       display->DisplayCurrentPage();
       break;
     case kWiFiSettingsPage:
@@ -1123,7 +1124,7 @@ void SetPage(ScreenPage page) {
       }
       break;
     default:
-      Serial.print("Unprogrammed Page "); Serial.print(page); Serial.println('!');
+      Serial.print("Unprogrammed Page "); Serial.print(set_this_page); Serial.println('!');
   }
   // if(current_page != kMainPage)
   //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
@@ -1147,18 +1148,18 @@ void MoveCursor(bool increment) {
         current_cursor--;
     }
   }
-  else if(current_page == kSettingsPage) {
+  else if(current_page == kSettingsPage || current_page == kScreensaverSettingsPage) {
     if(increment) {
-      if(current_cursor == kSettingsPageCancel)
-        current_cursor = kSettingsPageWiFi;
+      if(current_cursor == kPageCancelButton)
+        current_cursor = display_pages_vec[current_page][0]->btn_id;
       else
-        current_cursor++;
+        current_cursor = display_pages_vec[current_page][CurrentButtonIndex() + 1]->btn_id;
     }
     else {
-      if(current_cursor == kSettingsPageWiFi)
-        current_cursor = kSettingsPageCancel;
+      if(current_cursor == display_pages_vec[current_page][0]->btn_id)
+        current_cursor = display_pages_vec[current_page][display_pages_vec[current_page].size() - 1]->btn_id;
       else
-        current_cursor--;
+        current_cursor = display_pages_vec[current_page][CurrentButtonIndex() - 1]->btn_id;
     }
   }
   else if(current_page == kAlarmSetPage) {
@@ -1234,6 +1235,8 @@ void MoveCursor(bool increment) {
 
 void PopulateDisplayPages() {
 
+  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X" };
+
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
     new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kIconButton, "", true, 270, 105, 40, 40, "" },
@@ -1242,14 +1245,20 @@ void PopulateDisplayPages() {
 
   // SETTINGS PAGE
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ /* WiFi Details   */ kSettingsPageWiFi, kRowClickButton, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
-    new DisplayButton{ /* Weather Details   */ kSettingsPageWeather, kRowClickButton, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
-    new DisplayButton{ /* Alarm Long Press Seconds */ kSettingsPageAlarmLongPressSeconds, kRowClickCycleButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
-    new DisplayButton{ /* Screensaver Motion Type */ kSettingsPageScreensaverMotion, kRowClickCycleButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
-    new DisplayButton{ /* Screensaver Speed */ kSettingsPageScreensaverSpeed, kRowClickCycleButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
-    new DisplayButton{ /* Run Screensaver */ kSettingsPageRunScreensaver, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    new DisplayButton{ /* Firmware Update Button */ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UP" },
-    new DisplayButton{ /* Cancel Button */ kSettingsPageCancel, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X" },
+    new DisplayButton{ kSettingsPageWiFi, kRowClickButton, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
+    new DisplayButton{ kSettingsPageWeather, kRowClickButton, "Weather Settings:", false, 0,0,0,0, "WEATHER" },
+    new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickCycleButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Screensaver Settings:", false, 0,0,0,0, "SCREENSAVER" },
+    new DisplayButton{ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
+    page_cancel_button,
+  };
+
+  // SCREENSAVER SETTINGS PAGE
+  display_pages_vec[kScreensaverSettingsPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickCycleButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
+    new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickCycleButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
+    new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
+    page_cancel_button,
   };
 
 
@@ -1303,7 +1312,7 @@ void LedButtonClickAction() {
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage);
       }
-      else if(current_cursor == kSettingsPageAlarmLongPressSeconds) {
+      else if(current_cursor == kSettingsPageAlarmLongPressTime) {
         // change seconds
         if(alarm_clock->alarm_long_press_seconds_ < 25)
           alarm_clock->alarm_long_press_seconds_ += 10;
@@ -1313,27 +1322,16 @@ void LedButtonClickAction() {
         eeprom->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
         LedButtonClickUiResponse();
       }
-      else if(current_cursor == kSettingsPageScreensaverMotion) {
-        display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
-        display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr);
-        eeprom->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
-        LedButtonClickUiResponse();
-      }
-      else if(current_cursor == kSettingsPageScreensaverSpeed) {
-        CycleCpuFrequency();
-        display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr));
-        LedButtonClickUiResponse();
-      }
-      else if(current_cursor == kSettingsPageRunScreensaver) {
+      else if(current_cursor == kSettingsPageScreensaver) {
         LedButtonClickUiResponse(1);
-        SetPage(kScreensaverPage);
+        SetPage(kScreensaverSettingsPage);
       }
       else if(current_cursor == kSettingsPageUpdate) {
         LedButtonClickUiResponse(2);
         wifi_stuff->FirmwareVersionCheck();
         LedButtonClickUiResponse(3);
       }
-      else if(current_cursor == kSettingsPageCancel) {
+      else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
         SetPage(kMainPage);
       }
@@ -1428,6 +1426,28 @@ void LedButtonClickAction() {
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage);
       }
+    }
+    else if(current_page == kScreensaverSettingsPage) {        // SCREENSAVER SETTINGS PAGE
+      if(current_cursor == kScreensaverSettingsPageMotion) {
+        display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
+        display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr);
+        eeprom->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
+        LedButtonClickUiResponse();
+      }
+      else if(current_cursor == kScreensaverSettingsPageSpeed) {
+        CycleCpuFrequency();
+        display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr));
+        LedButtonClickUiResponse();
+      }
+      else if(current_cursor == kScreensaverSettingsPageRun) {
+        LedButtonClickUiResponse(1);
+        SetPage(kScreensaverPage);
+      }
+      else if(current_cursor == kPageCancelButton) {
+        LedButtonClickUiResponse(1);
+        SetPage(kSettingsPage);
+      }
+      
     }
   }
 }
