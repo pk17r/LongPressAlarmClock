@@ -150,7 +150,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorOrange, offFill, true);
 
     // high light text / buttons
-    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageHour), 10);
+    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageHour), 10);
   }
   else {
     // processUserInput
@@ -220,42 +220,42 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       //    9 = Set button
       //    10 = Cancel button
 
-      if(highlight == kAlarmSetPageHour) {
+      if(current_cursor == kAlarmSetPageHour) {
         if(inc_button_pressed) userButtonClick = 1;
         else if(dec_button_pressed) userButtonClick = 2;
-        else highlight = kAlarmSetPageMinute;
+        else current_cursor = kAlarmSetPageMinute;
       }
-      else if(highlight == kAlarmSetPageMinute) {
+      else if(current_cursor == kAlarmSetPageMinute) {
         if(inc_button_pressed) userButtonClick = 3;
         else if(dec_button_pressed) userButtonClick = 4;
-        else highlight = kAlarmSetPageAmPm;
+        else current_cursor = kAlarmSetPageAmPm;
       }
-      else if(highlight == kAlarmSetPageAmPm) {
+      else if(current_cursor == kAlarmSetPageAmPm) {
         if(inc_button_pressed) userButtonClick = 5;
         else if(dec_button_pressed) userButtonClick = 6;
         else {
           // if(alarm_clock->var_4_ON_)
-            highlight = kAlarmSetPageOn;
+            current_cursor = kAlarmSetPageOn;
           // else
             // highlight = kAlarmSetPageOff;
         }
       }
-      else if(highlight == kAlarmSetPageOn || highlight == kAlarmSetPageOff) {
-        if(inc_button_pressed) highlight = kAlarmSetPageOn;
-        else if(dec_button_pressed) highlight = kAlarmSetPageOff;
+      else if(current_cursor == kAlarmSetPageOn || current_cursor == kAlarmSetPageOff) {
+        if(inc_button_pressed) current_cursor = kAlarmSetPageOn;
+        else if(dec_button_pressed) current_cursor = kAlarmSetPageOff;
         else {
-          if(highlight == kAlarmSetPageOn)
+          if(current_cursor == kAlarmSetPageOn)
             userButtonClick = 7;
           else
             userButtonClick = 8;
-          highlight = kAlarmSetPageSet;
+          current_cursor = kAlarmSetPageSet;
         }
       }
-      else if(highlight == kAlarmSetPageSet || highlight == kAlarmSetPageCancel) {
-        if(inc_button_pressed) highlight = kAlarmSetPageSet;
-        else if(dec_button_pressed) highlight = kAlarmSetPageCancel;
+      else if(current_cursor == kAlarmSetPageSet || current_cursor == kAlarmSetPageCancel) {
+        if(inc_button_pressed) current_cursor = kAlarmSetPageSet;
+        else if(dec_button_pressed) current_cursor = kAlarmSetPageCancel;
         else {
-          if(highlight == kAlarmSetPageSet)
+          if(current_cursor == kAlarmSetPageSet)
             userButtonClick = 9;
           else
             userButtonClick = 10;
@@ -264,13 +264,13 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     }
 
     // high light text / buttons
-    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageHour), 10);
-    ButtonHighlight(min_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageMinute), 10);
-    ButtonHighlight(amPm_x, time_y - gap_y, gap_x, gap_y, (highlight == kAlarmSetPageAmPm), 10);
-    ButtonHighlight(onOff_x, onSet_y, button_w, button_h, (highlight == kAlarmSetPageOn), 5);
-    ButtonHighlight(onOff_x, offCancel_y, button_w, button_h, (highlight == kAlarmSetPageOff), 5);
-    ButtonHighlight(setCancel_x, onSet_y, button_w, button_h, (highlight == kAlarmSetPageSet), 5);
-    ButtonHighlight(setCancel_x, offCancel_y, button_w, button_h, (highlight == kAlarmSetPageCancel), 5);
+    ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageHour), 10);
+    ButtonHighlight(min_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageMinute), 10);
+    ButtonHighlight(amPm_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageAmPm), 10);
+    ButtonHighlight(onOff_x, onSet_y, button_w, button_h, (current_cursor == kAlarmSetPageOn), 5);
+    ButtonHighlight(onOff_x, offCancel_y, button_w, button_h, (current_cursor == kAlarmSetPageOff), 5);
+    ButtonHighlight(setCancel_x, onSet_y, button_w, button_h, (current_cursor == kAlarmSetPageSet), 5);
+    ButtonHighlight(setCancel_x, offCancel_y, button_w, button_h, (current_cursor == kAlarmSetPageCancel), 5);
 
     // Process user input
     if(userButtonClick >= 1 && userButtonClick <= 6) {
@@ -444,12 +444,36 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
   tft.drawTriangle(x1, y1, x2, y2, x3, y3, borderColor);
 }
 
-void RGBDisplay::UpdatePageItem(int button_index) {
+void RGBDisplay::DisplayCursorHighlight(DisplayButton* button, bool highlight_On) {
+  if(highlight_On) {
+    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  }
+  else{
+    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  }
+}
+
+void RGBDisplay::DisplayCursorHighlight(bool highlight_On) {
+  for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
+    DisplayButton* button = display_pages_vec[current_page][i];
+    if(button->btn_id == current_cursor) {
+      DisplayCursorHighlight(button, highlight_On);
+      break;
+    }
+  }
+}
+
+void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
 
   DisplayButton* button = display_pages_vec[current_page][button_index];
 
   const int kRowHeight = 30;
   const int row_text_y0 = button_index * kRowHeight + 20;
+
+  // clear row
+  tft.fillRect(0, row_text_y0 - 20, kTftWidth, kRowHeight, kDisplayBackroundColor);
 
   int space_left = kTftWidth;
 
@@ -462,7 +486,7 @@ void RGBDisplay::UpdatePageItem(int button_index) {
       tft.setFont(&FreeMonoBold9pt7b);
       tft.setTextColor(kDisplayColorBlack);
       // make button
-      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (button->is_on ? kButtonClickedFillColor : kButtonFillColor));
+      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
       // tft.setTextColor((isOn ? offFill : onFill));
       tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
@@ -485,7 +509,7 @@ void RGBDisplay::UpdatePageItem(int button_index) {
       button->btn_h = btn_value_h + 2 * kDisplayTextGap;
       // Serial.printf("button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
       // make button
-      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (button->is_on ? kButtonClickedFillColor : kButtonFillColor));
+      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
       // tft.setTextColor((isOn ? offFill : onFill));
       tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
@@ -505,6 +529,7 @@ void RGBDisplay::UpdatePageItem(int button_index) {
     tft.setCursor(row_label_x0, row_text_y0);
     // get bounds of title on tft display (with background color as this causes a blink)
     tft.getTextBounds(button->row_label.c_str(), row_label_x0, row_text_y0, &row_label_x0, &row_label_y0, &row_label_w, &row_label_h);
+    Serial.printf("row_label_x0 %d, row_label_y0 %d, row_label_w %d, row_label_h %d\n", row_label_x0, row_label_y0, row_label_w, row_label_h);
     // check width and fit in 1 or 2 rows
     if(row_label_w + kDisplayTextGap <= space_left) {
       // label fits in 1 row
@@ -529,24 +554,42 @@ void RGBDisplay::UpdatePageItem(int button_index) {
 
   // button highlight
 
-  if(button->btn_id == highlight) {
-    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayColorCyan);
-    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  if(button->btn_id == current_cursor) {
+    DisplayCursorHighlight(button, true);
   }
   else{
-    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
-    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    DisplayCursorHighlight(button, false);
   }
 }
 
-void RGBDisplay::DisplayPage(ScreenPage page_id) {
+void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
+  for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
+    if(display_pages_vec[current_page][i]->btn_id == current_cursor) {
+      DisplayCurrentPageButtonRow(i, is_on);
+      break;
+    }
+  }
+}
+
+void RGBDisplay::DisplayCurrentPage() {
   tft.fillScreen(kDisplayBackroundColor);
-  for (int i = 0; i < display_pages_vec[page_id].size(); i++) {
-    UpdatePageItem(i);
+  for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
+    DisplayCurrentPageButtonRow(i, false);
   }
 }
 
-Cursor RGBDisplay::CheckClickItem() {
+Cursor RGBDisplay::CheckButtonTouch() {
+  int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
+  Serial.printf("ts_x=%d, ts_y=%d\n", ts_x, ts_y);
+
+  for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
+    DisplayButton* button = display_pages_vec[current_page][i];
+    if(ts_x >= button->btn_x && ts_x <= button->btn_x + button->btn_w && ts_y >= button->btn_y && ts_y <= button->btn_y + button->btn_h) {
+      DisplayCurrentPageButtonRow(i, true);
+      delay(100);
+      return button->btn_id;
+    }
+  }
   return kCursorNoSelection;
 }
 
@@ -1556,67 +1599,67 @@ void RGBDisplay::ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, b
 void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
   if(current_page == kMainPage) {                 // MAIN PAGE
     // settings wheel cursor highlight
-    ButtonHighlight(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, (highlight == kMainPageSettingsWheel), 5);
+    ButtonHighlight(kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, (current_cursor == kMainPageSettingsWheel), 5);
 
     // alarm cursor highlight
-    ButtonHighlight(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, (highlight == kMainPageSetAlarm), 0);
+    ButtonHighlight(1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, (current_cursor == kMainPageSetAlarm), 0);
   }
   else if(current_page == kSettingsPage) {        // SETTINGS PAGE
     // Update WiFi Details button
-    ButtonHighlight(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, (highlight == kSettingsPageWiFi), 5);
+    ButtonHighlight(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, (current_cursor == kSettingsPageWiFi), 5);
 
     // Update Weather and Location button
-    ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (highlight == kSettingsPageWeather), 5);
+    ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (current_cursor == kSettingsPageWeather), 5);
     if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, (color_button == kSettingsPageWeather ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Alarm Long Press Seconds Text
-    ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (highlight == kSettingsPageAlarmLongPressSeconds), 5);
+    ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (current_cursor == kSettingsPageAlarmLongPressSeconds), 5);
 
     // Alarm Long Press Seconds Set button
-    ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (highlight == kSettingsPageSet), 5);
-    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageSet ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    ButtonHighlight(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, (current_cursor == kSettingsPageAlarmLongPressSeconds), 5);
+    DrawButton(kAlarmLongPressSecondsSetButtonX1, kAlarmLongPressSecondsSetButtonY1, kAlarmLongPressSecondsSetButtonW, kAlarmLongPressSecondsSetButtonH, setStr, kDisplayColorCyan, (color_button == kSettingsPageAlarmLongPressSeconds ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Type Button
-    ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (highlight == kSettingsPageScreensaverMotion), 5);
+    ButtonHighlight(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (current_cursor == kSettingsPageScreensaverMotion), 5);
     DrawButton(kScreensaverMotionButtonX1, kScreensaverMotionButtonY1, kScreensaverMotionButtonW, kScreensaverMotionButtonH, (screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr), kDisplayColorCyan, (color_button == kSettingsPageScreensaverMotion ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Screensaver Speed Button
-    ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (highlight == kSettingsPageScreensaverSpeed), 5);
+    ButtonHighlight(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (current_cursor == kSettingsPageScreensaverSpeed), 5);
     DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, (color_button == kSettingsPageScreensaverSpeed ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Run Screensaver Button
-    ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (highlight == kSettingsPageRunScreensaver), 5);
+    ButtonHighlight(kRunScreensaverButtonX1, kRunScreensaverButtonY1, kRunScreensaverButtonW, kRunScreensaverButtonH, (current_cursor == kSettingsPageRunScreensaver), 5);
 
     // Update button
-    ButtonHighlight(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, (highlight == kSettingsPageUpdate), 5);
+    ButtonHighlight(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, (current_cursor == kSettingsPageUpdate), 5);
     DrawButton(kUpdateButtonX1, kUpdateButtonY1, kUpdateButtonW, kUpdateButtonH, updateStr, kDisplayColorCyan, (color_button == kSettingsPageUpdate ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSettingsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kSettingsPageCancel), 5);
   }
   else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
     // Set WiFi Ssid Passwd
-    ButtonHighlight(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, (highlight == kWiFiSettingsPageSetSsidPasswd), 5);
+    ButtonHighlight(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, (current_cursor == kWiFiSettingsPageSetSsidPasswd), 5);
     if(color_button == kWiFiSettingsPageSetSsidPasswd) DrawButton(kSetWiFiButtonX1, kSetWiFiButtonY1, kSetWiFiButtonW, kSetWiFiButtonH, setWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Connect To WiFi
-    ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (highlight == kWiFiSettingsPageConnect), 5);
+    ButtonHighlight(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, (current_cursor == kWiFiSettingsPageConnect), 5);
     if(color_button == kWiFiSettingsPageConnect) DrawButton(kConnectWiFiButtonX1, kConnectWiFiButtonY1, kConnectWiFiButtonW, kConnectWiFiButtonH, connectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Disconnect WiFi button
-    ButtonHighlight(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, (highlight == kWiFiSettingsPageDisconnect), 5);
+    ButtonHighlight(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, (current_cursor == kWiFiSettingsPageDisconnect), 5);
     if(color_button == kWiFiSettingsPageDisconnect) DrawButton(kDisconnectWiFiButtonX1, kDisconnectWiFiButtonY1, kDisconnectWiFiButtonW, kDisconnectWiFiButtonH, disconnectWiFiStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWiFiSettingsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kWiFiSettingsPageCancel), 5);
   }
   else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
     // Save button
-    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (highlight == kSoftApInputsPageSave), 5);
+    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (current_cursor == kSoftApInputsPageSave), 5);
     if(color_button == kSoftApInputsPageSave) DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kSoftApInputsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kSoftApInputsPageCancel), 5);
     if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
   else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
@@ -1630,32 +1673,32 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
       if(color_button == kWeatherSettingsPageSetCountryCode) DrawButton(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
     #else
       // set location button
-      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
+      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (current_cursor == kWeatherSettingsPageSetLocation), 5);
       if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
     #endif
 
     // Toggle Units Metric/Imperial button
-    ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (highlight == kWeatherSettingsPageUnits), 5);
+    ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (current_cursor == kWeatherSettingsPageUnits), 5);
     if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Get WEATHER Info button
-    ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (highlight == kWeatherSettingsPageFetch), 5);
+    ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (current_cursor == kWeatherSettingsPageFetch), 5);
     if(color_button == kWeatherSettingsPageFetch) DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Update TIME button
-    ButtonHighlight(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, (highlight == kWeatherSettingsPageUpdateTime), 5);
+    ButtonHighlight(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, (current_cursor == kWeatherSettingsPageUpdateTime), 5);
     if(color_button == kWeatherSettingsPageUpdateTime) DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kWeatherSettingsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kWeatherSettingsPageCancel), 5);
   }
   else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
     // Save button
-    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (highlight == kLocationInputsPageSave), 5);
+    ButtonHighlight(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, (current_cursor == kLocationInputsPageSave), 5);
     if(color_button == kLocationInputsPageSave) DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (highlight == kLocationInputsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kLocationInputsPageCancel), 5);
     if(color_button == kLocationInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
 }

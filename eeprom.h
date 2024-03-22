@@ -93,7 +93,7 @@ private:
   const uint32_t kWeatherZipCode = 92104;
   const std::string kWeatherCountryCode = "US";
   const bool kWeatherUnitsMetricNotImperial = false;
-  const uint8_t kAlarmLongPressSeconds = 20;
+  const uint8_t kAlarmLongPressSeconds = 15;
 
 };
 

@@ -55,9 +55,12 @@ public:
   void IncorrectTimeBanner();
   void FirmwareUpdatePage();
   void RealTimeOnScreenOutput(std::string text, int width);
-  void DisplayPage(ScreenPage page_id);
-  void UpdatePageItem(int button_index);
-  Cursor CheckClickItem();
+  void DisplayCurrentPage();
+  void DisplayCurrentPageButtonRow(bool is_on);
+  void DisplayCurrentPageButtonRow(int button_index, bool is_on);
+  void DisplayCursorHighlight(DisplayButton* button, bool highlight_On);
+  void DisplayCursorHighlight(bool highlight_On);
+  Cursor CheckButtonTouch();
 
   // functions
   void Setup();

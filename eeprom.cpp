@@ -61,6 +61,7 @@ void EEPROM::RetrieveLongPressSeconds(uint8_t &long_press_seconds) {
 
 void EEPROM::SaveLongPressSeconds(uint8_t long_press_seconds) {
   Save1Byte(kAlarmLongPressSecondsAddress, long_press_seconds);
+  Serial.printf("EEPROM long_press_seconds: %d sec\n", long_press_seconds);
 }
 
 void EEPROM::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
@@ -75,6 +76,7 @@ void EEPROM::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool a
   Save1Byte(kAlarmMinAddress, alarmMin);
   Save1Byte(kAlarmIsAmAddress, static_cast<uint8_t>(alarmIsAm));
   Save1Byte(kAlarmOnAddress, static_cast<uint8_t>(alarmOn));
+  Serial.printf("EEPROM SaveAlarm %2d:%02d alarmIsAm=%d alarmOn=%d\n", alarmHr, alarmMin, alarmIsAm, alarmOn);
 }
 
 void EEPROM::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password) {

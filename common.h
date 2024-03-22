@@ -96,7 +96,7 @@ enum Cursor {
   kAlarmSetPageCancel,
   kSettingsPageWiFi,
   kSettingsPageWeather,
-  kSettingsPageSet,
+  kSettingsPageAlarmLongPressSeconds,
   kSettingsPageScreensaverMotion,
   kSettingsPageScreensaverSpeed,
   kSettingsPageRunScreensaver,
@@ -117,11 +117,10 @@ enum Cursor {
   kLocationInputsPageSave,
   kLocationInputsPageCancel,
   kCursorMaxValue,    // inc/dec button scroll won't go above this level
-  kSettingsPageAlarmLongPressSeconds,
   };
 
 // current cursor highlight location on page
-extern Cursor highlight;
+extern Cursor current_cursor;
 
 // postfix form ++ -- operator overloads for Cursor enum variables
 inline Cursor operator++ (Cursor& highlight_location, int) {
@@ -183,7 +182,6 @@ struct DisplayButton {
   uint16_t btn_w;
   uint16_t btn_h;
   std::string btn_value;
-  bool is_on;
 };
 
 extern std::vector<std::vector<DisplayButton*>> display_pages_vec;
