@@ -469,11 +469,10 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
 
   DisplayButton* button = display_pages_vec[current_page][button_index];
 
-  const int kRowHeight = 30;
-  const int row_text_y0 = button_index * kRowHeight + 20;
+  const int row_text_y0 = (button_index + 1) * kPageRowHeight + 20;
 
   // clear row
-  tft.fillRect(0, row_text_y0 - 20, kTftWidth, kRowHeight, kDisplayBackroundColor);
+  tft.fillRect(0, row_text_y0 - 20, kTftWidth, kPageRowHeight, kDisplayBackroundColor);
 
   int space_left = kTftWidth;
 
@@ -488,7 +487,6 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       // make button
       tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
-      // tft.setTextColor((isOn ? offFill : onFill));
       tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
       tft.print(button->btn_value.c_str());
     }
@@ -511,7 +509,6 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       // make button
       tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
-      // tft.setTextColor((isOn ? offFill : onFill));
       tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
       tft.print(button->btn_value.c_str());
     }
@@ -529,7 +526,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
     tft.setCursor(row_label_x0, row_text_y0);
     // get bounds of title on tft display (with background color as this causes a blink)
     tft.getTextBounds(button->row_label.c_str(), row_label_x0, row_text_y0, &row_label_x0, &row_label_y0, &row_label_w, &row_label_h);
-    Serial.printf("row_label_x0 %d, row_label_y0 %d, row_label_w %d, row_label_h %d\n", row_label_x0, row_label_y0, row_label_w, row_label_h);
+    // Serial.printf("row_label_x0 %d, row_label_y0 %d, row_label_w %d, row_label_h %d\n", row_label_x0, row_label_y0, row_label_w, row_label_h);
     // check width and fit in 1 or 2 rows
     if(row_label_w + kDisplayTextGap <= space_left) {
       // label fits in 1 row
@@ -545,7 +542,6 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       int row_1_label_length = button->row_label.size() / 2;
       std::string row_1_label = button->row_label.substr(0, row_1_label_length);
       tft.print(row_1_label.c_str());
-      // row 2tft.setTextColor(kDisplayColorYellow);
       tft.setCursor(kDisplayTextGap, row_text_y0 + 5);
       std::string row_2_label = button->row_label.substr(row_1_label_length, button->row_label.size() - row_1_label_length);
       tft.print(row_2_label.c_str());
@@ -554,12 +550,10 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
 
   // button highlight
 
-  if(button->btn_id == current_cursor) {
+  if(button->btn_id == current_cursor)
     DisplayCursorHighlight(button, true);
-  }
-  else{
+  else
     DisplayCursorHighlight(button, false);
-  }
 }
 
 void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
@@ -573,6 +567,19 @@ void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
 
 void RGBDisplay::DisplayCurrentPage() {
   tft.fillScreen(kDisplayBackroundColor);
+  // page title
+  tft.setFont(&FreeMonoBold9pt7b);
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setCursor(kDisplayTextGap, 20);
+  std::string title_str = "";
+  switch(current_page) {
+    case kScreensaverSettingsPage: title_str = "SCREENSAVER SETTINGS PAGE"; break;
+    case kSettingsPage: title_str = "MAIN SETTINGS PAGE"; break;
+    case kWiFiSettingsPage: title_str = "WIFI SETTINGS PAGE"; break;
+    case kWeatherSettingsPage: title_str = "WEATHER SETTINGS PAGE"; break;
+    default: title_str = "Not Implemented!";
+  }
+  tft.print(title_str.c_str());
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     DisplayCurrentPageButtonRow(i, false);
   }

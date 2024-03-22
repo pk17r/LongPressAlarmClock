@@ -63,6 +63,7 @@ extern elapsedMillis inactivity_millis;
 enum ScreenPage {
   kMainPage = 0,
   kScreensaverPage,
+  kScreensaverSettingsPage,
   kAlarmSetPage,
   kAlarmTriggeredPage,
   kTimeSetPage,

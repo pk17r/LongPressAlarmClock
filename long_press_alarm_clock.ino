@@ -105,6 +105,7 @@ uint16_t ota_update_days_minutes = 0;
 // LOCAL FUNCTIONS
 void PopulateDisplayPages();
 int CurrentButtonIndex();
+void LedButtonClickUiResponse(int response_type);
 
 // setup core1
 void setup() {
@@ -1263,6 +1264,25 @@ int CurrentButtonIndex() {
   return -1;
 }
 
+void LedButtonClickUiResponse(int response_type = 0) {
+  switch (response_type) {
+    case 1:   // turn On Button, wait
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      delay(kUserInputDelayMs);
+      break;
+    case 2:   // turn On Button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      break;
+    case 3:   // turn Off Button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+      break;
+    default:     // turn On Button, wait, turn Off button
+      display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+      delay(kUserInputDelayMs);
+      display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+  }
+}
+
 void LedButtonClickAction() {
   if(current_page == kAlarmSetPage)
     display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ true);
@@ -1275,12 +1295,11 @@ void LedButtonClickAction() {
     }
     else if(current_page == kSettingsPage) {        // SETTINGS PAGE
       if(current_cursor == kSettingsPageWiFi) {
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-        delay(kUserInputDelayMs);
+        LedButtonClickUiResponse(1);
         SetPage(kWiFiSettingsPage);
       }
       else if(current_cursor == kSettingsPageWeather) {
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+        LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWeatherSettingsPage);
@@ -1292,39 +1311,31 @@ void LedButtonClickAction() {
         else
           alarm_clock->alarm_long_press_seconds_ = 5;
         display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
         eeprom->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
-        delay(kUserInputDelayMs);
-        display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+        LedButtonClickUiResponse();
       }
       else if(current_cursor == kSettingsPageScreensaverMotion) {
         display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
         display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr);
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
         eeprom->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
-        delay(kUserInputDelayMs);
-        display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+        LedButtonClickUiResponse();
       }
       else if(current_cursor == kSettingsPageScreensaverSpeed) {
         CycleCpuFrequency();
         display_pages_vec[current_page][CurrentButtonIndex()]->btn_value = (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr));
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-        delay(kUserInputDelayMs);
-        display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+        LedButtonClickUiResponse();
       }
       else if(current_cursor == kSettingsPageRunScreensaver) {
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-        delay(kUserInputDelayMs);
+        LedButtonClickUiResponse(1);
         SetPage(kScreensaverPage);
       }
       else if(current_cursor == kSettingsPageUpdate) {
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
+        LedButtonClickUiResponse(2);
         wifi_stuff->FirmwareVersionCheck();
-        display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+        LedButtonClickUiResponse(3);
       }
       else if(current_cursor == kSettingsPageCancel) {
-        display->DisplayCurrentPageButtonRow(/*is_on = */ true);
-        delay(kUserInputDelayMs);
+        LedButtonClickUiResponse(1);
         SetPage(kMainPage);
       }
     }
