@@ -103,6 +103,7 @@ SPIClass* spi_obj = NULL;
 uint16_t ota_update_days_minutes = 0;
 
 // LOCAL FUNCTIONS
+// populate all pages in display_pages_vec
 void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
@@ -272,9 +273,9 @@ void loop() {
       }
       else // all other pages
       { // if not on alarm page and user clicked somewhere, get touch input
-        ScreenPage userTouchRegion = display->ClassifyUserScreenTouchInput();
-        if(userTouchRegion != kNoPageSelected)
-          SetPage(userTouchRegion);
+        current_cursor = display->CheckButtonTouch();
+        if(current_cursor != kCursorNoSelection)
+          LedButtonClickAction();
       }
     }
     // push/big LED button click action
@@ -1122,8 +1123,6 @@ void SetPage(ScreenPage set_this_page) {
     default:
       Serial.print("Unprogrammed Page "); Serial.print(set_this_page); Serial.println('!');
   }
-  // if(current_page != kMainPage)
-  //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
   delay(kUserInputDelayMs);
   display->DisplayCursorHighlight(/*highlight_On = */ true);
 }
@@ -1179,9 +1178,10 @@ void MoveCursor(bool increment) {
   display->DisplayCursorHighlight(/*highlight_On = */ true);
 }
 
+// populate all pages in display_pages_vec
 void PopulateDisplayPages() {
   DisplayButton* page_save_button = new DisplayButton{ /* Save Button */ kPageSaveButton, kRowClickButton, "", true, kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr };
-  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X" };
+  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr };
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {

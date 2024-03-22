@@ -44,13 +44,9 @@ public:
   void SetAlarmScreen(bool process_user_input, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void DisplayWeatherInfo();
-  void SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_long_press_secs);
   void SoftApInputsPage();
-  void WiFiSettingsPage();
-  void WeatherSettingsPage();
   void LocationInputsLocalServerPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
-  void InstantHighlightResponse(Cursor color_button);
   void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
   void IncorrectTimeBanner();
   void FirmwareUpdatePage();
@@ -74,7 +70,6 @@ public:
     void CheckTimeAndSetBrightness();
   #endif
   void ScreensaverControl(bool turnOn);
-  ScreenPage ClassifyUserScreenTouchInput();
 
 // PUBLIC VARIABLES
 
