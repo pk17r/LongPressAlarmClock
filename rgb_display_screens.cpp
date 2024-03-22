@@ -575,22 +575,51 @@ void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
 
 void RGBDisplay::DisplayCurrentPage() {
   tft.fillScreen(kDisplayBackroundColor);
-  // page title
+
+  // Page Title
   tft.setFont(&FreeMonoBold9pt7b);
-  tft.setTextColor(kDisplayColorYellow);
+  tft.setTextColor(kDisplayColorGreen);
   tft.setCursor(kDisplayTextGap, 20);
   std::string title_str = "";
   switch(current_page) {
     case kScreensaverSettingsPage: title_str = "SCREENSAVER SETTINGS PAGE"; break;
     case kSettingsPage: title_str = "MAIN SETTINGS PAGE"; break;
     case kWiFiSettingsPage: title_str = "WIFI SETTINGS PAGE"; break;
-    case kWeatherSettingsPage: title_str = "WEATHER SETTINGS PAGE"; break;
+    case kLocationAndWeatherSettingsPage: title_str = "LOCATION & WEATHER SETTINGS"; break;
     default: title_str = "Not Implemented!";
   }
   tft.print(title_str.c_str());
+
+  // Page Body
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     DisplayCurrentPageButtonRow(i, false);
   }
+
+  // Page Footer
+  switch(current_page) {
+    case kSettingsPage:
+      DisplayFirmwareVersionAndDate();
+      break;
+    case kWiFiSettingsPage:
+      break;
+    case kLocationAndWeatherSettingsPage:
+      DisplayWeatherInfo();
+      break;
+  }
+}
+
+void RGBDisplay::DisplayFirmwareVersionAndDate() {
+  // Firmware Version and Date
+  tft.setFont(&FreeMono9pt7b);
+  tft.setTextColor(kDisplayColorBlue);
+  tft.setCursor(10, kTftHeight - 20);
+  tft.print("Firmware: ");
+  tft.print(kFirmwareVersion.c_str());
+  if(wifi_stuff->firmware_update_available_str_.size() > 0)
+    tft.print(" (latest)");
+  tft.setCursor(10, kTftHeight - 5);
+  tft.print("Date: ");
+  tft.print(kFirmwareDate.c_str());
 }
 
 Cursor RGBDisplay::CheckButtonTouch() {
@@ -664,10 +693,10 @@ void RGBDisplay::SettingsPage(bool inc_alarm_long_press_secs, bool dec_alarm_lon
     // Firmware Version and Date
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorYellow);
-    tft.setCursor(10, kTftHeight - 20);
+    tft.setCursor(kDisplayTextGap, kTftHeight - 20);
     tft.print("Firmware: ");
     tft.print(kFirmwareVersion.c_str());
-    tft.setCursor(10, kTftHeight - 5);
+    tft.setCursor(kDisplayTextGap, kTftHeight - kDisplayTextGap);
     tft.print("Date: ");
     tft.print(kFirmwareDate.c_str());
   }
@@ -904,17 +933,31 @@ void RGBDisplay::DisplayWeatherInfo() {
 
   const int16_t alarm_triggered_page_title_y0 = 50;
   const int16_t long_press_alarm_seconds_y0 = alarm_triggered_page_title_y0 + 48;
-  const int16_t city_x0 = 200, city_y0 = alarm_triggered_page_title_y0 + 88;
-  const int16_t weather_x0 = 5, weather_main_y0 = long_press_alarm_seconds_y0 + 65;
-  const int16_t weather_row2_y0 = weather_main_y0 + 30, weather_row3_y0 = weather_row2_y0 + 20, weather_row4_y0 = weather_row3_y0 + 20;
+  const int16_t city_x0 = 200;
+  const int16_t city_y0 = alarm_triggered_page_title_y0 + 88;
+  const int16_t weather_x0 = 5;
+  const int16_t weather_main_y0 = long_press_alarm_seconds_y0 + 70;
+  const int16_t weather_row2_y0 = weather_main_y0 + 25;
+  const int16_t weather_row3_y0 = weather_row2_y0 + 20;
+  const int16_t weather_row4_y0 = weather_row3_y0 + 20;
 
   // show today's weather
   if(wifi_stuff->got_weather_info_) {
     // tft.setFont(&FreeMonoBold9pt7b);
+    if(current_page == kLocationAndWeatherSettingsPage) {
+      tft.setFont(&FreeMonoBold9pt7b);
+      tft.setCursor(60, 50);
+      tft.setTextColor(kDisplayColorGreen);
+      tft.print(wifi_stuff->city_.c_str());
+      tft.setTextColor(kDisplayColorBlue);
+    }
+    else {
+      tft.setFont(&FreeSans12pt7b);
+      tft.setCursor(city_x0, city_y0);
+      tft.setTextColor(kDisplayColorOrange);
+      tft.print(wifi_stuff->city_.c_str());
+    }
     tft.setFont(&FreeSans12pt7b);
-    tft.setCursor(city_x0, city_y0);
-    tft.setTextColor(kDisplayColorOrange);
-    tft.print(wifi_stuff->city_.c_str());
     tft.setCursor(weather_x0, weather_main_y0);
     tft.print(wifi_stuff->weather_main_.c_str()); tft.print(" : "); tft.print(wifi_stuff->weather_description_.c_str());
     tft.setFont(&FreeMono9pt7b);
@@ -1624,8 +1667,8 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kWiFiSettingsButtonX1, kWiFiSettingsButtonY1, kWiFiSettingsButtonW, kWiFiSettingsButtonH, (current_cursor == kSettingsPageWiFi), 5);
 
     // Update Weather and Location button
-    ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (current_cursor == kSettingsPageWeather), 5);
-    if(color_button == kSettingsPageWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, (color_button == kSettingsPageWeather ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
+    ButtonHighlight(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, (current_cursor == kSettingsPageLocationAndWeather), 5);
+    if(color_button == kSettingsPageLocationAndWeather) DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, (color_button == kSettingsPageLocationAndWeather ? kDisplayColorRed : kDisplayColorOrange), kDisplayColorBlack, true);
 
     // Alarm Long Press Seconds Text
     ButtonHighlight(kAlarmLongPressSecondsX0, kAlarmLongPressSecondsY1, kAlarmLongPressSecondsW + kAlarmLongPressSecondsTriangleButtonsSize, kAlarmLongPressSecondsH, (current_cursor == kSettingsPageAlarmLongPressTime), 5);
@@ -1677,7 +1720,7 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
     ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kSoftApInputsPageCancel), 5);
     if(color_button == kSoftApInputsPageCancel) DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
   }
-  else if(current_page == kWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
+  else if(current_page == kLocationAndWeatherSettingsPage) {       // WEATHER SETTINGS PAGE
     #if defined(TOUCHSCREEN_IS_XPT2046)
       // set ZIP/PIN button
       ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (highlight == kWeatherSettingsPageSetLocation), 5);
@@ -1688,24 +1731,24 @@ void RGBDisplay::InstantHighlightResponse(Cursor color_button) {
       if(color_button == kWeatherSettingsPageSetCountryCode) DrawButton(kSetCountryCodeButtonX1, kSetCountryCodeButtonY1, kSetCountryCodeButtonW, kSetCountryCodeButtonH, countryCodeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
     #else
       // set location button
-      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (current_cursor == kWeatherSettingsPageSetLocation), 5);
-      if(color_button == kWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+      ButtonHighlight(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, (current_cursor == kLocationAndWeatherSettingsPageSetLocation), 5);
+      if(color_button == kLocationAndWeatherSettingsPageSetLocation) DrawButton(kSetLocationButtonX1, kSetLocationButtonY1, kSetLocationButtonW, kSetLocationButtonH, setStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
     #endif
 
     // Toggle Units Metric/Imperial button
-    ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (current_cursor == kWeatherSettingsPageUnits), 5);
-    if(color_button == kWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    ButtonHighlight(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, (current_cursor == kLocationAndWeatherSettingsPageUnits), 5);
+    if(color_button == kLocationAndWeatherSettingsPageUnits) DrawButton(kUnitsButtonX1, kUnitsButtonY1, kUnitsButtonW, kUnitsButtonH, unitsStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Get WEATHER Info button
-    ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (current_cursor == kWeatherSettingsPageFetch), 5);
-    if(color_button == kWeatherSettingsPageFetch) DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    ButtonHighlight(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, (current_cursor == kLocationAndWeatherSettingsPageFetch), 5);
+    if(color_button == kLocationAndWeatherSettingsPageFetch) DrawButton(kFetchWeatherButtonX1, kFetchWeatherButtonY1, kFetchWeatherButtonW, kFetchWeatherButtonH, fetchStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Update TIME button
-    ButtonHighlight(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, (current_cursor == kWeatherSettingsPageUpdateTime), 5);
-    if(color_button == kWeatherSettingsPageUpdateTime) DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
+    ButtonHighlight(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, (current_cursor == kLocationAndWeatherSettingsPageUpdateTime), 5);
+    if(color_button == kLocationAndWeatherSettingsPageUpdateTime) DrawButton(kUpdateTimeButtonX1, kUpdateTimeButtonY1, kUpdateTimeButtonW, kUpdateTimeButtonH, updateTimeStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
 
     // Cancel button
-    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kWeatherSettingsPageCancel), 5);
+    ButtonHighlight(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, (current_cursor == kLocationAndWeatherSettingsPageCancel), 5);
   }
   else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
     // Save button
@@ -1752,7 +1795,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
     if(ts_x >= kWeatherSettingsButtonX1 && ts_x <= kWeatherSettingsButtonX1 + kWeatherSettingsButtonW && ts_y >= kWeatherSettingsButtonY1 && ts_y <= kWeatherSettingsButtonY1 + kWeatherSettingsButtonH) {
       DrawButton(kWeatherSettingsButtonX1, kWeatherSettingsButtonY1, kWeatherSettingsButtonW, kWeatherSettingsButtonH, weatherStr, kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
       delay(100);
-      return kWeatherSettingsPage;
+      return kLocationAndWeatherSettingsPage;
     }
 
     DrawButton(kScreensaverSpeedButtonX1, kScreensaverSpeedButtonY1, kScreensaverSpeedButtonW, kScreensaverSpeedButtonH, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)), kDisplayColorCyan, kDisplayColorRed, kDisplayColorBlack, true);
@@ -1814,7 +1857,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       return kSettingsPage;
     }
   }
-  else if(current_page == kWeatherSettingsPage) {     // WEATHER SETTINGS PAGE
+  else if(current_page == kLocationAndWeatherSettingsPage) {     // WEATHER SETTINGS PAGE
 
     // update kEnterWeatherLocationZipPage button
     if(ts_x >= kSetLocationButtonX1 && ts_x <= kSetLocationButtonX1 + kSetLocationButtonW && ts_y >= kSetLocationButtonY1 && ts_y <= kSetLocationButtonY1 + kSetLocationButtonH) {
@@ -1837,7 +1880,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       // delay(100);
       wifi_stuff->SaveWeatherUnits();
       wifi_stuff->got_weather_info_ = false;
-      return kWeatherSettingsPage;
+      return kLocationAndWeatherSettingsPage;
     }
 
     // get Weather Info button
@@ -1846,7 +1889,7 @@ ScreenPage RGBDisplay::ClassifyUserScreenTouchInput() {
       AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       WaitForExecutionOfSecondCoreTask();
       // delay(100);
-      return kWeatherSettingsPage;
+      return kLocationAndWeatherSettingsPage;
     }
 
     // update Time button

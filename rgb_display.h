@@ -61,6 +61,7 @@ public:
   void DisplayCursorHighlight(DisplayButton* button, bool highlight_On);
   void DisplayCursorHighlight(bool highlight_On);
   Cursor CheckButtonTouch();
+  void DisplayFirmwareVersionAndDate();
 
   // functions
   void Setup();

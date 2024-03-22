@@ -72,7 +72,7 @@ enum ScreenPage {
   kSoftApInputsPage,
   kEnterWiFiSsidPage,
   kEnterWiFiPasswdPage,
-  kWeatherSettingsPage,
+  kLocationAndWeatherSettingsPage,
   kLocationInputsPage,
   kEnterWeatherLocationZipPage,
   kEnterWeatherLocationCountryCodePage,
@@ -96,7 +96,7 @@ enum Cursor {
   kAlarmSetPageSet,
   kAlarmSetPageCancel,
   kSettingsPageWiFi,
-  kSettingsPageWeather,
+  kSettingsPageLocationAndWeather,
   kSettingsPageAlarmLongPressTime,
   kSettingsPageScreensaver,
   kSettingsPageUpdate,
@@ -107,12 +107,12 @@ enum Cursor {
   kWiFiSettingsPageCancel,
   kSoftApInputsPageSave,
   kSoftApInputsPageCancel,
-  kWeatherSettingsPageSetLocation,
-  kWeatherSettingsPageSetCountryCode,
-  kWeatherSettingsPageUnits,
-  kWeatherSettingsPageFetch,
-  kWeatherSettingsPageUpdateTime,
-  kWeatherSettingsPageCancel,
+  kLocationAndWeatherSettingsPageSetLocation,
+  kLocationAndWeatherSettingsPageSetCountryCode,
+  kLocationAndWeatherSettingsPageUnits,
+  kLocationAndWeatherSettingsPageFetch,
+  kLocationAndWeatherSettingsPageUpdateTime,
+  kLocationAndWeatherSettingsPageCancel,
   kLocationInputsPageSave,
   kLocationInputsPageCancel,
   kScreensaverSettingsPageMotion,
@@ -166,12 +166,7 @@ extern bool second_core_task_added_flag_array[];
 
 enum ButtonType {
   kIconButton,    // kIconButton has hard coded locations and size
-  kStandaloneClickButton,
   kRowClickButton,
-  kRowValueIncDecButton,
-  kRowOnOffButton,
-  kRowClickCycleButton,
-  kColumnValueIncDecButton,
 };
 
 // struct declerations
