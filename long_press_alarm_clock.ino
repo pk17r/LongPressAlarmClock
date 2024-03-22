@@ -985,7 +985,7 @@ void SetPage(ScreenPage set_this_page) {
       // if screensaver is active then clear screensaver canvas to free memory
       if(current_page == kScreensaverPage)
         display->ScreensaverControl(false);
-      current_page = kMainPage;         // new page needs to be set before any action
+      current_page = set_this_page;         // new page needs to be set before any action
       current_cursor = kCursorNoSelection;
       display->redraw_display_ = true;
       display->DisplayTimeUpdate();
@@ -993,16 +993,16 @@ void SetPage(ScreenPage set_this_page) {
       wifi_stuff->firmware_update_available_str_ = "";
       break;
     case kScreensaverPage:
-      current_page = kScreensaverPage;      // new page needs to be set before any action
+      current_page = set_this_page;      // new page needs to be set before any action
       display->ScreensaverControl(true);
       current_cursor = kCursorNoSelection;
       break;
     case kFirmwareUpdatePage:
-      current_page = kFirmwareUpdatePage;
+      current_page = set_this_page;
       display->FirmwareUpdatePage();
       break;
     case kAlarmSetPage:
-      current_page = kAlarmSetPage;     // new page needs to be set before any action
+      current_page = set_this_page;     // new page needs to be set before any action
       current_cursor = kAlarmSetPageHour;
       // set variables for alarm set screen
       alarm_clock->var_1_ = alarm_clock->alarm_hr_;
@@ -1012,7 +1012,7 @@ void SetPage(ScreenPage set_this_page) {
       display->SetAlarmScreen(/* process_user_input */ false, /* inc_button_pressed */ false, /* dec_button_pressed */ false, /* push_button_pressed */ false);
       break;
     case kAlarmTriggeredPage:
-      current_page = kAlarmTriggeredPage;     // new page needs to be set before any action
+      current_page = set_this_page;     // new page needs to be set before any action
       display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
       break;
     case kSettingsPage:
@@ -1023,14 +1023,9 @@ void SetPage(ScreenPage set_this_page) {
       current_cursor = display_pages_vec[current_page][0]->btn_id;
       display->DisplayCurrentPage();
       break;
-    // case kWiFiSettingsPage:
-    //   current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-    //   current_cursor = kWiFiSettingsPageConnect;
-    //   display->WiFiSettingsPage();
-    //   break;
     case kSoftApInputsPage:
-      current_page = kSoftApInputsPage;     // new page needs to be set before any action
-      current_cursor = kSoftApInputsPageSave;
+      current_page = set_this_page;     // new page needs to be set before any action
+      current_cursor = kPageSaveButton;
       display->SoftApInputsPage();
       break;
     case kEnterWiFiSsidPage:
@@ -1082,8 +1077,8 @@ void SetPage(ScreenPage set_this_page) {
       }
       break;
     case kLocationInputsPage:
-      current_page = kLocationInputsPage;     // new page needs to be set before any action
-      current_cursor = kLocationInputsPageSave;
+      current_page = set_this_page;     // new page needs to be set before any action
+      current_cursor = kPageSaveButton;
       display->LocationInputsLocalServerPage();
       break;
     case kEnterWeatherLocationZipPage:
@@ -1130,11 +1125,11 @@ void SetPage(ScreenPage set_this_page) {
   // if(current_page != kMainPage)
   //   display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
   delay(kUserInputDelayMs);
+  display->DisplayCursorHighlight(/*highlight_On = */ true);
 }
 
 void MoveCursor(bool increment) {
   display->DisplayCursorHighlight(/*highlight_On = */ false);
-  // Serial.print("MoveCursor top current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
   if(current_page == kMainPage) {
     if(increment) {
       if(current_cursor == kMainPageSetAlarm)
@@ -1149,7 +1144,7 @@ void MoveCursor(bool increment) {
         current_cursor--;
     }
   }
-  else if(current_page == kSettingsPage || current_page == kWiFiSettingsPage || current_page == kLocationAndWeatherSettingsPage || current_page == kScreensaverSettingsPage) {
+  else if(current_page != kAlarmSetPage) {
     if(increment) {
       if(current_cursor == kPageCancelButton)
         current_cursor = display_pages_vec[current_page][0]->btn_id;
@@ -1181,31 +1176,17 @@ void MoveCursor(bool increment) {
         current_cursor--;
     }
   }
-  else if(current_page == kSoftApInputsPage) {
-    if(current_cursor == kSoftApInputsPageSave)
-      current_cursor = kSoftApInputsPageCancel;
-    else
-      current_cursor = kSoftApInputsPageSave;
-  }
-  else if(current_page == kLocationInputsPage) {
-    if(current_cursor == kLocationInputsPageSave)
-      current_cursor = kLocationInputsPageCancel;
-    else
-      current_cursor = kLocationInputsPageSave;
-  }
-  // Serial.print("MoveCursor bottom current_page "); Serial.print(current_page); Serial.print(" highlight "); Serial.println(highlight);
-  // display->InstantHighlightResponse(/* color_button = */ kCursorNoSelection);
   display->DisplayCursorHighlight(/*highlight_On = */ true);
 }
 
 void PopulateDisplayPages() {
-
+  DisplayButton* page_save_button = new DisplayButton{ /* Save Button */ kPageSaveButton, kRowClickButton, "", true, kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr };
   DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, "X" };
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kIconButton, "", true, 270, 105, 40, 40, "" },
-    new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kIconButton, "", true, 1, 160, 318, 79, "" },
+    new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kIconButton, "", true, kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, "" },
+    new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kIconButton, "", true, 1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "" },
   };
 
   // SETTINGS PAGE
@@ -1227,12 +1208,24 @@ void PopulateDisplayPages() {
     page_cancel_button,
   };
 
+  // WIFI DETAILS SOFT AP PAGE
+  display_pages_vec[kSoftApInputsPage] = std::vector<DisplayButton*> {
+    page_save_button,
+    page_cancel_button,
+  };
+
   // LOCATION AND WEATHER SETTINGS PAGE
   display_pages_vec[kLocationAndWeatherSettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kRowClickButton, "City:", false, 0,0,0,0, (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_) },
     new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kRowClickButton, "Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? metricUnitStr : imperialUnitStr) },
     new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kRowClickButton, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
     new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kRowClickButton, "Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
+    page_cancel_button,
+  };
+
+  // LOCATION INPUT DETAILS PAGE
+  display_pages_vec[kLocationInputsPage] = std::vector<DisplayButton*> {
+    page_save_button,
     page_cancel_button,
   };
 
@@ -1368,8 +1361,8 @@ void LedButtonClickAction() {
       }
     }
     else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
-      if(current_cursor == kSoftApInputsPageSave) {
-        display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageSave);
+      if(current_cursor == kPageSaveButton) {
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->SaveWiFiDetails();
@@ -1377,8 +1370,8 @@ void LedButtonClickAction() {
         display_pages_vec[kWiFiSettingsPage][display_pages_vec_wifi_ssid_passwd_button_index]->btn_value = wifi_stuff->WiFiDetailsShortString();
         SetPage(kWiFiSettingsPage);
       }
-      else if(current_cursor == kSoftApInputsPageCancel) {
-        display->InstantHighlightResponse(/* color_button = */ kSoftApInputsPageCancel);
+      else if(current_cursor == kPageCancelButton) {
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiSettingsPage);
@@ -1420,8 +1413,8 @@ void LedButtonClickAction() {
       }
     }
     else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
-      if(current_cursor == kLocationInputsPageSave) {
-        display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageSave);
+      if(current_cursor == kPageSaveButton) {
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->SaveWeatherLocationDetails();
@@ -1431,8 +1424,8 @@ void LedButtonClickAction() {
         display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
         SetPage(kLocationAndWeatherSettingsPage);
       }
-      else if(current_cursor == kLocationInputsPageCancel) {
-        display->InstantHighlightResponse(/* color_button = */ kLocationInputsPageCancel);
+      else if(current_cursor == kPageCancelButton) {
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kLocationAndWeatherSettingsPage);

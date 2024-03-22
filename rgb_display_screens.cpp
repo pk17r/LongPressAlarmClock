@@ -405,7 +405,10 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
 }
 
 void RGBDisplay::DrawButton(int16_t x, int16_t y, uint16_t w, uint16_t h, const char* label, uint16_t borderColor, uint16_t onFill, uint16_t offFill, bool isOn) {
-  tft.setFont(&FreeSans12pt7b);
+  if(current_page == kAlarmSetPage)
+    tft.setFont(&FreeSans12pt7b);
+  else
+    tft.setFont(&FreeMono9pt7b);
   tft.setTextColor((isOn ? onFill : offFill));
   int16_t title_x0, title_y0;
   uint16_t title_w, title_h;

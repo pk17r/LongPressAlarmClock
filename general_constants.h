@@ -67,7 +67,7 @@ const char softApSsid[24] = "Long-Press-Alarm-SoftAP";
   const int kPageRowHeight = 30;
 
   const int16_t kCancelButtonSize = 21, kCancelButtonX1 = kTftWidth - kCancelButtonSize - kDisplayTextGap, kCancelButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
-  const int16_t kSaveButtonW = 80, kSaveButtonH = 40, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kSaveButtonH - kDisplayTextGap;
+  const int16_t kSaveButtonW = 60, kSaveButtonH = kCancelButtonSize, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kSaveButtonH - kDisplayTextGap;
 
   const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
   const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
