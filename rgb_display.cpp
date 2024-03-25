@@ -67,17 +67,17 @@ void RGBDisplay::Setup() {
   // update TFT display
   DisplayTimeUpdate();
 
-  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+  if(use_photodiode) {
     // configure Photoresistor pin
     pinMode(PHOTORESISTOR_PIN, INPUT);
     analogReadResolution(kAdcResolutionBits);
 
     // set display brightness
     CheckPhotoresistorAndSetBrightness();
-  #else
+  }
+  else
     // set display brightness based on time of day
     CheckTimeAndSetBrightness();
-  #endif
 
   PrintLn("Display Initialized!");
 }
@@ -91,15 +91,15 @@ void RGBDisplay::SetBrightness(int brightness) {
   // if(debug_mode)
   //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
   current_brightness_ = brightness;
-  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+  if(use_photodiode) {
     // hysteresis in background color on / off
     if(!show_colored_edge_screensaver_ && brightness >= kBrightnessBackgroundColorThreshold + 5)
       show_colored_edge_screensaver_ = true;
     else if(show_colored_edge_screensaver_ && brightness <= kBrightnessBackgroundColorThreshold - 5)
       show_colored_edge_screensaver_ = false;
-  #else
+  }
+  else
     show_colored_edge_screensaver_ = (brightness >= kEveningBrightness);
-  #endif
 }
 
 void RGBDisplay::SetMaxBrightness() {
@@ -107,14 +107,13 @@ void RGBDisplay::SetMaxBrightness() {
     SetBrightness(kMaxBrightness);
 }
 
-#if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
   int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
-  // Serial.printf("photodiode_light_raw = %d %0.2f%, lcd_brightness_val = %d\n", photodiode_light_raw, 100.0 * photodiode_light_raw / kPhotodiodeLightRawMax, lcd_brightness_val);
+  Serial.printf("photodiode_light_raw = %d %0.2f%, lcd_brightness_val = %d\n", photodiode_light_raw, 100.0 * photodiode_light_raw / kPhotodiodeLightRawMax, lcd_brightness_val);
   SetBrightness(lcd_brightness_val);
 }
-#else
+
 void RGBDisplay::CheckTimeAndSetBrightness() {
   // check if RTC is good
   if(rtc->year() < 2024) {
@@ -133,7 +132,6 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
       SetBrightness(kNightBrightness);
   }
 }
-#endif
 
 void RGBDisplay::ScreensaverControl(bool turnOn) {
   if(!turnOn && my_canvas_ != NULL) {

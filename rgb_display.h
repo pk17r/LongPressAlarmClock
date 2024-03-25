@@ -64,11 +64,8 @@ public:
   void Setup();
   void SetBrightness(int brightness);
   void SetMaxBrightness();
-  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
-    void CheckPhotoresistorAndSetBrightness();
-  #else
-    void CheckTimeAndSetBrightness();
-  #endif
+  void CheckPhotoresistorAndSetBrightness();
+  void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
 
 // PUBLIC VARIABLES
@@ -143,25 +140,23 @@ private:
 
   // display brightness constants
   const int kMaxBrightness = 255;
-  #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
-    // display brightness constants
-    const int kBrightnessInactiveMax = 150;
-    const int kBrightnessBackgroundColorThreshold = 40;
+  // display brightness constants
+  const int kBrightnessInactiveMax = 150;
+  const int kBrightnessBackgroundColorThreshold = 40;
 
-    // photoresistor pin's adc resolution (for all ADCs on MCU)
-    const int kAdcResolutionBits = 8;
-    const int kPhotodiodeLightRawMax = pow(2, kAdcResolutionBits) - 1;
-  #else
-    // display brightness constants
-    const int kNightBrightness = 1;
-    const int kEveningBrightness = 100;
-    const int kDayBrightness = 150;
+  // photoresistor pin's adc resolution (for all ADCs on MCU)
+  const int kAdcResolutionBits = 8;
+  const int kPhotodiodeLightRawMax = pow(2, kAdcResolutionBits) - 1;
 
-    // time of day at which its respective brightness starts
-    const uint16_t kDayTimeMinutes = 420;
-    const uint16_t kEveningTimeMinutes = 1080;
-    const uint16_t kNightTimeMinutes = 1320;
-  #endif
+  // display brightness constants
+  const int kNightBrightness = 1;
+  const int kEveningBrightness = 100;
+  const int kDayBrightness = 150;
+
+  // time of day at which its respective brightness starts
+  const uint16_t kDayTimeMinutes = 420;
+  const uint16_t kEveningTimeMinutes = 1080;
+  const uint16_t kNightTimeMinutes = 1320;
 
 
   // color definitions

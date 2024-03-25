@@ -406,13 +406,12 @@ void loop() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-      #if defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+      if(use_photodiode)
         // check photoresistor brightness and adjust display brightness
         display->CheckPhotoresistorAndSetBrightness();
-      #else
+      else
         // set display brightness based on time
         display->CheckTimeAndSetBrightness();
-      #endif
       // turn screen saver On
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);
@@ -568,6 +567,8 @@ void WaitForExecutionOfSecondCoreTask() {
 }
 
 // GLOBAL VARIABLES AND FUNCTIONS
+
+bool use_photodiode = true;
 
 // debug mode turned On by pulling debug pin Low
 bool debug_mode = false;

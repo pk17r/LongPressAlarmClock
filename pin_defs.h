@@ -75,6 +75,8 @@
   const int WIFI_LED = 2;
   const int BUZZER_PIN = 13;
   const int DEBUG_PIN = 12;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
+  const int PHOTORESISTOR_PIN = 25;
+
 
 
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
