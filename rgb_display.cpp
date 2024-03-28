@@ -110,7 +110,8 @@ void RGBDisplay::SetMaxBrightness() {
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
   int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
-  Serial.printf("photodiode_light_raw = %d %0.2f%, lcd_brightness_val = %d\n", photodiode_light_raw, 100.0 * photodiode_light_raw / kPhotodiodeLightRawMax, lcd_brightness_val);
+  if(debug_mode)
+    Serial.printf("photodiode_light_raw = %d %0.2f%, lcd_brightness_val = %d\n", photodiode_light_raw, 100.0 * photodiode_light_raw / kPhotodiodeLightRawMax, lcd_brightness_val);
   SetBrightness(lcd_brightness_val);
 }
 

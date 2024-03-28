@@ -145,11 +145,11 @@
   const int INC_BUTTON_PIN = 2;
   const int DEC_BUTTON_PIN = 42;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  const int LED_PIN = 41;
+  const int LED_PIN = 48;
   // const int LED_BUILTIN = 38;   // RGB LED
-  const int WIFI_LED = 37;
-  const int BUZZER_PIN = 40;
-  const int DEBUG_PIN = 39;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
+  const int WIFI_LED = 21;
+  const int BUZZER_PIN = 47;
+  const int DEBUG_PIN = 13;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
   const int PHOTORESISTOR_PIN = 5;
 
 
