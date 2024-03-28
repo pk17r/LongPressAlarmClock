@@ -175,6 +175,7 @@ void setup() {
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
   // initialize modules
+  // setup eeprom (needs to be first)
   eeprom = new EEPROM();
   // check if firmware was updated
   std::string saved_firmware_version = "";
@@ -184,24 +185,25 @@ void setup() {
     Serial.print("Firmware updated from "); Serial.print(saved_firmware_version.c_str()); Serial.print(" to "); Serial.println(kFirmwareVersion.c_str());
     eeprom->SaveCurrentFirmwareVersion();
   }
-  // setup ds3231 rtc module
+  // setup ds3231 rtc (needs to be before alarm clock)
   rtc = new RTC();
-  // setup alarm clock
+  // setup alarm clock (needs to be before display)
   alarm_clock = new AlarmClock();
   alarm_clock->Setup();
   // prepare date and time arrays and serial print RTC Date Time
   PrepareTimeDayDateArrays();
   // serial print RTC Date Time
   SerialPrintRtcDateTime();
+  // initialize wifi (needs to be before display setup)
+  #if defined(WIFI_IS_USED)
+    wifi_stuff = new WiFiStuff();
+  #endif
+  // initialize display class object
   display = new RGBDisplay();
-  // setup display
+  // setup and populate display
   display->Setup();
   #if defined(TOUCHSCREEN_IS_XPT2046)
     ts = new Touchscreen();
-  #endif
-  // initialize wifi
-  #if defined(WIFI_IS_USED)
-    wifi_stuff = new WiFiStuff();
   #endif
 
   PopulateDisplayPages();
