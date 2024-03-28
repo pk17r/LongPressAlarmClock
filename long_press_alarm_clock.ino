@@ -136,10 +136,9 @@ void setup() {
   pinMode(WIFI_LED, OUTPUT);
   digitalWrite(WIFI_LED, LOW);
 
+  // a delay to let currents stabalize and not have phantom serial inputs
+  delay(500);
   Serial.begin(115200);
-
-  // a delay to let currents stabalize
-  // delay(500);
 
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
