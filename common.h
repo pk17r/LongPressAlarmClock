@@ -19,9 +19,9 @@
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
   const std::string kFirmwareVersion = RASPBERRY_PI_PICO_W_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "RASPBERRY_PI_PICO_W_FIRMWARE_VERSION";
-#elif defined(MCU_IS_ESP32_S3_DEVKIT_C1)
-  const std::string kFirmwareVersion = ESP32_S3_DEVKIT_C1_FIRMWARE_VERSION;
-  const std::string kFwSearchStr = "ESP32_S3_DEVKIT_C1_FIRMWARE_VERSION";
+#elif defined(MCU_IS_ESP32_S3)
+  const std::string kFirmwareVersion = ESP32_S3_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "ESP32_S3_FIRMWARE_VERSION";
 #endif
 
 // forward decleration of classes

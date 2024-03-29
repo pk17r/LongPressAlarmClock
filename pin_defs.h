@@ -116,7 +116,7 @@
 
 
 
-#elif defined(MCU_IS_ESP32_S3_DEVKIT_C1)
+#elif defined(MCU_IS_ESP32_S3)
 
   // FOR ESP32 S3 DECKIT C1 MODULE
   // dual core

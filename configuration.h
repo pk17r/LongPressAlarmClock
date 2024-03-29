@@ -8,7 +8,7 @@
 // #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 // #define MCU_IS_RASPBERRY_PI_PICO_W
-#define MCU_IS_ESP32_S3_DEVKIT_C1
+#define MCU_IS_ESP32_S3
 
 
 // SELECT DISPLAY
@@ -34,8 +34,8 @@
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "1.8"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "1.9"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
-#define ESP32_S3_DEVKIT_C1_FIRMWARE_VERSION       "1.9"
-const std::string kFirmwareDate = "Mar 22, 2024";
+#define ESP32_S3_FIRMWARE_VERSION                 "2.0"
+const std::string kFirmwareDate = "Mar 28, 2024";
 
 const std::string kChangeLog = "- Screensaver Settings\n- Flexible Page Structure\n- Photoresistor added";
 
