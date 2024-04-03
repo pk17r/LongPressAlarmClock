@@ -133,7 +133,7 @@
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
     const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 47;
+    const int TS_CS_PIN = 17;
     const int TS_IRQ_PIN = 48;
   #endif
 
@@ -148,7 +148,7 @@
   const int LED_PIN = 41;
   // const int LED_BUILTIN = 38;   // RGB LED
   const int WIFI_LED = 39;
-  const int BUZZER_PIN = 38;
+  const int BUZZER_PIN = 16;
   const int DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
   const int PHOTORESISTOR_PIN = 4;
 

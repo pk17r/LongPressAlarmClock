@@ -205,8 +205,6 @@ void setup() {
     ts = new Touchscreen();
   #endif
 
-  PopulateDisplayPages();
-
   // second core task added flag array
   for (int i = 0; i < kNoTask; i++)
     second_core_task_added_flag_array[i] = false;
@@ -236,6 +234,8 @@ void setup() {
 
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
+
+  PopulateDisplayPages(); // needs to be after all saved values have been retrieved
 
   #if defined(ESP32_DUAL_CORE)
     xTaskCreatePinnedToCore(
