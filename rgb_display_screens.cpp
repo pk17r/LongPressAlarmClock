@@ -174,25 +174,25 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
 
       // find if user clicked a button
-      if(ts_x < amPm_x + gap_x && ts_y > incB_y) {
+      if(ts_x < amPm_x + 1.5 * gap_x && ts_y > incB_y - 0.5 * gap_y) {
         // check for increase or decrease button press
         // font color inside
-        if(ts_y < incB_y + gap_y) {
+        if(ts_y < incB_y + 1.5 * gap_y) {
           // increase button
-          if(ts_x > hr_x && ts_x < hr_x + gap_x)
+          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x)
             userButtonClick = 1;
-          else if(ts_x > min_x && ts_x < min_x + gap_x)
+          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x)
             userButtonClick = 3;
-          else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x)
             userButtonClick = 5;
         }
-        else if(ts_y > decB_y && ts_y < decB_y + gap_y) {
+        else if(ts_y > decB_y - 0.5 * gap_y && ts_y < decB_y + 1.5 * gap_y) {
           // decrease button
-          if(ts_x > hr_x && ts_x < hr_x + gap_x)
+          if(ts_x > hr_x - 0.5 * gap_x && ts_x < hr_x + 1.5 * gap_x)
             userButtonClick = 2;
-          else if(ts_x > min_x && ts_x < min_x + gap_x)
+          else if(ts_x > min_x - 0.5 * gap_x && ts_x < min_x + 1.5 * gap_x)
             userButtonClick = 4;
-          else if(ts_x > amPm_x && ts_x < amPm_x + gap_x)
+          else if(ts_x > amPm_x - 0.5 * gap_x && ts_x < amPm_x + 1.5 * gap_x)
             userButtonClick = 6;
         }
       }
