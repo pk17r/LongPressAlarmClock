@@ -969,13 +969,13 @@ void RGBDisplay::Screensaver() {
     else
       my_canvas_->setFont(&Satisfy_Regular18pt7b);
     my_canvas_->setTextColor(randomColor);
-    my_canvas_->setCursor(date_x0 + GAP_BAND, screensaver_h_ - 4 * GAP_BAND);
+    my_canvas_->setCursor(date_x0 + GAP_BAND, screensaver_h_ - 5 * GAP_BAND);
 
     if(!firmware_updated_flag_user_information) {
       my_canvas_->print(new_display_data_.date_str);
 
       // draw bell
-      my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - 2 * GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
+      my_canvas_->drawBitmap(my_canvas_->getCursorX() + 2*GAP_BAND, screensaver_h_ - alarm_icon_h - 3 * GAP_BAND, (new_display_data_.alarm_ON ? kBellSmallBitmap : kBellFallenSmallBitmap), alarm_icon_w, alarm_icon_h, randomColor);
     }
     else {
       my_canvas_->setFont(&FreeMonoBold9pt7b);
