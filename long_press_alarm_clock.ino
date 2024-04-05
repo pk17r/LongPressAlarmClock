@@ -69,6 +69,7 @@ Prashant Kumar
 #include "common.h"
 #include <PushButtonTaps.h>
 #include "eeprom.h"
+#include "nvs_preferences.h"
 #if defined(WIFI_IS_USED)
   #include "wifi_stuff.h"
 #endif
@@ -85,6 +86,7 @@ PushButtonTaps* push_button = NULL;   // Push Button object
 PushButtonTaps* inc_button = NULL;   // Push Button object
 PushButtonTaps* dec_button = NULL;   // Push Button object
 EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object
+NvsPreferences* nvs_preferences = NULL;    // ptr to NVS Preferences class object
 WiFiStuff* wifi_stuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions
 RTC* rtc = NULL;  // ptr to class object containing RTC HW
 AlarmClock* alarm_clock = NULL;  // ptr to alarm clock class object that controls Alarm functions
@@ -143,7 +145,7 @@ void setup() {
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
   if(debug_mode) {
-    // while(!Serial) { delay(20); };
+    while(!Serial) { delay(20); };
     Serial.println(F("\nSerial OK"));
     Serial.println(F("******** DEBUG MODE ******** : watchdog won't be activated!"));
     Serial.flush();
@@ -174,6 +176,8 @@ void setup() {
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
   // initialize modules
+  // setup nvs preferences data
+  nvs_preferences = new NvsPreferences();
   // setup eeprom (needs to be first)
   eeprom = new EEPROM();
   // check if firmware was updated

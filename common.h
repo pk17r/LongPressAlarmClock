@@ -30,6 +30,7 @@ class RGBDisplay;
 class AlarmClock;
 class WiFiStuff;
 class EEPROM;
+class NvsPreferences;
 class PushButtonTaps;
 class Touchscreen;
 
@@ -42,6 +43,7 @@ extern RGBDisplay* display;
 extern AlarmClock* alarm_clock;
 extern WiFiStuff* wifi_stuff;
 extern EEPROM* eeprom;
+extern NvsPreferences* nvs_preferences;
 extern PushButtonTaps* push_button;
 extern PushButtonTaps* inc_button;
 extern PushButtonTaps* dec_button;
