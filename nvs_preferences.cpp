@@ -235,13 +235,14 @@ uint8_t NvsPreferences::RetrieveNightTimeDimHour() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t night_time_dim_hour = preferences.getUChar(kNightTimeDimHourKey, 0);
   preferences.end();
+  Serial.printf("Retrieved NVS Memory night_time_dim_hour: %d Hr\n", night_time_dim_hour);
   return night_time_dim_hour;
 }
 
 void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
-  preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
+  preferences.putUChar(kNightTimeDimHourKey, night_time_dim_hour);
   preferences.end();
-  Serial.printf("NVS Memory night_time_dim_hour: %d Hr\n", night_time_dim_hour);
+  Serial.printf("Saved NVS Memory night_time_dim_hour: %d Hr\n", night_time_dim_hour);
 }
 

@@ -1469,9 +1469,9 @@ void LedButtonClickAction() {
           night_time_dim_hour++;
         else
           night_time_dim_hour = 8;
-        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM");
         nvs_preferences->SaveNightTimeDimHour(night_time_dim_hour);
         display->night_time_minutes = night_time_dim_hour * 60 + 720;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(night_time_dim_hour) + "PM");
         LedButtonClickUiResponse();
       }
       #endif
