@@ -9,7 +9,7 @@ NvsPreferences::NvsPreferences() {
   //   SaveDefaults();
   // }
 
-  PrintSavedData();
+  // PrintSavedData();
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
 }
@@ -20,6 +20,18 @@ void NvsPreferences::RetrieveDataModelVersion() {
   data_model_version = preferences.getUInt(kDataModelVersionKey, 0);
   preferences.end();
   Serial.printf("Data Model Version read = %u\n", data_model_version);
+}
+
+void NvsPreferences::SaveDataModelVersion() {
+  //init preference
+ 	preferences.begin(kNvsDataKey, /*readOnly = */ false);
+
+  // set default data
+  preferences.putUInt(kDataModelVersionKey, kDataModelVersion);
+  data_model_version = kDataModelVersion;
+  preferences.end();
+
+  Serial.printf("Data Version set = %u\n", kDataModelVersion);
 }
 
 void NvsPreferences::SaveDefaults() {

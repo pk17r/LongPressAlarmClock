@@ -14,6 +14,7 @@ public:
 
   NvsPreferences();
   void SaveDefaults();
+  void SaveDataModelVersion();
   void PrintSavedData();
 
   void RetrieveLongPressSeconds(uint8_t &long_press_seconds);

@@ -86,7 +86,6 @@ Prashant Kumar
 PushButtonTaps* push_button = NULL;   // Push Button object
 PushButtonTaps* inc_button = NULL;   // Push Button object
 PushButtonTaps* dec_button = NULL;   // Push Button object
-EEPROM* eeprom = NULL;    // ptr to External EEPROM HW class object
 NvsPreferences* nvs_preferences = NULL;    // ptr to NVS Preferences class object
 WiFiStuff* wifi_stuff = NULL;  // ptr to wifi stuff class object that contains WiFi and Weather Fetch functions
 RTC* rtc = NULL;  // ptr to class object containing RTC HW
@@ -184,11 +183,11 @@ void setup() {
     CopyEepromDataToNvsMemoryDuringUpdate();
   // check if firmware was updated
   std::string saved_firmware_version = "";
-  eeprom->RetrieveSavedFirmwareVersion(saved_firmware_version);
+  nvs_preferences->RetrieveSavedFirmwareVersion(saved_firmware_version);
   if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
     firmware_updated_flag_user_information = true;
     Serial.print("Firmware updated from "); Serial.print(saved_firmware_version.c_str()); Serial.print(" to "); Serial.println(kFirmwareVersion.c_str());
-    eeprom->SaveCurrentFirmwareVersion();
+    nvs_preferences->SaveCurrentFirmwareVersion();
   }
   // setup ds3231 rtc (needs to be before alarm clock)
   rtc = new RTC();
@@ -229,17 +228,17 @@ void setup() {
 
   // set CPU Speed
   #if defined(MCU_IS_ESP32)
-    uint32_t saved_cpu_speed_mhz = eeprom->RetrieveSavedCpuSpeed();
+    uint32_t saved_cpu_speed_mhz = nvs_preferences->RetrieveSavedCpuSpeed();
     if(saved_cpu_speed_mhz == 80 || saved_cpu_speed_mhz == 160 || saved_cpu_speed_mhz == 240)
       cpu_speed_mhz = saved_cpu_speed_mhz;
     setCpuFrequencyMhz(cpu_speed_mhz);
     cpu_speed_mhz = getCpuFrequencyMhz();
     Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
-    eeprom->SaveCpuSpeed();
+    nvs_preferences->SaveCpuSpeed();
   #endif
 
   // set screensaver motion
-  display->screensaver_bounce_not_fly_horizontally_ = eeprom->RetrieveScreensaverBounceNotFlyHorizontally();
+  display->screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
 
   PopulateDisplayPages(); // needs to be after all saved values have been retrieved
 
@@ -984,7 +983,7 @@ void CycleCpuFrequency() {
     else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
     else setCpuFrequencyMhz(160);
     cpu_speed_mhz = getCpuFrequencyMhz();
-    eeprom->SaveCpuSpeed();
+    nvs_preferences->SaveCpuSpeed();
     Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
   #endif
 }
@@ -1312,7 +1311,7 @@ void LedButtonClickAction() {
         else
           alarm_clock->alarm_long_press_seconds_ = 5;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
-        eeprom->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
+        nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
         LedButtonClickUiResponse();
       }
       else if(current_cursor == kSettingsPageScreensaver) {
@@ -1444,7 +1443,7 @@ void LedButtonClickAction() {
       if(current_cursor == kScreensaverSettingsPageMotion) {
         display->screensaver_bounce_not_fly_horizontally_ = !display->screensaver_bounce_not_fly_horizontally_;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr);
-        eeprom->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
+        nvs_preferences->SaveScreensaverBounceNotFlyHorizontally(display->screensaver_bounce_not_fly_horizontally_);
         LedButtonClickUiResponse();
       }
       else if(current_cursor == kScreensaverSettingsPageSpeed) {
@@ -1483,25 +1482,27 @@ void CopyEepromDataToNvsMemoryDuringUpdate() {
   // if EEPROM is present then copy its data to NVS
   if(eeprom_present) {
     // setup eeprom
-    eeprom = new EEPROM();
+    EEPROM eeprom_temp_obj;    // External EEPROM HW class object
     uint8_t long_press_seconds;
-    eeprom->RetrieveLongPressSeconds(long_press_seconds);
+    eeprom_temp_obj.RetrieveLongPressSeconds(long_press_seconds);
     nvs_preferences->SaveLongPressSeconds(long_press_seconds);
     uint8_t alarmHr, alarmMin;
     bool alarmIsAm, alarmOn;
-    eeprom->RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
+    eeprom_temp_obj.RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
     nvs_preferences->SaveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
     std::string wifi_ssid, wifi_password;
-    eeprom->RetrieveWiFiDetails(wifi_ssid, wifi_password);
+    eeprom_temp_obj.RetrieveWiFiDetails(wifi_ssid, wifi_password);
     nvs_preferences->SaveWiFiDetails(wifi_ssid, wifi_password);
     uint32_t location_zip_code;
     std::string location_country_code;
     bool weather_units_metric_not_imperial;
-    eeprom->RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
+    eeprom_temp_obj.RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
     nvs_preferences->SaveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
     std::string savedFirmwareVersion;
-    eeprom->RetrieveSavedFirmwareVersion(savedFirmwareVersion);
+    eeprom_temp_obj.RetrieveSavedFirmwareVersion(savedFirmwareVersion);
     nvs_preferences->CopyFirmwareVersionFromEepromToNvs(savedFirmwareVersion);
+
+    nvs_preferences->SaveDataModelVersion();
 
     Serial.println("EEPROM data copied to NVS Memory.");
   }

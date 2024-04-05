@@ -2,7 +2,7 @@
 #include "rgb_display.h"
 #include "rtc.h"
 #include "wifi_stuff.h"
-#include "eeprom.h"
+#include "nvs_preferences.h"
 #include <PushButtonTaps.h>
 #include "touchscreen.h"
 
@@ -16,10 +16,10 @@ void AlarmClock::Setup() {
   digitalWrite(BUZZER_PIN, LOW);
 
   // retrieve alarm settings
-  eeprom->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
+  nvs_preferences->RetrieveAlarmSettings(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 
   // retrieve long press seconds
-  eeprom->RetrieveLongPressSeconds(alarm_long_press_seconds_);
+  nvs_preferences->RetrieveLongPressSeconds(alarm_long_press_seconds_);
 
   // setup buzzer timer
   SetupBuzzerTimer();
@@ -34,7 +34,7 @@ void AlarmClock::SaveAlarm() {
   alarm_ON_ = var_4_ON_;
 
   // save alarm settings
-  eeprom->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
+  nvs_preferences->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
 
   PrintLn("Alarm Settings Saved!");
 }

@@ -1,7 +1,6 @@
 #include "rgb_display.h"
 #include "alarm_clock.h"
 #include "wifi_stuff.h"
-#include "eeprom.h"
 #include "rtc.h"
 #include "touchscreen.h"
 

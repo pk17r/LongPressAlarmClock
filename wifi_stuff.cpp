@@ -5,7 +5,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
-#include "eeprom.h"
+#include "nvs_preferences.h"
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "rtc.h"
@@ -19,9 +19,9 @@
 
 WiFiStuff::WiFiStuff() {
 
-  eeprom->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
+  nvs_preferences->RetrieveWiFiDetails(wifi_ssid_, wifi_password_);
 
-  eeprom->RetrieveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  nvs_preferences->RetrieveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
 
   TurnWiFiOff();
 
@@ -29,7 +29,7 @@ WiFiStuff::WiFiStuff() {
 }
 
 void WiFiStuff::SaveWiFiDetails() {
-  eeprom->SaveWiFiDetails(wifi_ssid_, wifi_password_);
+  nvs_preferences->SaveWiFiDetails(wifi_ssid_, wifi_password_);
   incorrect_wifi_details_ = false;
 }
 
@@ -48,12 +48,12 @@ std::string WiFiStuff::WiFiDetailsShortString() {
 }
 
 void WiFiStuff::SaveWeatherLocationDetails() {
-  eeprom->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
+  nvs_preferences->SaveWeatherLocationDetails(location_zip_code_, location_country_code_, weather_units_metric_not_imperial_);
   incorrect_zip_code = false;
 }
 
 void WiFiStuff::SaveWeatherUnits() {
-  eeprom->SaveWeatherUnits(weather_units_metric_not_imperial_);
+  nvs_preferences->SaveWeatherUnits(weather_units_metric_not_imperial_);
 }
 
 bool WiFiStuff::TurnWiFiOn() {
