@@ -80,6 +80,7 @@ Prashant Kumar
 #if defined(MCU_IS_ESP32)
   #include <esp_task_wdt.h>   // ESP32 Watchdog header
 #endif
+#include <Adafruit_I2CDevice.h>
 
 // modules - hardware or software
 PushButtonTaps* push_button = NULL;   // Push Button object
@@ -110,6 +111,7 @@ void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
 void LedButtonClickUiResponse(int response_type);
+void CopyEepromDataToNvsMemoryDuringUpdate();
 
 // setup core1
 void setup() {
@@ -176,10 +178,10 @@ void setup() {
   dec_button = new PushButtonTaps(DEC_BUTTON_PIN);
 
   // initialize modules
-  // setup nvs preferences data
+  // setup nvs preferences data (needs to be first)
   nvs_preferences = new NvsPreferences();
-  // setup eeprom (needs to be first)
-  eeprom = new EEPROM();
+  if(nvs_preferences->data_model_version != nvs_preferences->kDataModelVersion)
+    CopyEepromDataToNvsMemoryDuringUpdate();
   // check if firmware was updated
   std::string saved_firmware_version = "";
   eeprom->RetrieveSavedFirmwareVersion(saved_firmware_version);
@@ -1463,7 +1465,52 @@ void LedButtonClickAction() {
   }
 }
 
+void CopyEepromDataToNvsMemoryDuringUpdate() {
 
+  // check if EEPROM is present
+  Wire.setPins(SDA_PIN, SCL_PIN);
+  bool eeprom_present = false;
+  Serial.println("I2C address detection test");
+  Adafruit_I2CDevice i2c_dev = Adafruit_I2CDevice(0x57, &Wire);
+  if (!i2c_dev.begin()) {
+    Serial.println("Did not find EEPROM.");
+  }
+  else {
+    Serial.println("EEPROM found.");
+    eeprom_present = true;
+  }
+
+  // if EEPROM is present then copy its data to NVS
+  if(eeprom_present) {
+    // setup eeprom
+    eeprom = new EEPROM();
+    uint8_t long_press_seconds;
+    eeprom->RetrieveLongPressSeconds(long_press_seconds);
+    nvs_preferences->SaveLongPressSeconds(long_press_seconds);
+    uint8_t alarmHr, alarmMin;
+    bool alarmIsAm, alarmOn;
+    eeprom->RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
+    nvs_preferences->SaveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
+    std::string wifi_ssid, wifi_password;
+    eeprom->RetrieveWiFiDetails(wifi_ssid, wifi_password);
+    nvs_preferences->SaveWiFiDetails(wifi_ssid, wifi_password);
+    uint32_t location_zip_code;
+    std::string location_country_code;
+    bool weather_units_metric_not_imperial;
+    eeprom->RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
+    nvs_preferences->SaveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
+    std::string savedFirmwareVersion;
+    eeprom->RetrieveSavedFirmwareVersion(savedFirmwareVersion);
+    nvs_preferences->CopyFirmwareVersionFromEepromToNvs(savedFirmwareVersion);
+
+    Serial.println("EEPROM data copied to NVS Memory.");
+  }
+  else {
+    nvs_preferences->SaveDefaults();
+  }
+
+  nvs_preferences->PrintSavedData();
+}
 
 
 

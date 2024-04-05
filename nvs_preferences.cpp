@@ -4,24 +4,12 @@ NvsPreferences::NvsPreferences() {
 
   RetrieveDataModelVersion();
 
-  if(data_model_version != kDataModelVersion) {
-    // save default data in NVS Memory
-    SaveDefaults();
-  }
+  // if(data_model_version != kDataModelVersion) {
+  //   // save default data in NVS Memory
+  //   SaveDefaults();
+  // }
 
-  uint8_t long_press_seconds;
-  RetrieveLongPressSeconds(long_press_seconds);
-  uint8_t alarmHr, alarmMin;
-  bool alarmIsAm, alarmOn;
-  RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
-  std::string wifi_ssid, wifi_password;
-  RetrieveWiFiDetails(wifi_ssid, wifi_password);
-  uint32_t location_zip_code;
-  std::string location_country_code;
-  bool weather_units_metric_not_imperial;
-  RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
-  std::string savedFirmwareVersion;
-  RetrieveSavedFirmwareVersion(savedFirmwareVersion);
+  PrintSavedData();
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
 }
@@ -66,6 +54,22 @@ void NvsPreferences::SaveDefaults() {
   Serial.printf("Default Data Set in NVS Memory\n");
   Serial.flush();
 
+}
+
+void NvsPreferences::PrintSavedData() {
+  uint8_t long_press_seconds;
+  RetrieveLongPressSeconds(long_press_seconds);
+  uint8_t alarmHr, alarmMin;
+  bool alarmIsAm, alarmOn;
+  RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
+  std::string wifi_ssid, wifi_password;
+  RetrieveWiFiDetails(wifi_ssid, wifi_password);
+  uint32_t location_zip_code;
+  std::string location_country_code;
+  bool weather_units_metric_not_imperial;
+  RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
+  std::string savedFirmwareVersion;
+  RetrieveSavedFirmwareVersion(savedFirmwareVersion);
 }
 
 void NvsPreferences::RetrieveLongPressSeconds(uint8_t &long_press_seconds) {
@@ -140,6 +144,14 @@ void NvsPreferences::SaveCurrentFirmwareVersion() {
   preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   preferences.end();
   PrintLn("Current Firmware Version written to NVS Memory");
+}
+
+void NvsPreferences::CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  String kFirmwareVersionString = firmwareVersion.c_str();
+  preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
+  preferences.end();
+  PrintLn("Firmware Version from Eeprom written to NVS Memory");
 }
 
 void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {

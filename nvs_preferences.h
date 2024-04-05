@@ -13,6 +13,8 @@ class NvsPreferences {
 public:
 
   NvsPreferences();
+  void SaveDefaults();
+  void PrintSavedData();
 
   void RetrieveLongPressSeconds(uint8_t &long_press_seconds);
   void SaveLongPressSeconds(uint8_t long_press_seconds);
@@ -25,24 +27,24 @@ public:
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
   void SaveCurrentFirmwareVersion();
+  void CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion);
   uint32_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
 
   unsigned int data_model_version = 0;
+  const unsigned int kDataModelVersion = 101;
 
 private:
 
   void RetrieveDataModelVersion();
-  void SaveDefaults();
 
   // ESP32 NVS Memory Data Access
   Preferences preferences;
   const char* kNvsDataKey = "longPressData";
 
   const char* kDataModelVersionKey = "kDataModelVer";
-  const unsigned int kDataModelVersion = 101;
 
   const char* kAlarmHrKey = "AlarmHr";
   const uint8_t kAlarmHr = 7;

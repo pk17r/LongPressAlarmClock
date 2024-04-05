@@ -5,7 +5,6 @@
 
 #include "common.h"
 #include "uEEPROMLib.h"
-#include "secrets.h"
 
 class EEPROM {
 
@@ -80,16 +79,8 @@ private:
   const uint8_t kAlarmMin = 30;
   const bool kAlarmIsAm = true;
   const bool kAlarmOn = false;
-  #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID and uncomment the include statement at top of this file
-    std::string kWiFiSsid = MY_WIFI_SSID;
-  #else
-    std::string kWiFiSsid = "Enter SSID";
-  #endif
-  #if defined(MY_WIFI_PASSWD)   // create a secrets.h file with #define for MY_WIFI_PASSWD and uncomment the include statement at top of this file
-    std::string kWiFiPasswd = MY_WIFI_PASSWD;
-  #else
-    std::string kWiFiPasswd = "Enter Passwd";
-  #endif
+  std::string kWiFiSsid = "Enter SSID";
+  std::string kWiFiPasswd = "Enter Passwd";
   const uint32_t kWeatherZipCode = 92104;
   const std::string kWeatherCountryCode = "US";
   const bool kWeatherUnitsMetricNotImperial = false;

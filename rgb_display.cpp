@@ -86,7 +86,7 @@ void RGBDisplay::Setup() {
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
     analogWrite(TFT_BL, brightness);
-    PrintLn("Display Brightness set to ", brightness);
+    // PrintLn("Display Brightness set to ", brightness);
   }
   // if(debug_mode)
   //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
