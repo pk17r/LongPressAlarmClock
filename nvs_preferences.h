@@ -31,6 +31,7 @@ public:
   void CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion);
   uint32_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();
+  void CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_eeprom);
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
 

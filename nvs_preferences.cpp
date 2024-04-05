@@ -211,6 +211,13 @@ void NvsPreferences::SaveCpuSpeed() {
   Serial.printf("NVS Memory cpu_speed_mhz: %u MHz saved.\n", cpu_speed_mhz);
 }
 
+void NvsPreferences::CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_from_eeprom) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz_from_eeprom);
+  preferences.end();
+  Serial.printf("NVS Memory cpu_speed_mhz_from_eeprom: %u MHz saved.\n", cpu_speed_mhz_from_eeprom);
+}
+
 bool NvsPreferences::RetrieveScreensaverBounceNotFlyHorizontally() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   bool screensaver_bounce_not_fly_horiontally = preferences.getBool(kScreensaverMotionTypeKey);

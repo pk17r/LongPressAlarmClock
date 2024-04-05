@@ -412,7 +412,7 @@ void loop() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
       else if(current_page == kLocationInputsPage)
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-      if(use_photodiode)
+      if(use_photoresistor)
         // check photoresistor brightness and adjust display brightness
         display->CheckPhotoresistorAndSetBrightness();
       else
@@ -574,7 +574,11 @@ void WaitForExecutionOfSecondCoreTask() {
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
-bool use_photodiode = true;
+#if defined(ESP32_DUAL_CORE)
+bool use_photoresistor = true;
+#else
+bool use_photoresistor = false;
+#endif
 
 // debug mode turned On by pulling debug pin Low
 bool debug_mode = false;
@@ -1501,6 +1505,10 @@ void CopyEepromDataToNvsMemoryDuringUpdate() {
     std::string savedFirmwareVersion;
     eeprom_temp_obj.RetrieveSavedFirmwareVersion(savedFirmwareVersion);
     nvs_preferences->CopyFirmwareVersionFromEepromToNvs(savedFirmwareVersion);
+    uint32_t eeprom_cpu_speed_mhz = eeprom_temp_obj.RetrieveSavedCpuSpeed();
+    nvs_preferences->CopyCpuSpeedFromEepromToNvsMemory(eeprom_cpu_speed_mhz);
+    bool screensaverBounceNotFlyHorizontally = eeprom_temp_obj.RetrieveScreensaverBounceNotFlyHorizontally();
+    nvs_preferences->SaveScreensaverBounceNotFlyHorizontally(screensaverBounceNotFlyHorizontally);
 
     nvs_preferences->SaveDataModelVersion();
 

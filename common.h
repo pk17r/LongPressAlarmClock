@@ -51,7 +51,7 @@ extern Touchscreen* ts;
 // debug mode turned On by pulling debug pin Low
 extern bool debug_mode;
 
-extern bool use_photodiode;
+extern bool use_photoresistor;
 
 // CPU Speed for ESP32 CPU
 extern uint32_t cpu_speed_mhz;

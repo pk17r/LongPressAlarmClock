@@ -67,7 +67,7 @@ void RGBDisplay::Setup() {
   // update TFT display
   DisplayTimeUpdate();
 
-  if(use_photodiode) {
+  if(use_photoresistor) {
     // configure Photoresistor pin
     pinMode(PHOTORESISTOR_PIN, INPUT);
     analogReadResolution(kAdcResolutionBits);
@@ -91,7 +91,7 @@ void RGBDisplay::SetBrightness(int brightness) {
   // if(debug_mode)
   //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
   current_brightness_ = brightness;
-  if(use_photodiode) {
+  if(use_photoresistor) {
     // hysteresis in background color on / off
     if(!show_colored_edge_screensaver_ && brightness >= kBrightnessBackgroundColorThreshold + 5)
       show_colored_edge_screensaver_ = true;
