@@ -93,6 +93,7 @@ public:
   // screensaver color and motion flags
   bool show_colored_edge_screensaver_ = true;
   bool screensaver_bounce_not_fly_horizontally_ = true;
+  uint8_t night_time_minutes = 1320;    // minute of day at which to dim it to night time brightness
 
 
 private:
@@ -156,7 +157,6 @@ private:
   // time of day at which its respective brightness starts
   const uint16_t kDayTimeMinutes = 420;
   const uint16_t kEveningTimeMinutes = 1080;
-  const uint16_t kNightTimeMinutes = 1320;
 
 
   // color definitions

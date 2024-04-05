@@ -115,6 +115,9 @@ enum Cursor {
   kScreensaverSettingsPageMotion,
   kScreensaverSettingsPageSpeed,
   kScreensaverSettingsPageRun,
+  #if !defined(ESP32_DUAL_CORE)
+  kScreensaverSettingsPageNightTmDimHr,
+  #endif
   kPageSaveButton,
   kPageCancelButton,
   kCursorMaxValue,    // inc/dec button scroll won't go above this level

@@ -4,12 +4,9 @@ NvsPreferences::NvsPreferences() {
 
   RetrieveDataModelVersion();
 
-  // if(data_model_version != kDataModelVersion) {
-  //   // save default data in NVS Memory
-  //   SaveDefaults();
-  // }
-
-  // PrintSavedData();
+  // newly added data variables
+  if(RetrieveNightTimeDimHour() == 0)
+    SaveNightTimeDimHour(kNightTimeDimHour);
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
 }
@@ -60,6 +57,7 @@ void NvsPreferences::SaveDefaults() {
   preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.putBool(kScreensaverMotionTypeKey, true);
+  preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
 
   preferences.end();
 
@@ -232,3 +230,18 @@ void NvsPreferences::SaveScreensaverBounceNotFlyHorizontally(bool screensaver_bo
   preferences.end();
   Serial.printf("NVS Memory screensaver_bounce_not_fly_horiontally: %d saved.\n", screensaver_bounce_not_fly_horiontally);
 }
+
+uint8_t NvsPreferences::RetrieveNightTimeDimHour() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t night_time_dim_hour = preferences.getUChar(kNightTimeDimHourKey, 0);
+  preferences.end();
+  return night_time_dim_hour;
+}
+
+void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
+  preferences.end();
+  Serial.printf("NVS Memory night_time_dim_hour: %d Hr\n", night_time_dim_hour);
+}
+

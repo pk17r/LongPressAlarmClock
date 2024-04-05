@@ -6,7 +6,7 @@
 
 #include <Preferences.h> //https://github.com/espressif/arduino-esp32/tree/master/libraries/Preferences
 #include "common.h"
-#include "secrets.h"
+// #include "secrets.h"
 
 class NvsPreferences {
 
@@ -34,6 +34,9 @@ public:
   void CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_eeprom);
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
+
+  uint8_t RetrieveNightTimeDimHour();
+  void SaveNightTimeDimHour(uint8_t night_time_dim_hour);
 
   unsigned int data_model_version = 0;
   const unsigned int kDataModelVersion = 101;
@@ -91,6 +94,9 @@ private:
   const char* kCpuSpeedMhzKey = "CpuSpeedMhz";  // 4 bytes
 
   const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";  // 1 byte
+
+  const char* kNightTimeDimHourKey = "NightTmDimHour";
+  const uint8_t kNightTimeDimHour = 10;
 
 };
 

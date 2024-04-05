@@ -1246,9 +1246,11 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
     new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
+    #if !defined(ESP32_DUAL_CORE)
+    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, "Night Time Dim Hour:", false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
+    #endif
     page_cancel_button,
   };
-
 
 }
 
@@ -1459,6 +1461,20 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse(1);
         SetPage(kScreensaverPage);
       }
+      #if !defined(ESP32_DUAL_CORE)
+      else if(current_cursor == kScreensaverSettingsPageNightTmDimHr) {
+        // change hours
+        uint8_t night_time_dim_hour = nvs_preferences->RetrieveNightTimeDimHour();
+        if(night_time_dim_hour < 11)
+          night_time_dim_hour++;
+        else
+          night_time_dim_hour = 8;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM");
+        nvs_preferences->SaveNightTimeDimHour(night_time_dim_hour);
+        display->night_time_minutes = night_time_dim_hour * 60 + 720;
+        LedButtonClickUiResponse();
+      }
+      #endif
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
         SetPage(kSettingsPage);

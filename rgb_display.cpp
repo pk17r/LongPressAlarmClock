@@ -2,6 +2,7 @@
 #include "rgb_display.h"
 #include "alarm_clock.h"
 #include "rtc.h"
+#include "nvs_preferences.h"
 
 void RGBDisplay::Setup() {
 
@@ -67,6 +68,9 @@ void RGBDisplay::Setup() {
   // update TFT display
   DisplayTimeUpdate();
 
+  // fetch night time dim hour
+  night_time_minutes = nvs_preferences->RetrieveNightTimeDimHour() * 60 + 720;
+
   if(use_photoresistor) {
     // configure Photoresistor pin
     pinMode(PHOTORESISTOR_PIN, INPUT);
@@ -124,7 +128,7 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
     SetBrightness(kDayBrightness);
   }
   else {
-    if(rtc->todays_minutes > kNightTimeMinutes)
+    if(rtc->todays_minutes > night_time_minutes)
       SetBrightness(kNightBrightness);
     else if(rtc->todays_minutes > kEveningTimeMinutes)
       SetBrightness(kEveningBrightness);
