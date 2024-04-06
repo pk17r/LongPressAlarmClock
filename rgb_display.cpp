@@ -70,6 +70,7 @@ void RGBDisplay::Setup() {
 
   // fetch night time dim hour
   night_time_minutes = nvs_preferences->RetrieveNightTimeDimHour() * 60 + 720;
+  Serial.printf("night_time_minutes: %d minutes  use_photoresistor = %d\n", night_time_minutes, use_photoresistor);
 
   if(use_photoresistor) {
     // configure Photoresistor pin
@@ -90,7 +91,7 @@ void RGBDisplay::Setup() {
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
     analogWrite(TFT_BL, brightness);
-    // PrintLn("Display Brightness set to ", brightness);
+    PrintLn("Display Brightness set to ", brightness);
   }
   // if(debug_mode)
   //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
