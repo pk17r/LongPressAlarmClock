@@ -38,7 +38,8 @@
   const int WIFI_LED = 15;
   const int BUZZER_PIN = 4;
   const int DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
-  const int PHOTORESISTOR_PIN = 16;
+  const int PHOTORESISTOR_PIN = 1;
+  const int RGB_LED_STRIP_PIN = 2;
 
 
 

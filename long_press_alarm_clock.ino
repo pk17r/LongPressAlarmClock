@@ -81,6 +81,10 @@ Prashant Kumar
   #include <esp_task_wdt.h>   // ESP32 Watchdog header
 #endif
 #include <Adafruit_I2CDevice.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
 
 // modules - hardware or software
 PushButtonTaps* push_button = NULL;   // Push Button object
@@ -103,6 +107,11 @@ SPIClass* spi_obj = NULL;
 
 // random afternoon hour and minute to update firmware
 uint16_t ota_update_days_minutes = 0;
+
+// RGB LED Strip Neopixels
+Adafruit_NeoPixel* rgb_led_strip = NULL;
+const int kRgbStripLedCount = 4;  // rgb_led_strip
+bool rgb_led_strip_on = false;
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -202,6 +211,10 @@ void setup() {
   #if defined(WIFI_IS_USED)
     wifi_stuff = new WiFiStuff();
   #endif
+  // initialize neopixels before display which sets color in screensaver fn
+  rgb_led_strip = new Adafruit_NeoPixel(kRgbStripLedCount, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+  rgb_led_strip->begin();
+  TurnOnRgbStrip();
   // initialize display class object
   display = new RGBDisplay();
   // setup and populate display
@@ -261,6 +274,9 @@ void loop() {
   // check if button pressed or touchscreen touched
   if((inactivity_millis >= kUserInputDelayMs) && (push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched()))) {
     bool ts_input = (ts != NULL && ts->IsTouched());
+    bool push_button_pressed = push_button->buttonActiveDebounced();
+    bool inc_button_pressed = inc_button->buttonActiveDebounced();
+    bool dec_button_pressed = dec_button->buttonActiveDebounced();
     // show instant response by turing up brightness
     display->SetMaxBrightness();
 
@@ -285,11 +301,20 @@ void loop() {
       }
     }
     // push/big LED button click action
-    else if(push_button->buttonActiveDebounced()) {
+    else if(push_button_pressed) {
       PrintLn("push_button");
       LedButtonClickAction();
     }
-    else if(inc_button->buttonActiveDebounced()) {
+    // both inc and dec button pressed at the same time -> toggle RGB LED STRIP ON OFF
+    else if(inc_button_pressed && dec_button_pressed) {
+      PrintLn("both inc dec button pressed");
+      if(rgb_led_strip_on)
+        TurnOffRgbStrip();
+      else
+        TurnOnRgbStrip();
+      delay(kUserInputDelayMs);
+    }
+    else if(inc_button_pressed) {
       PrintLn("inc_button");
       // if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
       //   display->SettingsPage(true, false);
@@ -303,7 +328,7 @@ void loop() {
       else
         display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ true, /* dec_button_pressed */ false, /* push_button_pressed */ false);
     }
-    else if(dec_button->buttonActiveDebounced()) {
+    else if(dec_button_pressed) {
       PrintLn("dec_button");
       // if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
       //   display->SettingsPage(false, true);
@@ -378,7 +403,9 @@ void loop() {
         if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 12)
           wifi_stuff->auto_updated_time_today_ = false;
 
-        // auto update time at 2AM 1 minute every morning (also accounts for day light savings that kicks in and ends at 2AM in March and November once every year, try for upto 59 times - once per min until successful time update)
+        // auto update time at 2:01 AM  every morning
+        // (the 1 minute helps take into account daylight savings time that kicks in and ends at 2AM in March and November once every year. At exactly 2AM, server time might not have updated)
+        // try for upto 59 times - once per min until successful time update
         if(!(wifi_stuff->incorrect_zip_code) && !(wifi_stuff->auto_updated_time_today_) && rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() >= 1) {
           // update time from NTP server
           AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
@@ -406,7 +433,7 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_millis > (((current_page != kSoftApInputsPage) || (current_page != kLocationInputsPage)) ? kInactivityMillisLimit : 5 * kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 5 * kInactivityMillisLimit : kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
@@ -471,6 +498,9 @@ void setup1() {
   delay(2000);
 }
 #endif
+
+// bool blink = false;
+// unsigned long last_inactivity_millis = 0;
 
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
@@ -548,9 +578,19 @@ void loop1() {
       second_core_task_added_flag_array[current_task] = false;
     // }
   }
-  // turn off WiFi if there are no more requests and User is not using device
-  if(wifi_stuff->wifi_connected_ && inactivity_millis >= kInactivityMillisLimit)
-    wifi_stuff->TurnWiFiOff();
+  // RGB565 to RGB888
+  // if(inactivity_millis - last_inactivity_millis > 50) {
+  //   byte r = random(0, 255);
+  //   byte g = random(0, 255);
+  //   byte b = random(0, 255);
+  //   uint32_t rgb888 = (uint32_t(r) << 16) + (uint32_t(g) << 8) + uint32_t(b);
+  //   // color rgb rgb_led_strip
+  //   rgb_led_strip->setPixelColor((blink ? 0 : 1), rgb888);
+  //   rgb_led_strip->setPixelColor((blink ? 1 : 0), 0x000000);
+  //   blink = !blink;
+  //   rgb_led_strip->show();
+  //   last_inactivity_millis = inactivity_millis;
+  // }
 }
 
 #if defined(ESP32_DUAL_CORE)
@@ -577,7 +617,7 @@ void WaitForExecutionOfSecondCoreTask() {
 #if defined(ESP32_DUAL_CORE)
 bool use_photoresistor = true;
 #else
-bool use_photoresistor = false;
+bool use_photoresistor = true;
 #endif
 
 // debug mode turned On by pulling debug pin Low
@@ -898,6 +938,12 @@ void ProcessSerialInput() {
         SetPage(kSettingsPage);
       }
       break;
+    case 'p':   // turn ON RGB LED Strip
+      TurnOnRgbStrip();
+      break;
+    case 'q':   // turn OFF RGB LED Strip
+      TurnOffRgbStrip();
+      break;
     case 's':   // toggle screensaver
       Serial.println(F("**** toggle Screensaver ****"));
       if(current_page != kScreensaverPage)
@@ -992,6 +1038,36 @@ void CycleCpuFrequency() {
   #endif
 }
 
+void SetRgbStripColor(uint16_t rgb565_color) {
+  if(!rgb_led_strip_on)
+    return;
+  // RGB565 to RGB888
+  byte r = byte(((rgb565_color & 0xF800) >> 11) << 3);
+  byte g = byte(((rgb565_color & 0x7E0) >> 5) << 2);
+  byte b = byte(((rgb565_color & 0x1F)) << 3);
+  uint32_t rgb888 = (uint32_t(r) << 16) + (uint32_t(g) << 8) + uint32_t(b);
+  // Serial.printf("rgb565_color = 0x%X   r=%d  g=%d  b=%d    rgb888 = 0x%X\n", rgb565_color, r, g, b, rgb888);
+  // color rgb_led_strip
+  rgb_led_strip->fill(rgb888, 0, 0);
+  rgb_led_strip->show();
+}
+
+void TurnOnRgbStrip() {
+  rgb_led_strip->setBrightness(255);
+  rgb_led_strip->fill(0xFFFFFF, 0, 0);
+  rgb_led_strip->show();
+  rgb_led_strip_on = true;
+  PrintLn("TurnOnRgbStrip()");
+}
+
+void TurnOffRgbStrip() {
+  // rgb_led_strip->fill(0x000000, 0, 0);
+  rgb_led_strip->setBrightness(0);
+  rgb_led_strip->show();
+  rgb_led_strip_on = false;
+  PrintLn("TurnOffRgbStrip()");
+}
+
 void SetPage(ScreenPage set_this_page) {
   switch(set_this_page) {
     case kMainPage:
@@ -1004,6 +1080,7 @@ void SetPage(ScreenPage set_this_page) {
       display->DisplayTimeUpdate();
       // useful flag to show on UI the latest firmware in Settings Page
       wifi_stuff->firmware_update_available_str_ = "";
+      TurnOnRgbStrip();
       break;
     case kScreensaverPage:
       current_page = set_this_page;      // new page needs to be set before any action

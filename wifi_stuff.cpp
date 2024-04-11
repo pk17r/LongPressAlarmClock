@@ -387,6 +387,7 @@ void WiFiStuff::StartSetWiFiSoftAP() {
   soft_AP_IP = IP.toString().c_str();
   
   server->begin();
+  digitalWrite(WIFI_LED, HIGH);
 
   _SoftAPWiFiDetails();
 }
@@ -499,7 +500,7 @@ const char index_html_wifi_details[] PROGMEM = R"rawliteral(
   <form action="/get" target="hidden-form">
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <h4>Enter WiFi Details:</h4>
-    <label>WiFi SSID:</label><br>
+    <label>WiFi SSID (2.4GHz):</label><br>
     <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
     <label>WiFi Password:</label><br>
     <input type="text" name="html_passwd" value="%html_passwd%"><br><br>

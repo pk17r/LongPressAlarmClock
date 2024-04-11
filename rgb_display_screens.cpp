@@ -956,6 +956,8 @@ void RGBDisplay::Screensaver() {
     PickNewRandomColor();
     uint16_t randomColor = kColorPickerWheel[current_random_color_index_];
 
+    SetRgbStripColor(randomColor);
+
     // print HH:MM
     my_canvas_->setFont(&ComingSoon_Regular70pt7b);
     my_canvas_->setTextColor(randomColor);

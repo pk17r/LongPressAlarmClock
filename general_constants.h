@@ -2,7 +2,7 @@
 #define GENERAL_CONSTANTS_H
 
 // max user inactivity seconds before turning down brightness or turning On screensaver
-const uint32_t kInactivityMillisLimit = 60000;
+const uint32_t kInactivityMillisLimit = 6000;
 
 // user input delay
 const uint32_t kUserInputDelayMs = 200;
@@ -55,27 +55,26 @@ const char softApSsid[24] = "Long-Press-Alarm-SoftAP";
 
 // DISPLAY ITEM LOCATIONS
 
-  // tft dimensions
-  const uint16_t kTftWidth = 320, kTftHeight = 240;
+// tft dimensions
+const uint16_t kTftWidth = 320, kTftHeight = 240;
 
-  // user defined locations of various text strings on display
-  const int16_t kTimeRowX0 = 10, kTimeRowY0 = 80, kAM_PM_row_Y0 = 45, kTimeRowY0IncorrectTime = 100;
-  const int16_t kDisplayTextGap = 5;
-  const int16_t kDateRow_Y0 = 140;
-  const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
-  const int16_t kRadiusButtonRoundRect = 5;
-  const int kPageRowHeight = 30;
+// user defined locations of various text strings on display
+const int16_t kTimeRowX0 = 10, kTimeRowY0 = 80, kAM_PM_row_Y0 = 45, kTimeRowY0IncorrectTime = 100;
+const int16_t kDisplayTextGap = 5;
+const int16_t kDateRow_Y0 = 140;
+const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
+const int16_t kRadiusButtonRoundRect = 5;
+const int kPageRowHeight = 30;
 
-  const int16_t kCancelButtonSize = 21, kCancelButtonX1 = kTftWidth - kCancelButtonSize - kDisplayTextGap, kCancelButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
-  const int16_t kSaveButtonW = 60, kSaveButtonH = kCancelButtonSize, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kSaveButtonH - kDisplayTextGap;
+const int16_t kCancelButtonSize = 21, kCancelButtonX1 = kTftWidth - kCancelButtonSize - kDisplayTextGap, kCancelButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
+const int16_t kSaveButtonW = 60, kSaveButtonH = kCancelButtonSize, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kSaveButtonH - kDisplayTextGap;
 
-  const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
-  const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
+const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
+const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
 
-  const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X";
-  const char slowStr[5] = "SLOW", medStr[7] = "MEDIUM", fastStr[5] = "FAST", flyOutScreensaverStr[8] = "FLY OUT", bounceScreensaverStr[7] = "BOUNCE";
-  const char metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL";
-
+const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X";
+const char slowStr[5] = "SLOW", medStr[7] = "MEDIUM", fastStr[5] = "FAST", flyOutScreensaverStr[8] = "FLY OUT", bounceScreensaverStr[7] = "BOUNCE";
+const char metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL";
 
 
 #endif  // GENERAL_CONSTANTS_H
