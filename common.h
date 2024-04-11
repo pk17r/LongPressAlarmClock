@@ -224,5 +224,6 @@ extern void PrintLn(std::string someTextStr1, std::string someTextStr2);
 extern void PrintLn(std::string &someTextStr1, std::string &someTextStr2);
 extern void PrintLn(std::string &someTextStr1);
 extern void PrintLn();
+extern bool AnyButtonPressed();
 
 #endif // COMMON_H

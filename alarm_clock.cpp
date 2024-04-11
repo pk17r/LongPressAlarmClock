@@ -3,7 +3,6 @@
 #include "rtc.h"
 #include "wifi_stuff.h"
 #include "nvs_preferences.h"
-#include <PushButtonTaps.h>
 #include "touchscreen.h"
 
 // program setup function
@@ -89,14 +88,14 @@ void AlarmClock::BuzzAlarmFn() {
   while(!alarmStopped) {
     ResetWatchdog();
     // if user presses button then pauze buzzer and start alarm end countdown!
-    if(push_button->buttonActiveDebounced()) {
+    if(AnyButtonPressed()) {
       if(!buzzerPausedByUser) {
         BuzzerDisable();
         buzzerPausedByUser = true;
       }
       unsigned long buttonPressStartTimeMs = millis(); //note time of button press
       // while button is pressed, display seconds countdown
-      while(push_button->buttonActiveDebounced() && !alarmStopped) {
+      while(AnyButtonPressed() && !alarmStopped) {
         ResetWatchdog();
         // display countdown to alarm off
         if(alarm_long_press_seconds_ - (millis() - buttonPressStartTimeMs) / 1000 < buttonPressSecondsCounter) {
@@ -112,7 +111,7 @@ void AlarmClock::BuzzAlarmFn() {
       }
     }
     // activate buzzer if button is not pressed by user
-    if(!push_button->buttonActiveDebounced() && !alarmStopped) {
+    if(!AnyButtonPressed() && !alarmStopped) {
       if(buzzerPausedByUser) {
         BuzzerEnable();
         buzzerPausedByUser = false;

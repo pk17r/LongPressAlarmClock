@@ -1068,6 +1068,13 @@ void TurnOffRgbStrip() {
   PrintLn("TurnOffRgbStrip()");
 }
 
+bool AnyButtonPressed() {
+  if(push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced())
+    return true;
+  else
+    return false;
+}
+
 void SetPage(ScreenPage set_this_page) {
   switch(set_this_page) {
     case kMainPage:
