@@ -278,12 +278,20 @@ uint8_t frames_per_second = 0;
 
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
-  // check if button pressed or touchscreen touched
-  if((inactivity_millis >= kUserInputDelayMs) && (push_button->buttonActiveDebounced() || inc_button->buttonActiveDebounced() || dec_button->buttonActiveDebounced() || (ts != NULL && ts->IsTouched()))) {
+  // note if button pressed or touchscreen touched
+  bool push_button_pressed = push_button->buttonActiveDebounced();
+  bool inc_button_pressed = inc_button->buttonActiveDebounced();
+  bool dec_button_pressed = dec_button->buttonActiveDebounced();
+
+  // if user presses main LED Push button, show instant response by turning On LED
+  if(push_button_pressed)
+    digitalWrite(LED_PIN, HIGH);
+  else
+    digitalWrite(LED_PIN, LOW);
+
+  // if a button or touchscreen is pressed then take action
+  if((inactivity_millis >= kUserInputDelayMs) && (push_button_pressed || inc_button_pressed || dec_button_pressed || (ts != NULL && ts->IsTouched()))) {
     bool ts_input = (ts != NULL && ts->IsTouched());
-    bool push_button_pressed = push_button->buttonActiveDebounced();
-    bool inc_button_pressed = inc_button->buttonActiveDebounced();
-    bool dec_button_pressed = dec_button->buttonActiveDebounced();
     // show instant response by turing up brightness
     display->SetMaxBrightness();
 
@@ -353,12 +361,6 @@ void loop() {
     // show firmware updated info only for the first time user uses the device
     firmware_updated_flag_user_information = false;
   }
-
-  // if user presses button, show instant response by turning On LED
-  if(push_button->buttonActiveDebounced())
-    digitalWrite(LED_PIN, HIGH);
-  else
-    digitalWrite(LED_PIN, LOW);
 
   // new second! Update Time!
   if (rtc->rtc_hw_sec_update_) {
@@ -1356,7 +1358,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
     new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, "Night Time Dim Hour:", false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
+    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, "Night Time Hour:", false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
     new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "AutoRun RGB LED Strip Mode:", false, 0,0,0,0, (autorun_rgb_led_strip_mode == 1 ? manualStr : (autorun_rgb_led_strip_mode == 2 ? eveningStr : sunDownStr)) },
     page_cancel_button,
   };

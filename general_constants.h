@@ -78,7 +78,7 @@ const char metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL";
 const char manualStr[7] = "MANUAL", eveningStr[8] = "EVENING", sunDownStr[9] = "SUN-DOWN";
 
 // time of day at which its respective brightness starts
-const uint16_t kDayTimeMinutes = 420;
-const uint16_t kEveningTimeMinutes = 1080;
+const uint16_t kDayTimeMinutes = 420;   // 7AM
+const uint16_t kEveningTimeMinutes = 1080;    // 6PM
 
 #endif  // GENERAL_CONSTANTS_H
