@@ -112,10 +112,6 @@ uint16_t ota_update_days_minutes = 0;
 Adafruit_NeoPixel* rgb_led_strip = NULL;
 const int kRgbStripLedCount = 4;  // rgb_led_strip
 bool rgb_led_strip_on = false;
-// 1 = manual
-// 2 = autorun at evening
-// 3 = autorun at evening + night
-uint8_t autorun_rgb_led_strip_mode = 2;
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -640,6 +636,13 @@ void WaitForExecutionOfSecondCoreTask() {
 
 bool use_photoresistor = false;
 
+int current_rgb_led_strip_index = 0;
+
+// 1 = manual
+// 2 = autorun at evening
+// 3 = autorun at evening + night
+uint8_t autorun_rgb_led_strip_mode = 2;
+
 // minute of day at which to dim display to night time brightness if not using a LDR
 uint16_t night_time_minutes = 1320;
 
@@ -1065,7 +1068,7 @@ void CycleCpuFrequency() {
   #endif
 }
 
-void SetRgbStripColor(uint16_t rgb565_color) {
+void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
   if(!rgb_led_strip_on)
     return;
   // RGB565 to RGB888
@@ -1075,7 +1078,15 @@ void SetRgbStripColor(uint16_t rgb565_color) {
   uint32_t rgb888 = (uint32_t(r) << 16) + (uint32_t(g) << 8) + uint32_t(b);
   // Serial.printf("rgb565_color = 0x%X   r=%d  g=%d  b=%d    rgb888 = 0x%X\n", rgb565_color, r, g, b, rgb888);
   // color rgb_led_strip
-  rgb_led_strip->fill(rgb888, 0, 0);
+  if(set_color_sequentially) {
+    rgb_led_strip->setPixelColor(current_rgb_led_strip_index, rgb888);
+    current_rgb_led_strip_index++;
+    if(current_rgb_led_strip_index == kRgbStripLedCount)
+      current_rgb_led_strip_index = 0;
+  }
+  else {
+    rgb_led_strip->fill(rgb888, 0, 0);
+  }
   rgb_led_strip->show();
 }
 

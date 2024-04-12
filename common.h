@@ -62,11 +62,12 @@ extern bool firmware_updated_flag_user_information;
 // counter to note user inactivity seconds
 extern elapsedMillis inactivity_millis;
 
-extern void SetRgbStripColor(uint16_t rgb565_color);
+extern void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially);
 extern void TurnOnRgbStrip();
 extern void TurnOffRgbStrip();
 
 extern uint8_t autorun_rgb_led_strip_mode;
+extern int current_rgb_led_strip_index;
 extern uint16_t night_time_minutes;
 
 // flag for display pages

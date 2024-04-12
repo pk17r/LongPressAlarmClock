@@ -956,7 +956,7 @@ void RGBDisplay::Screensaver() {
     PickNewRandomColor();
     uint16_t randomColor = kColorPickerWheel[current_random_color_index_];
 
-    SetRgbStripColor(randomColor);
+    SetRgbStripColor(randomColor, /* set_color_sequentially = */ true);
 
     // print HH:MM
     my_canvas_->setFont(&ComingSoon_Regular70pt7b);
@@ -1052,6 +1052,9 @@ void RGBDisplay::Screensaver() {
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
   FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
+  // color LED Strip sequentially
+  if(current_rgb_led_strip_index != 0)
+    SetRgbStripColor(kColorPickerWheel[current_random_color_index_], /* set_color_sequentially = */ true);
 }
 
 void RGBDisplay::PickNewRandomColor() {
