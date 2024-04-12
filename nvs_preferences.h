@@ -34,9 +34,10 @@ public:
   void CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_eeprom);
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
-
   uint8_t RetrieveNightTimeDimHour();
   void SaveNightTimeDimHour(uint8_t night_time_dim_hour);
+  uint8_t RetrieveAutorunRgbLedStripMode();
+  void SaveAutorunRgbLedStripMode(uint8_t autorun_rgb_led_strip_mode_to_save);
 
   unsigned int data_model_version = 0;
   const unsigned int kDataModelVersion = 101;
@@ -97,6 +98,9 @@ private:
 
   const char* kNightTimeDimHourKey = "NightTmDimHour";
   const uint8_t kNightTimeDimHour = 10;
+
+  const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
+  const uint8_t kAutorunRgbLedStripMode = 2;
 
 };
 

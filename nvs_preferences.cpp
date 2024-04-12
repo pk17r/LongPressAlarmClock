@@ -4,9 +4,14 @@ NvsPreferences::NvsPreferences() {
 
   RetrieveDataModelVersion();
 
+  // IMP: Keep key names short for NVS Memory to save those
+  Serial.println("** IMP: Keep key names short for NVS Memory to save those");
+
   // newly added data variables
   if(RetrieveNightTimeDimHour() == 0)
     SaveNightTimeDimHour(kNightTimeDimHour);
+  if(RetrieveAutorunRgbLedStripMode() == 0)
+    SaveAutorunRgbLedStripMode(kAutorunRgbLedStripMode);
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
 }
@@ -58,6 +63,7 @@ void NvsPreferences::SaveDefaults() {
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.putBool(kScreensaverMotionTypeKey, true);
   preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
+  preferences.putUChar(kAutorunRgbLedStripModeKey, kAutorunRgbLedStripMode);
 
   preferences.end();
 
@@ -246,3 +252,17 @@ void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
   Serial.printf("Saved NVS Memory night_time_dim_hour: %d PM\n", night_time_dim_hour);
 }
 
+uint8_t NvsPreferences::RetrieveAutorunRgbLedStripMode() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t autorun_rgb_led_strip_mode_retrieved = preferences.getUChar(kAutorunRgbLedStripModeKey, 0);
+  preferences.end();
+  Serial.printf("Retrieved NVS Memory autorun_rgb_led_strip_mode_retrieved: %d\n", autorun_rgb_led_strip_mode_retrieved);
+  return autorun_rgb_led_strip_mode_retrieved;
+}
+
+void NvsPreferences::SaveAutorunRgbLedStripMode(uint8_t autorun_rgb_led_strip_mode_to_save) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kAutorunRgbLedStripModeKey, autorun_rgb_led_strip_mode_to_save);
+  preferences.end();
+  Serial.printf("Saved NVS Memory autorun_rgb_led_strip_mode_to_save: %d\n", autorun_rgb_led_strip_mode_to_save);
+}
