@@ -38,9 +38,11 @@ public:
   void SaveNightTimeDimHour(uint8_t night_time_dim_hour);
   uint8_t RetrieveAutorunRgbLedStripMode();
   void SaveAutorunRgbLedStripMode(uint8_t autorun_rgb_led_strip_mode_to_save);
+  bool RetrieveUseLdr();
+  void SaveUseLdr(bool use_ldr);
 
   unsigned int data_model_version = 0;
-  const unsigned int kDataModelVersion = 101;
+  const unsigned int kDataModelVersion = 102;
 
 private:
 
@@ -101,6 +103,9 @@ private:
 
   const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
   const uint8_t kAutorunRgbLedStripMode = 2;
+
+  const char* kUseLDRKey = "UseLDR";
+  const bool kUseLDR = false;
 
 };
 

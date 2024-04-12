@@ -215,6 +215,8 @@ void setup() {
   #if defined(WIFI_IS_USED)
     wifi_stuff = new WiFiStuff();
   #endif
+  // check if hardware has LDR
+  use_photoresistor = nvs_preferences->RetrieveUseLdr();
   // initialize display class object
   display = new RGBDisplay();
   // setup and populate display
@@ -636,11 +638,7 @@ void WaitForExecutionOfSecondCoreTask() {
 
 // GLOBAL VARIABLES AND FUNCTIONS
 
-#if defined(ESP32_DUAL_CORE)
-bool use_photoresistor = true;
-#else
-bool use_photoresistor = true;
-#endif
+bool use_photoresistor = false;
 
 // minute of day at which to dim display to night time brightness if not using a LDR
 uint16_t night_time_minutes = 1320;
@@ -968,6 +966,10 @@ void ProcessSerialInput() {
       break;
     case 'q':   // turn OFF RGB LED Strip
       TurnOffRgbStrip();
+      break;
+    case 'r':   // Activate/Toggle LDR Photoresistor Usage
+      use_photoresistor = !use_photoresistor;
+      nvs_preferences->SaveUseLdr(use_photoresistor);
       break;
     case 's':   // toggle screensaver
       Serial.println(F("**** toggle Screensaver ****"));
