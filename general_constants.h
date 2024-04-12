@@ -75,6 +75,10 @@ const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGe
 const char saveStr[5] = "SAVE", setStr[4] = "SET", cancelStr[2] = "X";
 const char slowStr[5] = "SLOW", medStr[7] = "MEDIUM", fastStr[5] = "FAST", flyOutScreensaverStr[8] = "FLY OUT", bounceScreensaverStr[7] = "BOUNCE";
 const char metricUnitStr[7] = "METRIC", imperialUnitStr[9] = "IMPERIAL";
+const char manualStr[7] = "MANUAL", eveningStr[8] = "EVENING", sunDownStr[9] = "SUN-DOWN";
 
+// time of day at which its respective brightness starts
+const uint16_t kDayTimeMinutes = 420;
+const uint16_t kEveningTimeMinutes = 1080;
 
 #endif  // GENERAL_CONSTANTS_H

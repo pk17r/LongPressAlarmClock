@@ -66,6 +66,9 @@ extern void SetRgbStripColor(uint16_t rgb565_color);
 extern void TurnOnRgbStrip();
 extern void TurnOffRgbStrip();
 
+extern uint8_t autorun_rgb_led_strip_mode;
+extern uint16_t night_time_minutes;
+
 // flag for display pages
 enum ScreenPage {
   kMainPage = 0,
@@ -119,9 +122,8 @@ enum Cursor {
   kScreensaverSettingsPageMotion,
   kScreensaverSettingsPageSpeed,
   kScreensaverSettingsPageRun,
-  #if !defined(ESP32_DUAL_CORE)
   kScreensaverSettingsPageNightTmDimHr,
-  #endif
+  kScreensaverSettingsPageRgbLedStripMode,
   kPageSaveButton,
   kPageCancelButton,
   kCursorMaxValue,    // inc/dec button scroll won't go above this level

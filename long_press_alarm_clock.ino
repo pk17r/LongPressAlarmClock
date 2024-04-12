@@ -112,6 +112,10 @@ uint16_t ota_update_days_minutes = 0;
 Adafruit_NeoPixel* rgb_led_strip = NULL;
 const int kRgbStripLedCount = 4;  // rgb_led_strip
 bool rgb_led_strip_on = false;
+// 0 = manual
+// 1 = autorun at evening
+// 2 = autorun at evening + night
+uint8_t autorun_rgb_led_strip_mode = 1;
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -211,10 +215,6 @@ void setup() {
   #if defined(WIFI_IS_USED)
     wifi_stuff = new WiFiStuff();
   #endif
-  // initialize neopixels before display which sets color in screensaver fn
-  rgb_led_strip = new Adafruit_NeoPixel(kRgbStripLedCount, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
-  rgb_led_strip->begin();
-  TurnOnRgbStrip();
   // initialize display class object
   display = new RGBDisplay();
   // setup and populate display
@@ -252,6 +252,11 @@ void setup() {
 
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
+
+  // initialize rgb led strip neopixels
+  rgb_led_strip = new Adafruit_NeoPixel(kRgbStripLedCount, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+  rgb_led_strip->begin();
+  TurnOnRgbStrip();
 
   PopulateDisplayPages(); // needs to be after all saved values have been retrieved
 
@@ -420,6 +425,19 @@ void loop() {
         }
       #endif
 
+      // set rgb led strip
+      if(autorun_rgb_led_strip_mode == 2) { // run rgb led strip all evening + night
+        if(rtc->todays_minutes >= kEveningTimeMinutes || rtc->todays_minutes < kDayTimeMinutes)
+          TurnOnRgbStrip();
+        else
+          TurnOffRgbStrip();
+      }
+      else if(autorun_rgb_led_strip_mode == 1) {  // // run rgb led strip all evening only
+        if(rtc->todays_minutes >= kEveningTimeMinutes && rtc->todays_minutes < night_time_minutes)
+          TurnOnRgbStrip();
+        else
+          TurnOffRgbStrip();
+      }
     }
 
     // prepare date and time arrays
@@ -619,6 +637,9 @@ bool use_photoresistor = true;
 #else
 bool use_photoresistor = true;
 #endif
+
+// minute of day at which to dim display to night time brightness if not using a LDR
+uint16_t night_time_minutes = 1320;
 
 // debug mode turned On by pulling debug pin Low
 bool debug_mode = false;
@@ -1330,9 +1351,8 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
     new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    #if !defined(ESP32_DUAL_CORE)
     new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, "Night Time Dim Hour:", false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
-    #endif
+    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "AutoRun RGB Led Strip Mode:", false, 0,0,0,0, (autorun_rgb_led_strip_mode == 0 ? manualStr : (autorun_rgb_led_strip_mode == 1 ? eveningStr : sunDownStr)) },
     page_cancel_button,
   };
 
@@ -1545,7 +1565,6 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse(1);
         SetPage(kScreensaverPage);
       }
-      #if !defined(ESP32_DUAL_CORE)
       else if(current_cursor == kScreensaverSettingsPageNightTmDimHr) {
         // change hours
         uint8_t night_time_dim_hour = nvs_preferences->RetrieveNightTimeDimHour();
@@ -1554,11 +1573,18 @@ void LedButtonClickAction() {
         else
           night_time_dim_hour = 8;
         nvs_preferences->SaveNightTimeDimHour(night_time_dim_hour);
-        display->night_time_minutes = night_time_dim_hour * 60 + 720;
+        night_time_minutes = night_time_dim_hour * 60 + 720;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(night_time_dim_hour) + "PM");
         LedButtonClickUiResponse();
       }
-      #endif
+      else if(current_cursor == kScreensaverSettingsPageRgbLedStripMode) {
+        if(autorun_rgb_led_strip_mode < 2)
+          autorun_rgb_led_strip_mode++;
+        else
+          autorun_rgb_led_strip_mode = 0;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (autorun_rgb_led_strip_mode == 0 ? manualStr : (autorun_rgb_led_strip_mode == 1 ? eveningStr : sunDownStr));
+        LedButtonClickUiResponse();
+      }
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
         SetPage(kSettingsPage);
