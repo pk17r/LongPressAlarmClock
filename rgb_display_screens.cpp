@@ -652,8 +652,11 @@ void RGBDisplay::DisplayFirmwareVersionAndDate() {
   tft.setCursor(10, kTftHeight - 20);
   tft.print("Firmware: ");
   tft.print(kFirmwareVersion.c_str());
-  if(wifi_stuff->firmware_update_available_str_.size() > 0)
+  if(wifi_stuff->firmware_update_available_str_.size() > 0) {
+    tft.setFont(&FreeMonoBold9pt7b);
     tft.print(" (latest)");
+    tft.setFont(&FreeMono9pt7b);
+  }
   tft.setCursor(10, kTftHeight - 5);
   tft.print("Date: ");
   tft.print(kFirmwareDate.c_str());

@@ -34,9 +34,9 @@
 #define ESP32_S2_MINI_FIRMWARE_VERSION            "2.2"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.2"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
-#define ESP32_S3_FIRMWARE_VERSION                 "2.2"
-const std::string kFirmwareDate = "Apr 6, 2024";
+#define ESP32_S3_FIRMWARE_VERSION                 "2.3"
+const std::string kFirmwareDate = "Apr 19, 2024";
 
-const std::string kChangeLog = "- Screensaver Settings\n- Flexible Page Structure\n- NightTime Setting";
+const std::string kChangeLog = "- Bug fixes\n- RGB LED Hardware\n- Moved from EEPROM to NVM";
 
 #endif  // CONFIGURATION_H

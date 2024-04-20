@@ -1131,10 +1131,10 @@ void SetPage(ScreenPage set_this_page) {
       display->DisplayTimeUpdate();
       // useful flag to show on UI the latest firmware in Settings Page
       wifi_stuff->firmware_update_available_str_ = "";
-      if(autorun_rgb_led_strip_mode > 1)  // if in auto mode, then make it white
-        TurnOnRgbStrip();
-      else if(rgb_led_strip_on)
-        TurnOnRgbStrip();   // if in manual mode and already on then make it white
+      // if(autorun_rgb_led_strip_mode > 1)  // if in auto mode, then make it white
+      //   TurnOnRgbStrip();
+      // else if(rgb_led_strip_on)
+      //   TurnOnRgbStrip();   // if in manual mode and already on then make it white
       break;
     case kScreensaverPage:
       current_page = set_this_page;      // new page needs to be set before any action
