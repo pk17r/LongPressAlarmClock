@@ -425,6 +425,12 @@ void loop() {
           AddSecondCoreTaskIfNotThere(kFirmwareVersionCheck);
           WaitForExecutionOfSecondCoreTask();
         }
+
+        // auto disconnect wifi if connected and inactivity millis is over limit
+        if(wifi_stuff->wifi_connected_ && (inactivity_millis > kInactivityMillisLimit)) {
+          PrintLn("**** Auto disconnect WiFi ****");
+          AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+        }
       #endif
 
       // set rgb led strip
@@ -1630,6 +1636,9 @@ void CopyEepromDataToNvsMemoryDuringUpdate() {
     eeprom_present = true;
   }
 
+  // save defaults first
+  nvs_preferences->SaveDefaults();
+
   // if EEPROM is present then copy its data to NVS
   if(eeprom_present) {
     // setup eeprom
@@ -1656,13 +1665,11 @@ void CopyEepromDataToNvsMemoryDuringUpdate() {
     nvs_preferences->CopyCpuSpeedFromEepromToNvsMemory(eeprom_cpu_speed_mhz);
     bool screensaverBounceNotFlyHorizontally = eeprom_temp_obj.RetrieveScreensaverBounceNotFlyHorizontally();
     nvs_preferences->SaveScreensaverBounceNotFlyHorizontally(screensaverBounceNotFlyHorizontally);
+    nvs_preferences->SaveUseLdr(use_photoresistor);
 
     nvs_preferences->SaveDataModelVersion();
 
     Serial.println("EEPROM data copied to NVS Memory.");
-  }
-  else {
-    nvs_preferences->SaveDefaults();
   }
 
   nvs_preferences->PrintSavedData();

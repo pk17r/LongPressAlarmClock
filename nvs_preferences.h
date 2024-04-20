@@ -105,7 +105,7 @@ private:
   const uint8_t kAutorunRgbLedStripMode = 2;
 
   const char* kUseLDRKey = "UseLDR";
-  const bool kUseLDR = false;
+  const bool kUseLDR = true;
 
 };
 

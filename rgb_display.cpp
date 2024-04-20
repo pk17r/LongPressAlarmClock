@@ -116,7 +116,9 @@ void RGBDisplay::SetMaxBrightness() {
 void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
   int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   // int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
-  int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, 1, kBrightnessInactiveMax), 1);
+  int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, kNightBrightness, kBrightnessInactiveMax), kNightBrightness);
+  if(rtc->todays_minutes < night_time_minutes && rtc->todays_minutes >= kDayTimeMinutes)
+    lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness);
   if(debug_mode)
     Serial.printf("photodiode_light_raw = %d, lcd_brightness_val2 = %d\n", photodiode_light_raw, lcd_brightness_val2);
   SetBrightness(lcd_brightness_val2);
@@ -130,11 +132,11 @@ void RGBDisplay::CheckTimeAndSetBrightness() {
     SetBrightness(kDayBrightness);
   }
   else {
-    if(rtc->todays_minutes > night_time_minutes)
+    if(rtc->todays_minutes >= night_time_minutes)
       SetBrightness(kNightBrightness);
-    else if(rtc->todays_minutes > kEveningTimeMinutes)
+    else if(rtc->todays_minutes >= kEveningTimeMinutes)
       SetBrightness(kEveningBrightness);
-    else if(rtc->todays_minutes > kDayTimeMinutes)
+    else if(rtc->todays_minutes >= kDayTimeMinutes)
       SetBrightness(kDayBrightness);
     else
       SetBrightness(kNightBrightness);

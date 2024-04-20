@@ -150,6 +150,7 @@ private:
 
   // display brightness constants
   const int kNightBrightness = 1;
+  const int kNonNightMinBrightness = 4;
   const int kEveningBrightness = 100;
   const int kDayBrightness = 150;
 

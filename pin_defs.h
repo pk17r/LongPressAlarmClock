@@ -21,8 +21,8 @@
 
   #if defined(TOUCHSCREEN_IS_XPT2046)
     const int TS_CIPO = 37;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 21;
-    const int TS_IRQ_PIN = 18;
+    const int TS_CS_PIN = 2;
+    const int TS_IRQ_PIN = 3;
   #endif
 
   // Sqw Alarm Interrupt Pin
@@ -39,7 +39,7 @@
   const int BUZZER_PIN = 4;
   const int DEBUG_PIN = 21;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug
   const int PHOTORESISTOR_PIN = 1;
-  const int RGB_LED_STRIP_PIN = 2;
+  const int RGB_LED_STRIP_PIN = 14;
 
 
 
@@ -153,6 +153,7 @@
   const int BUZZER_PIN = 16;
   const int DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
   const int PHOTORESISTOR_PIN = 4;
+  const int RGB_LED_STRIP_PIN = 15;
 
 
 #endif

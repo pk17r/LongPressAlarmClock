@@ -12,11 +12,12 @@ NvsPreferences::NvsPreferences() {
     SaveNightTimeDimHour(kNightTimeDimHour);
   if(RetrieveAutorunRgbLedStripMode() == 0)
     SaveAutorunRgbLedStripMode(kAutorunRgbLedStripMode);
-  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  102
+  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  upgrade to DataModelVersion = 102's NVS Memory variables
     SaveUseLdr(kUseLDR);
 
-  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  102
+  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  upgrade DataModelVersion to latest
     SaveDataModelVersion();
+  // Save Defaults is called from main's CopyEepromDataToNvsMemoryDuringUpdate() function
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
 }
