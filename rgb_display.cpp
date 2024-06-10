@@ -25,7 +25,7 @@ void RGBDisplay::Setup() {
   // #else
   //   tft.setRotation(1);
   // #endif
-  tft.setRotation(3);
+  tft.setRotation(screen_orientation_);
 
 #elif defined(DISPLAY_IS_ST7735)
 

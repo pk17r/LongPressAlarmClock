@@ -1359,6 +1359,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kSettingsPageLocationAndWeather, kRowClickButton, "Location, Time & Weather:", false, 0,0,0,0, "LOCATION" },
     new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
     new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Screensaver Set:", false, 0,0,0,0, "SCREENSAVER" },
+    new DisplayButton{ kSettingsPageRotateScreen, kRowClickButton, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     new DisplayButton{ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
     page_cancel_button,
   };
@@ -1474,6 +1475,16 @@ void LedButtonClickAction() {
       else if(current_cursor == kSettingsPageScreensaver) {
         LedButtonClickUiResponse(1);
         SetPage(kScreensaverSettingsPage);
+      }
+      else if(current_cursor == kSettingsPageRotateScreen) {
+        // rotate screen 180 degrees
+        if(alarm_clock->alarm_long_press_seconds_ < 25)
+          alarm_clock->alarm_long_press_seconds_ += 10;
+        else
+          alarm_clock->alarm_long_press_seconds_ = 5;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
+        nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
+        LedButtonClickUiResponse();
       }
       else if(current_cursor == kSettingsPageUpdate) {
         LedButtonClickUiResponse(2);

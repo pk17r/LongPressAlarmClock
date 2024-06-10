@@ -111,6 +111,7 @@ enum Cursor {
   kSettingsPageLocationAndWeather,
   kSettingsPageAlarmLongPressTime,
   kSettingsPageScreensaver,
+  kSettingsPageRotateScreen,
   kSettingsPageUpdate,
   kWiFiSettingsPageSetSsidPasswd,
   kWiFiSettingsPageClearSsidAndPasswd,

@@ -88,6 +88,9 @@ public:
   bool redraw_display_ = true;
 
   // refresh screensaver canvas
+  uint8_t screen_orientation_ = 3;
+
+  // refresh screensaver canvas
   bool refresh_screensaver_canvas_ = true;
 
   // screensaver color and motion flags

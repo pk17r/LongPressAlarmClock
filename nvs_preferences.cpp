@@ -7,6 +7,9 @@ NvsPreferences::NvsPreferences() {
   // IMP: Keep key names short for NVS Memory to save those
   Serial.println("** IMP: Keep key names short for NVS Memory to save those");
 
+  // TODO:
+  // if data_model_version > 0 && data_model_version < kDataModelVersion -> fetch every key and add default for whichever key is not present
+
   // newly added data variables
   if(RetrieveNightTimeDimHour() == 0)
     SaveNightTimeDimHour(kNightTimeDimHour);
@@ -69,6 +72,7 @@ void NvsPreferences::SaveDefaults() {
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.putBool(kScreensaverMotionTypeKey, true);
   preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
+  preferences.putUChar(kScreenOrientationKey, kScreenOrientation);
   preferences.putUChar(kAutorunRgbLedStripModeKey, kAutorunRgbLedStripMode);
   preferences.putBool(kUseLDRKey, kUseLDR);
 
@@ -257,6 +261,21 @@ void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
   preferences.putUChar(kNightTimeDimHourKey, night_time_dim_hour);
   preferences.end();
   Serial.printf("Saved NVS Memory night_time_dim_hour: %d PM\n", night_time_dim_hour);
+}
+
+uint8_t NvsPreferences::RetrieveScreenOrientation() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t screen_orientation = preferences.getUChar(kScreenOrientationKey, 3);
+  preferences.end();
+  Serial.printf("Retrieved NVS Memory screen_orientation: %d\n", screen_orientation);
+  return screen_orientation;
+}
+
+void NvsPreferences::SaveScreenOrientation(uint8_t screen_orientation) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kScreenOrientationKey, screen_orientation);
+  preferences.end();
+  Serial.printf("Saved NVS Memory screen_orientation: %d\n", screen_orientation);
 }
 
 uint8_t NvsPreferences::RetrieveAutorunRgbLedStripMode() {
