@@ -58,7 +58,7 @@ void WiFiStuff::SaveWeatherUnits() {
 
 bool WiFiStuff::TurnWiFiOn() {
 
-  PrintLn("Connecting to WiFi");
+  PrintLn("WiFiStuff::TurnWiFiOn(): Connecting to WiFi");
   WiFi.mode(WIFI_STA);
   delay(1);
   WiFi.persistent(true);
@@ -72,13 +72,13 @@ bool WiFiStuff::TurnWiFiOn() {
     if(i >= 5) break;
   }
   if(WiFi.status() == WL_CONNECTED) {
-    PrintLn("WiFi Connected.");
+    PrintLn("WiFiStuff::TurnWiFiOn(): WiFi Connected.");
     digitalWrite(WIFI_LED, HIGH);
     wifi_connected_ = true;
     incorrect_wifi_details_ = false;
   }
   else {
-    PrintLn("Could NOT connect to WiFi.");
+    PrintLn("WiFiStuff::TurnWiFiOn(): Could NOT connect to WiFi.");
     digitalWrite(WIFI_LED, LOW);
     wifi_connected_ = false;
     incorrect_wifi_details_ = true;
@@ -93,7 +93,7 @@ void WiFiStuff::TurnWiFiOff() {
   WiFi.mode(WIFI_OFF);
   delay(1);
   WiFi.disconnect();
-  PrintLn("WiFi Off.");
+  PrintLn("WiFiStuff::TurnWiFiOff(): WiFi Off.");
   digitalWrite(WIFI_LED, LOW);
   wifi_connected_ = false;
 }
@@ -104,14 +104,18 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   // don't fetch frequently otherwise can get banned
   if(last_fetch_weather_info_time_ms_ != 0 && millis() - last_fetch_weather_info_time_ms_ < kFetchWeatherInfoMinIntervalMs) {
     get_weather_info_wait_seconds_ = (kFetchWeatherInfoMinIntervalMs - (millis() - last_fetch_weather_info_time_ms_)) / 1000;
+    PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Fetch request too soon. Returning...");
     return;
   }
   get_weather_info_wait_seconds_ = 0;
 
   // turn On Wifi
-  if(!wifi_connected_)
-    if(!TurnWiFiOn())
+  if(!wifi_connected_) {
+    if(!TurnWiFiOn()) {
+      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Could not turn WiFi On. Returning...");
       return;
+    }
+  }
 
   // Your Domain name with URL path or IP address with path
   // std::string openWeatherMapApiKey = 
@@ -140,8 +144,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     String jsonBuffer = "{}"; 
     
     if (httpResponseCode>0) {
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
+      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): HTTP Response code: ", httpResponseCode);
       jsonBuffer = http.getString();
     }
     else {
@@ -161,7 +164,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     if(httpResponseCode >= 200 && httpResponseCode < 300)
     {
       // got response
-      got_weather_info_ = true;
+      wifi_stuff->got_weather_info_ = true;
 
       Serial.print("JSON object = ");
       Serial.println(myObject);
@@ -200,11 +203,11 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
     }
     else if(httpResponseCode >= 400) {
-      Serial.println("Incorrect zip code!");
+      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Incorrect zip code!");
       incorrect_zip_code = true;
     }
     else {
-      Serial.println("Parsing input failed!");
+      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Parsing input failed!");
     }
   }
   else {
@@ -219,20 +222,28 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   manual_time_update_successful_ = false;
 
   if(!got_weather_info_) { // we need gmt_offset_sec_ before getting time update!
+    PrintLn("WiFiStuff::GetTimeFromNtpServer(): Fetching gmt_offset_sec_ before getting time update.");
     GetTodaysWeatherInfo();
-    if(!got_weather_info_)
+    PrintLn("WiFiStuff::GetTimeFromNtpServer(): got_weather_info_ = ", got_weather_info_);
+    if(!got_weather_info_) {
+      PrintLn("WiFiStuff::GetTimeFromNtpServer(): Could not fetch gmt_offset_sec_. Returning...");
       return false;
+    }
   }
 
   // turn On Wifi
-  if(!wifi_connected_)
-    if(!TurnWiFiOn())
+  if(!wifi_connected_) {
+    if(!TurnWiFiOn()) {
+      PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi could not be turned on. Returning...");
       return false;
+    }
+  }
 
   bool returnVal = false;
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
+    PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi Connected. Fetching time from NTP Server.");
 
     const char* NTP_SERVER = "pool.ntp.org";
     // const long  GMT_OFFSET_SEC = -8*60*60;
@@ -243,6 +254,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
     ntpClient.begin();
     returnVal = ntpClient.update();
+    PrintLn("WiFiStuff::GetTimeFromNtpServer(): ntpClient.update() = ", returnVal);
 
     if(returnVal) {
       unsigned long epoch_since_1970 = ntpClient.getEpochTime();
@@ -251,8 +263,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       int seconds = ntpClient.getSeconds();
       int dayOfWeekSunday0 = ntpClient.getDay();
 
-
-      Serial.print("TIME FROM NTP SERVER:  Success="); Serial.println(returnVal);
       Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.print(seconds); Serial.print("  DoW: "); Serial.print(kDaysTable_[dayOfWeekSunday0]); Serial.print("  EpochTime: "); Serial.println(epoch_since_1970);
 
       int today, month, year;
@@ -271,7 +281,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
   }
   else {
-    Serial.println("WiFi not connected");
+    PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi not connected");
   }
 
   // // test

@@ -148,12 +148,17 @@ void setup() {
   pinMode(WIFI_LED, OUTPUT);
   digitalWrite(WIFI_LED, LOW);
 
+  // TFT_RST - pull it low
+  pinMode(TFT_RST, OUTPUT);
+  digitalWrite(TFT_RST, LOW);
+
   // a delay to let currents stabalize and not have phantom serial inputs
-  delay(500);
+  delay(1000);
   Serial.begin(115200);
 
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
+  // debug_mode = true;
   if(debug_mode) {
     // while(!Serial) { delay(20); };   // Do not uncomment during commit!
     Serial.println(F("\nSerial OK"));
@@ -270,6 +275,8 @@ void setup() {
         &Task1,  /* Task handle. */
         0); /* Core where the task should run */
   #endif
+
+  ResetWatchdog();
 }
 
 uint8_t frames_per_second = 0;
@@ -530,6 +537,7 @@ void setup1() {
 
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
+  ResetWatchdog();
   // run the core only to do specific not time important operations
   while (!second_core_tasks_queue.empty())
   {
@@ -546,6 +554,7 @@ void loop1() {
       // try once more if did not get info
       if(!success) {
         delay(1000);
+        ResetWatchdog();
         wifi_stuff->GetTodaysWeatherInfo();
         success = wifi_stuff->got_weather_info_;
       }
@@ -553,10 +562,14 @@ void loop1() {
     else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000)) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
+      PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() success = ", success);
       // try once more if did not get info
       if(!success) {
         delay(1000);
+        ResetWatchdog();
+        PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() Trying again...");
         success = wifi_stuff->GetTimeFromNtpServer();
+        PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() success = ", success);
       }
       if(success)
         display->redraw_display_ = true;
@@ -1021,6 +1034,14 @@ void ProcessSerialInput() {
       Serial.println(F("**** Get Weather Info ****"));
       // get today's weather info
       AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
+      break;
+    case 'x':   // toggle RGB LED Strip Mode
+      if(autorun_rgb_led_strip_mode < 3)
+        autorun_rgb_led_strip_mode++;
+      else
+        autorun_rgb_led_strip_mode = 1;
+      nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
+      PrintLn("RGB LED Strip Mode = ", (autorun_rgb_led_strip_mode == 1 ? manualStr : (autorun_rgb_led_strip_mode == 2 ? eveningStr : sunDownStr)));
       break;
     case 'y':   // show alarm triggered screen
       Serial.println(F("**** Show Alarm Triggered Screen ****"));

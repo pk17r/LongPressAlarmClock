@@ -8,7 +8,7 @@ Touchscreen::Touchscreen() {
   #endif
   touchscreen_ptr_->begin(*spi_obj);
   touchscreen_ptr_->setRotation(1);
-  touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};
+  touchscreen_calibration_ = TouchCalibration{220, 3800, 3830, 280, kTftWidth, kTftHeight};
 
   PrintLn("Touchscreen Initialized!");
 }

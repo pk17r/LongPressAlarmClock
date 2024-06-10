@@ -20,11 +20,12 @@ void RGBDisplay::Setup() {
   tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
   // make display landscape orientation
-  #if defined(TOUCHSCREEN_IS_XPT2046)   // touchscreen version display has things rotated 180 deg
-    tft.setRotation(3);
-  #else
-    tft.setRotation(1);
-  #endif
+  // #if defined(TOUCHSCREEN_IS_XPT2046)   // touchscreen version display has things rotated 180 deg
+  //   tft.setRotation(3);
+  // #else
+  //   tft.setRotation(1);
+  // #endif
+  tft.setRotation(3);
 
 #elif defined(DISPLAY_IS_ST7735)
 
@@ -117,7 +118,9 @@ void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
   int photodiode_light_raw = analogRead(PHOTORESISTOR_PIN);
   // int lcd_brightness_val = max(photodiode_light_raw * kBrightnessInactiveMax / kPhotodiodeLightRawMax, 1);
   int lcd_brightness_val2 = max((int)map(photodiode_light_raw, 0.2 / 3.3 * kPhotodiodeLightRawMax, kPhotodiodeLightRawMax, kNightBrightness, kBrightnessInactiveMax), kNightBrightness);
-  if(rtc->todays_minutes < night_time_minutes && rtc->todays_minutes >= kDayTimeMinutes)
+  if(rgb_led_strip_on)
+    lcd_brightness_val2 = max(lcd_brightness_val2, kRgbStripOnDispMinBrightness);
+  else if(rtc->todays_minutes < night_time_minutes && rtc->todays_minutes >= kDayTimeMinutes)
     lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness);
   if(debug_mode)
     Serial.printf("photodiode_light_raw = %d, lcd_brightness_val2 = %d\n", photodiode_light_raw, lcd_brightness_val2);

@@ -65,6 +65,7 @@ extern elapsedMillis inactivity_millis;
 extern void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially);
 extern void TurnOnRgbStrip();
 extern void TurnOffRgbStrip();
+extern bool rgb_led_strip_on;
 
 extern uint8_t autorun_rgb_led_strip_mode;
 extern int current_rgb_led_strip_index;

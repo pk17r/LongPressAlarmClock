@@ -6,7 +6,7 @@
 
 #include <Preferences.h> //https://github.com/espressif/arduino-esp32/tree/master/libraries/Preferences
 #include "common.h"
-// #include "secrets.h"
+#include "secrets.h"
 
 class NvsPreferences {
 
