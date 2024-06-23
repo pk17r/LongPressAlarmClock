@@ -127,10 +127,10 @@ void setup() {
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
 
-  #if defined(TOUCHSCREEN_IS_XPT2046)
+  // #if defined(TOUCHSCREEN_IS_XPT2046)
     pinMode(TS_CS_PIN, OUTPUT);
     digitalWrite(TS_CS_PIN, HIGH);
-  #endif
+  // #endif
 
   // make buzzer pin low
   pinMode(BUZZER_PIN, OUTPUT);
@@ -175,11 +175,11 @@ void setup() {
     spi_obj->begin();   // Hardware SPI
   #elif defined(MCU_IS_ESP32)
     spi_obj = new SPIClass(HSPI);
-    #if defined(TOUCHSCREEN_IS_XPT2046)
+    // #if defined(TOUCHSCREEN_IS_XPT2046)
       spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
-    #else
-      spi_obj->begin(TFT_CLK, -1, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
-    #endif
+    // #else
+    //   spi_obj->begin(TFT_CLK, -1, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
+    // #endif
   #endif
 
   // initialize push button
@@ -217,9 +217,8 @@ void setup() {
   display = new RGBDisplay();
   // setup and populate display
   display->Setup();
-  #if defined(TOUCHSCREEN_IS_XPT2046)
+  if(nvs_preferences->RetrieveIsTouchscreen())
     ts = new Touchscreen();
-  #endif
 
   // second core task added flag array
   for (int i = 0; i < kNoTask; i++)
@@ -937,8 +936,16 @@ void ProcessSerialInput() {
     case 'g':   // good morning
       display->GoodMorningScreen();
       break;
-    case 'h':   // 
-      
+    case 'h':   // enable / disable TOUCHSCREEN
+      if(ts != NULL) {
+        ts = NULL;
+        nvs_preferences->SaveIsTouchscreen(false);
+      }
+      else {
+        nvs_preferences->SaveIsTouchscreen(true);
+        ts = new Touchscreen();
+      }
+      PrintLn("RetrieveIsTouchscreen() = ", nvs_preferences->RetrieveIsTouchscreen());
       break;
     case 'i':   // set WiFi details
       {

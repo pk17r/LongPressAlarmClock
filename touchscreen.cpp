@@ -3,9 +3,9 @@
 #include "rgb_display.h"
 
 Touchscreen::Touchscreen() {
-  #if defined(TOUCHSCREEN_IS_XPT2046)
+  // #if defined(TOUCHSCREEN_IS_XPT2046)
     touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
-  #endif
+  // #endif
   touchscreen_ptr_->begin(*spi_obj);
   touchscreen_ptr_->setRotation(1);
   touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};

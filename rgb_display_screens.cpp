@@ -240,8 +240,12 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         }
       }
       else if(current_cursor == kAlarmSetPageOn || current_cursor == kAlarmSetPageOff) {
-        if(inc_button_pressed) current_cursor = kAlarmSetPageOn;
-        else if(dec_button_pressed) current_cursor = kAlarmSetPageOff;
+        if(inc_button_pressed || dec_button_pressed) {
+          if(current_cursor == kAlarmSetPageOn)
+            current_cursor = kAlarmSetPageOff;
+          else
+            current_cursor = kAlarmSetPageOn;
+        }
         else {
           if(current_cursor == kAlarmSetPageOn)
             userButtonClick = 7;
@@ -251,8 +255,12 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         }
       }
       else if(current_cursor == kAlarmSetPageSet || current_cursor == kAlarmSetPageCancel) {
-        if(inc_button_pressed) current_cursor = kAlarmSetPageSet;
-        else if(dec_button_pressed) current_cursor = kAlarmSetPageCancel;
+        if(inc_button_pressed || dec_button_pressed) {
+          if(current_cursor == kAlarmSetPageSet)
+            current_cursor = kAlarmSetPageCancel;
+          else
+            current_cursor = kAlarmSetPageSet;
+        }
         else {
           if(current_cursor == kAlarmSetPageSet)
             userButtonClick = 9;

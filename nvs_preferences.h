@@ -45,6 +45,8 @@ public:
   void RetrieveTestVal(uint8_t &test_val);
   uint8_t RetrieveTestValOrSaveDefault();
   void SaveTestVal(uint8_t test_val);
+  bool RetrieveIsTouchscreen();
+  void SaveIsTouchscreen(bool is_touchscreen);
 
 private:
 
@@ -98,17 +100,20 @@ private:
 
   const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";  // 1 byte
 
-  const char* kNightTimeDimHourKey = "NightTmDimHour";
+  const char* kNightTimeDimHourKey = "NightTmDimHour";  // 1 byte
   const uint8_t kNightTimeDimHour = 10;
 
-  const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
+  const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";  // 1 byte
   const uint8_t kAutorunRgbLedStripMode = 2;
 
-  const char* kScreenOrientationKey = "ScreenOrient";
+  const char* kScreenOrientationKey = "ScreenOrient";  // 1 byte
   const uint8_t kScreenOrientation = 3;
 
-  const char* kUseLDRKey = "UseLDR";
+  const char* kUseLDRKey = "UseLDR";  // 1 byte
   const bool kUseLDR = true;
+
+  const char* kIsTouchscreenKey = "Touchscreen";  // 1 byte
+  const bool kIsTouchscreen = false;
 
 };
 

@@ -3,6 +3,8 @@
 When alarm time hits, program requires user to press and hold the main LED push button for 20 (adjustable) seconds continously to turn off the alarm, making sure the user wakes up.
 Without the button press, buzzer keeps buzzing. If user lets go of the push button before alarm end time, the buzzer restarts. Max buzzer time of 120 seconds.
 
+NOTE: Works with esp32 Board Manager version 2.0.15 only.
+
 ![Alt text](resources/image_main.JPG?raw=true "Main Page")
 
 ### Along with Super fast 50 FPS & Low RAM usage 16-bit RGB565 SPI frame transfer:
@@ -54,7 +56,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)
   - Colorful Smooth Screensaver with a big clock
   - Touchscreen based alarm set page (touchscreen not on by default)
-  - Settings saved in EEPROM so not lost on power loss
+  - Settings saved in ESP32 NVM so not lost on power loss
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
   - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
   - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
