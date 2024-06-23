@@ -67,6 +67,7 @@ public:
   void CheckPhotoresistorAndSetBrightness();
   void CheckTimeAndSetBrightness();
   void ScreensaverControl(bool turnOn);
+  void RotateScreen();
 
 // PUBLIC VARIABLES
 
@@ -86,9 +87,6 @@ public:
 
   // redraw full display flag
   bool redraw_display_ = true;
-
-  // refresh screensaver canvas
-  uint8_t screen_orientation_ = 3;
 
   // refresh screensaver canvas
   bool refresh_screensaver_canvas_ = true;
@@ -120,6 +118,7 @@ private:
 
   // current screen brightness
   int current_brightness_ = 0;
+  uint8_t screen_orientation_ = 3;
 
   // screensaver
   bool screensaver_move_down_ = true, screensaver_move_right_ = true;

@@ -42,19 +42,17 @@ public:
   void SaveAutorunRgbLedStripMode(uint8_t autorun_rgb_led_strip_mode_to_save);
   bool RetrieveUseLdr();
   void SaveUseLdr(bool use_ldr);
-
-  unsigned int data_model_version = 0;
-  const unsigned int kDataModelVersion = 103;
+  void RetrieveTestVal(uint8_t &test_val);
+  uint8_t RetrieveTestValOrSaveDefault();
+  void SaveTestVal(uint8_t test_val);
 
 private:
 
-  void RetrieveDataModelVersion();
+  // ESP32 NVS Memory Data Access     ***** MAX KEY LENGTH 15 CHARACTERS *****
 
-  // ESP32 NVS Memory Data Access
   Preferences preferences;
-  const char* kNvsDataKey = "longPressData";
 
-  const char* kDataModelVersionKey = "kDataModelVer";
+  const char* kNvsDataKey = "longPressData";
 
   const char* kAlarmHrKey = "AlarmHr";
   const uint8_t kAlarmHr = 7;
@@ -106,7 +104,7 @@ private:
   const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
   const uint8_t kAutorunRgbLedStripMode = 2;
 
-  const char* kScreenOrientationKey = "ScreenOrientation";
+  const char* kScreenOrientationKey = "ScreenOrient";
   const uint8_t kScreenOrientation = 3;
 
   const char* kUseLDRKey = "UseLDR";

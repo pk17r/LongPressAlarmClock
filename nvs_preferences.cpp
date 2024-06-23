@@ -2,85 +2,59 @@
 
 NvsPreferences::NvsPreferences() {
 
-  RetrieveDataModelVersion();
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
 
-  // IMP: Keep key names short for NVS Memory to save those
-  Serial.println("** IMP: Keep key names short for NVS Memory to save those");
+  // save keys if not present
+  // ADD NEW KEYS HERE
+  if(!preferences.isKey(kAlarmHrKey))
+    preferences.putUChar(kAlarmHrKey, kAlarmHr);
+  if(!preferences.isKey(kAlarmMinKey))
+    preferences.putUChar(kAlarmMinKey, kAlarmMin);
+  if(!preferences.isKey(kAlarmIsAmKey))
+    preferences.putBool(kAlarmIsAmKey, kAlarmIsAm);
+  if(!preferences.isKey(kAlarmOnKey))
+    preferences.putBool(kAlarmOnKey, kAlarmOn);
+  if(!preferences.isKey(kWiFiSsidKey)) {
+    String kWiFiSsidString = kWiFiSsid.c_str();
+    preferences.putString(kWiFiSsidKey, kWiFiSsidString);
+  }
+  if(!preferences.isKey(kWiFiPasswdKey)) {
+    String kWiFiPasswdString = kWiFiPasswd.c_str();
+    preferences.putString(kWiFiPasswdKey, kWiFiPasswdString);
+  }
+  if(!preferences.isKey(kWeatherZipCodeKey))
+    preferences.putUInt(kWeatherZipCodeKey, kWeatherZipCode);
+  if(!preferences.isKey(kWeatherCountryCodeKey)) {
+    String kWeatherCountryCodeString = kWeatherCountryCode.c_str();
+    preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
+  }
+  if(!preferences.isKey(kWeatherUnitsMetricNotImperialKey))
+    preferences.putBool(kWeatherUnitsMetricNotImperialKey, kWeatherUnitsMetricNotImperial);
+  if(!preferences.isKey(kAlarmLongPressSecondsKey))
+    preferences.putUChar(kAlarmLongPressSecondsKey, kAlarmLongPressSeconds);
+  if(!preferences.isKey(kFirmwareVersionKey)) {
+    String kFirmwareVersionString = kFirmwareVersion.c_str();
+    preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
+  }
+  if(!preferences.isKey(kCpuSpeedMhzKey))
+    preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
+  if(!preferences.isKey(kScreensaverMotionTypeKey))
+    preferences.putBool(kScreensaverMotionTypeKey, true);
+  if(!preferences.isKey(kNightTimeDimHourKey))
+    preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
+  if(!preferences.isKey(kScreenOrientationKey))
+    preferences.putUChar(kScreenOrientationKey, kScreenOrientation);
+  if(!preferences.isKey(kAutorunRgbLedStripModeKey))
+    preferences.putUChar(kAutorunRgbLedStripModeKey, kAutorunRgbLedStripMode);
+  if(!preferences.isKey(kUseLDRKey))
+    preferences.putBool(kUseLDRKey, kUseLDR);
 
-  // TODO:
-  // if data_model_version > 0 && data_model_version < kDataModelVersion -> fetch every key and add default for whichever key is not present
 
-  // newly added data variables
-  if(RetrieveNightTimeDimHour() == 0)
-    SaveNightTimeDimHour(kNightTimeDimHour);
-  if(RetrieveAutorunRgbLedStripMode() == 0)
-    SaveAutorunRgbLedStripMode(kAutorunRgbLedStripMode);
-  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  upgrade to DataModelVersion = 102's NVS Memory variables
-    SaveUseLdr(kUseLDR);
+  preferences.end();
 
-  if(data_model_version > 0 && data_model_version < kDataModelVersion)  //  upgrade DataModelVersion to latest
-    SaveDataModelVersion();
-  // Save Defaults is called from main's CopyEepromDataToNvsMemoryDuringUpdate() function
+  // nvs_preferences->PrintSavedData();
 
   Serial.println(F("ESP32 NVS Memory setup successful!"));
-}
-
-void NvsPreferences::RetrieveDataModelVersion() {
-  //init preference
- 	preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  data_model_version = preferences.getUInt(kDataModelVersionKey, 0);
-  preferences.end();
-  Serial.printf("Data Model Version read = %u\n", data_model_version);
-}
-
-void NvsPreferences::SaveDataModelVersion() {
-  //init preference
- 	preferences.begin(kNvsDataKey, /*readOnly = */ false);
-
-  // set default data
-  preferences.putUInt(kDataModelVersionKey, kDataModelVersion);
-  data_model_version = kDataModelVersion;
-  preferences.end();
-
-  Serial.printf("Data Version set = %u\n", kDataModelVersion);
-}
-
-void NvsPreferences::SaveDefaults() {
-  //init preference
- 	preferences.begin(kNvsDataKey, /*readOnly = */ false);
-
- 	// set default data
-  preferences.putUInt(kDataModelVersionKey, kDataModelVersion);
-  data_model_version = kDataModelVersion;
-  Serial.printf("Data Version set = %u\n", kDataModelVersion);
-
-  preferences.putUChar(kAlarmHrKey, kAlarmHr);
-  preferences.putUChar(kAlarmMinKey, kAlarmMin);
-  preferences.putBool(kAlarmIsAmKey, kAlarmIsAm);
-  preferences.putBool(kAlarmOnKey, kAlarmOn);
-  String kWiFiSsidString = kWiFiSsid.c_str();
-  preferences.putString(kWiFiSsidKey, kWiFiSsidString);
-  String kWiFiPasswdString = kWiFiPasswd.c_str();
-  preferences.putString(kWiFiPasswdKey, kWiFiPasswdString);
-  preferences.putUInt(kWeatherZipCodeKey, kWeatherZipCode);
-  String kWeatherCountryCodeString = kWeatherCountryCode.c_str();
-  preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
-  preferences.putBool(kWeatherUnitsMetricNotImperialKey, kWeatherUnitsMetricNotImperial);
-  preferences.putUChar(kAlarmLongPressSecondsKey, kAlarmLongPressSeconds);
-  String kFirmwareVersionString = kFirmwareVersion.c_str();
-  preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
-  preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
-  preferences.putBool(kScreensaverMotionTypeKey, true);
-  preferences.putUChar(kNightTimeDimHourKey, kNightTimeDimHour);
-  preferences.putUChar(kScreenOrientationKey, kScreenOrientation);
-  preferences.putUChar(kAutorunRgbLedStripModeKey, kAutorunRgbLedStripMode);
-  preferences.putBool(kUseLDRKey, kUseLDR);
-
-  preferences.end();
-
-  Serial.printf("Default Data Set in NVS Memory\n");
-  Serial.flush();
-
 }
 
 void NvsPreferences::PrintSavedData() {
@@ -250,7 +224,7 @@ void NvsPreferences::SaveScreensaverBounceNotFlyHorizontally(bool screensaver_bo
 
 uint8_t NvsPreferences::RetrieveNightTimeDimHour() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  uint8_t night_time_dim_hour = preferences.getUChar(kNightTimeDimHourKey, 0);
+  uint8_t night_time_dim_hour = preferences.getUChar(kNightTimeDimHourKey);
   preferences.end();
   Serial.printf("Retrieved NVS Memory night_time_dim_hour: %d PM\n", night_time_dim_hour);
   return night_time_dim_hour;
@@ -265,7 +239,7 @@ void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
 
 uint8_t NvsPreferences::RetrieveScreenOrientation() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  uint8_t screen_orientation = preferences.getUChar(kScreenOrientationKey, 3);
+  uint8_t screen_orientation = preferences.getUChar(kScreenOrientationKey);
   preferences.end();
   Serial.printf("Retrieved NVS Memory screen_orientation: %d\n", screen_orientation);
   return screen_orientation;

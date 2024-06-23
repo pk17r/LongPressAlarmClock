@@ -19,12 +19,7 @@ void RGBDisplay::Setup() {
   tft.init(kTftHeight, kTftWidth);           // Init ST7789 320x240
   tft.setSPISpeed(SPI_Speed);
   tft.invertDisplay(false);
-  // make display landscape orientation
-  // #if defined(TOUCHSCREEN_IS_XPT2046)   // touchscreen version display has things rotated 180 deg
-  //   tft.setRotation(3);
-  // #else
-  //   tft.setRotation(1);
-  // #endif
+  screen_orientation_ = nvs_preferences->RetrieveScreenOrientation();
   tft.setRotation(screen_orientation_);
 
 #elif defined(DISPLAY_IS_ST7735)
@@ -86,6 +81,15 @@ void RGBDisplay::Setup() {
     CheckTimeAndSetBrightness();
 
   PrintLn("Display Initialized!");
+}
+
+void RGBDisplay::RotateScreen() {
+  if(screen_orientation_ == 1)
+    screen_orientation_ = 3;
+  else
+    screen_orientation_ = 1;
+  nvs_preferences->SaveScreenOrientation(screen_orientation_);
+  tft.setRotation(screen_orientation_);
 }
 
 // set display brightness function

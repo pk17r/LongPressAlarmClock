@@ -48,7 +48,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - Get user input of WiFi details via an on-screen keyboard (when touchscreen is used and enabled)
   - Colorful Smooth Screensaver with a big clock
   - Touchscreen based alarm set page (touchscreen not on by default)
-  - Settings saved in EEPROM so not lost on power loss
+  - Settings saved in ESP32 NVM so not lost on power loss
   - Screen brightness changes according to time of the day, with lowest brightness setting at night time
   - Time critical tasks happen on core0 - time update, screensaver fast motion, alarm time trigger
   - Non Time critical tasks happen on core1 - update weather info using WiFi, update time using NTP server, connect/disconnect WiFi
@@ -119,7 +119,6 @@ void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
 void LedButtonClickUiResponse(int response_type);
-void CopyEepromDataToNvsMemoryDuringUpdate();
 
 // setup core1
 void setup() {
@@ -155,22 +154,20 @@ void setup() {
   // a delay to let currents stabalize and not have phantom serial inputs
   delay(1000);
   Serial.begin(115200);
+  Serial.println(F("\nSerial OK"));
 
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
   // debug_mode = true;
   if(debug_mode) {
     // while(!Serial) { delay(20); };   // Do not uncomment during commit!
-    Serial.println(F("\nSerial OK"));
     Serial.println(F("******** DEBUG MODE ******** : watchdog won't be activated!"));
-    Serial.flush();
   }
   else {
-    Serial.println(F("\nSerial OK"));
-    Serial.flush();
     // enable watchdog reset if not in debug mode
     SetWatchdogTime(kWatchdogTimeoutMs);
   }
+  Serial.flush();
 
   // initialize hardware spi
   #if defined(MCU_IS_RP2040)
@@ -193,8 +190,6 @@ void setup() {
   // initialize modules
   // setup nvs preferences data (needs to be first)
   nvs_preferences = new NvsPreferences();
-  if(nvs_preferences->data_model_version == 0)  // first time MCU being flashed or being updated from EEPROM only version
-    CopyEepromDataToNvsMemoryDuringUpdate();
   // check if firmware was updated
   std::string saved_firmware_version = "";
   nvs_preferences->RetrieveSavedFirmwareVersion(saved_firmware_version);
@@ -864,6 +859,14 @@ void SetWatchdogTime(unsigned long ms) {
     // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
     esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
     esp_task_wdt_add(NULL); //add current thread to WDT watch
+
+    // https://github.com/espressif/esp-idf/blob/master/examples/system/task_watchdog/main/task_watchdog_example_main.c
+    // esp_task_wdt_config_t twdt_config = {
+    //       .timeout_ms = ms,
+    //       .idle_core_mask = (1 << CONFIG_SOC_CPU_CORES_NUM) - 1,    // Bitmask of all cores
+    //       .trigger_panic = true,
+    //   };
+    // esp_task_wdt_init(&twdt_config);
   #endif
 }
 
@@ -934,6 +937,9 @@ void ProcessSerialInput() {
     case 'g':   // good morning
       display->GoodMorningScreen();
       break;
+    case 'h':   // 
+      
+      break;
     case 'i':   // set WiFi details
       {
         Serial.println(F("**** Enter WiFi Details ****"));
@@ -964,6 +970,12 @@ void ProcessSerialInput() {
     case 'k':   // set firmware updated flag true
       Serial.println(F("**** set firmware updated flag true ****"));
       firmware_updated_flag_user_information = true;
+      break;
+    case 'l':   // 
+      nvs_preferences->RetrieveScreenOrientation();
+      break;
+    case 'm':   // 
+      display->RotateScreen();
       break;
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
@@ -1211,7 +1223,7 @@ void SetPage(ScreenPage set_this_page) {
             wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + returnText[i];
             i++;
           }
-          PrintLn("EEPROM wifi_ssid: ", wifi_stuff->wifi_ssid_);
+          PrintLn("Saved wifi_ssid: ", wifi_stuff->wifi_ssid_);
           wifi_stuff->SaveWiFiDetails();
         }
         SetPage(kWiFiSettingsPage);
@@ -1235,7 +1247,7 @@ void SetPage(ScreenPage set_this_page) {
             wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + returnText[i];
             i++;
           }
-          PrintLn("EEPROM wifi_password_: ", wifi_stuff->wifi_password_);
+          PrintLn("Saved wifi_password_: ", wifi_stuff->wifi_password_);
           wifi_stuff->SaveWiFiDetails();
         }
         SetPage(kWiFiSettingsPage);
@@ -1478,13 +1490,8 @@ void LedButtonClickAction() {
       }
       else if(current_cursor == kSettingsPageRotateScreen) {
         // rotate screen 180 degrees
-        if(alarm_clock->alarm_long_press_seconds_ < 25)
-          alarm_clock->alarm_long_press_seconds_ += 10;
-        else
-          alarm_clock->alarm_long_press_seconds_ = 5;
-        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec";
-        nvs_preferences->SaveLongPressSeconds(alarm_clock->alarm_long_press_seconds_);
-        LedButtonClickUiResponse();
+        display->RotateScreen();
+        SetPage(kSettingsPage);
       }
       else if(current_cursor == kSettingsPageUpdate) {
         LedButtonClickUiResponse(2);
@@ -1652,61 +1659,4 @@ void LedButtonClickAction() {
     }
   }
 }
-
-void CopyEepromDataToNvsMemoryDuringUpdate() {
-
-  // check if EEPROM is present
-  Wire.setPins(SDA_PIN, SCL_PIN);
-  bool eeprom_present = false;
-  Serial.println("I2C address detection test");
-  Adafruit_I2CDevice i2c_dev = Adafruit_I2CDevice(0x57, &Wire);
-  if (!i2c_dev.begin()) {
-    Serial.println("Did not find EEPROM.");
-  }
-  else {
-    Serial.println("EEPROM found.");
-    eeprom_present = true;
-  }
-
-  // save defaults first
-  nvs_preferences->SaveDefaults();
-
-  // if EEPROM is present then copy its data to NVS
-  if(eeprom_present) {
-    // setup eeprom
-    EEPROM eeprom_temp_obj;    // External EEPROM HW class object
-    uint8_t long_press_seconds;
-    eeprom_temp_obj.RetrieveLongPressSeconds(long_press_seconds);
-    nvs_preferences->SaveLongPressSeconds(long_press_seconds);
-    uint8_t alarmHr, alarmMin;
-    bool alarmIsAm, alarmOn;
-    eeprom_temp_obj.RetrieveAlarmSettings(alarmHr, alarmMin, alarmIsAm, alarmOn);
-    nvs_preferences->SaveAlarm(alarmHr, alarmMin, alarmIsAm, alarmOn);
-    std::string wifi_ssid, wifi_password;
-    eeprom_temp_obj.RetrieveWiFiDetails(wifi_ssid, wifi_password);
-    nvs_preferences->SaveWiFiDetails(wifi_ssid, wifi_password);
-    uint32_t location_zip_code;
-    std::string location_country_code;
-    bool weather_units_metric_not_imperial;
-    eeprom_temp_obj.RetrieveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
-    nvs_preferences->SaveWeatherLocationDetails(location_zip_code, location_country_code, weather_units_metric_not_imperial);
-    std::string savedFirmwareVersion;
-    eeprom_temp_obj.RetrieveSavedFirmwareVersion(savedFirmwareVersion);
-    nvs_preferences->CopyFirmwareVersionFromEepromToNvs(savedFirmwareVersion);
-    uint32_t eeprom_cpu_speed_mhz = eeprom_temp_obj.RetrieveSavedCpuSpeed();
-    nvs_preferences->CopyCpuSpeedFromEepromToNvsMemory(eeprom_cpu_speed_mhz);
-    bool screensaverBounceNotFlyHorizontally = eeprom_temp_obj.RetrieveScreensaverBounceNotFlyHorizontally();
-    nvs_preferences->SaveScreensaverBounceNotFlyHorizontally(screensaverBounceNotFlyHorizontally);
-    nvs_preferences->SaveUseLdr(use_photoresistor);
-
-    nvs_preferences->SaveDataModelVersion();
-
-    Serial.println("EEPROM data copied to NVS Memory.");
-  }
-
-  nvs_preferences->PrintSavedData();
-}
-
-
-
 
