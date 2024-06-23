@@ -52,6 +52,7 @@ public:
   // function to get x, y and isTouched flag
   TouchPixel* GetTouchedPixel();
 
+  void SetTouchscreenOrientation();
 };
 
 #endif  // TOUCHSCREEN_H
