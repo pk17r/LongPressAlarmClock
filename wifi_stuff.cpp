@@ -63,11 +63,13 @@ bool WiFiStuff::TurnWiFiOn() {
   delay(1);
   WiFi.persistent(true);
   delay(1);
+  PrintLn(wifi_ssid_.c_str());
+  PrintLn(wifi_password_.c_str());
   WiFi.begin(wifi_ssid_.c_str(), wifi_password_.c_str());
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
     delay(500);
-    // Serial.print(".");
+    PrintLn(".");
     i++;
     if(i >= 5) break;
   }

@@ -5,10 +5,10 @@
 
 // SELECT MCU
 
-#define MCU_IS_ESP32_S2_MINI
+// #define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 // #define MCU_IS_RASPBERRY_PI_PICO_W
-// #define MCU_IS_ESP32_S3
+#define MCU_IS_ESP32_S3
 
 
 // SELECT DISPLAY
@@ -31,12 +31,12 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.2"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.3"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.3"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
 #define ESP32_S3_FIRMWARE_VERSION                 "2.3"
-const std::string kFirmwareDate = "Apr 20, 2024";
+const std::string kFirmwareDate = "Jun 22, 2024";
 
-const std::string kChangeLog = "- Bug fixes\n- RGB LED Hardware\n- Moved from EEPROM to NVM";
+const std::string kChangeLog = "- Screen Rotation Added";
 
 #endif  // CONFIGURATION_H

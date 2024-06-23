@@ -30,8 +30,8 @@
   const int SDA_PIN = 8;
   const int SCL_PIN = 9;
   const int BUTTON_PIN = 6;
-  const int INC_BUTTON_PIN = 11;
-  const int DEC_BUTTON_PIN = 10;
+  const int INC_BUTTON_PIN = 10;
+  const int DEC_BUTTON_PIN = 11;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
   const int LED_PIN = 5;
   // const int LED_BUILTIN = 15;   // pre-defined
