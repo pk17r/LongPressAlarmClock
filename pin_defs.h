@@ -19,11 +19,9 @@
   const int TFT_DC = 38;
   const int TFT_BL = 17;  //  controls TFT Display backlight as output of PWM pin
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-    const int TS_CIPO = 37;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 2;
-    const int TS_IRQ_PIN = 3;
-  // #endif
+  const int TS_CIPO = 37;    // don't connect CIPO (MISO) to TFT
+  const int TS_CS_PIN = 2;
+  const int TS_IRQ_PIN = 3;
 
   // Sqw Alarm Interrupt Pin
   const int SQW_INT_PIN = 7;
@@ -58,11 +56,9 @@
   const int TFT_DC = 26;
   const int TFT_BL = 14;  //  controls TFT Display backlight as output of PWM pin
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-    const int TS_CIPO = 19;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 33;
-    const int TS_IRQ_PIN = 34;
-  // #endif
+  const int TS_CIPO = 19;    // don't connect CIPO (MISO) to TFT
+  const int TS_CS_PIN = 33;
+  const int TS_IRQ_PIN = 34;
 
   // Sqw Alarm Interrupt Pin
   const int SQW_INT_PIN = 4;
@@ -98,11 +94,9 @@
   const int TFT_DC = 21;
   const int TFT_BL = 22;  //  controls TFT Display backlight as output of PWM pin
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-    const int TS_CIPO = 16;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 26;
-    const int TS_IRQ_PIN = 27;
-  // #endif
+  const int TS_CIPO = 16;    // don't connect CIPO (MISO) to TFT
+  const int TS_CS_PIN = 26;
+  const int TS_IRQ_PIN = 27;
 
   // Sqw Alarm Interrupt Pin
   const int SQW_INT_PIN = 3;
@@ -134,11 +128,9 @@
   const int TFT_DC = 21;
   const int TFT_BL = 47;  //  controls TFT Display backlight as output of PWM pin
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-    const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
-    const int TS_CS_PIN = 17;
-    const int TS_IRQ_PIN = 48;
-  // #endif
+  const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
+  const int TS_CS_PIN = 17;
+  const int TS_IRQ_PIN = 48;
 
   // Sqw Alarm Interrupt Pin
   const int SQW_INT_PIN = 18;

@@ -127,10 +127,8 @@ void setup() {
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
 
-  // #if defined(TOUCHSCREEN_IS_XPT2046)
-    pinMode(TS_CS_PIN, OUTPUT);
-    digitalWrite(TS_CS_PIN, HIGH);
-  // #endif
+  pinMode(TS_CS_PIN, OUTPUT);
+  digitalWrite(TS_CS_PIN, HIGH);
 
   // make buzzer pin low
   pinMode(BUZZER_PIN, OUTPUT);
@@ -175,11 +173,7 @@ void setup() {
     spi_obj->begin();   // Hardware SPI
   #elif defined(MCU_IS_ESP32)
     spi_obj = new SPIClass(HSPI);
-    // #if defined(TOUCHSCREEN_IS_XPT2046)
-      spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
-    // #else
-    //   spi_obj->begin(TFT_CLK, -1, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
-    // #endif
+    spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
   #endif
 
   // initialize push button
@@ -983,6 +977,8 @@ void ProcessSerialInput() {
       break;
     case 'm':   // 
       display->RotateScreen();
+      if(ts != NULL)
+          ts->SetTouchscreenOrientation();
       break;
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
@@ -1498,6 +1494,8 @@ void LedButtonClickAction() {
       else if(current_cursor == kSettingsPageRotateScreen) {
         // rotate screen 180 degrees
         display->RotateScreen();
+        if(ts != NULL)
+          ts->SetTouchscreenOrientation();
         SetPage(kSettingsPage);
       }
       else if(current_cursor == kSettingsPageUpdate) {
