@@ -12,17 +12,17 @@
 #elif defined(DISPLAY_IS_ILI9488)
   #include "ILI9488_t3.h"   // Teensy Hardware DMA accelerated library
 #endif
-#include <Fonts/ComingSoon_Regular70pt7b.h>   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
-#include <Fonts/FreeSansBold48pt7b.h>
-#include <Fonts/Satisfy_Regular24pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
-#include <Fonts/FreeSansBold24pt7b.h>
-#include <Fonts/FreeSans24pt7b.h>
-#include <Fonts/FreeSans18pt7b.h>
-#include <Fonts/Satisfy_Regular18pt7b.h>     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
-#include <Fonts/FreeSansBold12pt7b.h>
-#include <Fonts/FreeSans12pt7b.h>
-#include <Fonts/FreeMonoBold9pt7b.h>
-#include <Fonts/FreeMono9pt7b.h>
+#include "Fonts/ComingSoon_Regular70pt7b_numbers_only.h"   // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/ and reduced in size
+#include "Fonts/FreeSansBold48pt7b_numbers_only.h"         // from https://rop.nl/truetype2gfx/ and reduced in size
+#include "Fonts/Satisfy_Regular24pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include "Fonts/FreeSansBold24pt7b.h"       // from Adafruit_GFX library
+#include "Fonts/FreeSans24pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeSans18pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/Satisfy_Regular18pt7b.h"     // from https://fonts.google.com/ and converted using https://rop.nl/truetype2gfx/
+#include "Fonts/FreeSansBold12pt7b.h"       // from Adafruit_GFX library
+#include "Fonts/FreeSans12pt7b.h"           // from Adafruit_GFX library
+#include "Fonts/FreeMonoBold9pt7b.h"        // from Adafruit_GFX library
+#include "Fonts/FreeMono9pt7b.h"            // from Adafruit_GFX library
 #include <SPI.h>
 #if defined(MCU_IS_ESP32)
   #include <pgmspace.h>
