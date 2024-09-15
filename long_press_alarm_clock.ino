@@ -1195,8 +1195,12 @@ void SetPage(ScreenPage set_this_page) {
       current_page = set_this_page;     // new page needs to be set before any action
       display->AlarmTriggeredScreen(true, alarm_clock->alarm_long_press_seconds_);
       break;
-    case kSettingsPage:
     case kWiFiSettingsPage:
+      // try to connect to WiFi
+      AddSecondCoreTaskIfNotThere(kConnectWiFi);
+      WaitForExecutionOfSecondCoreTask();
+      // show page
+    case kSettingsPage:
     case kLocationAndWeatherSettingsPage:
     case kScreensaverSettingsPage:
       current_page = set_this_page;     // new page needs to be set before any action
@@ -1383,9 +1387,9 @@ void PopulateDisplayPages() {
 
   // WIFI SETTINGS PAGE
   display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kRowClickButton, "Ssid Pwd:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
-    new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kRowClickButton, "Clear Ssid Passwd:", false, 0,0,0,0, "CLEAR" },
-    new DisplayButton{ kWiFiSettingsPageConnect, kRowClickButton, "Connect WiFi:", false, 0,0,0,0, "CONNECT" },
+    new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kRowClickButton, "Set WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
+    new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kRowClickButton, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
+    new DisplayButton{ kWiFiSettingsPageConnect, kRowClickButton, "Connect to WiFi:", false, 0,0,0,0, "CONNECT" },
     new DisplayButton{ kWiFiSettingsPageDisconnect, kRowClickButton, "Disconnect WiFi:", false, 0,0,0,0, "DISCONNECT" },
     page_cancel_button,
   };
@@ -1439,6 +1443,11 @@ int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor) {
   return -1;
 }
 
+/*  1: turn On Button & wait,
+    2: turn On Button,
+    3: turn Off Button,
+    default: turn On Button, wait & turn Off button
+*/
 void LedButtonClickUiResponse(int response_type = 0) {
   switch (response_type) {
     case 1:   // turn On Button, wait
@@ -1556,16 +1565,16 @@ void LedButtonClickAction() {
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->SaveWiFiDetails();
+        // populate info of WiFi on button
         int display_pages_vec_wifi_ssid_passwd_button_index = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageSetSsidPasswd);
         display_pages_vec[kWiFiSettingsPage][display_pages_vec_wifi_ssid_passwd_button_index]->btn_value = wifi_stuff->WiFiDetailsShortString();
-        SetPage(kWiFiSettingsPage);
       }
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kWiFiSettingsPage);
       }
+      SetPage(kWiFiSettingsPage);
     }
     else if(current_page == kLocationAndWeatherSettingsPage) {       // LOCATION AND WEATHER SETTINGS PAGE
       if(current_cursor == kLocationAndWeatherSettingsPageSetLocation) {
@@ -1620,6 +1629,7 @@ void LedButtonClickAction() {
         WaitForExecutionOfSecondCoreTask();
         SetPage(kLocationAndWeatherSettingsPage);
       }
+      
     }
     else if(current_page == kScreensaverSettingsPage) {        // SCREENSAVER SETTINGS PAGE
       if(current_cursor == kScreensaverSettingsPageMotion) {
