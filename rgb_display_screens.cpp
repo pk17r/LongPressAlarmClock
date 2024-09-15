@@ -773,7 +773,7 @@ void RGBDisplay::LocationInputsLocalServerPage() {
   tft.setCursor(10, 50);
   tft.print("Have your mobile connected");
   tft.setCursor(10, 70);
-  tft.print("to the following WiFi Network:");
+  tft.print("to the following WiFi:");
 
   tft.setCursor(10, 100);
   tft.setFont(&FreeSansBold12pt7b);

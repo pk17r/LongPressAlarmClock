@@ -219,6 +219,7 @@ extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void CycleCpuFrequency();
+extern void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button);
 extern void SetPage(ScreenPage set_this_page);
 extern void SetWatchdogTime(unsigned long ms);
 extern void ResetWatchdog();

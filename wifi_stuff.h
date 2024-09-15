@@ -53,7 +53,7 @@ public:
   bool got_weather_info_ = false;   // whether weather information has been pulled
   uint8_t get_weather_info_wait_seconds_ = 0;   // wait to delay weather info pulls
   unsigned long last_fetch_weather_info_time_ms_ = 0;
-  const unsigned long kFetchWeatherInfoMinIntervalMs = 60*1000;    //  1 minute
+  const unsigned long kFetchWeatherInfoMinIntervalMs = 5*1000;    //  5 seconds
   bool incorrect_zip_code = false;
 
   bool auto_updated_time_today_ = false;   // auto update time once every day at 2:01 AM
