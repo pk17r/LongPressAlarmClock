@@ -26,12 +26,12 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.4"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.5"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
 #define ESP32_S3_FIRMWARE_VERSION                 "2.4"
-const std::string kFirmwareDate = "Jun 22, 2024";
+const std::string kFirmwareDate = "Sep 15, 2024";
 
-const std::string kChangeLog = "- Screen Rotation Added";
+const std::string kChangeLog = "- RGB LEDs Settings\n- WiFi & Location Settings\n  Flow enhancements.";
 
 #endif  // CONFIGURATION_H
