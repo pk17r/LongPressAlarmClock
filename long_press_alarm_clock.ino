@@ -454,7 +454,7 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // check for inactivity
-    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 5 * kInactivityMillisLimit : kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 20 * kInactivityMillisLimit : kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
@@ -1355,6 +1355,8 @@ void MoveCursor(bool increment) {
     }
   }
   display->DisplayCursorHighlight(/*highlight_On = */ true);
+  // wait a little
+  delay(2*kUserInputDelayMs);
 }
 
 // populate all pages in display_pages_vec

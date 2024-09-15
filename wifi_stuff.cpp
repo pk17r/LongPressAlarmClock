@@ -505,18 +505,19 @@ const char index_html_wifi_details[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent! Press 'Save' on device to set!");
+      alert("Sent! Please press 'Save' on device to complete operation!");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
     <h4>Enter WiFi Details:</h4>
-    <label>WiFi SSID (2.4GHz):</label><br>
+    <label>WiFi SSID (NOTE: Enter 2.4GHz WiFi, not 5G):</label><br>
     <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
     <label>WiFi Password:</label><br>
     <input type="text" name="html_passwd" value="%html_passwd%"><br><br>
-    <input type="submit" value="Submit" onclick="submitMessage()">
+    <input type="submit" value="Submit" onclick="submitMessage()"><br>
+    <label>Remember to press Save on the clock!</label><br>
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
@@ -528,7 +529,7 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent! Press 'Save' on device to set!");
+      alert("Sent! Please press 'Save' on device to complete operation!");
       setTimeout(function(){ document.location.reload(false); }, 500);   
     }
   </script></head><body>
@@ -541,7 +542,8 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
     <a href="https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes#Current_ISO_3166_country_codes" target="_blank">List</a>
     <label>):</label><br>
     <input type="text" name="html_country_code" value="%html_country_code%" oninput="this.value = this.value.toUpperCase()"><br><br>
-    <input type="submit" value="Submit" onclick="submitMessage()">
+    <input type="submit" value="Submit" onclick="submitMessage()"><br>
+    <label>Remember to press Save on the clock!</label><br>
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";

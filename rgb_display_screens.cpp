@@ -155,7 +155,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     // processUserInput
 
     // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
-    //    0 = no button clicked
+    //    0 = no button clicked or Big Button Pressed (Move to next Operation)
     //    1 = Hr Inc button
     //    2 = Hr Dec button
     //    3 = Min Inc button
@@ -207,7 +207,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     else {
       // button input
       // userButtonClick : 1 and 2 for Hr increase, dec button respectively; 3,4 min; 5,6 AmPm;
-      //    0 = no button clicked
+      //    0 = no button clicked or Big Button Pressed (Move to next Operation)
       //    1 = Hr Inc button
       //    2 = Hr Dec button
       //    3 = Min Inc button
@@ -219,6 +219,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       //    9 = Set button
       //    10 = Cancel button
 
+      // set new cursor position
       if(current_cursor == kAlarmSetPageHour) {
         if(inc_button_pressed) userButtonClick = 1;
         else if(dec_button_pressed) userButtonClick = 2;
@@ -406,6 +407,10 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
       delay(2*kUserInputDelayMs);
       // go back to main page
       SetPage(kMainPage);
+    }
+    else if(userButtonClick == 0) {
+      // wait a little
+      delay(3*kUserInputDelayMs);
     }
     
   }
@@ -697,38 +702,54 @@ void RGBDisplay::RealTimeOnScreenOutput(std::string text, int width) {
 void RGBDisplay::SoftApInputsPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
+
+  // Page Title
+  tft.setFont(&FreeMonoBold9pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.setCursor(kDisplayTextGap, 20);
+  tft.print("SET WIFI DETAILS USING MOBILE");
+
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.setCursor(10, 20);
-  tft.print("Connect to Created WiFi");
-  tft.setCursor(10, 40);
-  tft.print("using mobile/computer.");
-  tft.setCursor(10, 60);
-  tft.print("WiFi SSID:");
-
+  tft.setCursor(10, 50);
+  // tft.print("Connect to Created WiFi");
+  tft.print("A WiFi AP has been created.");
+  tft.setCursor(10, 70);
+  // tft.print("using mobile/computer.");
+  tft.print("Using your Mobile connect to");
   tft.setCursor(10, 90);
+  // tft.print("WiFi SSID:");
+  tft.print("this WiFi Access Point:");
+
+  tft.setCursor(10, 120);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(softApSsid);
 
-  tft.setCursor(10, 120);
+  tft.setCursor(10, 150);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.print("Open web browser and in");
-  tft.setCursor(10, 140);
-  tft.print("address bar enter:");
-
+  // tft.print("Open web browser and in");
+  tft.print("Once connected, open a web");
   tft.setCursor(10, 170);
+  // tft.print("address bar enter:");
+  tft.print("browser and in address bar");
+
+  tft.setCursor(10, 200);
+  tft.print("enter:");
+
+  tft.setCursor(80, 200);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(wifi_stuff->soft_AP_IP.c_str());
 
-  tft.setCursor(10, 200);
+  tft.setCursor(10, 230);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.print("Set your 2.4GHz");
-  tft.setCursor(10, 220);
-  tft.print("WiFi details.");
+  // tft.print("Set your 2.4GHz");
+  tft.print("& set WiFi Details.");
+  // tft.setCursor(10, 220);
+  // tft.print("WiFi details.");
 
   // Save button
   DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
@@ -740,38 +761,41 @@ void RGBDisplay::SoftApInputsPage() {
 void RGBDisplay::LocationInputsLocalServerPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
+
+  // Page Title
+  tft.setFont(&FreeMonoBold9pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.setCursor(kDisplayTextGap, 20);
+  tft.print("SET LOCATION USING MOBILE");
+
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.setCursor(10, 20);
-  tft.print("Connect to this WiFi");
-  tft.setCursor(10, 40);
-  tft.print("using mobile/computer.");
-  tft.setCursor(10, 60);
-  tft.print("WiFi SSID:");
+  tft.setCursor(10, 50);
+  tft.print("Have your mobile connected");
+  tft.setCursor(10, 70);
+  tft.print("to the following WiFi Network:");
 
-  tft.setCursor(10, 90);
+  tft.setCursor(10, 100);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(wifi_stuff->wifi_ssid_.c_str());
 
-  tft.setCursor(10, 120);
+  tft.setCursor(10, 130);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.print("Open web browser and in");
-  tft.setCursor(10, 140);
+  tft.print("Now open web browser and in");
+  tft.setCursor(10, 150);
   tft.print("address bar enter:");
 
-  tft.setCursor(10, 170);
+  tft.setCursor(10, 180);
   tft.setFont(&FreeSansBold12pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.print(wifi_stuff->soft_AP_IP.c_str());
 
-  tft.setCursor(10, 200);
+  tft.setCursor(10, 210);
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  tft.print("Set Location");
-  tft.setCursor(10, 220);
-  tft.print("details.");
+  tft.print("& set Location.");
 
   // Save button
   DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
