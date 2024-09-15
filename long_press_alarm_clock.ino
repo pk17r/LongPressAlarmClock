@@ -119,6 +119,8 @@ void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
 void LedButtonClickUiResponse(int response_type);
+void RunRgbLedAccordingToSettings();
+const char* RgbLedSettingString();
 
 // setup core1
 void setup() {
@@ -248,8 +250,7 @@ void setup() {
   rgb_led_strip = new Adafruit_NeoPixel(kRgbStripLedCount, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
   rgb_led_strip->begin();
   autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
-  if(autorun_rgb_led_strip_mode > 1)
-    TurnOnRgbStrip();
+  RunRgbLedAccordingToSettings();
 
   PopulateDisplayPages(); // needs to be after all saved values have been retrieved
 
@@ -429,18 +430,7 @@ void loop() {
       #endif
 
       // set rgb led strip
-      if(autorun_rgb_led_strip_mode == 3) { // run rgb led strip all evening + night
-        if(rtc->todays_minutes >= kEveningTimeMinutes || rtc->todays_minutes < kDayTimeMinutes)
-          TurnOnRgbStrip();
-        else
-          TurnOffRgbStrip();
-      }
-      else if(autorun_rgb_led_strip_mode == 2) {  // // run rgb led strip all evening only
-        if(rtc->todays_minutes >= kEveningTimeMinutes && rtc->todays_minutes < night_time_minutes)
-          TurnOnRgbStrip();
-        else
-          TurnOffRgbStrip();
-      }
+      RunRgbLedAccordingToSettings();
     }
 
     // prepare date and time arrays
@@ -639,15 +629,46 @@ void WaitForExecutionOfSecondCoreTask() {
   #endif
 }
 
+void RunRgbLedAccordingToSettings() {
+  // set rgb led strip
+  if(autorun_rgb_led_strip_mode == 3) { // run rgb led strip all evening + night
+    if(rtc->todays_minutes >= kEveningTimeMinutes || rtc->todays_minutes < kDayTimeMinutes)
+      TurnOnRgbStrip();
+    else
+      TurnOffRgbStrip();
+  }
+  else if(autorun_rgb_led_strip_mode == 2) {  // // run rgb led strip all evening only
+    if(rtc->todays_minutes >= kEveningTimeMinutes && rtc->todays_minutes < night_time_minutes)
+      TurnOnRgbStrip();
+    else
+      TurnOffRgbStrip();
+  }
+  else if(autorun_rgb_led_strip_mode == 1)
+    TurnOnRgbStrip();
+  else
+    TurnOffRgbStrip();
+}
+
+const char* RgbLedSettingString() {
+  switch (autorun_rgb_led_strip_mode) {
+    case 0: return manualOffStr;
+    case 1: return manualOnStr;
+    case 2: return eveningStr;
+    case 3: return sunDownStr;
+    default: return manualOffStr;
+  }
+}
+
 // GLOBAL VARIABLES AND FUNCTIONS
 
 bool use_photoresistor = false;
 
 int current_rgb_led_strip_index = 0;
 
-// 1 = manual
-// 2 = autorun at evening
-// 3 = autorun at evening + night
+/* 0 = manual OFF
+ 1 = manual ON
+ 2 = autorun at evening
+ 3 = autorun at sun-down */
 uint8_t autorun_rgb_led_strip_mode = 2;
 
 // minute of day at which to dim display to night time brightness if not using a LDR
@@ -1054,9 +1075,9 @@ void ProcessSerialInput() {
       if(autorun_rgb_led_strip_mode < 3)
         autorun_rgb_led_strip_mode++;
       else
-        autorun_rgb_led_strip_mode = 1;
+        autorun_rgb_led_strip_mode = 0;
       nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
-      PrintLn("RGB LED Strip Mode = ", (autorun_rgb_led_strip_mode == 1 ? manualStr : (autorun_rgb_led_strip_mode == 2 ? eveningStr : sunDownStr)));
+      PrintLn("RGB LED Strip Mode = ", RgbLedSettingString());
       break;
     case 'y':   // show alarm triggered screen
       Serial.println(F("**** Show Alarm Triggered Screen ****"));
@@ -1171,10 +1192,6 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button) {
       display->DisplayTimeUpdate();
       // useful flag to show on UI the latest firmware in Settings Page
       wifi_stuff->firmware_update_available_str_ = "";
-      // if(autorun_rgb_led_strip_mode > 1)  // if in auto mode, then make it white
-      //   TurnOnRgbStrip();
-      // else if(rgb_led_strip_on)
-      //   TurnOnRgbStrip();   // if in manual mode and already on then make it white
       break;
     case kScreensaverPage:
       current_page = set_this_page;      // new page needs to be set before any action
@@ -1382,8 +1399,8 @@ void PopulateDisplayPages() {
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kSettingsPageWiFi, kRowClickButton, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
     new DisplayButton{ kSettingsPageLocationAndWeather, kRowClickButton, "Location Settings:", false, 0,0,0,0, "LOCATION" },
-    new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickButton, "Alarm Long Press Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
-    new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Screensaver Set:", false, 0,0,0,0, "SCREENSAVER" },
+    new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickButton, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
     new DisplayButton{ kSettingsPageRotateScreen, kRowClickButton, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     new DisplayButton{ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
     page_cancel_button,
@@ -1424,8 +1441,8 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? bounceScreensaverStr : flyOutScreensaverStr) },
     new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? slowStr : (cpu_speed_mhz == 160 ? medStr : fastStr)) },
     new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, "Night Time Hour:", false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
-    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "AutoRun RGB LED Strip Mode:", false, 0,0,0,0, (autorun_rgb_led_strip_mode == 1 ? manualStr : (autorun_rgb_led_strip_mode == 2 ? eveningStr : sunDownStr)) },
+    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
+    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
     page_cancel_button,
   };
 
@@ -1674,9 +1691,10 @@ void LedButtonClickAction() {
         if(autorun_rgb_led_strip_mode < 3)
           autorun_rgb_led_strip_mode++;
         else
-          autorun_rgb_led_strip_mode = 1;
+          autorun_rgb_led_strip_mode = 0;
         nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
-        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (autorun_rgb_led_strip_mode == 1 ? manualStr : (autorun_rgb_led_strip_mode == 2 ? eveningStr : sunDownStr));
+        RunRgbLedAccordingToSettings();
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = RgbLedSettingString();
         LedButtonClickUiResponse();
       }
       else if(current_cursor == kPageCancelButton) {
