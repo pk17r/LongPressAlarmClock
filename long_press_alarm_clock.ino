@@ -868,19 +868,25 @@ void SetWatchdogTime(unsigned long ms) {
     // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
     rp2040.wdt_begin(ms);
   #elif defined(MCU_IS_ESP32)
-    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
-    esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
-    esp_task_wdt_add(NULL); //add current thread to WDT watch
-
-    // https://github.com/espressif/esp-idf/blob/master/examples/system/task_watchdog/main/task_watchdog_example_main.c
-    // esp_task_wdt_config_t twdt_config = {
-    //       .timeout_ms = ms,
-    //       .idle_core_mask = (1 << CONFIG_SOC_CPU_CORES_NUM) - 1,    // Bitmask of all cores
-    //       .trigger_panic = true,
-    //   };
-    // esp_task_wdt_init(&twdt_config);
+    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    // Code for version 3.x
+      // esp32 watchdog example https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
+      esp_task_wdt_config_t twdt_config = {
+          .timeout_ms = ms,
+          .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
+          .trigger_panic = true,
+      };
+      esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
+      esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
+      esp_task_wdt_add(NULL); //add current thread to WDT watch
+    #else
+    // Code for version 2.x
+      // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
+      esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
+      esp_task_wdt_add(NULL); //add current thread to WDT watch
+    #endif
   #endif
 }
 

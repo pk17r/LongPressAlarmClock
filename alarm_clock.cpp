@@ -154,10 +154,21 @@ bool AlarmClock::PassiveBuzzerTimerISR(struct repeating_timer *t) {
 void AlarmClock::BuzzerEnable() {
   // Timer Enable
   #if defined(MCU_IS_ESP32)
-  // Set alarm to call onTimer function every second (value in microseconds).
-  // Repeat the alarm (third parameter) with unlimited count = 0 (fourth parameter).
-  // timerAlarm(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true, 0);
-  timerAlarmEnable(passive_buzzer_timer_ptr_);
+    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    // Code for version 3.x
+      // Set timer frequency to 1Mhz
+      passive_buzzer_timer_ptr_ = timerBegin(1000000);
+
+      // Attach onTimer function to our timer.
+      timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR);
+
+      // Set alarm to call onTimer function every second (value in microseconds).
+      // Repeat the alarm (third parameter) with unlimited count = 0 (fourth parameter).
+      timerAlarm(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true, 0);
+    #else
+    // Code for version 2.x
+      timerAlarmEnable(passive_buzzer_timer_ptr_);
+    #endif
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
     add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
@@ -169,13 +180,17 @@ void AlarmClock::BuzzerEnable() {
 void AlarmClock::BuzzerDisable() {
   // Timer Disable
   #if defined(MCU_IS_ESP32)
-    // If timer is still running
-    // if (passive_buzzer_timer_ptr_) {
-    //   // Stop and free timer
-    //   timerEnd(passive_buzzer_timer_ptr_);
-    //   passive_buzzer_timer_ptr_ = NULL;
-    // }
-    timerAlarmDisable(passive_buzzer_timer_ptr_);
+    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    // Code for version 3.x
+      if (passive_buzzer_timer_ptr_) {
+        // Stop and free timer
+        timerEnd(passive_buzzer_timer_ptr_);
+        passive_buzzer_timer_ptr_ = NULL;
+      }
+    #else
+    // Code for version 2.x
+      timerAlarmDisable(passive_buzzer_timer_ptr_);
+    #endif
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     cancel_repeating_timer(passive_buzzer_timer_ptr_);
   #endif
@@ -190,13 +205,14 @@ void AlarmClock::BuzzerDisable() {
 void AlarmClock::SetupBuzzerTimer() {
 
   #if defined(MCU_IS_ESP32)
-    passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
-    timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
-    timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true);
-    // Set timer frequency to 1Mhz
-    // passive_buzzer_timer_ptr_ = timerBegin(1000000);
-    // // Attach onTimer function to our timer.
-    // timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR);
+    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+    // Code for version 3.x
+    #else
+    // Code for version 2.x
+      passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
+      timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
+      timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true);
+    #endif
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     passive_buzzer_timer_ptr_ = new struct repeating_timer;
   #endif

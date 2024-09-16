@@ -10,18 +10,21 @@
 #include "SPI.h"
 #include <elapsedMillis.h>
 
-#if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-  const std::string kFirmwareVersion = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
-  const std::string kFwSearchStr = "ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION";
-#elif defined(MCU_IS_ESP32_S2_MINI)
+#if defined(MCU_IS_ESP32_S2_MINI)
   const std::string kFirmwareVersion = ESP32_S2_MINI_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "ESP32_S2_MINI_FIRMWARE_VERSION";
+  #define CONFIG_FREERTOS_NUMBER_OF_CORES 1       // watchdog timer usage https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
+#elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+  const std::string kFirmwareVersion = ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION;
+  const std::string kFwSearchStr = "ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION";
+  #define CONFIG_FREERTOS_NUMBER_OF_CORES 2
 #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
   const std::string kFirmwareVersion = RASPBERRY_PI_PICO_W_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "RASPBERRY_PI_PICO_W_FIRMWARE_VERSION";
 #elif defined(MCU_IS_ESP32_S3)
   const std::string kFirmwareVersion = ESP32_S3_FIRMWARE_VERSION;
   const std::string kFwSearchStr = "ESP32_S3_FIRMWARE_VERSION";
+  #define CONFIG_FREERTOS_NUMBER_OF_CORES 2
 #endif
 
 // forward decleration of classes
