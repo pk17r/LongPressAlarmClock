@@ -4,7 +4,7 @@ NvsPreferences::NvsPreferences() {
 
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
 
-  // save keys if not present
+  // save key values
   // ADD NEW KEYS HERE
   if(!preferences.isKey(kAlarmHrKey))
     preferences.putUChar(kAlarmHrKey, kAlarmHr);
@@ -51,6 +51,8 @@ NvsPreferences::NvsPreferences() {
   if(!preferences.isKey(kIsTouchscreenKey))
     preferences.putBool(kIsTouchscreenKey, kIsTouchscreen);
 
+  // save new key values
+  // ADD NEW KEYS ABOVE
   preferences.end();
 
   // nvs_preferences->PrintSavedData();

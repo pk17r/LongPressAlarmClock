@@ -5,6 +5,8 @@
 #include <Adafruit_GFX.h>     // Core graphics library
 #if defined(DISPLAY_IS_ST7789V)
   #include <Adafruit_ST7789.h> // Hardware-specific library for ST7789
+#elif defined(DISPLAY_IS_ST7796)
+  #include <Adafruit_ST7796.h>  // Hardware-specific library for ST7735
 #elif defined(DISPLAY_IS_ST7735)
   #include <Adafruit_ST7735.h>  // Hardware-specific library for ST7735
 #elif defined(DISPLAY_IS_ILI9341)
@@ -75,6 +77,9 @@ public:
   #if defined(DISPLAY_IS_ST7789V)
     // Adafruit_ST7789 tft = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
     Adafruit_ST7789 tft = Adafruit_ST7789(spi_obj, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
+  #elif defined(DISPLAY_IS_ST7796)
+    // Adafruit_ST7796 tft = Adafruit_ST7796(TFT_CS, TFT_DC, TFT_COPI, TFT_CLK, TFT_RST);
+    Adafruit_ST7796 tft = Adafruit_ST7796(spi_obj, TFT_CS, TFT_DC, TFT_RST);   // when multiple SPI Peripherals are present then only this works
   #elif defined(DISPLAY_IS_ST7735)
     // For 1.8" TFT with ST7735 using Hardware VSPI Pins COPI and SCK:
     Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
