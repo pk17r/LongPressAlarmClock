@@ -22,6 +22,14 @@ void RGBDisplay::Setup() {
   screen_orientation_ = nvs_preferences->RetrieveScreenOrientation();
   tft.setRotation(screen_orientation_);
 
+#elif defined(DISPLAY_IS_ST7796)
+
+  tft.init();           // Init ST7796 480x320
+  // make display landscape orientation
+  tft.setRotation(1);
+  screen_orientation_ = nvs_preferences->RetrieveScreenOrientation();
+  tft.setRotation(screen_orientation_);
+
 #elif defined(DISPLAY_IS_ST7735)
 
   // Use this initializer if using a 1.8" ST7735 TFT screen:

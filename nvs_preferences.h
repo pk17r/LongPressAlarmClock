@@ -98,21 +98,21 @@ private:
 
   const char* kCpuSpeedMhzKey = "CpuSpeedMhz";  // 4 bytes
 
-  const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";  // 1 byte
+  const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";
 
-  const char* kNightTimeDimHourKey = "NightTmDimHour";  // 1 byte
+  const char* kNightTimeDimHourKey = "NightTmDimHour";
   const uint8_t kNightTimeDimHour = 10;
 
-  const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";  // 1 byte
+  const char* kAutorunRgbLedStripModeKey = "RgbLedStripMode";
   const uint8_t kAutorunRgbLedStripMode = 2;
 
-  const char* kScreenOrientationKey = "ScreenOrient";  // 1 byte
+  const char* kScreenOrientationKey = "ScreenOrient";
   const uint8_t kScreenOrientation = 3;
 
-  const char* kUseLDRKey = "UseLDR";  // 1 byte
+  const char* kUseLDRKey = "UseLDR";
   const bool kUseLDR = true;
 
-  const char* kIsTouchscreenKey = "Touchscreen";  // 1 byte
+  const char* kIsTouchscreenKey = "Touchscreen";
   const bool kIsTouchscreen = false;
 
 };

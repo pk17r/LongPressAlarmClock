@@ -959,6 +959,7 @@ void ProcessSerialInput() {
       break;
     case 'h':   // enable / disable TOUCHSCREEN
       if(ts != NULL) {
+        delete ts;
         ts = NULL;
         nvs_preferences->SaveIsTouchscreen(false);
       }
@@ -970,6 +971,9 @@ void ProcessSerialInput() {
       break;
     case 'i':   // set WiFi details
       {
+        // increase watchdog timeout to 90s
+        if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
+
         Serial.println(F("**** Enter WiFi Details ****"));
         String inputStr;
         Serial.print("SSID: ");
@@ -989,6 +993,9 @@ void ProcessSerialInput() {
             wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + inputStr[i];
         Serial.println(wifi_stuff->wifi_password_.c_str());
         wifi_stuff->SaveWiFiDetails();
+
+        // set back watchdog timeout
+        if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
       }
       break;
     case 'j':   // cycle through CPU speeds
@@ -999,13 +1006,14 @@ void ProcessSerialInput() {
       Serial.println(F("**** set firmware updated flag true ****"));
       firmware_updated_flag_user_information = true;
       break;
-    case 'l':   // 
+    case 'l':   // nvs_preferences->RetrieveScreenOrientation()
       nvs_preferences->RetrieveScreenOrientation();
       break;
-    case 'm':   // 
+    case 'm':   // RotateScreen();
       display->RotateScreen();
       if(ts != NULL)
           ts->SetTouchscreenOrientation();
+      display->redraw_display_ = true;
       break;
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
