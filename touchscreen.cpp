@@ -51,7 +51,7 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
 
     // Rotate and map
     int16_t x = map(touch.x, touchscreen_calibration_.xMin, touchscreen_calibration_.xMax, 0, touchscreen_calibration_.screen_width);
-    int16_t y = map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
+    int16_t y = touchscreen_calibration_.screen_height - map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
 
     if (x > touchscreen_calibration_.screen_width){
         x = touchscreen_calibration_.screen_width;
