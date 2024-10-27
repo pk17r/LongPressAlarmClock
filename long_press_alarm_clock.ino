@@ -115,6 +115,7 @@ int rgb_strip_led_count = 4;  // rgb_led_strip
 bool rgb_led_strip_on = false;
 uint16_t current_led_strip_color = 0x6D9D;    // RGB565_Argentinian_blue
 const uint32_t kDefaultLedStripColor = 0xFFFFFF;       // White
+uint8_t rgb_strip_led_brightness = 255;
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -631,6 +632,7 @@ void InitializeRgbLed() {
     delete rgb_led_strip;
   }
   rgb_strip_led_count = nvs_preferences->RetrieveRgbStripLedCount();
+  rgb_strip_led_brightness = nvs_preferences->RetrieveRgbStripLedBrightness();
   rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
   rgb_led_strip->begin();
   autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
@@ -931,13 +933,15 @@ void ProcessSerialInput() {
       alarm_clock->alarm_ON_ = !alarm_clock->alarm_ON_;
       Serial.print(F("alarmOn = ")); Serial.println(alarm_clock->alarm_ON_);
       break;
-    case 'b':   // brightness
+    case 'b':   // RGB LED brightness
       {
-        Serial.println(F("**** Set Brightness [0-255] ****"));
+        Serial.println(F("**** Set RGB Brightness [0-255] ****"));
         SerialInputWait();
         int brightnessVal = Serial.parseInt();
         SerialInputFlush();
-        display->SetBrightness(brightnessVal);
+        nvs_preferences->SaveRgbStripLedBrightness(brightnessVal);
+        InitializeRgbLed();
+        RunRgbLedAccordingToSettings();
       }
       break;
     case 'c':   // connect to WiFi
@@ -1186,7 +1190,7 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
 }
 
 void TurnOnRgbStrip() {
-  rgb_led_strip->setBrightness(50);
+  rgb_led_strip->setBrightness(rgb_strip_led_brightness);
   rgb_led_strip->fill(kDefaultLedStripColor, 0, 0);
   rgb_led_strip->show();
   rgb_led_strip_on = true;
