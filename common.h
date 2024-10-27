@@ -129,6 +129,7 @@ enum Cursor {
   kScreensaverSettingsPageRun,
   kScreensaverSettingsPageNightTmDimHr,
   kScreensaverSettingsPageRgbLedStripMode,
+  kScreensaverSettingsPageRgbLedBrightness,
   kPageSaveButton,
   kPageCancelButton,
   kCursorMaxValue,    // inc/dec button scroll won't go above this level

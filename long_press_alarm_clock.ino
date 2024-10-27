@@ -1479,6 +1479,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
     new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
     new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
+    new DisplayButton{ kScreensaverSettingsPageRgbLedBrightness, kRowClickButton, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
     page_cancel_button,
   };
 
@@ -1731,6 +1732,18 @@ void LedButtonClickAction() {
         nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
         RunRgbLedAccordingToSettings();
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = RgbLedSettingString();
+        LedButtonClickUiResponse();
+      }
+      else if(current_cursor == kScreensaverSettingsPageRgbLedBrightness) {
+        // change brightness
+        if(rgb_strip_led_brightness < 255)
+          rgb_strip_led_brightness += 51;
+        else
+          rgb_strip_led_brightness = 51;
+        display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%");
+        nvs_preferences->SaveRgbStripLedBrightness(rgb_strip_led_brightness);
+        InitializeRgbLed();
+        RunRgbLedAccordingToSettings();
         LedButtonClickUiResponse();
       }
       else if(current_cursor == kPageCancelButton) {
