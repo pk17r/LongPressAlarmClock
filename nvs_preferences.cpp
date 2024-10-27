@@ -50,6 +50,8 @@ NvsPreferences::NvsPreferences() {
     preferences.putBool(kUseLDRKey, kUseLDR);
   if(!preferences.isKey(kIsTouchscreenKey))
     preferences.putBool(kIsTouchscreenKey, kIsTouchscreen);
+  if(!preferences.isKey(kRgbStripLedCountKey))
+    preferences.putUChar(kRgbStripLedCountKey, kRgbStripLedCount);
 
   // save new key values
   // ADD NEW KEYS ABOVE
@@ -300,3 +302,17 @@ void NvsPreferences::SaveIsTouchscreen(bool is_touchscreen) {
   Serial.printf("NVS Memory is_touchscreen: %d saved.\n", is_touchscreen);
 }
 
+uint8_t NvsPreferences::RetrieveRgbStripLedCount() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  uint8_t rgb_strip_led_count = preferences.getUChar(kRgbStripLedCountKey, 0);
+  preferences.end();
+  Serial.printf("Retrieved rgb_strip_led_count: %d\n", rgb_strip_led_count);
+  return rgb_strip_led_count;
+}
+
+void NvsPreferences::SaveRgbStripLedCount(uint8_t rgb_strip_led_count) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUChar(kRgbStripLedCountKey, rgb_strip_led_count);
+  preferences.end();
+  Serial.printf("Saved NVS Memory rgb_strip_led_count: %d\n", rgb_strip_led_count);
+}

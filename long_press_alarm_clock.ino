@@ -103,6 +103,7 @@ Touchscreen* ts = NULL;         // Touchscreen class object
   TaskHandle_t Task1;
 #endif
 
+// Arduino SPI Class Object
 SPIClass* spi_obj = NULL;
 
 // random afternoon hour and minute to update firmware
@@ -110,8 +111,10 @@ uint16_t ota_update_days_minutes = 0;
 
 // RGB LED Strip Neopixels
 Adafruit_NeoPixel* rgb_led_strip = NULL;
-const int kRgbStripLedCount = 4;  // rgb_led_strip
+int rgb_strip_led_count = 4;  // rgb_led_strip
 bool rgb_led_strip_on = false;
+uint16_t current_led_strip_color = 0x6D9D;    // RGB565_Argentinian_blue
+const uint32_t kDefaultLedStripColor = 0xFFFFFF;       // White
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -119,6 +122,7 @@ void PopulateDisplayPages();
 int DisplayPagesVecCurrentButtonIndex();
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor);
 void LedButtonClickUiResponse(int response_type);
+void InitializeRgbLed();
 void RunRgbLedAccordingToSettings();
 const char* RgbLedSettingString();
 
@@ -247,9 +251,7 @@ void setup() {
   display->screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
 
   // initialize rgb led strip neopixels
-  rgb_led_strip = new Adafruit_NeoPixel(kRgbStripLedCount, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
-  rgb_led_strip->begin();
-  autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
+  InitializeRgbLed();
   RunRgbLedAccordingToSettings();
 
   PopulateDisplayPages(); // needs to be after all saved values have been retrieved
@@ -388,6 +390,7 @@ void loop() {
       // if screensaver is On, then update time on it
       if(current_page == kScreensaverPage) {
         display->refresh_screensaver_canvas_ = true;
+        display->new_minute_ = true;
         // every new hour, show main page
         if(rtc->minute() == 0) {
           SetPage(kMainPage);
@@ -476,7 +479,7 @@ void loop() {
       }
     #endif
 
-    // watchdog to reboot system if it gets stuck for whatever reason
+    // reset watchdog
     ResetWatchdog();
 
     // print fps
@@ -516,6 +519,11 @@ void setup1() {
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
   ResetWatchdog();
+
+  // color LED Strip sequentially
+  if(rgb_led_strip_on && (current_led_strip_color != display->kColorPickerWheel[display->current_random_color_index_]))
+    SetRgbStripColor(display->kColorPickerWheel[display->current_random_color_index_], /* set_color_sequentially = */ true);
+
   // run the core only to do specific not time important operations
   while (!second_core_tasks_queue.empty())
   {
@@ -595,19 +603,6 @@ void loop1() {
       second_core_task_added_flag_array[current_task] = false;
     // }
   }
-  // RGB565 to RGB888
-  // if(inactivity_millis - last_inactivity_millis > 50) {
-  //   byte r = random(0, 255);
-  //   byte g = random(0, 255);
-  //   byte b = random(0, 255);
-  //   uint32_t rgb888 = (uint32_t(r) << 16) + (uint32_t(g) << 8) + uint32_t(b);
-  //   // color rgb rgb_led_strip
-  //   rgb_led_strip->setPixelColor((blink ? 0 : 1), rgb888);
-  //   rgb_led_strip->setPixelColor((blink ? 1 : 0), 0x000000);
-  //   blink = !blink;
-  //   rgb_led_strip->show();
-  //   last_inactivity_millis = inactivity_millis;
-  // }
 }
 
 #if defined(ESP32_DUAL_CORE)
@@ -627,6 +622,18 @@ void WaitForExecutionOfSecondCoreTask() {
       delay(10);
     }
   #endif
+}
+
+// initialize RGB LED requires NVS Preferences to be loaded
+void InitializeRgbLed() {
+  if(rgb_led_strip != NULL) {
+    rgb_led_strip->clear();
+    delete rgb_led_strip;
+  }
+  rgb_strip_led_count = nvs_preferences->RetrieveRgbStripLedCount();
+  rgb_led_strip = new Adafruit_NeoPixel(rgb_strip_led_count, RGB_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+  rgb_led_strip->begin();
+  autorun_rgb_led_strip_mode = nvs_preferences->RetrieveAutorunRgbLedStripMode();
 }
 
 void RunRgbLedAccordingToSettings() {
@@ -1039,9 +1046,16 @@ void ProcessSerialInput() {
     case 'q':   // turn OFF RGB LED Strip
       TurnOffRgbStrip();
       break;
-    case 'r':   // Activate/Toggle LDR Photoresistor Usage
-      use_photoresistor = !use_photoresistor;
-      nvs_preferences->SaveUseLdr(use_photoresistor);
+    case 'r':   // Set RGB LED Count
+      {
+        Serial.println(F("**** Set RGB LED Count [0-255] ****"));
+        SerialInputWait();
+        int rgb_strip_led_count_user = Serial.parseInt();
+        SerialInputFlush();
+        nvs_preferences->SaveRgbStripLedCount(rgb_strip_led_count_user);
+        InitializeRgbLed();
+        RunRgbLedAccordingToSettings();
+      }
       break;
     case 's':   // toggle screensaver
       Serial.println(F("**** toggle Screensaver ****"));
@@ -1148,6 +1162,7 @@ void CycleCpuFrequency() {
 void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
   if(!rgb_led_strip_on)
     return;
+
   // RGB565 to RGB888
   byte r = byte(((rgb565_color & 0xF800) >> 11) << 3);
   byte g = byte(((rgb565_color & 0x7E0) >> 5) << 2);
@@ -1158,8 +1173,11 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
   if(set_color_sequentially) {
     rgb_led_strip->setPixelColor(current_rgb_led_strip_index, rgb888);
     current_rgb_led_strip_index++;
-    if(current_rgb_led_strip_index == kRgbStripLedCount)
+    if(current_rgb_led_strip_index == rgb_strip_led_count) {
       current_rgb_led_strip_index = 0;
+      // stop further color changes until screensaver color change
+      current_led_strip_color = display->kColorPickerWheel[display->current_random_color_index_];
+    }
   }
   else {
     rgb_led_strip->fill(rgb888, 0, 0);
@@ -1168,8 +1186,8 @@ void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {
 }
 
 void TurnOnRgbStrip() {
-  rgb_led_strip->setBrightness(255);
-  rgb_led_strip->fill(0xFFFFFF, 0, 0);
+  rgb_led_strip->setBrightness(50);
+  rgb_led_strip->fill(kDefaultLedStripColor, 0, 0);
   rgb_led_strip->show();
   rgb_led_strip_on = true;
   PrintLn("TurnOnRgbStrip()");

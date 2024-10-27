@@ -988,10 +988,11 @@ void RGBDisplay::Screensaver() {
     my_canvas_->fillScreen(kDisplayBackroundColor);
 
     // picknew random color
-    PickNewRandomColor();
+    if(!new_minute_)  // pick new color only when time hits top or bottom row, not when a minute change is there
+      PickNewRandomColor();
+    else
+      new_minute_ = false;
     uint16_t randomColor = kColorPickerWheel[current_random_color_index_];
-
-    SetRgbStripColor(randomColor, /* set_color_sequentially = */ true);
 
     // print HH:MM
     my_canvas_->setFont(&ComingSoon_Regular70pt7b);
@@ -1051,16 +1052,16 @@ void RGBDisplay::Screensaver() {
     if(screensaver_x1_ + 2* GAP_BAND <= 0) {   // left edge
       if(!screensaver_move_right_) {
         screensaver_move_right_ = true;
-        if(rtc->hour() < 10)
-          refresh_screensaver_canvas_ = true;
+        // if(rtc->hour() < 10)
+        //   refresh_screensaver_canvas_ = true;
       }
     }
     else if(screensaver_x1_ + screensaver_w_ - 2 * GAP_BAND >= kTftWidth) {    // right edge
       if(screensaver_bounce_not_fly_horizontally_) {
         if(screensaver_move_right_) {
           screensaver_move_right_ = false;
-          if(rtc->hour() < 10)
-            refresh_screensaver_canvas_ = true;
+          // if(rtc->hour() < 10)
+          //   refresh_screensaver_canvas_ = true;
         }
       }
       else {  // fly through right edge and apprear back on left edge
@@ -1087,9 +1088,7 @@ void RGBDisplay::Screensaver() {
   // tft.drawRGBBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h); // Copy to screen
   // tft.drawBitmap(screensaver_x1, screensaver_y1, myCanvas->getBuffer(), screensaver_w, screensaver_h, colorPickerWheelBright[currentRandomColorIndex], Display_Backround_Color); // Copy to screen
   FastDrawTwoColorBitmapSpi(screensaver_x1_, screensaver_y1_, my_canvas_->getBuffer(), screensaver_w_, screensaver_h_, kColorPickerWheel[current_random_color_index_], kDisplayBackroundColor);
-  // color LED Strip sequentially
-  if(current_rgb_led_strip_index != 0)
-    SetRgbStripColor(kColorPickerWheel[current_random_color_index_], /* set_color_sequentially = */ true);
+  // // color LED Strip sequentially   ->   now done in loop1() by second core
 }
 
 void RGBDisplay::PickNewRandomColor() {
@@ -1097,7 +1096,7 @@ void RGBDisplay::PickNewRandomColor() {
   while(newIndex == current_random_color_index_)
     newIndex = random(0, kColorPickerWheelSize - 1);
   current_random_color_index_ = newIndex;
-  // Serial.println(currentRandomColorIndex);
+  // PrintLn("current_random_color_index_ = ", current_random_color_index_);
 }
 
 void RGBDisplay::DisplayTimeUpdate() {

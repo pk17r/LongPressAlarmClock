@@ -47,6 +47,8 @@ public:
   void SaveTestVal(uint8_t test_val);
   bool RetrieveIsTouchscreen();
   void SaveIsTouchscreen(bool is_touchscreen);
+  uint8_t RetrieveRgbStripLedCount();
+  void SaveRgbStripLedCount(uint8_t rgb_strip_led_count);
 
 private:
 
@@ -114,6 +116,9 @@ private:
 
   const char* kIsTouchscreenKey = "Touchscreen";
   const bool kIsTouchscreen = false;
+
+  const char* kRgbStripLedCountKey = "RgbLedCount";
+  const uint8_t kRgbStripLedCount = 4;
 
 };
 

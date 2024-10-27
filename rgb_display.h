@@ -98,9 +98,13 @@ public:
 
   // refresh screensaver canvas
   bool refresh_screensaver_canvas_ = true;
+  bool new_minute_ = false;
 
   // screensaver color and motion flags
   bool show_colored_edge_screensaver_ = true;
+  int current_random_color_index_ = 0;
+  constexpr static uint8_t kColorPickerWheelSize = 33;
+  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
 
@@ -129,7 +133,6 @@ private:
 
   // screensaver
   bool screensaver_move_down_ = true, screensaver_move_right_ = true;
-  int current_random_color_index_ = 0;
   GFXcanvas1* my_canvas_ = NULL;
 
   // location of various display text strings
@@ -211,9 +214,6 @@ private:
   #define RGB565_Golden_yellow                                               		0xFEE0         // Golden yellow                           	#FFDF00			https://en.wikipedia.org/wiki/Gold_(color)#Golden_yellow
   #define RGB565_Yellow_rgb_x11_yellow                                       		0xFFE0         // Yellow (RGB) (X11 yellow)               	#FFFF00			https://en.wikipedia.org/wiki/Shades_of_yellow#Yellow_rgb_x11_yellow
   #define RGB565_Lime_color_wheel                                            		0xBFE0         // Lime (color wheel)                      	#BFFF00			https://en.wikipedia.org/wiki/Lime_(color)
-
-  constexpr static uint8_t kColorPickerWheelSize = 33;
-  const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
 
   // The colors we actually want to use
   const uint16_t        kDisplayTimeColor         = kDisplayColorYellow;
