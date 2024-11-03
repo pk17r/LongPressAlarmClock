@@ -46,6 +46,7 @@ public:
   void SetAlarmScreen(bool process_user_input, bool inc_button_pressed, bool dec_button_pressed, bool push_button_pressed);
   void AlarmTriggeredScreen(bool first_time, int8_t button_press_seconds_counter);
   void DisplayWeatherInfo();
+  void WiFiScanNetworksPage(bool increment_page);
   void SoftApInputsPage();
   void LocationInputsLocalServerPage();
   bool GetUserOnScreenTextInput(char* label, char* return_text);
@@ -147,6 +148,8 @@ private:
   int16_t alarm_row_x0_ = 0;
   int16_t alarm_icon_x0_ = 0, alarm_icon_y0_ = 0;
 
+  // wifi networks scan page
+  uint8_t current_wifi_networks_scan_page_no = 0;
 
 // PRIVATE CONSTANTS
 

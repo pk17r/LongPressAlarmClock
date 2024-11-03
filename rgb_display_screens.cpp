@@ -146,7 +146,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
     // Set button
     DrawButton(setCancel_x, onSet_y, button_w, button_h, setStr, borderColor, kDisplayColorOrange, offFill, true);
     // Cancel button
-    DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorOrange, offFill, true);
+    DrawButton(setCancel_x, offCancel_y, button_w, button_h, kCancelStr, borderColor, kDisplayColorOrange, offFill, true);
 
     // high light text / buttons
     ButtonHighlight(hr_x, time_y - gap_y, gap_x, gap_y, (current_cursor == kAlarmSetPageHour), 10);
@@ -402,7 +402,7 @@ void RGBDisplay::SetAlarmScreen(bool processUserInput, bool inc_button_pressed, 
         alarm_clock->SaveAlarm();
       }
       else  // show a little graphic of Cancel button Press
-        DrawButton(setCancel_x, offCancel_y, button_w, button_h, cancelStr, borderColor, kDisplayColorRed, offFill, true);
+        DrawButton(setCancel_x, offCancel_y, button_w, button_h, kCancelStr, borderColor, kDisplayColorRed, offFill, true);
       // wait a little
       delay(2*kUserInputDelayMs);
       // go back to main page
@@ -699,6 +699,58 @@ void RGBDisplay::RealTimeOnScreenOutput(std::string text, int width) {
   tft.print(text.c_str());
 }
 
+void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
+
+  tft.fillScreen(kDisplayBackroundColor);
+
+  // Page Title
+  tft.setFont(&FreeMonoBold9pt7b);
+  tft.setTextColor(kDisplayColorGreen);
+  tft.setCursor(kDisplayTextGap, 20);
+  tft.print("SELECT WIFI NETWORK");
+
+  tft.setTextColor(kDisplayColorYellow);
+  tft.setFont(&FreeMono9pt7b);
+  int cursorY = 40;
+
+  // get number of WiFi Networks scanned
+  int n_wifi_networks = wifi_stuff->WiFiScanNetworksCount();
+  const int items_per_page = 9;
+
+  if(!increment_page) {
+    current_wifi_networks_scan_page_no = 0;
+  }
+  else {
+    current_wifi_networks_scan_page_no++;
+    if(items_per_page * current_wifi_networks_scan_page_no > n_wifi_networks - 1)
+      current_wifi_networks_scan_page_no = 0;
+  }
+
+  if(n_wifi_networks == 0) {
+    tft.setCursor(10, cursorY);
+    tft.print("No WiFi Networks found.");
+    tft.setCursor(10, cursorY + 40);
+    tft.print("Scan Again!");
+  }
+  else {
+    // display WiFi scanned list
+    for(int i = items_per_page * current_wifi_networks_scan_page_no; i< min(items_per_page * (current_wifi_networks_scan_page_no + 1), n_wifi_networks); i++) {
+      tft.setCursor(10, cursorY);
+      tft.print(wifi_stuff->WiFiScanNetworkDetails(i).c_str());
+      cursorY += 20;
+    }
+  }
+
+  // Rescan button
+  DrawButton(kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Next button
+  DrawButton(kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+
+  // Cancel button
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+}
+
 void RGBDisplay::SoftApInputsPage() {
 
   tft.fillScreen(kDisplayBackroundColor);
@@ -752,10 +804,10 @@ void RGBDisplay::SoftApInputsPage() {
   // tft.print("WiFi details.");
 
   // Save button
-  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::LocationInputsLocalServerPage() {
@@ -798,10 +850,10 @@ void RGBDisplay::LocationInputsLocalServerPage() {
   tft.print("& set Location.");
 
   // Save button
-  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, saveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
   // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, cancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::DisplayWeatherInfo() {

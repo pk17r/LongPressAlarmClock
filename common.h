@@ -83,6 +83,7 @@ enum ScreenPage {
   kTimeSetPage,
   kSettingsPage,
   kWiFiSettingsPage,
+  kScanNetworksPage,
   kSoftApInputsPage,
   kEnterWiFiSsidPage,
   kEnterWiFiPasswdPage,
@@ -115,10 +116,13 @@ enum Cursor {
   kSettingsPageScreensaver,
   kSettingsPageRotateScreen,
   kSettingsPageUpdate,
+  kWiFiSettingsPageScanNetworks,
   kWiFiSettingsPageSetSsidPasswd,
   kWiFiSettingsPageClearSsidAndPasswd,
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
+  kWiFiScanNetworksPageRescan,
+  kWiFiScanNetworksPageNext,
   kLocationAndWeatherSettingsPageSetLocation,
   kLocationAndWeatherSettingsPageSetCountryCode,
   kLocationAndWeatherSettingsPageUnits,
@@ -159,6 +163,7 @@ inline Cursor operator-- (Cursor& highlight_location, int) {
 enum SecondCoreTask {
   kStartSetWiFiSoftAP = 0,
   kStopSetWiFiSoftAP,
+  kScanNetworks,
   kStartLocationInputsLocalServer,
   kStopLocationInputsLocalServer,
   kGetWeatherInfo,
@@ -180,6 +185,7 @@ extern bool second_core_task_added_flag_array[];
 enum ButtonType {
   kIconButton,    // kIconButton has hard coded locations and size
   kRowClickButton,
+  kCustomLocationClickButton,
 };
 
 // struct declerations
@@ -222,6 +228,7 @@ extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
 extern void ProcessSerialInput();
 extern void CycleCpuFrequency();
+extern void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool increment_page);
 extern void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button);
 extern void SetPage(ScreenPage set_this_page);
 extern void SetWatchdogTime(unsigned long ms);

@@ -750,4 +750,72 @@ void WiFiStuff::UpdateFirmware() {
   PrintLn("UpdateFirmware() unsuccessful.");
   if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 }
+
+bool WiFiStuff::WiFiScanNetworks() {
+  PrintLn("Scan Start");
+  // WiFi.scanNetworks will return the number of networks found.
+  int n = WiFi.scanNetworks();
+  PrintLn("Scan done");
+  if (n == 0) {
+    PrintLn("no networks found");
+    return false;
+  } else {
+    Serial.print(n);
+    Serial.println(" networks found");
+    return true;
+  }
+  // Delete the scan result to free memory for code below.
+  //WiFi.scanDelete();
+  //return n;
+}
+
+int WiFiStuff::WiFiScanNetworksCount() {
+  return WiFi.scanComplete();
+}
+
+std::string WiFiStuff::WiFiScanNetworkDetails(int wifi_net_ind) {
+  const int ssid_len = 17;
+  std::string wifi_network_details(ssid_len, ' ');
+
+  std::string ssid = WiFi.SSID(wifi_net_ind).c_str();
+  int rssi = WiFi.RSSI(wifi_net_ind);
+  std::string encryptionType = "";
+  switch (WiFi.encryptionType(wifi_net_ind)) {
+    case WIFI_AUTH_OPEN:
+        encryptionType = "Open";
+        break;
+    case WIFI_AUTH_WEP:
+        encryptionType = "WEP";
+        break;
+    case WIFI_AUTH_WPA_PSK:
+        encryptionType = "WPA";
+        break;
+    case WIFI_AUTH_WPA2_PSK:
+        encryptionType = "WPA2";
+        break;
+    case WIFI_AUTH_WPA_WPA2_PSK:
+        encryptionType = "WPA+2";
+        break;
+    case WIFI_AUTH_WPA2_ENTERPRISE:
+        encryptionType = "WPA2EP";
+        break;
+    case WIFI_AUTH_WPA3_PSK:
+        encryptionType = "WPA3";
+        break;
+    case WIFI_AUTH_WPA2_WPA3_PSK:
+        encryptionType = "WPA2+3";
+        break;
+    case WIFI_AUTH_WAPI_PSK:
+        encryptionType = "WAPI";
+        break;
+    default:
+        encryptionType = "???";
+  }
+
+  wifi_network_details.replace(0, std::min(int(ssid.length()), ssid_len), ssid.substr(0,std::min(int(ssid.length()), ssid_len)));
+  wifi_network_details += "|" + std::string(String(rssi).c_str()) + " " + encryptionType;
+  PrintLn(wifi_network_details.c_str());
+  return wifi_network_details;
+}
+
 #endif

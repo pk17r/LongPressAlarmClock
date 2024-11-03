@@ -25,6 +25,9 @@ public:
   void StopSetLocationLocalServer();
   void UpdateFirmware();
   bool FirmwareVersionCheck();
+  bool WiFiScanNetworks();
+  int WiFiScanNetworksCount();
+  std::string WiFiScanNetworkDetails(int wifi_net_ind);
 #endif
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
