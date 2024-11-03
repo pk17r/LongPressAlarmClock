@@ -317,42 +317,18 @@ void loop() {
       PrintLn("push_button");
       LedButtonClickAction();
     }
-    // both inc and dec button pressed at the same time -> toggle RGB LED STRIP ON OFF
-    else if(inc_button_pressed && dec_button_pressed) {
-      PrintLn("both inc dec button pressed");
-      if(rgb_led_strip_on)
-        TurnOffRgbStrip();
+    else if(inc_button_pressed || dec_button_pressed) {
+      if(inc_button_pressed) {
+        PrintLn("inc_button_pressed");
+        dec_button_pressed = false; // just having things clean, only have 1 button pressed at a time
+      }
       else
-        TurnOnRgbStrip();
-      delay(kUserInputDelayMs);
-    }
-    else if(inc_button_pressed) {
-      PrintLn("inc_button");
-      // if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
-      //   display->SettingsPage(true, false);
-      // }
-      // else if(current_page != kAlarmSetPage)
-      //   MoveCursor(false);
-      // else
-      //   display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ true, /* dec_button_pressed */ false, /* push_button_pressed */ false);
+        PrintLn("dec_button_pressed");
+      // inc/dec button action
       if(current_page != kAlarmSetPage)
-        MoveCursor(false);
+        MoveCursor(inc_button_pressed);
       else
-        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ true, /* dec_button_pressed */ false, /* push_button_pressed */ false);
-    }
-    else if(dec_button_pressed) {
-      PrintLn("dec_button");
-      // if(current_page == kSettingsPage && highlight == kSettingsPageAlarmLongPressSeconds) {
-      //   display->SettingsPage(false, true);
-      // }
-      // else if(current_page != kAlarmSetPage)
-      //   MoveCursor(true);
-      // else
-      //   display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ true, /* push_button_pressed */ false);
-      if(current_page != kAlarmSetPage)
-        MoveCursor(true);
-      else
-        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ false, /* dec_button_pressed */ true, /* push_button_pressed */ false);
+        display->SetAlarmScreen(/* process_user_input */ true, /* inc_button_pressed */ inc_button_pressed, /* dec_button_pressed */ dec_button_pressed, /* push_button_pressed */ false);
     }
 
     // show firmware updated info only for the first time user uses the device
