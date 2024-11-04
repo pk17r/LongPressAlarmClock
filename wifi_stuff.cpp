@@ -754,6 +754,11 @@ void WiFiStuff::UpdateFirmware() {
 
 bool WiFiStuff::WiFiScanNetworks() {
   PrintLn("Scan Start");
+  WiFiScanNetworksFreeMemory();
+  // Set WiFi to station mode and disconnect from an AP if it was previously connected.
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
   // WiFi.scanNetworks will return the number of networks found.
   int n = WiFi.scanNetworks();
   PrintLn("Scan done");
@@ -815,8 +820,20 @@ std::string WiFiStuff::WiFiScanNetworkDetails(int wifi_net_ind) {
 
   wifi_network_details.replace(0, std::min(int(ssid.length()), ssid_len), ssid.substr(0,std::min(int(ssid.length()), ssid_len)));
   wifi_network_details += "|" + std::string(String(rssi).c_str()) + " " + encryptionType;
-  PrintLn(wifi_network_details.c_str());
+  PrintLn(wifi_network_details);
   return wifi_network_details;
+}
+
+std::string WiFiStuff::WiFiScanNetworkSsid(int wifi_net_ind) {
+  std::string ssid = WiFi.SSID(wifi_net_ind).c_str();
+  PrintLn("Selected WiFi SSID = ", ssid);
+  return ssid;
+}
+
+void WiFiStuff::WiFiScanNetworksFreeMemory() {
+  // Delete the scan result to free memory for code below.
+  WiFi.scanDelete();
+  PrintLn("WiFi.scanDelete() called.");
 }
 
 #endif

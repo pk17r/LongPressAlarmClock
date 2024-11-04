@@ -1377,24 +1377,28 @@ void MoveCursor(bool increment) {
   PrintLn("increment = ", increment);
   // special case of WiFi Scan Networks Page:
   bool find_next_button = false;
-  if((current_page == kWiFiScanNetworksPage) && (current_cursor == kCursorNoSelection)) {
+  if((current_page == kWiFiScanNetworksPage) && (current_cursor == kWiFiScanNetworksPageList)) {
     // move cursor inside the WiFi Networks Selection List
     if(increment) {
-      if(display->current_wifi_networks_scan_page_cursor < display->items_per_page - 1) {
+      if(display->current_wifi_networks_scan_page_cursor < display->kWifiScanNetworksPageItems - 1) {
         display->current_wifi_networks_scan_page_cursor++;
+        PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
       }
       else {
         display->current_wifi_networks_scan_page_cursor = -1;
         find_next_button = true;
+        PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
       }
     }
     else {
       if(display->current_wifi_networks_scan_page_cursor > 0) {
         display->current_wifi_networks_scan_page_cursor--;
+        PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
       }
       else {
         display->current_wifi_networks_scan_page_cursor = -1;
         find_next_button = true;
+        PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
       }
     }
     // special case of kWiFiScanNetworksPage continued inside if(find_next_button)
@@ -1414,9 +1418,10 @@ void MoveCursor(bool increment) {
       else {
         current_cursor = display_pages_vec[current_page][first_click_button_index]->btn_cursor_id;
         // special case of kWiFiScanNetworksPage continued from before if(find_next_button)
-        if(current_page == kWiFiScanNetworksPage && current_cursor == kCursorNoSelection) {
+        if((current_page == kWiFiScanNetworksPage) && (current_cursor == kWiFiScanNetworksPageList)) {
           // came here from cancel button
           display->current_wifi_networks_scan_page_cursor = 0;
+          PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
         }
       }
     }
@@ -1427,9 +1432,10 @@ void MoveCursor(bool increment) {
           new_button_index--;
         current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
         // special case of kWiFiScanNetworksPage continued from before if(find_next_button)
-        if(current_page == kWiFiScanNetworksPage && current_cursor == kCursorNoSelection) {
+        if((current_page == kWiFiScanNetworksPage) && (current_cursor == kWiFiScanNetworksPageList)) {
           // came here from Rescan button
-          display->current_wifi_networks_scan_page_cursor = display->items_per_page - 1;
+          display->current_wifi_networks_scan_page_cursor = display->kWifiScanNetworksPageItems - 1;
+          PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
         }
       }
       else {
@@ -1485,7 +1491,7 @@ void PopulateDisplayPages() {
 
   // WIFI SETTINGS PAGE
   display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kCursorNoSelection, kLabelOnlyNoClickButton, "Saved WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
+    new DisplayButton{ kWiFiSettingsPageShowSsidRow, kLabelOnlyNoClickButton, "Saved WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
     new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kClickButtonWithLabel, "Set WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
     new DisplayButton{ kWiFiSettingsPageScanNetworks, kClickButtonWithLabel, "Scan WiFi Networks:", false, 0,0,0,0, "SCAN" },
     new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "Connect to WiFi:", false, 0,0,0,0, "CONNECT" },
@@ -1496,7 +1502,7 @@ void PopulateDisplayPages() {
 
   // WIFI SCAN NETWORKS PAGE
   display_pages_vec[kWiFiScanNetworksPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kCursorNoSelection, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
+    new DisplayButton{ kWiFiScanNetworksPageList, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
     new DisplayButton{ kWiFiScanNetworksPageRescan, kClickButtonWithLabel, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
     new DisplayButton{ kWiFiScanNetworksPageNext, kClickButtonWithLabel, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
     page_cancel_button,
@@ -1675,6 +1681,19 @@ void LedButtonClickAction() {
       }
     }
     else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
+      if(current_cursor == kWiFiScanNetworksPageList) {
+        int index_of_selected_ssid = display->current_wifi_networks_scan_page_cursor + display->current_wifi_networks_scan_page_no * display->kWifiScanNetworksPageItems;
+        PrintLn("index_of_selected_ssid = ", index_of_selected_ssid);
+        if(index_of_selected_ssid > wifi_stuff->WiFiScanNetworksCount() - 1)
+          return;
+        LedButtonClickUiResponse(2);
+        wifi_stuff->wifi_ssid_ = wifi_stuff->WiFiScanNetworkSsid(index_of_selected_ssid);
+        wifi_stuff->SaveWiFiDetails();
+        int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
+        display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
+        wifi_stuff->WiFiScanNetworksFreeMemory();
+        SetPage(kWiFiSettingsPage);
+      }
       if(current_cursor == kWiFiScanNetworksPageRescan) {
         LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
@@ -1687,8 +1706,8 @@ void LedButtonClickAction() {
       }
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
-        current_cursor = kWiFiSettingsPageScanNetworks;
-        SetPage(kWiFiSettingsPage, /* bool move_cursor_to_first_button = */ false);
+        wifi_stuff->WiFiScanNetworksFreeMemory();
+        SetPage(kWiFiSettingsPage);
       }
     }
     else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE

@@ -110,7 +110,8 @@ public:
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
   // wifi networks scan page
-  const int items_per_page = 9;
+  const int kWifiScanNetworksPageItems = 9;
+  uint8_t current_wifi_networks_scan_page_no = 0;
   uint8_t current_wifi_networks_scan_page_cursor = -1;
 
 private:
@@ -151,9 +152,6 @@ private:
   int16_t date_row_x0_ = 0;
   int16_t alarm_row_x0_ = 0;
   int16_t alarm_icon_x0_ = 0, alarm_icon_y0_ = 0;
-
-  // wifi networks scan page
-  uint8_t current_wifi_networks_scan_page_no = 0;
 
 // PRIVATE CONSTANTS
 

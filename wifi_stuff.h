@@ -28,6 +28,8 @@ public:
   bool WiFiScanNetworks();
   int WiFiScanNetworksCount();
   std::string WiFiScanNetworkDetails(int wifi_net_ind);
+  std::string WiFiScanNetworkSsid(int wifi_net_ind);
+  void WiFiScanNetworksFreeMemory();
 #endif
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
