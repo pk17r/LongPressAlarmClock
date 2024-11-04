@@ -49,7 +49,7 @@ public:
   void WiFiScanNetworksPage(bool increment_page);
   void SoftApInputsPage();
   void LocationInputsLocalServerPage();
-  bool GetUserOnScreenTextInput(char* label, char* return_text);
+  bool GetUserOnScreenTextInput(std::string label, char* return_text);
   void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
   void IncorrectTimeBanner();
   void FirmwareUpdatePage();
@@ -126,10 +126,10 @@ private:
   void DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h, bool isUp, uint16_t borderColor, uint16_t fillColor);
   void FastDrawTwoColorBitmapSpi(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg);
   // keyboard functions
-  void MakeKeyboard(const char type[][13], char* label);
+  void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(int x, int y, int w, int h);
   byte IsTouchWithin(int x, int y, int w, int h);
-  bool GetKeyboardPress(char * textBuffer, char* label, char * textReturn);
+  bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
 // PRIVATE VARIABLES

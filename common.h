@@ -118,7 +118,7 @@ enum Cursor {
   kSettingsPageUpdate,
   kWiFiSettingsPageShowSsidRow,
   kWiFiSettingsPageScanNetworks,
-  kWiFiSettingsPageSetSsidPasswd,
+  kWiFiSettingsPageChangePasswd,
   kWiFiSettingsPageClearSsidAndPasswd,
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
