@@ -480,9 +480,7 @@ void RGBDisplay::DisplayCursorHighlight(bool highlight_On) {
   }
 }
 
-void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
-
-  DisplayButton* button = display_pages_vec[current_page][button_index];
+void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_index, bool is_on) {
 
   const int row_text_y0 = (button_index + 1) * kPageRowHeight + 20;
 
@@ -490,6 +488,8 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
   tft.fillRect(0, row_text_y0 - 20, kTftWidth, kPageRowHeight, kDisplayBackroundColor);
 
   int space_left = kTftWidth;
+
+  // First Row Item's Button is drawn, then Row Item's Label is drawn
 
   // item button
 
@@ -499,13 +499,6 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       // pre-fixed location button
       tft.setFont(&FreeMonoBold9pt7b);
       tft.setTextColor(kDisplayColorBlack);
-      // Serial.printf("fixed button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
-      // int16_t btn_value_x0 = button->btn_x + kDisplayTextGap, btn_value_y0 = button->btn_y + button->btn_h - kDisplayTextGap;
-      // uint16_t btn_value_w, btn_value_h;
-      // tft.setCursor(btn_value_x0, btn_value_y0);
-      // // get bounds of title on tft display (with background color as this causes a blink)
-      // tft.getTextBounds(button->btn_value.c_str(), btn_value_x0, btn_value_y0, &btn_value_x0, &btn_value_y0, &btn_value_w, &btn_value_h);
-      // Serial.printf("X btn btn_value_x0 %d, btn_value_y0 %d, btn_value_w %d, btn_value_h %d\n", btn_value_x0, btn_value_y0, btn_value_w, btn_value_h);
       // make button
       tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
       tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
@@ -530,10 +523,19 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
       button->btn_h = btn_value_h + 2 * kDisplayTextGap;
       // Serial.printf("flexible button->btn_x %d, button->btn_y %d, button->btn_w %d, button->btn_h %d\n", button->btn_x, button->btn_y, button->btn_w, button->btn_h);
       // make button
-      tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
-      tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
-      tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
-      tft.print(button->btn_value.c_str());
+      if(button->btn_type == kLabelOnlyNoClickButton) {
+        // special case -> only label, no click button
+        tft.setTextColor(kDisplayColorGreen);
+        button->btn_x = button->btn_x + 2 * kDisplayTextGap;
+        tft.setCursor(button->btn_x, row_text_y0);
+        tft.print(button->btn_value.c_str());
+      }
+      else {
+        tft.fillRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, (is_on ? kButtonClickedFillColor : kButtonFillColor));
+        tft.drawRoundRect(button->btn_x, button->btn_y, button->btn_w, button->btn_h, kRadiusButtonRoundRect, kButtonBorderColor);
+        tft.setCursor(button->btn_x + kDisplayTextGap, row_text_y0);
+        tft.print(button->btn_value.c_str());
+      }
     }
 
     space_left = button->btn_x - kDisplayTextGap;
@@ -579,10 +581,16 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
     DisplayCursorHighlight(button, false);
 }
 
+void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
+  DisplayButton* button = display_pages_vec[current_page][button_index];
+  DisplayCurrentPageButtonRow(button, button_index, is_on);
+}
+
 void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     if(display_pages_vec[current_page][i]->btn_id == current_cursor) {
-      DisplayCurrentPageButtonRow(i, is_on);
+      DisplayButton* button = display_pages_vec[current_page][i];
+      DisplayCurrentPageButtonRow(button, i, is_on);
       break;
     }
   }
@@ -715,7 +723,6 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
 
   // get number of WiFi Networks scanned
   int n_wifi_networks = wifi_stuff->WiFiScanNetworksCount();
-  const int items_per_page = 9;
 
   if(!increment_page) {
     current_wifi_networks_scan_page_no = 0;
@@ -725,6 +732,7 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
     if(items_per_page * current_wifi_networks_scan_page_no > n_wifi_networks - 1)
       current_wifi_networks_scan_page_no = 0;
   }
+  current_wifi_networks_scan_page_cursor = 0;
 
   if(n_wifi_networks == 0) {
     tft.setCursor(10, cursorY);

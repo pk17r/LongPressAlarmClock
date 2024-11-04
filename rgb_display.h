@@ -57,6 +57,7 @@ public:
   void DisplayCurrentPage();
   void DisplayCurrentPageButtonRow(bool is_on);
   void DisplayCurrentPageButtonRow(int button_index, bool is_on);
+  void DisplayCurrentPageButtonRow(DisplayButton* button, int button_index, bool is_on);
   void DisplayCursorHighlight(DisplayButton* button, bool highlight_On);
   void DisplayCursorHighlight(bool highlight_On);
   Cursor CheckButtonTouch();
@@ -150,8 +151,12 @@ private:
 
   // wifi networks scan page
   uint8_t current_wifi_networks_scan_page_no = 0;
+  uint8_t current_wifi_networks_scan_page_cursor = 0;
 
 // PRIVATE CONSTANTS
+
+  // wifi networks scan page
+  const int items_per_page = 9;
 
   // display brightness constants
   const int kMaxBrightness = 255;

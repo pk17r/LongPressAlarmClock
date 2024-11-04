@@ -184,8 +184,8 @@ extern bool second_core_task_added_flag_array[];
 
 enum ButtonType {
   kIconButton,    // kIconButton has hard coded locations and size
-  kRowClickButton,
-  kCustomLocationClickButton,
+  kClickButtonWithLabel,
+  kLabelOnlyNoClickButton,
 };
 
 // struct declerations

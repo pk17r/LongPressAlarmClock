@@ -34,17 +34,18 @@ void WiFiStuff::SaveWiFiDetails() {
 }
 
 std::string WiFiStuff::WiFiDetailsShortString() {
-  std::string wifi_ssid_passwd_value = wifi_ssid_.substr(0,6) + "*, ";
-  int i = 0;
-  while(i <= 5) {
-    if(i > wifi_password_.size() - 1) break;
-    if(i%2 == 0)
-      wifi_ssid_passwd_value += wifi_password_[i];
-    else
-      wifi_ssid_passwd_value += "*";
-    i++;
-  }
-  return wifi_ssid_passwd_value;
+  //std::string wifi_ssid_passwd_value = wifi_ssid_.substr(0,6) + "*, ";
+  //int i = 0;
+  //while(i <= 5) {
+  //  if(i > wifi_password_.size() - 1) break;
+  //  if(i%2 == 0)
+  //    wifi_ssid_passwd_value += wifi_password_[i];
+  //  else
+  //    wifi_ssid_passwd_value += "*";
+  //  i++;
+  //}
+  //return wifi_ssid_passwd_value;
+  return wifi_ssid_.substr(0,16);
 }
 
 void WiFiStuff::SaveWeatherLocationDetails() {

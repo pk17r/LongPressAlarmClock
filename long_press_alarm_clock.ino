@@ -548,9 +548,6 @@ void loop1() {
     }
   #if defined(MCU_IS_ESP32)
     else if(current_task == kScanNetworks) {
-      // disconnect wifi
-      wifi_stuff->TurnWiFiOff();
-      ResetWatchdog();
       success = wifi_stuff->WiFiScanNetworks();
     }
     else if(current_task == kStartSetWiFiSoftAP) {
@@ -1244,6 +1241,10 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       AddSecondCoreTaskIfNotThere(kConnectWiFi);
       WaitForExecutionOfSecondCoreTask();
       // show page
+      current_page = set_this_page;     // new page needs to be set before any action
+      if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageSetSsidPasswd;
+      display->DisplayCurrentPage();
+      break;
     case kSettingsPage:
     case kLocationAndWeatherSettingsPage:
     case kScreensaverSettingsPage:
@@ -1377,16 +1378,34 @@ void MoveCursor(bool increment) {
   }
   else if(current_page != kAlarmSetPage) {
     if(increment) {
-      if(current_cursor == kPageCancelButton)
-        current_cursor = display_pages_vec[current_page][0]->btn_id;
-      else
-        current_cursor = display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex() + 1]->btn_id;
+      if(current_cursor == kPageCancelButton) {
+        // cancel button is always last button on page
+        int i = 0;
+        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
+          i++;
+        current_cursor = display_pages_vec[current_page][i]->btn_id;
+      }
+      else {
+        int i = DisplayPagesVecCurrentButtonIndex() + 1;
+        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
+          i++;
+        current_cursor = display_pages_vec[current_page][i]->btn_id;
+      }
     }
     else {
-      if(current_cursor == display_pages_vec[current_page][0]->btn_id)
+      // find top-most kClickButtonWithLabel button
+      int i = 0;
+      while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
+        i++;
+      // top-most kClickButtonWithLabel button found
+      if(current_cursor == display_pages_vec[current_page][i]->btn_id)
         current_cursor = display_pages_vec[current_page][display_pages_vec[current_page].size() - 1]->btn_id;
-      else
-        current_cursor = display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex() - 1]->btn_id;
+      else {
+        i = DisplayPagesVecCurrentButtonIndex() - 1;
+        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
+          i--;
+        current_cursor = display_pages_vec[current_page][i]->btn_id;
+      }
     }
   }
   else if(current_page == kAlarmSetPage) {
@@ -1414,8 +1433,21 @@ void MoveCursor(bool increment) {
 
 // populate all pages in display_pages_vec
 void PopulateDisplayPages() {
-  DisplayButton* page_save_button = new DisplayButton{ /* Save Button */ kPageSaveButton, kRowClickButton, "", true, kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr };
-  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kRowClickButton, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr };
+  //// struct decleration in common.h
+  //struct DisplayButton {
+  //  const Cursor btn_id;
+  //  const ButtonType btn_type;
+  //  const std::string row_label;
+  //  const bool fixed_location;
+  //  int16_t btn_x;
+  //  int16_t btn_y;
+  //  uint16_t btn_w;
+  //  uint16_t btn_h;
+  //  std::string btn_value;
+  //};
+
+  DisplayButton* page_save_button = new DisplayButton{ /* Save Button */ kPageSaveButton, kClickButtonWithLabel, "", true, kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr };
+  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kClickButtonWithLabel, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr };
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
@@ -1425,29 +1457,30 @@ void PopulateDisplayPages() {
 
   // SETTINGS PAGE
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kSettingsPageWiFi, kRowClickButton, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
-    new DisplayButton{ kSettingsPageLocationAndWeather, kRowClickButton, "Location Settings:", false, 0,0,0,0, "LOCATION" },
-    new DisplayButton{ kSettingsPageAlarmLongPressTime, kRowClickButton, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
-    new DisplayButton{ kSettingsPageScreensaver, kRowClickButton, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
-    new DisplayButton{ kSettingsPageRotateScreen, kRowClickButton, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
-    new DisplayButton{ kSettingsPageUpdate, kRowClickButton, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
+    new DisplayButton{ kSettingsPageWiFi, kClickButtonWithLabel, "WiFi Settings:", false, 0,0,0,0, "WIFI" },
+    new DisplayButton{ kSettingsPageLocationAndWeather, kClickButtonWithLabel, "Location Settings:", false, 0,0,0,0, "LOCATION" },
+    new DisplayButton{ kSettingsPageAlarmLongPressTime, kClickButtonWithLabel, "Long Press / Alarm Snooze Hold Time:", false, 0,0,0,0, (std::to_string(alarm_clock->alarm_long_press_seconds_) + "sec") },
+    new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
+    new DisplayButton{ kSettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
+    new DisplayButton{ kSettingsPageUpdate, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
     page_cancel_button,
   };
 
   // WIFI SETTINGS PAGE
   display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kWiFiSettingsPageScanNetworks, kRowClickButton, "Scan WiFi Networks:", false, 0,0,0,0, "SCAN" },
-    new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kRowClickButton, "Set WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
-    new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kRowClickButton, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
-    new DisplayButton{ kWiFiSettingsPageConnect, kRowClickButton, "Connect to WiFi:", false, 0,0,0,0, "CONNECT" },
-    new DisplayButton{ kWiFiSettingsPageDisconnect, kRowClickButton, "Disconnect WiFi:", false, 0,0,0,0, "DISCONNECT" },
+    new DisplayButton{ kCursorNoSelection, kLabelOnlyNoClickButton, "Saved WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
+    new DisplayButton{ kWiFiSettingsPageSetSsidPasswd, kClickButtonWithLabel, "Set WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
+    new DisplayButton{ kWiFiSettingsPageScanNetworks, kClickButtonWithLabel, "Scan WiFi Networks:", false, 0,0,0,0, "SCAN" },
+    new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "Connect to WiFi:", false, 0,0,0,0, "CONNECT" },
+    new DisplayButton{ kWiFiSettingsPageDisconnect, kClickButtonWithLabel, "Disconnect WiFi:", false, 0,0,0,0, "DISCONNECT" },
+    //new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kClickButtonWithLabel, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
     page_cancel_button,
   };
 
   // WIFI SCAN NETWORKS PAGE
   display_pages_vec[kScanNetworksPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kWiFiScanNetworksPageRescan, kCustomLocationClickButton, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
-    new DisplayButton{ kWiFiScanNetworksPageNext, kCustomLocationClickButton, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
+    new DisplayButton{ kWiFiScanNetworksPageRescan, kClickButtonWithLabel, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
+    new DisplayButton{ kWiFiScanNetworksPageNext, kClickButtonWithLabel, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
     page_cancel_button,
   };
 
@@ -1459,10 +1492,10 @@ void PopulateDisplayPages() {
 
   // LOCATION AND WEATHER SETTINGS PAGE
   display_pages_vec[kLocationAndWeatherSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kRowClickButton, "City:", false, 0,0,0,0, (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_) },
-    new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kRowClickButton, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
-    new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kRowClickButton, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
-    new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kRowClickButton, "Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
+    new DisplayButton{ kLocationAndWeatherSettingsPageSetLocation, kClickButtonWithLabel, "City:", false, 0,0,0,0, (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_) },
+    new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kClickButtonWithLabel, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
+    new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kClickButtonWithLabel, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
+    new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kClickButtonWithLabel, "Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
     page_cancel_button,
   };
 
@@ -1474,12 +1507,12 @@ void PopulateDisplayPages() {
 
   // SCREENSAVER SETTINGS PAGE
   display_pages_vec[kScreensaverSettingsPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ kScreensaverSettingsPageMotion, kRowClickButton, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? kBounceScreensaverStr : kFlyOutScreensaverStr) },
-    new DisplayButton{ kScreensaverSettingsPageSpeed, kRowClickButton, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr)) },
-    new DisplayButton{ kScreensaverSettingsPageRun, kRowClickButton, "Run Screensaver:", false, 0,0,0,0, "RUN" },
-    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kRowClickButton, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
-    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kRowClickButton, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
-    new DisplayButton{ kScreensaverSettingsPageRgbLedBrightness, kRowClickButton, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
+    new DisplayButton{ kScreensaverSettingsPageMotion, kClickButtonWithLabel, "Screensaver Motion:", false, 0,0,0,0, (display->screensaver_bounce_not_fly_horizontally_ ? kBounceScreensaverStr : kFlyOutScreensaverStr) },
+    new DisplayButton{ kScreensaverSettingsPageSpeed, kClickButtonWithLabel, "Screensaver Speed:", false, 0,0,0,0, (cpu_speed_mhz == 80 ? kSlowStr : (cpu_speed_mhz == 160 ? kMediumStr : kFastStr)) },
+    new DisplayButton{ kScreensaverSettingsPageRun, kClickButtonWithLabel, "Run Screensaver:", false, 0,0,0,0, "RUN" },
+    new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kClickButtonWithLabel, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
+    new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kClickButtonWithLabel, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
+    new DisplayButton{ kScreensaverSettingsPageRgbLedBrightness, kClickButtonWithLabel, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
     page_cancel_button,
   };
 
