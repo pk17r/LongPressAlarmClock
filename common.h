@@ -121,7 +121,6 @@ enum Cursor {
   kWiFiSettingsPageClearSsidAndPasswd,
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
-  kWiFiScanNetworksPageWiFiNetworksList,
   kWiFiScanNetworksPageRescan,
   kWiFiScanNetworksPageNext,
   kLocationAndWeatherSettingsPageSetLocation,

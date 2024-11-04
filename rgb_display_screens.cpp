@@ -460,13 +460,26 @@ void RGBDisplay::DrawTriangleButton(int16_t x, int16_t y, uint16_t w, uint16_t h
 }
 
 void RGBDisplay::DisplayCursorHighlight(DisplayButton* button, bool highlight_On) {
-  if(highlight_On) {
-    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayColorCyan);
-    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+  // special case first
+  if(current_page == kWiFiScanNetworksPage && current_cursor == kCursorNoSelection) {
+    // inside WiFi Scan Networks Page List
+    int cursorY = kWiFiScanNetworksList_y0_ + kWiFiScanNetworksList_h_ * (current_wifi_networks_scan_page_cursor - 1) + kWiFiScanNetworksList_h_ / 4 + 1;
+    if(highlight_On) {
+      tft.drawRoundRect(0, cursorY, kTftWidth - 1, kWiFiScanNetworksList_h_, kRadiusButtonRoundRect, kDisplayColorCyan);
+    }
+    else {
+      tft.drawRoundRect(0, cursorY, kTftWidth - 1, kWiFiScanNetworksList_h_, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    }
   }
-  else{
-    tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
-    tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+  else {
+    if(highlight_On) {
+      tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayColorCyan);
+      tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayColorCyan);
+    }
+    else {
+      tft.drawRoundRect(button->btn_x - 1, button->btn_y - 1, button->btn_w + 2 * 1, button->btn_h + 2 * 1, kRadiusButtonRoundRect, kDisplayBackroundColor);
+      tft.drawRoundRect(button->btn_x - 2, button->btn_y - 2, button->btn_w + 2 * 2, button->btn_h + 2 * 2, kRadiusButtonRoundRect, kDisplayBackroundColor);
+    }
   }
 }
 
@@ -719,7 +732,7 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
 
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
-  int cursorY = 40;
+  int cursorY = kWiFiScanNetworksList_y0_;
 
   // get number of WiFi Networks scanned
   int n_wifi_networks = wifi_stuff->WiFiScanNetworksCount();
@@ -745,7 +758,7 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
     for(int i = items_per_page * current_wifi_networks_scan_page_no; i< min(items_per_page * (current_wifi_networks_scan_page_no + 1), n_wifi_networks); i++) {
       tft.setCursor(10, cursorY);
       tft.print(wifi_stuff->WiFiScanNetworkDetails(i).c_str());
-      cursorY += 20;
+      cursorY += kWiFiScanNetworksList_h_;
     }
   }
 

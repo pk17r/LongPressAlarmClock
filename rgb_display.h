@@ -73,7 +73,7 @@ public:
   void ScreensaverControl(bool turnOn);
   void RotateScreen();
 
-// PUBLIC VARIABLES
+// PUBLIC VARIABLES / CONSTANTS
 
   // display object
   #if defined(DISPLAY_IS_ST7789V)
@@ -109,6 +109,9 @@ public:
   const uint16_t kColorPickerWheel[kColorPickerWheelSize] = {0x6D9D, 0x867E, 0x897B, 0x065F, 0xF7BB, 0xDD0D, 0xF52C, 0x07FF, 0x46F9, 0xCC53, 0x67E0, 0x0653, 0x07E0, 0xAFE6, 0xF81F, 0xF897, 0xFE76, 0xFCCC, 0xFC60, 0xFBE0, 0xFA69, 0xFAF9, 0xFBBF, 0xB81F, 0x991D, 0xF840, 0xF800, 0xFB09, 0xFFFD, 0x7FE0, 0xFEE0, 0xFFE0, 0xBFE0};
   bool screensaver_bounce_not_fly_horizontally_ = true;
 
+  // wifi networks scan page
+  const int items_per_page = 9;
+  uint8_t current_wifi_networks_scan_page_cursor = -1;
 
 private:
 
@@ -151,12 +154,11 @@ private:
 
   // wifi networks scan page
   uint8_t current_wifi_networks_scan_page_no = 0;
-  uint8_t current_wifi_networks_scan_page_cursor = 0;
 
 // PRIVATE CONSTANTS
 
   // wifi networks scan page
-  const int items_per_page = 9;
+  int16_t kWiFiScanNetworksList_y0_ = 40, kWiFiScanNetworksList_h_ = 20;
 
   // display brightness constants
   const int kMaxBrightness = 255;

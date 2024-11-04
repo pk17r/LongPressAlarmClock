@@ -1375,27 +1375,66 @@ void MoveCursor(bool increment) {
   PrintLn("first_click_button_index = ", first_click_button_index);
   PrintLn("last_click_button_index = ", last_click_button_index);
   PrintLn("increment = ", increment);
-  // find next button
-  if(increment) {
-    if(current_cursor != display_pages_vec[current_page][last_click_button_index]->btn_cursor_id) {
-      int new_button_index = DisplayPagesVecCurrentButtonIndex() + 1;
-      while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
-        new_button_index++;
-      current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
+  // special case of WiFi Scan Networks Page:
+  bool find_next_button = false;
+  if((current_page == kWiFiScanNetworksPage) && (current_cursor == kCursorNoSelection)) {
+    // move cursor inside the WiFi Networks Selection List
+    if(increment) {
+      if(display->current_wifi_networks_scan_page_cursor < display->items_per_page - 1) {
+        display->current_wifi_networks_scan_page_cursor++;
+      }
+      else {
+        display->current_wifi_networks_scan_page_cursor = -1;
+        find_next_button = true;
+      }
     }
     else {
-      current_cursor = display_pages_vec[current_page][first_click_button_index]->btn_cursor_id;
+      if(display->current_wifi_networks_scan_page_cursor > 0) {
+        display->current_wifi_networks_scan_page_cursor--;
+      }
+      else {
+        display->current_wifi_networks_scan_page_cursor = -1;
+        find_next_button = true;
+      }
     }
+    // special case of kWiFiScanNetworksPage continued inside if(find_next_button)
   }
   else {
-    if(current_cursor != display_pages_vec[current_page][first_click_button_index]->btn_cursor_id) {
-      int new_button_index = DisplayPagesVecCurrentButtonIndex() - 1;
-      while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
-        new_button_index--;
-      current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
+    find_next_button = true;
+  }
+  // find next button
+  if(find_next_button) {
+    if(increment) {
+      if(current_cursor != display_pages_vec[current_page][last_click_button_index]->btn_cursor_id) {
+        int new_button_index = DisplayPagesVecCurrentButtonIndex() + 1;
+        while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
+          new_button_index++;
+        current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
+      }
+      else {
+        current_cursor = display_pages_vec[current_page][first_click_button_index]->btn_cursor_id;
+        // special case of kWiFiScanNetworksPage continued from before if(find_next_button)
+        if(current_page == kWiFiScanNetworksPage && current_cursor == kCursorNoSelection) {
+          // came here from cancel button
+          display->current_wifi_networks_scan_page_cursor = 0;
+        }
+      }
     }
     else {
-      current_cursor = display_pages_vec[current_page][last_click_button_index]->btn_cursor_id;
+      if(current_cursor != display_pages_vec[current_page][first_click_button_index]->btn_cursor_id) {
+        int new_button_index = DisplayPagesVecCurrentButtonIndex() - 1;
+        while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
+          new_button_index--;
+        current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
+        // special case of kWiFiScanNetworksPage continued from before if(find_next_button)
+        if(current_page == kWiFiScanNetworksPage && current_cursor == kCursorNoSelection) {
+          // came here from Rescan button
+          display->current_wifi_networks_scan_page_cursor = display->items_per_page - 1;
+        }
+      }
+      else {
+        current_cursor = display_pages_vec[current_page][last_click_button_index]->btn_cursor_id;
+      }
     }
   }
   PrintLn("current_cursor = ", current_cursor);
@@ -1457,6 +1496,7 @@ void PopulateDisplayPages() {
 
   // WIFI SCAN NETWORKS PAGE
   display_pages_vec[kWiFiScanNetworksPage] = std::vector<DisplayButton*> {
+    new DisplayButton{ kCursorNoSelection, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
     new DisplayButton{ kWiFiScanNetworksPageRescan, kClickButtonWithLabel, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
     new DisplayButton{ kWiFiScanNetworksPageNext, kClickButtonWithLabel, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
     page_cancel_button,
