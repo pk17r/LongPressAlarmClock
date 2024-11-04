@@ -1019,7 +1019,7 @@ void ProcessSerialInput() {
         std::string label = "WiFi Password";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
-        display->GetUserOnScreenTextInput(label, returnText);
+        display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
         Serial.print("User Input :"); Serial.println(returnText);
         SetPage(kSettingsPage);
       }
@@ -1270,7 +1270,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         std::string label = "WiFi SSID";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
         PrintLn(label, returnText);
         if(ret) {
           // set WiFi SSID:
@@ -1294,7 +1294,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         std::string label = "WiFi PASSWD";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
         PrintLn(label, returnText);
         if(ret) {
           // set WiFi Passwd:
@@ -1323,7 +1323,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         std::string label = "ZIP/PIN Code";
         char returnText[8] = "";
         // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ true);
         PrintLn(label, returnText);
         if(ret) {
           // set Location ZIP code:
@@ -1342,7 +1342,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
         std::string label = "Two Letter Country Code";
         char returnText[3] = "";
         // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText);
+        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
         PrintLn(label, returnText);
         if(ret) {
           // set country code:
@@ -1652,14 +1652,15 @@ void LedButtonClickAction() {
           std::string label = "Pwd for " + wifi_stuff->wifi_ssid_.substr(0,16) + ":";
           char returnText[kWifiSsidPasswordLengthMax + 1] = "";
           // get user input from screen
-          display->GetUserOnScreenTextInput(label, returnText);
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
           Serial.print("User Input :"); Serial.println(returnText);
           LedButtonClickUiResponse(2);
-          wifi_stuff->wifi_password_ = returnText;
-          wifi_stuff->SaveWiFiDetails();
-          int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
-          display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
-          wifi_stuff->WiFiScanNetworksFreeMemory();
+          if(ret) {
+            wifi_stuff->wifi_password_ = returnText;
+            wifi_stuff->SaveWiFiDetails();
+            int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
+            display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
+          }
           SetPage(kWiFiSettingsPage);
         }
         else {
@@ -1714,7 +1715,7 @@ void LedButtonClickAction() {
           std::string label = "Pwd for " + wifi_ssid.substr(0,16) + ":";
           char returnText[kWifiSsidPasswordLengthMax + 1] = "";
           // get user input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText);
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
           Serial.print("User Input :"); Serial.println(returnText);
           LedButtonClickUiResponse(2);
           if(ret) {
@@ -1723,7 +1724,6 @@ void LedButtonClickAction() {
             wifi_stuff->SaveWiFiDetails();
             int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
             display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
-            
           }
         }
         else {
@@ -1771,9 +1771,54 @@ void LedButtonClickAction() {
     else if(current_page == kLocationAndWeatherSettingsPage) {       // LOCATION AND WEATHER SETTINGS PAGE
       if(current_cursor == kLocationAndWeatherSettingsPageSetLocation) {
         LedButtonClickUiResponse(2);
-        AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationInputsPage);
+        if(ts != NULL) {
+          // use touchscreen
+          // user input string
+          std::string label = "Your City ZIP(5)/PIN(6) Code:";
+          std::string location_zip_code = std::to_string(wifi_stuff->location_zip_code_);
+          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+          for(int i = 0; i< location_zip_code.size(); i++) {
+            returnText[i] = location_zip_code[i];
+          }
+          // get user input from screen
+          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ true);
+          Serial.print("User Input :"); Serial.println(returnText);
+          LedButtonClickUiResponse(2);
+          if(ret) {
+            std::string new_location_zip_str = returnText;
+            //Serial.print("new_location_zip_str :"); Serial.println(new_location_zip_str.c_str());
+            uint32_t new_location_zip = std::stoi(new_location_zip_str);
+            Serial.print("new_location_zip :"); Serial.println(new_location_zip);
+
+            // get Country Code
+
+            label = "Your Two Letter Country Code:";
+            strcpy(returnText, "");
+            strcpy(returnText, wifi_stuff->location_country_code_.c_str());
+            // get user input from screen
+            bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
+            Serial.print("User Input :"); Serial.println(returnText);
+            LedButtonClickUiResponse(2);
+            if(ret) {
+              wifi_stuff->location_zip_code_ = new_location_zip;
+              wifi_stuff->location_country_code_ = returnText;
+              wifi_stuff->SaveWeatherLocationDetails();
+              // update new location Zip/Pin code on button
+              int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
+              std::string location_str = (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_);
+              display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
+              // get new location, update time and weather info
+              AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
+              WaitForExecutionOfSecondCoreTask();
+            }
+            SetPage(kLocationAndWeatherSettingsPage);
+          }
+        }
+        else {
+          AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
+          WaitForExecutionOfSecondCoreTask();
+          SetPage(kLocationInputsPage);
+        }
       }
       else if(current_cursor == kLocationAndWeatherSettingsPageUnits) {
         wifi_stuff->weather_units_metric_not_imperial_ = !wifi_stuff->weather_units_metric_not_imperial_;

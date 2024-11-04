@@ -1862,21 +1862,24 @@ byte RGBDisplay::IsTouchWithin(int x, int y, int w, int h) {
 
 // get keyboard presses on keyboard made by MakeKeyboard
 // credits: Andrew Mascolo https://github.com/AndrewMascolo/Adafruit_Stuff/blob/master/Sketches/Keyboard.ino
-bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * textReturn) {
-  char key = 0;
+bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * textReturn, bool number_input) {
+  // static vars for Keyboard
   static bool shift = true, lastSh = true, special = false, lastSp = false;
+  if(number_input) {
+    shift = false;
+    lastSh = false;
+    special = true;
+    lastSp = true;
+  }
   static char bufIndex = 0;
+  while(textBuffer[bufIndex] != '\0')
+    bufIndex++;
 
   if (ts->IsTouched())
   {
     // check if cancel button is pressed
     if (IsTouchWithin(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize))
     {
-      // reset static vars
-      shift = true;
-      lastSh = true;
-      special = false;
-      lastSp = false;
       return false;
     }
 
@@ -2021,11 +2024,6 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
       }
       // clear writing pad
       tft.fillRect(15, kTextAreaHeight - 30, tft.width() - 40, 20, kDisplayBackroundColor);
-      // reset static vars
-      shift = true;
-      lastSh = true;
-      special = false;
-      lastSp = false;
     }
   }
   tft.setTextColor(kTextRegularColor, kKeyboardButtonFillColor);
@@ -2036,22 +2034,31 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 }
 
 // get user text input from on-screen keyboard
-bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text) {
+bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, bool number_input) {
   bool ret = false;
 
   tft.fillScreen(kDisplayBackroundColor);
   tft.setFont(NULL);
 
-  MakeKeyboard(Mobile_KB_Capitals, label);
+  if(number_input) {
+    // Numpad Input
+    MakeKeyboard(Mobile_NumKeys, label);
+  }
+  else {
+    // Keypad Input
+    MakeKeyboard(Mobile_KB_Capitals, label);
+  }
 
   // buffer for user input
   char user_input_buffer[kWifiSsidPasswordLengthMax + 1] = "";
+  strcpy(user_input_buffer, return_text);
+  strcpy(return_text, "");
 
   // get user input
   while(1) {
     ResetWatchdog();
     // See if there's any  touch data for us
-    ret = GetKeyboardPress(user_input_buffer, label, return_text);
+    ret = GetKeyboardPress(user_input_buffer, label, return_text, number_input);
     if(!ret)
       break;
 

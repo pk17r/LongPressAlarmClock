@@ -49,7 +49,7 @@ public:
   void WiFiScanNetworksPage(bool increment_page);
   void SoftApInputsPage();
   void LocationInputsLocalServerPage();
-  bool GetUserOnScreenTextInput(std::string label, char* return_text);
+  bool GetUserOnScreenTextInput(std::string label, char* return_text, bool number_input);
   void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
   void IncorrectTimeBanner();
   void FirmwareUpdatePage();
@@ -129,7 +129,7 @@ private:
   void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(int x, int y, int w, int h);
   byte IsTouchWithin(int x, int y, int w, int h);
-  bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
+  bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn, bool number_input);
 
 
 // PRIVATE VARIABLES
