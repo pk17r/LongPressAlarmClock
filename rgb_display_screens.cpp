@@ -473,7 +473,7 @@ void RGBDisplay::DisplayCursorHighlight(DisplayButton* button, bool highlight_On
 void RGBDisplay::DisplayCursorHighlight(bool highlight_On) {
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     DisplayButton* button = display_pages_vec[current_page][i];
-    if(button->btn_id == current_cursor) {
+    if(button->btn_cursor_id == current_cursor) {
       DisplayCursorHighlight(button, highlight_On);
       break;
     }
@@ -494,7 +494,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
   // item button
 
   // if not an icon button then make a button
-  if(button->btn_type != kIconButton) {
+  if(button->btn_type != kClickButtonWithIcon) {
     if(button->fixed_location) {
       // pre-fixed location button
       tft.setFont(&FreeMonoBold9pt7b);
@@ -575,7 +575,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(DisplayButton* button, int button_i
 
   // button highlight
 
-  if(button->btn_id == current_cursor)
+  if(button->btn_cursor_id == current_cursor)
     DisplayCursorHighlight(button, true);
   else
     DisplayCursorHighlight(button, false);
@@ -588,7 +588,7 @@ void RGBDisplay::DisplayCurrentPageButtonRow(int button_index, bool is_on) {
 
 void RGBDisplay::DisplayCurrentPageButtonRow(bool is_on) {
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
-    if(display_pages_vec[current_page][i]->btn_id == current_cursor) {
+    if(display_pages_vec[current_page][i]->btn_cursor_id == current_cursor) {
       DisplayButton* button = display_pages_vec[current_page][i];
       DisplayCurrentPageButtonRow(button, i, is_on);
       break;
@@ -692,7 +692,7 @@ Cursor RGBDisplay::CheckButtonTouch() {
     if(ts_x >= button->btn_x && ts_x <= button->btn_x + button->btn_w && ts_y >= button->btn_y && ts_y <= button->btn_y + button->btn_h) {
       DisplayCurrentPageButtonRow(i, true);
       delay(100);
-      return button->btn_id;
+      return button->btn_cursor_id;
     }
   }
   return kCursorNoSelection;

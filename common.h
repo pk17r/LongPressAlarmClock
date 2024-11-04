@@ -83,7 +83,7 @@ enum ScreenPage {
   kTimeSetPage,
   kSettingsPage,
   kWiFiSettingsPage,
-  kScanNetworksPage,
+  kWiFiScanNetworksPage,
   kSoftApInputsPage,
   kEnterWiFiSsidPage,
   kEnterWiFiPasswdPage,
@@ -121,6 +121,7 @@ enum Cursor {
   kWiFiSettingsPageClearSsidAndPasswd,
   kWiFiSettingsPageConnect,
   kWiFiSettingsPageDisconnect,
+  kWiFiScanNetworksPageWiFiNetworksList,
   kWiFiScanNetworksPageRescan,
   kWiFiScanNetworksPageNext,
   kLocationAndWeatherSettingsPageSetLocation,
@@ -183,14 +184,14 @@ extern bool second_core_task_added_flag_array[];
 // Display Items
 
 enum ButtonType {
-  kIconButton,    // kIconButton has hard coded locations and size
+  kClickButtonWithIcon,
   kClickButtonWithLabel,
-  kLabelOnlyNoClickButton,
+  kLabelOnlyNoClickButton,    // kLabelOnlyNoClickButton will not be highlighted on display
 };
 
 // struct declerations
 struct DisplayButton {
-  const Cursor btn_id;
+  const Cursor btn_cursor_id;
   const ButtonType btn_type;
   const std::string row_label;
   const bool fixed_location;

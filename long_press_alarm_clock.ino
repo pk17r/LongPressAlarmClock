@@ -1249,10 +1249,10 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
     case kLocationAndWeatherSettingsPage:
     case kScreensaverSettingsPage:
       current_page = set_this_page;     // new page needs to be set before any action
-      if(move_cursor_to_first_button) current_cursor = display_pages_vec[current_page][0]->btn_id;
+      if(move_cursor_to_first_button) current_cursor = display_pages_vec[current_page][0]->btn_cursor_id;
       display->DisplayCurrentPage();
       break;
-    case kScanNetworksPage:
+    case kWiFiScanNetworksPage:
       current_page = set_this_page;     // new page needs to be set before any action
       if(move_cursor_to_first_button) current_cursor = kWiFiScanNetworksPageRescan;
       display->WiFiScanNetworksPage(increment_page);
@@ -1361,71 +1361,45 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
 }
 
 void MoveCursor(bool increment) {
+  // Alarm Set Page (kAlarmSetPage) increment/decrement operations do not come here
+  // they are handled as a special case
+
   display->DisplayCursorHighlight(/*highlight_On = */ false);
-  if(current_page == kMainPage) {
-    if(increment) {
-      if(current_cursor == kMainPageSetAlarm)
-        current_cursor = kCursorNoSelection;
-      else
-        current_cursor++;
+
+  // find first and last Click button in the page
+  int first_click_button_index = 0, last_click_button_index = display_pages_vec[current_page].size() - 1;
+  while(display_pages_vec[current_page][first_click_button_index]->btn_type == kLabelOnlyNoClickButton)
+    first_click_button_index++;
+  while(display_pages_vec[current_page][last_click_button_index]->btn_type == kLabelOnlyNoClickButton)
+    last_click_button_index--;
+  PrintLn("first_click_button_index = ", first_click_button_index);
+  PrintLn("last_click_button_index = ", last_click_button_index);
+  PrintLn("increment = ", increment);
+  // find next button
+  if(increment) {
+    if(current_cursor != display_pages_vec[current_page][last_click_button_index]->btn_cursor_id) {
+      int new_button_index = DisplayPagesVecCurrentButtonIndex() + 1;
+      while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
+        new_button_index++;
+      current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
     }
     else {
-      if(current_cursor == kCursorNoSelection)
-        current_cursor = kMainPageSetAlarm;
-      else
-        current_cursor--;
+      current_cursor = display_pages_vec[current_page][first_click_button_index]->btn_cursor_id;
     }
   }
-  else if(current_page != kAlarmSetPage) {
-    if(increment) {
-      if(current_cursor == kPageCancelButton) {
-        // cancel button is always last button on page
-        int i = 0;
-        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
-          i++;
-        current_cursor = display_pages_vec[current_page][i]->btn_id;
-      }
-      else {
-        int i = DisplayPagesVecCurrentButtonIndex() + 1;
-        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
-          i++;
-        current_cursor = display_pages_vec[current_page][i]->btn_id;
-      }
+  else {
+    if(current_cursor != display_pages_vec[current_page][first_click_button_index]->btn_cursor_id) {
+      int new_button_index = DisplayPagesVecCurrentButtonIndex() - 1;
+      while(display_pages_vec[current_page][new_button_index]->btn_type == kLabelOnlyNoClickButton)
+        new_button_index--;
+      current_cursor = display_pages_vec[current_page][new_button_index]->btn_cursor_id;
     }
     else {
-      // find top-most kClickButtonWithLabel button
-      int i = 0;
-      while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
-        i++;
-      // top-most kClickButtonWithLabel button found
-      if(current_cursor == display_pages_vec[current_page][i]->btn_id)
-        current_cursor = display_pages_vec[current_page][display_pages_vec[current_page].size() - 1]->btn_id;
-      else {
-        i = DisplayPagesVecCurrentButtonIndex() - 1;
-        while(display_pages_vec[current_page][i]->btn_type != kClickButtonWithLabel)
-          i--;
-        current_cursor = display_pages_vec[current_page][i]->btn_id;
-      }
+      current_cursor = display_pages_vec[current_page][last_click_button_index]->btn_cursor_id;
     }
   }
-  else if(current_page == kAlarmSetPage) {
-    if(increment) {
-      if(current_cursor == kCursorNoSelection)
-        current_cursor = kAlarmSetPageHour;
-      else if(current_cursor == kAlarmSetPageCancel)
-        current_cursor = kCursorNoSelection;
-      else
-        current_cursor++;
-    }
-    else {
-      if(current_cursor == kCursorNoSelection)
-        current_cursor = kAlarmSetPageCancel;
-      else if(current_cursor == kAlarmSetPageHour)
-        current_cursor = kCursorNoSelection;
-      else
-        current_cursor--;
-    }
-  }
+  PrintLn("current_cursor = ", current_cursor);
+
   display->DisplayCursorHighlight(/*highlight_On = */ true);
   // wait a little
   delay(2*kUserInputDelayMs);
@@ -1435,7 +1409,7 @@ void MoveCursor(bool increment) {
 void PopulateDisplayPages() {
   //// struct decleration in common.h
   //struct DisplayButton {
-  //  const Cursor btn_id;
+  //  const Cursor btn_cursor_id;
   //  const ButtonType btn_type;
   //  const std::string row_label;
   //  const bool fixed_location;
@@ -1451,9 +1425,13 @@ void PopulateDisplayPages() {
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
-    new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kIconButton, "", true, kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, "" },
-    new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kIconButton, "", true, 1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "" },
+    new DisplayButton{ /* No Selection */ kCursorNoSelection, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
+    new DisplayButton{ /* Settings Wheel */ kMainPageSettingsWheel, kClickButtonWithIcon, "", true, kSettingsGearX1, kSettingsGearY1, kSettingsGearWidth, kSettingsGearHeight, "" },
+    new DisplayButton{ /* Alarms Row     */ kMainPageSetAlarm, kClickButtonWithIcon, "", true, 1, kAlarmRowY1, kTftWidth - 2, kTftHeight - kAlarmRowY1 - 1, "" },
   };
+
+  // ALARM SET PAGE
+  // this page is handled as a special case
 
   // SETTINGS PAGE
   display_pages_vec[kSettingsPage] = std::vector<DisplayButton*> {
@@ -1478,7 +1456,7 @@ void PopulateDisplayPages() {
   };
 
   // WIFI SCAN NETWORKS PAGE
-  display_pages_vec[kScanNetworksPage] = std::vector<DisplayButton*> {
+  display_pages_vec[kWiFiScanNetworksPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kWiFiScanNetworksPageRescan, kClickButtonWithLabel, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
     new DisplayButton{ kWiFiScanNetworksPageNext, kClickButtonWithLabel, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
     page_cancel_button,
@@ -1520,7 +1498,7 @@ void PopulateDisplayPages() {
 
 int DisplayPagesVecCurrentButtonIndex() {
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
-    if(display_pages_vec[current_page][i]->btn_id == current_cursor)
+    if(display_pages_vec[current_page][i]->btn_cursor_id == current_cursor)
       return i;
   }
   return -1;
@@ -1528,7 +1506,7 @@ int DisplayPagesVecCurrentButtonIndex() {
 
 int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor) {
   for (int i = 0; i < display_pages_vec[button_page].size(); i++) {
-    if(display_pages_vec[button_page][i]->btn_id == button_cursor)
+    if(display_pages_vec[button_page][i]->btn_cursor_id == button_cursor)
       return i;
   }
   return -1;
@@ -1618,7 +1596,7 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kScanNetworksPage);
+        SetPage(kWiFiScanNetworksPage);
       }
       else if(current_cursor == kWiFiSettingsPageSetSsidPasswd) {
         LedButtonClickUiResponse(2);
@@ -1656,16 +1634,16 @@ void LedButtonClickAction() {
         SetPage(kSettingsPage);
       }
     }
-    else if(current_page == kScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
+    else if(current_page == kWiFiScanNetworksPage) {          // WIFI NETWORKS SCAN PAGE
       if(current_cursor == kWiFiScanNetworksPageRescan) {
         LedButtonClickUiResponse(2);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
         WaitForExecutionOfSecondCoreTask();
-        SetPage(kScanNetworksPage);
+        SetPage(kWiFiScanNetworksPage);
       }
       else if(current_cursor == kWiFiScanNetworksPageNext) {
         LedButtonClickUiResponse();
-        SetPage(kScanNetworksPage, false, true);
+        SetPage(kWiFiScanNetworksPage, false, true);
       }
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
