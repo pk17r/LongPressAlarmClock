@@ -799,19 +799,19 @@ void RGBDisplay::SoftApInputsPage() {
   tft.setFont(&FreeMonoBold9pt7b);
   tft.setTextColor(kDisplayColorGreen);
   tft.setCursor(kDisplayTextGap, 20);
-  tft.print("SET WIFI DETAILS USING MOBILE");
+  tft.print("SET WIFI PASSWD USING MOBILE");
 
   tft.setTextColor(kDisplayColorYellow);
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(10, 50);
-  // tft.print("Connect to Created WiFi");
-  tft.print("A WiFi AP has been created.");
+  //tft.print("A WiFi AP has been created.");
+  tft.print("A WiFi Access Point has been");
   tft.setCursor(10, 70);
   // tft.print("using mobile/computer.");
-  tft.print("Using your Mobile connect to");
+  tft.print("created. Use your Mobile to");
   tft.setCursor(10, 90);
   // tft.print("WiFi SSID:");
-  tft.print("this WiFi Access Point:");
+  tft.print("connect to the WiFi:");
 
   tft.setCursor(10, 120);
   tft.setFont(&FreeSansBold12pt7b);

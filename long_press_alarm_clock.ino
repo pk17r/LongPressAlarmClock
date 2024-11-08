@@ -426,8 +426,15 @@ void loop() {
     // serial print RTC Date Time
     // SerialPrintRtcDateTime();
 
+    // if SAP is on, then track got_SAP_user_input_ to stop SAP
+    if((current_page == kSoftApInputsPage) && wifi_stuff->got_SAP_user_input_) {
+      current_cursor = kPageSaveButton;
+      LedButtonClickAction();
+      inactivity_millis = 0;
+    }
+
     // check for inactivity
-    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 20 * kInactivityMillisLimit : kInactivityMillisLimit)) {
+    if(inactivity_millis > (((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) ? 15 * kInactivityMillisLimit : kInactivityMillisLimit)) {
       // if softap server is on, then end it
       if(current_page == kSoftApInputsPage)
         AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
@@ -1698,20 +1705,16 @@ void LedButtonClickAction() {
       }
     }
     else if(current_page == kSoftApInputsPage) {          // SOFT AP SET WIFI SSID PASSWD PAGE
+      LedButtonClickUiResponse(1);
       if(current_cursor == kPageSaveButton) {
-        LedButtonClickUiResponse(1);
-        AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
-        WaitForExecutionOfSecondCoreTask();
-        wifi_stuff->SaveWiFiDetails();
-        // populate info of WiFi on page
-        int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
-        display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
+        LedOnOffResponse();
+        wifi_stuff->save_SAP_details_ = true;
       }
       else if(current_cursor == kPageCancelButton) {
-        LedButtonClickUiResponse(1);
-        AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
-        WaitForExecutionOfSecondCoreTask();
+        // don't save wifi details
       }
+      AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
+      WaitForExecutionOfSecondCoreTask();
       SetPage(kWiFiSettingsPage);
     }
     else if(current_page == kLocationAndWeatherSettingsPage) {       // LOCATION AND WEATHER SETTINGS PAGE

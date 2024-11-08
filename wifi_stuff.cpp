@@ -386,6 +386,8 @@ void WiFiStuff::StartSetWiFiSoftAP() {
 
   WiFi.mode(WIFI_AP);
   delay(100);
+  got_SAP_user_input_ = false;
+  save_SAP_details_ = false;
 
   server = new AsyncWebServer(80);
 
@@ -427,8 +429,14 @@ void WiFiStuff::StopSetWiFiSoftAP() {
     server = NULL;
   }
 
-  wifi_stuff->wifi_ssid_ = temp_ssid_str.c_str();
-  wifi_stuff->wifi_password_ = temp_passwd_str.c_str();
+  if(save_SAP_details_) {
+    //wifi_ssid_ = temp_ssid_str.c_str();
+    wifi_password_ = temp_passwd_str.c_str();
+    SaveWiFiDetails();
+  }
+
+  got_SAP_user_input_ = false;
+  save_SAP_details_ = false;
 }
 
 void WiFiStuff::StartSetLocationLocalServer() {
@@ -506,19 +514,14 @@ const char index_html_wifi_details[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent! Please press 'Save' on device to complete operation!");
-      setTimeout(function(){ document.location.reload(false); }, 500);   
+      setTimeout(function() { alert('sent!'); }, 1);
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
   	<a href="https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release" target="_blank"><h3>Long Press Alarm Clock</h3></a>
-    <h4>Enter WiFi Details:</h4>
-    <label>WiFi SSID (NOTE: Enter 2.4GHz WiFi, not 5G):</label><br>
-    <input type="text" name="html_ssid" value="%html_ssid%"><br><br>
-    <label>WiFi Password:</label><br>
+    <h4>Enter WiFi Password for %html_ssid%</h4>
     <input type="text" name="html_passwd" value="%html_passwd%"><br><br>
     <input type="submit" value="Submit" onclick="submitMessage()"><br>
-    <label>Remember to press Save on the clock!</label><br>
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
@@ -581,15 +584,11 @@ void _SoftAPWiFiDetails() {
   // Send a GET request to <ESP_IP>/get?inputString=<inputMessage>
   server->on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
     String inputMessage;
-    // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
-    if (request->hasParam(kHtmlParamKeySsid)) {
-      inputMessage = request->getParam(kHtmlParamKeySsid)->value();
-      temp_ssid_str = inputMessage;
-    }
     // GET html_passwd value on <ESP_IP>/get?html_passwd=<inputMessage>
     if (request->hasParam(kHtmlParamKeyPasswd)) {
       inputMessage = request->getParam(kHtmlParamKeyPasswd)->value();
       temp_passwd_str = inputMessage;
+      wifi_stuff->got_SAP_user_input_ = true;
     }
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);

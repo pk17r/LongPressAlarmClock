@@ -77,6 +77,8 @@ public:
   bool incorrect_wifi_details_ = false;
 
   std::string soft_AP_IP = "";
+  bool got_SAP_user_input_ = false;
+  bool save_SAP_details_ = false;
 
   // flag to to know if new firmware update is available
   bool firmware_update_available_ = false;
