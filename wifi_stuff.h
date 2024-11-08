@@ -42,6 +42,11 @@ public:
   #else
     std::string wifi_password_ = "";
   #endif
+  #if defined(MY_OPEN_WEATHER_MAP_API_KEY)   // create a secrets.h file with #define for MY_OPEN_WEATHER_MAP_API_KEY
+    std::string openWeatherMapApiKey = MY_OPEN_WEATHER_MAP_API_KEY;
+  #else
+    std::string openWeatherMapApiKey = "";
+  #endif
 
   // weather information
   std::string weather_main_ = "";
@@ -139,12 +144,6 @@ public:
 private:
 
   void ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today, int &month, int &year);
-
-  #if defined(MY_OPEN_WEATHER_MAP_API_KEY)   // create a secrets.h file with #define for MY_OPEN_WEATHER_MAP_API_KEY
-    std::string openWeatherMapApiKey = MY_OPEN_WEATHER_MAP_API_KEY;
-  #else
-    std::string openWeatherMapApiKey = "";
-  #endif
 
 };
 

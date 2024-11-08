@@ -104,6 +104,12 @@ void WiFiStuff::TurnWiFiOff() {
 void WiFiStuff::GetTodaysWeatherInfo() {
   got_weather_info_ = false;
 
+  // no point fetching weather info if openWeatherMapApiKey is empty
+  if(openWeatherMapApiKey.size() == 0) {
+    PrintLn("WiFiStuff::GetTodaysWeatherInfo(): openWeatherMapApiKey is empty! Returning...");
+    return;
+  }
+
   // don't fetch frequently otherwise can get banned
   if(last_fetch_weather_info_time_ms_ != 0 && millis() - last_fetch_weather_info_time_ms_ < kFetchWeatherInfoMinIntervalMs) {
     get_weather_info_wait_seconds_ = (kFetchWeatherInfoMinIntervalMs - (millis() - last_fetch_weather_info_time_ms_)) / 1000;
@@ -578,7 +584,7 @@ String processor(const String& var){
 void _SoftAPWiFiDetails() {
 
   temp_ssid_str = wifi_stuff->wifi_ssid_.c_str();
-  temp_passwd_str = wifi_stuff->wifi_password_.c_str();
+  temp_passwd_str = "-here-"; // wifi_stuff->wifi_password_.c_str();
 
   extern String processor(const String& var);
 

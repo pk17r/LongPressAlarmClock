@@ -15,8 +15,8 @@ To undo the above action, use:
 */
 
 // Enter your WiFi SSID and Password to not manually fill in later
-#define MY_WIFI_SSID "SSID"
-#define MY_WIFI_PASSWD "Password"
+#define MY_WIFI_SSID "Scan WiFi"
+#define MY_WIFI_PASSWD "Enter Password"
 
 
 // get your Open Weather Map API Key by signing up for free from here: https://home.openweathermap.org/api_keys

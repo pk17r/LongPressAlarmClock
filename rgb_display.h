@@ -49,7 +49,7 @@ public:
   void WiFiScanNetworksPage(bool increment_page);
   void SoftApInputsPage();
   void LocationInputsLocalServerPage();
-  bool GetUserOnScreenTextInput(std::string label, char* return_text, bool number_input);
+  bool GetUserOnScreenTextInput(std::string label, char* return_text, bool numbers_only, bool capitals_only);
   void ButtonHighlight(int16_t x, int16_t y, uint16_t w, uint16_t h, bool turnOn, int gap);
   void IncorrectTimeBanner();
   void FirmwareUpdatePage();
@@ -137,6 +137,7 @@ private:
 
   // static vars for GetKeyboardPress Keyboard
   bool GetKeyboardPress_shift = false, GetKeyboardPress_lastShift = false, GetKeyboardPress_numpad = false, GetKeyboardPress_lastNumpad = false;
+  bool kb_capitals_only = false, kb_numbers_only = false;
 
   // current screen brightness
   int current_brightness_ = 0;
