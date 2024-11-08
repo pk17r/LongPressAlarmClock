@@ -454,6 +454,8 @@ void WiFiStuff::StartSetLocationLocalServer() {
   }
 
   soft_AP_IP = "";
+  got_SAP_user_input_ = false;
+  save_SAP_details_ = false;
 
   if(!TurnWiFiOn())
     return;
@@ -491,8 +493,14 @@ void WiFiStuff::StopSetLocationLocalServer() {
     server = NULL;
   }
 
-  wifi_stuff->location_zip_code_ = std::atoi(temp_zip_pin_str.c_str());
-  wifi_stuff->location_country_code_ = temp_country_code_str.c_str();
+  if(save_SAP_details_) {
+    location_zip_code_ = std::atoi(temp_zip_pin_str.c_str());
+    location_country_code_ = temp_country_code_str.c_str();
+    SaveWeatherLocationDetails();
+  }
+
+  got_SAP_user_input_ = false;
+  save_SAP_details_ = false;
 }
 
 AsyncWebServer* server = NULL;
@@ -533,8 +541,7 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script>
     function submitMessage() {
-      alert("Sent! Please press 'Save' on device to complete operation!");
-      setTimeout(function(){ document.location.reload(false); }, 500);   
+      setTimeout(function() { alert('sent!'); }, 1);
     }
   </script></head><body>
   <form action="/get" target="hidden-form">
@@ -547,7 +554,6 @@ const char index_html_location_details[] PROGMEM = R"rawliteral(
     <label>):</label><br>
     <input type="text" name="html_country_code" value="%html_country_code%" oninput="this.value = this.value.toUpperCase()"><br><br>
     <input type="submit" value="Submit" onclick="submitMessage()"><br>
-    <label>Remember to press Save on the clock!</label><br>
   </form>
   <iframe style="display:none" name="hidden-form"></iframe>
 </body></html>)rawliteral";
@@ -588,10 +594,10 @@ void _SoftAPWiFiDetails() {
     if (request->hasParam(kHtmlParamKeyPasswd)) {
       inputMessage = request->getParam(kHtmlParamKeyPasswd)->value();
       temp_passwd_str = inputMessage;
-      wifi_stuff->got_SAP_user_input_ = true;
     }
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);
+    wifi_stuff->got_SAP_user_input_ = true;
   });
 
   // server->onNotFound(notFound);
@@ -625,6 +631,7 @@ void _LocalServerLocationInputs() {
     }
     Serial.println(inputMessage);
     request->send(200, "text/text", inputMessage);
+    wifi_stuff->got_SAP_user_input_ = true;
   });
 
   // server->onNotFound(notFound);

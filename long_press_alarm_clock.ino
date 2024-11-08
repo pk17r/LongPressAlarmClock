@@ -427,7 +427,7 @@ void loop() {
     // SerialPrintRtcDateTime();
 
     // if SAP is on, then track got_SAP_user_input_ to stop SAP
-    if((current_page == kSoftApInputsPage) && wifi_stuff->got_SAP_user_input_) {
+    if(((current_page == kSoftApInputsPage) || (current_page == kLocationInputsPage)) && wifi_stuff->got_SAP_user_input_) {
       current_cursor = kPageSaveButton;
       LedButtonClickAction();
       inactivity_millis = 0;
@@ -1803,27 +1803,26 @@ void LedButtonClickAction() {
       }
     }
     else if(current_page == kLocationInputsPage) {          // LOCATION INPUTS PAGE
+      LedButtonClickUiResponse(1);
       if(current_cursor == kPageSaveButton) {
-        LedButtonClickUiResponse(1);
+        LedOnOffResponse();
+        wifi_stuff->save_SAP_details_ = true;
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
         WaitForExecutionOfSecondCoreTask();
-        wifi_stuff->SaveWeatherLocationDetails();
         wifi_stuff->got_weather_info_ = false;
         // update new location Zip/Pin code on button
         int display_pages_vec_location_and_weather_button_index = DisplayPagesVecButtonIndex(kLocationAndWeatherSettingsPage, kLocationAndWeatherSettingsPageSetLocation);
         std::string location_str = (std::to_string(wifi_stuff->location_zip_code_) + " " + wifi_stuff->location_country_code_);
         display_pages_vec[kLocationAndWeatherSettingsPage][display_pages_vec_location_and_weather_button_index]->btn_value = location_str;
-        // get new location, update time and weather info
+        // got new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationAndWeatherSettingsPage);
       }
       else if(current_cursor == kPageCancelButton) {
         LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
-        WaitForExecutionOfSecondCoreTask();
-        SetPage(kLocationAndWeatherSettingsPage);
       }
+      WaitForExecutionOfSecondCoreTask();
+      SetPage(kLocationAndWeatherSettingsPage);
     }
     else if(current_page == kScreensaverSettingsPage) {        // SCREENSAVER SETTINGS PAGE
       if(current_cursor == kScreensaverSettingsPageMotion) {
