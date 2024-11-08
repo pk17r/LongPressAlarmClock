@@ -658,11 +658,11 @@ void RGBDisplay::DisplayWiFiConnectionStatus() {
 
   tft.setFont(&FreeMono9pt7b);
   tft.setCursor(kDisplayTextGap, 170);
-  tft.print("Not connected.");
+  tft.print("Could not");
   tft.setCursor(kDisplayTextGap, 190);
-  tft.print("Click CONNECT Button,");
+  tft.print("connect to saved");
   tft.setCursor(kDisplayTextGap, 210);
-  tft.print("Wait a few seconds..");
+  tft.print("WiFi Network.");
 
   // write new text
   if(wifi_stuff->wifi_connected_) {
@@ -675,11 +675,11 @@ void RGBDisplay::DisplayWiFiConnectionStatus() {
     tft.setFont(&FreeMono9pt7b);
     tft.setTextColor(kDisplayColorBlue);
     tft.setCursor(kDisplayTextGap, 170);
-    tft.print("Not connected.");
+    tft.print("Could not");
     tft.setCursor(kDisplayTextGap, 190);
-    tft.print("Click CONNECT Button,");
+    tft.print("connect to saved");
     tft.setCursor(kDisplayTextGap, 210);
-    tft.print("Wait a few seconds..");
+    tft.print("WiFi Network.");
   }
 }
 
@@ -1792,7 +1792,7 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
   // heading label
   tft.setTextSize(1);
   tft.setFont(&FreeMono9pt7b);
-  tft.setCursor(5, 12);
+  tft.setCursor(0, 12);
   tft.setTextColor(kTextRegularColor, kDisplayBackroundColor);
   tft.print(label.c_str());
 

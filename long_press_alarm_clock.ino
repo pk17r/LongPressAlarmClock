@@ -126,6 +126,8 @@ void LedButtonClickUiResponse(int response_type);
 void InitializeRgbLed();
 void RunRgbLedAccordingToSettings();
 const char* RgbLedSettingString();
+void WiFiPasswordInputTouchAndNonTouch();
+void LedOnOffResponse();
 
 // setup core1
 void setup() {
@@ -1510,6 +1512,12 @@ int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor) {
   return -1;
 }
 
+void LedOnOffResponse() {
+  digitalWrite(LED_PIN, HIGH);
+  delay(kUserInputDelayMs);
+  digitalWrite(LED_PIN, LOW);
+}
+
 /*  1: turn On Button & wait,
     2: turn On Button,
     3: turn Off Button,
@@ -1531,6 +1539,34 @@ void LedButtonClickUiResponse(int response_type = 0) {
       display->DisplayCurrentPageButtonRow(/*is_on = */ true);
       delay(kUserInputDelayMs);
       display->DisplayCurrentPageButtonRow(/*is_on = */ false);
+  }
+}
+
+// takes in WiFi Password input using Touchscreen or by creating a SoftAP
+void WiFiPasswordInputTouchAndNonTouch() {
+  LedButtonClickUiResponse();
+  // get WiFi Password Input
+  if(ts != NULL) {
+    // use touchscreen
+    std::string wifi_pwd_str = "";
+    // user input string
+    std::string label = "Enter Password for WiFi:\n" + wifi_stuff->wifi_ssid_;
+    char returnText[kWifiSsidPasswordLengthMax + 1] = "";
+    // get user input from screen
+    bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
+    Serial.print("User Input :"); Serial.println(returnText);
+    if(ret) {
+      LedOnOffResponse();
+      wifi_stuff->wifi_password_ = returnText;
+      wifi_stuff->SaveWiFiDetails();
+    }
+    SetPage(kWiFiSettingsPage);
+  }
+  else {
+    // start a SoftAP and take user input
+    AddSecondCoreTaskIfNotThere(kStartSetWiFiSoftAP);
+    WaitForExecutionOfSecondCoreTask();
+    SetPage(kSoftApInputsPage);
   }
 }
 
@@ -1597,30 +1633,7 @@ void LedButtonClickAction() {
         SetPage(kWiFiScanNetworksPage);
       }
       else if(current_cursor == kWiFiSettingsPageChangePasswd) {
-        LedButtonClickUiResponse(2);
-        if(ts != NULL) {
-          // use touchscreen
-          // user input string
-          std::string label = "Pwd for " + wifi_stuff->wifi_ssid_.substr(0,16) + ":";
-          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
-          // get user input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
-          Serial.print("User Input :"); Serial.println(returnText);
-          LedButtonClickUiResponse(2);
-          if(ret) {
-            wifi_stuff->wifi_password_ = returnText;
-            wifi_stuff->SaveWiFiDetails();
-            int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
-            display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
-          }
-          SetPage(kWiFiSettingsPage);
-        }
-        else {
-          // start a SoftAP and take user input
-          AddSecondCoreTaskIfNotThere(kStartSetWiFiSoftAP);
-          WaitForExecutionOfSecondCoreTask();
-          SetPage(kSoftApInputsPage);
-        }
+        WiFiPasswordInputTouchAndNonTouch();
       }
       else if(current_cursor == kWiFiSettingsPageClearSsidAndPasswd) {
         LedButtonClickUiResponse(2);
@@ -1656,36 +1669,17 @@ void LedButtonClickAction() {
       if(current_cursor == kWiFiScanNetworksPageList) {
         int index_of_selected_ssid = display->current_wifi_networks_scan_page_cursor + display->current_wifi_networks_scan_page_no * display->kWifiScanNetworksPageItems;
         PrintLn("index_of_selected_ssid = ", index_of_selected_ssid);
-        if(index_of_selected_ssid > wifi_stuff->WiFiScanNetworksCount() - 1)
+        if((index_of_selected_ssid > wifi_stuff->WiFiScanNetworksCount() - 1) || (index_of_selected_ssid < 0))
           return;
-        LedButtonClickUiResponse(2);
-        std::string wifi_ssid = wifi_stuff->WiFiScanNetworkSsid(index_of_selected_ssid);
-        // if Touchscreen, then ask for WiFi Password
-        if(ts != NULL) {
-          // use touchscreen
-          // user input string
-          std::string label = "Pwd for " + wifi_ssid.substr(0,16) + ":";
-          char returnText[kWifiSsidPasswordLengthMax + 1] = "";
-          // get user input from screen
-          bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
-          Serial.print("User Input :"); Serial.println(returnText);
-          LedButtonClickUiResponse(2);
-          if(ret) {
-            wifi_stuff->wifi_ssid_ = wifi_ssid;
-            wifi_stuff->wifi_password_ = returnText;
-            wifi_stuff->SaveWiFiDetails();
-            int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
-            display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
-          }
-        }
-        else {
-          wifi_stuff->wifi_ssid_ = wifi_ssid;
-          wifi_stuff->SaveWiFiDetails();
-          int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
-          display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
-        }
+        // save selected WiFi SSID
+        wifi_stuff->wifi_ssid_ = wifi_stuff->WiFiScanNetworkSsid(index_of_selected_ssid);
         wifi_stuff->WiFiScanNetworksFreeMemory();
-        SetPage(kWiFiSettingsPage);
+        wifi_stuff->SaveWiFiDetails();
+        // update Settings Page WiFi ssid row
+        int index_of_ssid_button = DisplayPagesVecButtonIndex(kWiFiSettingsPage, kWiFiSettingsPageShowSsidRow);
+        display_pages_vec[kWiFiSettingsPage][index_of_ssid_button]->btn_value = wifi_stuff->WiFiDetailsShortString();
+        // get WiFi Password Input
+        WiFiPasswordInputTouchAndNonTouch();
       }
       if(current_cursor == kWiFiScanNetworksPageRescan) {
         LedButtonClickUiResponse(2);
@@ -1726,7 +1720,7 @@ void LedButtonClickAction() {
         if(ts != NULL) {
           // use touchscreen
           // user input string
-          std::string label = "Your City ZIP(5)/PIN(6) Code:";
+          std::string label = "Enter the 5-digit ZIP or 6-\ndigit PIN of your city:";
           std::string location_zip_code = std::to_string(wifi_stuff->location_zip_code_);
           char returnText[kWifiSsidPasswordLengthMax + 1] = "";
           for(int i = 0; i< location_zip_code.size(); i++) {
@@ -1735,24 +1729,25 @@ void LedButtonClickAction() {
           // get user input from screen
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ true);
           Serial.print("User Input :"); Serial.println(returnText);
-          LedButtonClickUiResponse(2);
           if(ret) {
+            LedOnOffResponse();
             std::string new_location_zip_str = returnText;
             //Serial.print("new_location_zip_str :"); Serial.println(new_location_zip_str.c_str());
             uint32_t new_location_zip = std::stoi(new_location_zip_str);
             Serial.print("new_location_zip :"); Serial.println(new_location_zip);
+            wifi_stuff->location_zip_code_ = new_location_zip;
+            wifi_stuff->SaveWeatherLocationDetails();
 
             // get Country Code
 
-            label = "Your Two Letter Country Code:";
+            label = "Enter your Country's 2-letter\nCountry Code or Initials:";
             strcpy(returnText, "");
             strcpy(returnText, wifi_stuff->location_country_code_.c_str());
             // get user input from screen
             bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
             Serial.print("User Input :"); Serial.println(returnText);
-            LedButtonClickUiResponse(2);
             if(ret) {
-              wifi_stuff->location_zip_code_ = new_location_zip;
+              LedOnOffResponse();
               wifi_stuff->location_country_code_ = returnText;
               wifi_stuff->SaveWeatherLocationDetails();
               // update new location Zip/Pin code on button
@@ -1763,7 +1758,6 @@ void LedButtonClickAction() {
               AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
               WaitForExecutionOfSecondCoreTask();
             }
-            SetPage(kLocationAndWeatherSettingsPage);
           }
           SetPage(kLocationAndWeatherSettingsPage);
         }
