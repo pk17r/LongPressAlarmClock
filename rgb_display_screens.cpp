@@ -649,6 +649,10 @@ void RGBDisplay::DisplayCurrentPage() {
   }
 }
 
+void RGBDisplay::DisplayBlankScreen() {
+  tft.fillScreen(kDisplayBackroundColor);
+}
+
 void RGBDisplay::DisplayWiFiConnectionStatus() {
   // clear any old text
   tft.setFont(&FreeSans12pt7b);

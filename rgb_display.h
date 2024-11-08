@@ -63,6 +63,7 @@ public:
   Cursor CheckButtonTouch();
   void DisplayFirmwareVersionAndDate();
   void DisplayWiFiConnectionStatus();
+  void DisplayBlankScreen();
 
   // functions
   void Setup();

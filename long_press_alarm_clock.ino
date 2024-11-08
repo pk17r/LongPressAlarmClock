@@ -1637,7 +1637,7 @@ void LedButtonClickAction() {
     }
     else if(current_page == kWiFiSettingsPage) {          // WIFI SETTINGS PAGE
       if(current_cursor == kWiFiSettingsPageScanNetworks) {
-        LedButtonClickUiResponse(2);
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kScanNetworks);
         WaitForExecutionOfSecondCoreTask();
         SetPage(kWiFiScanNetworksPage);
@@ -1646,7 +1646,7 @@ void LedButtonClickAction() {
         WiFiPasswordInputTouchAndNonTouch();
       }
       else if(current_cursor == kWiFiSettingsPageClearSsidAndPasswd) {
-        LedButtonClickUiResponse(2);
+        LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
         WaitForExecutionOfSecondCoreTask();
         wifi_stuff->wifi_ssid_ = "Scan WiFi";
@@ -1723,7 +1723,7 @@ void LedButtonClickAction() {
     }
     else if(current_page == kLocationAndWeatherSettingsPage) {       // LOCATION AND WEATHER SETTINGS PAGE
       if(current_cursor == kLocationAndWeatherSettingsPageSetLocation) {
-        LedButtonClickUiResponse(2);
+        LedButtonClickUiResponse(1);
         if(ts != NULL) {
           // use touchscreen
           // user input string
@@ -1737,6 +1737,7 @@ void LedButtonClickAction() {
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
           Serial.print("User Input :"); Serial.println(returnText);
           if(ret) {
+            display->DisplayBlankScreen();
             LedOnOffResponse();
             std::string new_location_zip_str = returnText;
             //Serial.print("new_location_zip_str :"); Serial.println(new_location_zip_str.c_str());
@@ -1754,6 +1755,7 @@ void LedButtonClickAction() {
             bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
             Serial.print("User Input :"); Serial.println(returnText);
             if(ret) {
+              display->DisplayBlankScreen();
               LedOnOffResponse();
               wifi_stuff->location_country_code_ = returnText;
               wifi_stuff->SaveWeatherLocationDetails();
