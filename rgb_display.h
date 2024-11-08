@@ -129,10 +129,13 @@ private:
   void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(int x, int y, int w, int h);
   byte IsTouchWithin(int x, int y, int w, int h);
-  bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn, bool number_input);
+  bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
 // PRIVATE VARIABLES
+
+  // static vars for GetKeyboardPress Keyboard
+  bool GetKeyboardPress_shift = false, GetKeyboardPress_lastShift = false, GetKeyboardPress_numpad = false, GetKeyboardPress_lastNumpad = false;
 
   // current screen brightness
   int current_brightness_ = 0;

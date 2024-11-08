@@ -1813,6 +1813,7 @@ void LedButtonClickAction() {
             }
             SetPage(kLocationAndWeatherSettingsPage);
           }
+          SetPage(kLocationAndWeatherSettingsPage);
         }
         else {
           AddSecondCoreTaskIfNotThere(kStartLocationInputsLocalServer);
