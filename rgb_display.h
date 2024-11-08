@@ -128,7 +128,8 @@ private:
   // keyboard functions
   void MakeKeyboard(const char type[][13], std::string label);
   void DrawKeyboardButton(int x, int y, int w, int h);
-  byte IsTouchWithin(int x, int y, int w, int h);
+  void DrawKeyboardButton(int x, int y, int w, int h, uint16_t kb_btn_fill_col);
+  bool IsTouchWithin(int x, int y, int w, int h);
   bool GetKeyboardPress(char * textBuffer, std::string label, char * textReturn);
 
 
@@ -231,11 +232,13 @@ private:
   const uint16_t        kDisplayDateColor         = kDisplayColorGreen;
   const uint16_t        kDisplayAlarmColor        = kDisplayColorCyan;
   const uint16_t        kDisplayBackroundColor    = kDisplayColorBlack;
-  // keyboard colors
+
+  // on-screen input keyboard colors
   const uint16_t  kTextRegularColor          = kDisplayColorWhite;
   const uint16_t  kTextHighLightColor        = kDisplayBackroundColor;
   const uint16_t  kKeyboardButtonFillColor   = kDisplayColorRed;
 
+  // display page buttons
   const uint16_t kButtonBorderColor = kDisplayColorCyan;
   const uint16_t kButtonFillColor = kDisplayColorOrange;
   const uint16_t kButtonClickedFillColor = kDisplayColorRed;
