@@ -1242,7 +1242,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       WaitForExecutionOfSecondCoreTask();
       // show page
       current_page = set_this_page;     // new page needs to be set before any action
-      if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageChangePasswd;
+      if(move_cursor_to_first_button) current_cursor = kWiFiSettingsPageScanNetworks;
       display->DisplayCurrentPage();
       break;
     case kSettingsPage:
@@ -1261,54 +1261,6 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       current_page = set_this_page;     // new page needs to be set before any action
       if(move_cursor_to_first_button) current_cursor = kPageSaveButton;
       display->SoftApInputsPage();
-      break;
-    case kEnterWiFiSsidPage:
-      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-      {
-        PrintLn("**** On Screen WiFi SSID Text Input ****");
-        // user input string
-        std::string label = "WiFi SSID";
-        char returnText[kWifiSsidPasswordLengthMax + 1] = "";
-        // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
-        PrintLn(label, returnText);
-        if(ret) {
-          // set WiFi SSID:
-          wifi_stuff->wifi_ssid_ = "";
-          int i = 0;
-          while(returnText[i] != '\0' && i <= kWifiSsidPasswordLengthMax) {
-            wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + returnText[i];
-            i++;
-          }
-          PrintLn("Saved wifi_ssid: ", wifi_stuff->wifi_ssid_);
-          wifi_stuff->SaveWiFiDetails();
-        }
-        SetPage(kWiFiSettingsPage);
-      }
-      break;
-    case kEnterWiFiPasswdPage:
-      current_page = kWiFiSettingsPage;     // new page needs to be set before any action
-      {
-        PrintLn("**** On Screen WiFi PASSWD Text Input ****");
-        // user input string
-        std::string label = "WiFi PASSWD";
-        char returnText[kWifiSsidPasswordLengthMax + 1] = "";
-        // get user input from screen
-        bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool number_input = */ false);
-        PrintLn(label, returnText);
-        if(ret) {
-          // set WiFi Passwd:
-          wifi_stuff->wifi_password_ = "";
-          int i = 0;
-          while(returnText[i] != '\0' && i <= kWifiSsidPasswordLengthMax) {
-            wifi_stuff->wifi_password_ = wifi_stuff->wifi_password_ + returnText[i];
-            i++;
-          }
-          PrintLn("Saved wifi_password_: ", wifi_stuff->wifi_password_);
-          wifi_stuff->SaveWiFiDetails();
-        }
-        SetPage(kWiFiSettingsPage);
-      }
       break;
     case kLocationInputsPage:
       current_page = set_this_page;     // new page needs to be set before any action
@@ -1492,11 +1444,11 @@ void PopulateDisplayPages() {
   // WIFI SETTINGS PAGE
   display_pages_vec[kWiFiSettingsPage] = std::vector<DisplayButton*> {
     new DisplayButton{ kWiFiSettingsPageShowSsidRow, kLabelOnlyNoClickButton, "Saved WiFi:", false, 0,0,0,0, wifi_stuff->WiFiDetailsShortString() },
-    new DisplayButton{ kWiFiSettingsPageChangePasswd, kClickButtonWithLabel, "Change Password:", false, 0,0,0,0, "PASSWORD" },
-    new DisplayButton{ kWiFiSettingsPageScanNetworks, kClickButtonWithLabel, "Scan WiFi Networks:", false, 0,0,0,0, "SCAN" },
-    new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "Connect to WiFi:", false, 0,0,0,0, "CONNECT" },
-    new DisplayButton{ kWiFiSettingsPageDisconnect, kClickButtonWithLabel, "Disconnect WiFi:", false, 0,0,0,0, "DISCONNECT" },
     //new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kClickButtonWithLabel, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
+    new DisplayButton{ kWiFiSettingsPageScanNetworks, kClickButtonWithLabel, "Scan Networks:", false, 0,0,0,0, "SCAN WIFI" },
+    new DisplayButton{ kWiFiSettingsPageChangePasswd, kClickButtonWithLabel, "Change Password:", false, 0,0,0,0, "WIFI PASSWD" },
+    new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "", false, 0,0,0,0, "CONNECT WIFI" },
+    new DisplayButton{ kWiFiSettingsPageDisconnect, kClickButtonWithLabel, "", false, 0,0,0,0, "DISCONNECT" },
     page_cancel_button,
   };
 

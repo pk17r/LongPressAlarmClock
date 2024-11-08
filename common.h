@@ -85,8 +85,6 @@ enum ScreenPage {
   kWiFiSettingsPage,
   kWiFiScanNetworksPage,
   kSoftApInputsPage,
-  kEnterWiFiSsidPage,
-  kEnterWiFiPasswdPage,
   kLocationAndWeatherSettingsPage,
   kLocationInputsPage,
   kEnterWeatherLocationZipPage,
