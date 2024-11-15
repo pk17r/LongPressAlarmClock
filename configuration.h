@@ -27,12 +27,12 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.8"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "2.9"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
-#define ESP32_S3_FIRMWARE_VERSION                 "2.8"
-const std::string kFirmwareDate = "Nov 8, 2024";
+#define ESP32_S3_FIRMWARE_VERSION                 "2.9"
+const std::string kFirmwareDate = "Nov 14, 2024";
 
-const std::string kChangeLog = "- Auto Time Update Improved\n- LED Brightness Adjustable\n- WiFi Scan & Selection";
+const std::string kChangeLog = "- WiFi Auto-disconnect faster\n- Earliest evening end time\n  is now 7PM.";
 
 #endif  // CONFIGURATION_H

@@ -446,6 +446,11 @@ void loop() {
       else
         // set display brightness based on time
         display->CheckTimeAndSetBrightness();
+      // auto disconnect wifi if connected and inactivity millis is over limit
+      if(wifi_stuff->wifi_connected_ && second_core_tasks_queue.empty()) {
+        PrintLn("**** Auto disconnect WiFi ****");
+        AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+      }
       // turn screen saver On
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);
@@ -1852,7 +1857,7 @@ void LedButtonClickAction() {
         if(night_time_dim_hour < 11)
           night_time_dim_hour++;
         else
-          night_time_dim_hour = 8;
+          night_time_dim_hour = 7;
         nvs_preferences->SaveNightTimeDimHour(night_time_dim_hour);
         night_time_minutes = night_time_dim_hour * 60 + 720;
         display_pages_vec[current_page][DisplayPagesVecCurrentButtonIndex()]->btn_value = (std::to_string(night_time_dim_hour) + "PM");
