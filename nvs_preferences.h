@@ -117,7 +117,7 @@ private:
   const bool kUseLDR = true;
 
   const char* kIsTouchscreenKey = "Touchscreen";
-  const bool kIsTouchscreen = false;
+  const bool kIsTouchscreen = true;
 
   const char* kRgbStripLedCountKey = "RgbLedCount";
   const uint8_t kRgbStripLedCount = 4;
