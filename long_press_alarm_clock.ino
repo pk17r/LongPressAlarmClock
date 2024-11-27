@@ -384,7 +384,7 @@ void loop() {
           PrintLn("Get Weather Info!");
         }
 
-        // reset time updated today to false at midnight, for auto update of time at 2:05AM
+        // reset time updated today to false at midnight, for auto update of time at 3:05AM
         if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 12)
           wifi_stuff->auto_updated_time_today_ = false;
 
@@ -537,7 +537,7 @@ void loop1() {
         success = wifi_stuff->got_weather_info_;
       }
     }
-    else if(current_task == kUpdateTimeFromNtpServer && (wifi_stuff->last_ntp_server_time_update_time_ms == 0 || millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000)) {
+    else if(current_task == kUpdateTimeFromNtpServer) {       // && ((wifi_stuff->last_ntp_server_time_update_time_ms == 0) || (millis() - wifi_stuff->last_ntp_server_time_update_time_ms > 10*1000))) {
       // get time from NTP server
       success = wifi_stuff->GetTimeFromNtpServer();
       PrintLn("loop1(): wifi_stuff->GetTimeFromNtpServer() success = ", success);
@@ -1023,6 +1023,7 @@ void ProcessSerialInput() {
     case 'n':   // get time from NTP server and set on RTC HW
       Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
       // update time from NTP server
+      wifi_stuff->auto_updated_time_today_ = false;
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       break;
     case 'o':   // On Screen User Text Input
@@ -1196,7 +1197,7 @@ void TurnOffRgbStrip() {
   rgb_led_strip->setBrightness(0);
   rgb_led_strip->show();
   rgb_led_strip_on = false;
-  PrintLn("TurnOffRgbStrip()");
+  // PrintLn("TurnOffRgbStrip()");
 }
 
 bool AnyButtonPressed() {

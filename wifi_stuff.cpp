@@ -272,7 +272,8 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       int seconds = ntpClient.getSeconds();
       int dayOfWeekSunday0 = ntpClient.getDay();
 
-      Serial.print(hours); Serial.print(":"); Serial.print(minutes); Serial.print(":"); Serial.print(seconds); Serial.print("  DoW: "); Serial.print(kDaysTable_[dayOfWeekSunday0]); Serial.print("  EpochTime: "); Serial.println(epoch_since_1970);
+      Serial.printf("\t\tNTP Time: %2d:%2d:%2d   DoW=%s  epoch_since_1970=%lu   ", hours, minutes, seconds, kDaysTable_[dayOfWeekSunday0], epoch_since_1970);
+      Serial.flush();
 
       int today, month, year;
       ConvertEpochIntoDate(epoch_since_1970, today, month, year);
@@ -281,9 +282,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       rtc->SetRtcTimeAndDate(seconds, minutes, hours, dayOfWeekSunday0 + 1, today, month, year);
 
       last_ntp_server_time_update_time_ms = millis();
-      // auto update time today at 2:01AM success
-      if(rtc->hourModeAndAmPm() == 1 && rtc->hour() == 2 && rtc->minute() >= 1)
-        auto_updated_time_today_ = true;
+      auto_updated_time_today_ = true;
     }
 
     ntpClient.end();
