@@ -162,6 +162,7 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
   Serial.println(F("\nSerial OK"));
+  PrintLn("Hellow World!");
 
   // check if in debug mode
   debug_mode = !digitalRead(DEBUG_PIN);
@@ -724,6 +725,11 @@ int AvailableRam() {
   #endif
 }
 
+int MinFreeRam() {
+  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
+  return esp_get_minimum_free_heap_size();
+}
+
 void SerialInputWait() {
   while (Serial.available() == 0) // delay until something is received via serial
     delay(20);
@@ -762,7 +768,26 @@ void SerialTimeStampPrefix() {
   // if(inactivity_millis < 100) Serial.print(kCharZero);
   // if(inactivity_millis < 10) Serial.print(kCharZero);
   Serial.print(inactivity_millis);
-  Serial.print(": RAM "); Serial.print(AvailableRam());
+  int freeRam = AvailableRam();
+  float freeRamf = freeRam;
+  char* freeRamUnit = "B";
+  if((freeRamf = (1.0 * freeRam) / (1024 * 1024)) > 0.1) {
+    freeRamUnit = "MB";
+  }
+  else if((freeRamf = (1.0 * freeRam) / 1024) > 1) {
+    freeRamUnit = "KB";
+  }
+  Serial.print(": Free RAM "); Serial.print(freeRamf); Serial.print(freeRamUnit);
+  int minFreeRam = MinFreeRam();
+  float minFreeRamf = minFreeRam;
+  char* minFreeRamUnit = "B";
+  if((minFreeRamf = (1.0 * minFreeRam) / (1024 * 1024)) > 0.1) {
+    minFreeRamUnit = "MB";
+  }
+  else if((minFreeRamf = (1.0 * minFreeRam) / 1024) > 1) {
+    minFreeRamUnit = "KB";
+  }
+  Serial.print(": Min Free RAM "); Serial.print(minFreeRamf); Serial.print(minFreeRamUnit);
   Serial.print(')');
   Serial.print(kCharSpace);
   Serial.flush();
@@ -938,13 +963,20 @@ void ProcessSerialInput() {
         RunRgbLedAccordingToSettings();
       }
       break;
-    case 'c':   // connect to WiFi
-      Serial.println(F("**** Connect to WiFi ****"));
-      AddSecondCoreTaskIfNotThere(kConnectWiFi);
+    case 'c':   // connect/disconnect WiFi
+      if(wifi_stuff->wifi_connected_) {
+        Serial.println(F("**** Disconnect WiFi ****"));
+        AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+      }
+      else {
+        Serial.println(F("**** Connect to WiFi ****"));
+        AddSecondCoreTaskIfNotThere(kConnectWiFi);
+        inactivity_millis = 0;
+      }
       break;
-    case 'd':   // disconnect WiFi
-      Serial.println(F("**** Disconnect WiFi ****"));
-      AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
+    case 'd':   // flip touchscreen
+      nvs_preferences->SaveTouchscreenFlip(!nvs_preferences->RetrieveTouchscreenFlip());
+      ts->touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
       break;
     case 'e':   // setup ds3231 rtc
       Serial.println(F("**** setup ds3231 rtc ****"));

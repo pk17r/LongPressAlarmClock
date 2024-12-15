@@ -50,6 +50,8 @@ NvsPreferences::NvsPreferences() {
     preferences.putBool(kUseLDRKey, kUseLDR);
   if(!preferences.isKey(kIsTouchscreenKey))
     preferences.putBool(kIsTouchscreenKey, kIsTouchscreen);
+  if(!preferences.isKey(kTouchscreenFlipKey))
+    preferences.putBool(kTouchscreenFlipKey, kTouchscreenFlip);
   if(!preferences.isKey(kRgbStripLedCountKey))
     preferences.putUChar(kRgbStripLedCountKey, kRgbStripLedCount);
   if(!preferences.isKey(kRgbStripLedBrightnessKey))
@@ -302,6 +304,21 @@ void NvsPreferences::SaveIsTouchscreen(bool is_touchscreen) {
   preferences.putBool(kIsTouchscreenKey, is_touchscreen);
   preferences.end();
   Serial.printf("NVS Memory is_touchscreen: %d saved.\n", is_touchscreen);
+}
+
+bool NvsPreferences::RetrieveTouchscreenFlip() {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  bool touchscreen_flip = preferences.getBool(kTouchscreenFlipKey);
+  preferences.end();
+  Serial.printf("NVS Memory touchscreen_flip: %d retrieved.\n", touchscreen_flip);
+  return touchscreen_flip;
+}
+
+void NvsPreferences::SaveTouchscreenFlip(bool touchscreen_flip) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putBool(kTouchscreenFlipKey, touchscreen_flip);
+  preferences.end();
+  Serial.printf("NVS Memory touchscreen_flip: %d saved.\n", touchscreen_flip);
 }
 
 uint8_t NvsPreferences::RetrieveRgbStripLedCount() {

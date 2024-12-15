@@ -1,12 +1,14 @@
 #include "touchscreen.h"
 #include <SPI.h>
 #include "rgb_display.h"
+#include "nvs_preferences.h"
 
 Touchscreen::Touchscreen() {
   touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
   touchscreen_ptr_->begin(*spi_obj);
   SetTouchscreenOrientation();
   touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};
+  touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
 
   PrintLn("Touchscreen Initialized!");
 }
@@ -51,7 +53,11 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
 
     // Rotate and map
     int16_t x = map(touch.x, touchscreen_calibration_.xMin, touchscreen_calibration_.xMax, 0, touchscreen_calibration_.screen_width);
-    int16_t y = touchscreen_calibration_.screen_height - map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
+    int16_t y = 0;
+    if(touchscreen_flip)
+      y = touchscreen_calibration_.screen_height - map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
+    else
+      y = map(touch.y, touchscreen_calibration_.yMin, touchscreen_calibration_.yMax, 0, touchscreen_calibration_.screen_height);
 
     if (x > touchscreen_calibration_.screen_width){
         x = touchscreen_calibration_.screen_width;

@@ -221,6 +221,7 @@ extern DisplayData new_display_data_, displayed_data_;
 extern void AddSecondCoreTaskIfNotThere(SecondCoreTask task);
 extern void WaitForExecutionOfSecondCoreTask();
 extern int AvailableRam();
+extern int MinFreeRam();
 extern void SerialInputWait();
 extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();

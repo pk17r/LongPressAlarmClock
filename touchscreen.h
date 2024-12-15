@@ -47,10 +47,15 @@ public:
 
   // constructor
   Touchscreen();
+
   // to know if touchscreen is touched
   bool IsTouched();
+
   // function to get x, y and isTouched flag
   TouchPixel* GetTouchedPixel();
+
+  // flip touchscreen along horizontal axis -> top becomes bottom
+  bool touchscreen_flip = false;
 
   void SetTouchscreenOrientation();
 };
