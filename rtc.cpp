@@ -117,7 +117,7 @@ void RTC::Refresh() {
   // make _second equal to rtcHw seconds -> should be 0
   second_ = rtc_hw_.second();
 
-  PrintLn("__RTC Refresh__ ");
+  // PrintLn("__RTC Refresh__ ");
 
   SetTodaysMinutes();
 

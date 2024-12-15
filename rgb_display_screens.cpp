@@ -1616,7 +1616,7 @@ void RGBDisplay::IncorrectTimeBanner() {
   my_canvas_->print("Incorrect Time!");
   my_canvas_->setFont(&FreeMono9pt7b);
   my_canvas_->setCursor(kDisplayTextGap, 50);
-  my_canvas_->print("Battery may be out!");
+  my_canvas_->print("Power failure! Battery Down!");
   my_canvas_->setCursor(kDisplayTextGap, 70);
   my_canvas_->print("Time Update Required!");
   my_canvas_->setCursor(kDisplayTextGap, 90);

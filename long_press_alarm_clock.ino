@@ -343,7 +343,7 @@ void loop() {
     rtc->rtc_hw_sec_update_ = false;
 
     // if time is lost because of power failure
-    if(rtc->year() < 2024 && !(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code)) {
+    if((rtc->year() < 2024) && !(wifi_stuff->incorrect_wifi_details_) && !(wifi_stuff->incorrect_zip_code)) {
       PrintLn("**** Update RTC HW Time from NTP Server ****");
       // update time from NTP server
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
@@ -358,7 +358,7 @@ void loop() {
       // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
       // Activate Buzzer if Alarm Time has arrived
-      if(rtc->year() >= 2024 && alarm_clock->MinutesToAlarm() == 0) {
+      if((rtc->year() >= 2024) && alarm_clock->MinutesToAlarm() == 0) {
         // go to buzz alarm function and show alarm triggered screen!
         alarm_clock->BuzzAlarmFn();
         // returned from Alarm Triggered Screen and Good Morning Screen
