@@ -5,10 +5,10 @@
 
 // SELECT MCU
 
-// #define MCU_IS_ESP32_S2_MINI
+#define MCU_IS_ESP32_S2_MINI
 // #define MCU_IS_ESP32_WROOM_DA_MODULE
 // #define MCU_IS_RASPBERRY_PI_PICO_W
-#define MCU_IS_ESP32_S3
+// #define MCU_IS_ESP32_S3
 
 
 // SELECT DISPLAY
@@ -27,12 +27,12 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "3.0"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "3.1"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
-#define ESP32_S3_FIRMWARE_VERSION                 "3.0"
-const std::string kFirmwareDate = "Nov 26, 2024";
+#define ESP32_S3_FIRMWARE_VERSION                 "3.1"
+const std::string kFirmwareDate = "Dec 30, 2024";
 
-const std::string kChangeLog = "- Auto-time update\n  improvements.";
+const std::string kChangeLog = "- HAPPY NEW YEAR 2025!!\n- Bigger Back-Cancel Button.\n- Buzzer Frequency made device specific.";
 
 #endif  // CONFIGURATION_H

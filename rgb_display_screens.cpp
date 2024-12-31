@@ -791,8 +791,8 @@ void RGBDisplay::WiFiScanNetworksPage(bool increment_page) {
   // Next button
   DrawButton(kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  // Back button
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::SoftApInputsPage() {
@@ -850,8 +850,8 @@ void RGBDisplay::SoftApInputsPage() {
   // Save button
   DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  // Back button
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::LocationInputsLocalServerPage() {
@@ -896,8 +896,8 @@ void RGBDisplay::LocationInputsLocalServerPage() {
   // Save button
   DrawButton(kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 
-  // Cancel button
-  DrawButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
+  // Back button
+  DrawButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr, kDisplayColorCyan, kDisplayColorOrange, kDisplayColorBlack, true);
 }
 
 void RGBDisplay::DisplayWeatherInfo() {
@@ -1864,10 +1864,10 @@ void RGBDisplay::MakeKeyboard(const char type[][13], std::string label) {
   tft.setCursor(244, kTextAreaHeight + 35);
   tft.print(F("ENTER"));
 
-  // Cancel button
-  DrawKeyboardButton(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize);
-  tft.setCursor(kCancelButtonX1 + 5, kCancelButtonY1 + 3);
-  tft.print(F("X"));
+  // Back button
+  DrawKeyboardButton(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH);
+  tft.setCursor(kBackButtonX1 + 5, kBackButtonY1 + 3);
+  tft.print(kBackStr);
 }
 
 // helper function for MakeKeyboard
@@ -1908,8 +1908,8 @@ bool RGBDisplay::GetKeyboardPress(char * textBuffer, std::string label, char * t
 
   if (ts->IsTouched())
   {
-    // check if cancel button is pressed
-    if (IsTouchWithin(kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize))
+    // check if back button is pressed
+    if (IsTouchWithin(kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH))
     {
       return false;
     }
@@ -2149,7 +2149,7 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
     // See if there's any  touch data for us
     ret = GetKeyboardPress(user_input_buffer, label, return_text);
 
-    // break if cancel button is pressed
+    // break if back button is pressed
     if(!ret)
       break;
 

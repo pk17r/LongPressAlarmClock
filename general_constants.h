@@ -66,16 +66,16 @@ const int16_t kAlarmRowY0 = 210, kAlarmRowY1 = 160;
 const int16_t kRadiusButtonRoundRect = 5;
 const int kPageRowHeight = 30;
 
-const int16_t kCancelButtonSize = 21, kCancelButtonX1 = kTftWidth - kCancelButtonSize - kDisplayTextGap, kCancelButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
-const int16_t kSaveButtonW = 60, kSaveButtonH = kCancelButtonSize, kSaveButtonX1 = kTftWidth - kSaveButtonW - kCancelButtonSize - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
-const int16_t kRescanButtonW = 80, kRescanButtonH = kCancelButtonSize, kRescanButtonX1 = kDisplayTextGap, kRescanButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
-const int16_t kNextButtonW = 60, kNextButtonH = kCancelButtonSize, kNextButtonX1 = (kTftWidth - (kRescanButtonW + 2*kDisplayTextGap + kCancelButtonSize)) / 2 - kNextButtonW / 2 + kRescanButtonW + kDisplayTextGap, kNextButtonY1 = kTftHeight - kCancelButtonSize - kDisplayTextGap;
+const int16_t kBackButtonW = 60, kBackButtonH = 21, kBackButtonX1 = kTftWidth - kBackButtonW - kDisplayTextGap, kBackButtonY1 = kTftHeight - kBackButtonH - kDisplayTextGap;
+const int16_t kSaveButtonW = 60, kSaveButtonH = kBackButtonH, kSaveButtonX1 = kTftWidth - kSaveButtonW - kBackButtonW - 2*kDisplayTextGap, kSaveButtonY1 = kTftHeight - kBackButtonH - kDisplayTextGap;
+const int16_t kRescanButtonW = 80, kRescanButtonH = kBackButtonH, kRescanButtonX1 = kDisplayTextGap, kRescanButtonY1 = kTftHeight - kBackButtonH - kDisplayTextGap;
+const int16_t kNextButtonW = 60, kNextButtonH = kBackButtonH, kNextButtonX1 = (kTftWidth - (kRescanButtonW + 2*kDisplayTextGap + kBackButtonH)) / 2 - kNextButtonW / 2 + kRescanButtonW + kDisplayTextGap, kNextButtonY1 = kTftHeight - kBackButtonH - kDisplayTextGap;
 
 
 const uint8_t kSettingsGearWidth = 40, kSettingsGearHeight = 40;
 const int16_t kSettingsGearX1 = kTftWidth - kSettingsGearWidth - 10, kSettingsGearY1 = kDateRow_Y0 - kSettingsGearHeight + 5;
 
-const char kSaveStr[5] = "SAVE", setStr[4] = "SET", kCancelStr[2] = "X", kRescanStr[7] = "RESCAN", kPrevStr[5] = "PREV", kNextStr[5] = "NEXT";
+const char kSaveStr[5] = "SAVE", setStr[4] = "SET", kBackStr[5] = "BACK", kCancelStr[2] = "X", kRescanStr[7] = "RESCAN", kPrevStr[5] = "PREV", kNextStr[5] = "NEXT";
 const char kSlowStr[5] = "SLOW", kMediumStr[7] = "MEDIUM", kFastStr[5] = "FAST", kFlyOutScreensaverStr[8] = "FLY OUT", kBounceScreensaverStr[7] = "BOUNCE";
 const char kMetricUnitStr[9] = "METRIC*C", kImperialUnitStr[11] = "IMPERIAL*F";
 const char kManualOffStr[11] = "MANUAL-OFF", kManualOnStr[10] = "MANUAL-ON", kEveningStr[13] = "AUTO-EVENING", kSunDownStr[14] = "AUTO-SUN-DOWN";

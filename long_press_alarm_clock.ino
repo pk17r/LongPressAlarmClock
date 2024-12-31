@@ -1418,7 +1418,7 @@ void MoveCursor(bool increment) {
         current_cursor = display_pages_vec[current_page][first_click_button_index]->btn_cursor_id;
         // special case of kWiFiScanNetworksPage continued from before if(find_next_button)
         if((current_page == kWiFiScanNetworksPage) && (current_cursor == kWiFiScanNetworksPageList)) {
-          // came here from cancel button
+          // came here from back button
           display->current_wifi_networks_scan_page_cursor = 0;
           PrintLn("display->current_wifi_networks_scan_page_cursor = ", display->current_wifi_networks_scan_page_cursor);
         }
@@ -1465,7 +1465,7 @@ void PopulateDisplayPages() {
   //};
 
   DisplayButton* page_save_button = new DisplayButton{ /* Save Button */ kPageSaveButton, kClickButtonWithLabel, "", true, kSaveButtonX1, kSaveButtonY1, kSaveButtonW, kSaveButtonH, kSaveStr };
-  DisplayButton* page_cancel_button = new DisplayButton{ /* Cancel Button */ kPageCancelButton, kClickButtonWithLabel, "", true, kCancelButtonX1, kCancelButtonY1, kCancelButtonSize, kCancelButtonSize, kCancelStr };
+  DisplayButton* page_back_button = new DisplayButton{ /* Back Button */ kPageBackButton, kClickButtonWithLabel, "", true, kBackButtonX1, kBackButtonY1, kBackButtonW, kBackButtonH, kBackStr };
 
   // MAIN PAGE
   display_pages_vec[kMainPage] = std::vector<DisplayButton*> {
@@ -1485,7 +1485,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kSettingsPageScreensaver, kClickButtonWithLabel, "Set RGB LEDs &:", false, 0,0,0,0, "SCREENSAVER" },
     new DisplayButton{ kSettingsPageRotateScreen, kClickButtonWithLabel, "Rotate Screen:", false, 0,0,0,0, "ROTATE" },
     new DisplayButton{ kSettingsPageUpdate, kClickButtonWithLabel, "Firmware Update:", false, 0,0,0,0, "UPDATE" },
-    page_cancel_button,
+    page_back_button,
   };
 
   // WIFI SETTINGS PAGE
@@ -1496,7 +1496,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kWiFiSettingsPageClearSsidAndPasswd, kClickButtonWithLabel, "Clear WiFi Details:", false, 0,0,0,0, "CLEAR" },
     new DisplayButton{ kWiFiSettingsPageConnect, kClickButtonWithLabel, "", false, 0,0,0,0, "CONNECT WIFI" },
     new DisplayButton{ kWiFiSettingsPageDisconnect, kClickButtonWithLabel, "", false, 0,0,0,0, "DISCONNECT" },
-    page_cancel_button,
+    page_back_button,
   };
 
   // WIFI SCAN NETWORKS PAGE
@@ -1504,13 +1504,13 @@ void PopulateDisplayPages() {
     new DisplayButton{ kWiFiScanNetworksPageList, kClickButtonWithIcon, "", true, 0, 0, 0, 0, "" },
     new DisplayButton{ kWiFiScanNetworksPageRescan, kClickButtonWithLabel, "", true, kRescanButtonX1, kRescanButtonY1, kRescanButtonW, kRescanButtonH, kRescanStr },
     new DisplayButton{ kWiFiScanNetworksPageNext, kClickButtonWithLabel, "", true, kNextButtonX1, kNextButtonY1, kNextButtonW, kNextButtonH, kNextStr },
-    page_cancel_button,
+    page_back_button,
   };
 
   // WIFI DETAILS SOFT AP PAGE
   display_pages_vec[kSoftApInputsPage] = std::vector<DisplayButton*> {
     page_save_button,
-    page_cancel_button,
+    page_back_button,
   };
 
   // LOCATION AND WEATHER SETTINGS PAGE
@@ -1519,13 +1519,13 @@ void PopulateDisplayPages() {
     new DisplayButton{ kLocationAndWeatherSettingsPageUnits, kClickButtonWithLabel, "Set Units:", false, 0,0,0,0, (wifi_stuff->weather_units_metric_not_imperial_ ? kMetricUnitStr : kImperialUnitStr) },
     new DisplayButton{ kLocationAndWeatherSettingsPageFetch, kClickButtonWithLabel, "Fetch Weather:", false, 0,0,0,0, "FETCH" },
     new DisplayButton{ kLocationAndWeatherSettingsPageUpdateTime, kClickButtonWithLabel, "Time-Zone:", false, 0,0,0,0, "UPDATE TIME" },
-    page_cancel_button,
+    page_back_button,
   };
 
   // LOCATION INPUT DETAILS PAGE
   display_pages_vec[kLocationInputsPage] = std::vector<DisplayButton*> {
     page_save_button,
-    page_cancel_button,
+    page_back_button,
   };
 
   // SCREENSAVER SETTINGS PAGE
@@ -1536,7 +1536,7 @@ void PopulateDisplayPages() {
     new DisplayButton{ kScreensaverSettingsPageRgbLedStripMode, kClickButtonWithLabel, "RGB LEDs Mode:", false, 0,0,0,0, RgbLedSettingString() },
     new DisplayButton{ kScreensaverSettingsPageNightTmDimHr, kClickButtonWithLabel, ("Evening time is " + std::to_string(kEveningTimeMinutes / 60 - 12) + "PM to:"), false, 0,0,0,0, (std::to_string(nvs_preferences->RetrieveNightTimeDimHour()) + "PM") },
     new DisplayButton{ kScreensaverSettingsPageRgbLedBrightness, kClickButtonWithLabel, "RGB LEDs Brightness:", false, 0,0,0,0, (std::to_string(int(static_cast<float>(rgb_strip_led_brightness) / 255 * 100)) + "%") },
-    page_cancel_button,
+    page_back_button,
   };
 
 }
@@ -1668,7 +1668,7 @@ void LedButtonClickAction() {
           display->DisplayFirmwareVersionAndDate();
         LedButtonClickUiResponse(3);
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         SetPage(kMainPage);
       }
@@ -1709,7 +1709,7 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse(3);
         display->DisplayWiFiConnectionStatus();
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         SetPage(kSettingsPage);
       }
@@ -1740,7 +1740,7 @@ void LedButtonClickAction() {
         LedButtonClickUiResponse();
         SetPage(kWiFiScanNetworksPage, false, true);
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         wifi_stuff->WiFiScanNetworksFreeMemory();
         SetPage(kWiFiSettingsPage);
@@ -1752,7 +1752,7 @@ void LedButtonClickAction() {
         LedOnOffResponse();
         wifi_stuff->save_SAP_details_ = true;
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         // don't save wifi details
       }
       AddSecondCoreTaskIfNotThere(kStopSetWiFiSoftAP);
@@ -1840,7 +1840,7 @@ void LedButtonClickAction() {
         else
           SetPage(kLocationAndWeatherSettingsPage, /* bool move_cursor_to_first_button = */ false);
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         current_cursor = kSettingsPageLocationAndWeather;
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
@@ -1861,7 +1861,7 @@ void LedButtonClickAction() {
         // got new location, update time and weather info
         AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         AddSecondCoreTaskIfNotThere(kStopLocationInputsLocalServer);
       }
@@ -1918,7 +1918,7 @@ void LedButtonClickAction() {
         RunRgbLedAccordingToSettings();
         LedButtonClickUiResponse();
       }
-      else if(current_cursor == kPageCancelButton) {
+      else if(current_cursor == kPageBackButton) {
         LedButtonClickUiResponse(1);
         current_cursor = kSettingsPageScreensaver;
         SetPage(kSettingsPage, /* bool move_cursor_to_first_button = */ false);
