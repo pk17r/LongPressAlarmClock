@@ -32,6 +32,8 @@ NvsPreferences::NvsPreferences() {
     preferences.putBool(kWeatherUnitsMetricNotImperialKey, kWeatherUnitsMetricNotImperial);
   if(!preferences.isKey(kAlarmLongPressSecondsKey))
     preferences.putUChar(kAlarmLongPressSecondsKey, kAlarmLongPressSeconds);
+  if(!preferences.isKey(kBuzzerFrequencyKey))
+    preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   if(!preferences.isKey(kFirmwareVersionKey)) {
     String kFirmwareVersionString = kFirmwareVersion.c_str();
     preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
@@ -93,6 +95,19 @@ void NvsPreferences::SaveLongPressSeconds(uint8_t long_press_seconds) {
   preferences.putUChar(kAlarmLongPressSecondsKey, long_press_seconds);
   preferences.end();
   Serial.printf("NVS Memory long_press_seconds: %d sec\n", long_press_seconds);
+}
+
+void NvsPreferences::RetrieveBuzzerFrequency(uint16_t &buzzer_freq) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ true);
+  buzzer_freq = preferences.getUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
+  preferences.end();
+}
+
+void NvsPreferences::SaveBuzzerFrequency(uint16_t buzzer_freq) {
+  preferences.begin(kNvsDataKey, /*readOnly = */ false);
+  preferences.putUShort(kBuzzerFrequencyKey, buzzer_freq);
+  preferences.end();
+  Serial.printf("NVS Memory buzzer_freq: %d Hz\n", buzzer_freq);
 }
 
 void NvsPreferences::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {

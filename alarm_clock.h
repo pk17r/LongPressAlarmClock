@@ -68,7 +68,7 @@ private:
     struct repeating_timer *passive_buzzer_timer_ptr_ = NULL;
   #endif
 
-  const int kBuzzerFrequency = 2048;
+  static inline uint16_t buzzer_frequency = 2048;
   static inline const unsigned long kBeepLengthMs = 800;
 
   static inline bool buzzer_square_wave_toggle_ = false;

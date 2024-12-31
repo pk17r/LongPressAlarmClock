@@ -19,6 +19,8 @@ public:
 
   void RetrieveLongPressSeconds(uint8_t &long_press_seconds);
   void SaveLongPressSeconds(uint8_t long_press_seconds);
+  void RetrieveBuzzerFrequency(uint16_t &buzzer_freq);
+  void SaveBuzzerFrequency(uint16_t buzzer_freq);
   void RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn);
   void SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn);
   void RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password);
@@ -99,6 +101,9 @@ private:
 
   const char* kAlarmLongPressSecondsKey = "AlarmLongPrsSec";
   const uint8_t kAlarmLongPressSeconds = 15;
+
+  const char* kBuzzerFrequencyKey = "BuzzerFreq";
+  const uint16_t kBuzzerFrequency = 2048;
 
   const char* kFirmwareVersionKey = "FwVersion";  // 6 bytes
 

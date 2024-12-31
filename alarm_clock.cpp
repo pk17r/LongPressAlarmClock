@@ -20,6 +20,9 @@ void AlarmClock::Setup() {
   // retrieve long press seconds
   nvs_preferences->RetrieveLongPressSeconds(alarm_long_press_seconds_);
 
+  // retrieve buzzer frequency
+  nvs_preferences->RetrieveBuzzerFrequency(buzzer_frequency);
+
   // setup buzzer timer
   SetupBuzzerTimer();
 
@@ -164,13 +167,13 @@ void AlarmClock::BuzzerEnable() {
 
       // Set alarm to call onTimer function every second (value in microseconds).
       // Repeat the alarm (third parameter) with unlimited count = 0 (fourth parameter).
-      timerAlarm(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true, 0);
+      timerAlarm(passive_buzzer_timer_ptr_, 1000000 / (buzzer_frequency * 2), true, 0);
     #else
     // Code for version 2.x
       timerAlarmEnable(passive_buzzer_timer_ptr_);
     #endif
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
-    int64_t delay_us = 1000000 / (kBuzzerFrequency * 2);
+    int64_t delay_us = 1000000 / (buzzer_frequency * 2);
     add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
   #endif
 
@@ -211,7 +214,7 @@ void AlarmClock::SetupBuzzerTimer() {
     // Code for version 2.x
       passive_buzzer_timer_ptr_ = timerBegin(1, 80, true);  // using timer 0, prescaler 80 (1MHz as ESP32 is 80MHz), counting up (true)
       timerAttachInterrupt(passive_buzzer_timer_ptr_, &PassiveBuzzerTimerISR, true);    //attach ISR to timer
-      timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (kBuzzerFrequency * 2), true);
+      timerAlarmWrite(passive_buzzer_timer_ptr_, 1000000 / (buzzer_frequency * 2), true);
     #endif
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     passive_buzzer_timer_ptr_ = new struct repeating_timer;
