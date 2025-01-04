@@ -27,12 +27,12 @@
 
 // FIRMWARE VERSION   (update these when pushing new MCU specific binaries to github)
 
-#define ESP32_S2_MINI_FIRMWARE_VERSION            "3.1"
+#define ESP32_S2_MINI_FIRMWARE_VERSION            "3.2"
 #define ESP32_WROOM_DA_MODULE_FIRMWARE_VERSION    "2.4"
 #define RASPBERRY_PI_PICO_W_FIRMWARE_VERSION      "1.5"
-#define ESP32_S3_FIRMWARE_VERSION                 "3.1"
-const std::string kFirmwareDate = "Dec 30, 2024";
+#define ESP32_S3_FIRMWARE_VERSION                 "3.2"
+const std::string kFirmwareDate = "Jan 4, 2025";
 
-const std::string kChangeLog = "- HAPPY NEW YEAR 2025!!\n- Bigger Back-Cancel Button.\n- Buzzer Frequency made device specific.";
+const std::string kChangeLog = "- Min 5 digit zip codes.";
 
 #endif  // CONFIGURATION_H
