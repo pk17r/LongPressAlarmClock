@@ -138,20 +138,27 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
+    std::string location_zip_code_str = std::to_string(location_zip_code_);
+    PrintLn("location_zip_code_str befgore = ", location_zip_code_str);
+    while(location_zip_code_str.size() < 5) {
+      location_zip_code_str = '0' + location_zip_code_str;
+    }
+    PrintLn("location_zip_code_str after = ", location_zip_code_str);
+
     // std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
-    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + std::to_string(location_zip_code_) + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
+    std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + location_zip_code_str + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
     WiFiClient client;
     HTTPClient http;
-      
+
     // Your Domain name with URL path or IP address with path
     http.begin(client, serverPath.c_str());
-    
+
     // Send HTTP POST request
     int httpResponseCode = http.GET();
     last_fetch_weather_info_time_ms_ = millis();
-    
+
     String jsonBuffer = "{}"; 
-    
+
     if (httpResponseCode>0) {
       PrintLn("WiFiStuff::GetTodaysWeatherInfo(): HTTP Response code: ", httpResponseCode);
       jsonBuffer = http.getString();
@@ -162,7 +169,7 @@ void WiFiStuff::GetTodaysWeatherInfo() {
     }
     // Free resources
     http.end();
-    
+
     Serial.println(jsonBuffer);
     JSONVar myObject = JSON.parse(jsonBuffer);
 
