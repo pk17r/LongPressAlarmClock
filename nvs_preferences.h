@@ -103,7 +103,7 @@ private:
   const uint8_t kAlarmLongPressSeconds = 15;
 
   const char* kBuzzerFrequencyKey = "BuzzerFreq";
-  const uint16_t kBuzzerFrequency = 2048;
+  const uint16_t kBuzzerFrequency = 2731;       // older selection of 12085 through hole buzzer had 2048Hz rated frequency. New selection of KLJ-7525-5027 SMD buzzer has 2731Hz as rated frequency.
 
   const char* kFirmwareVersionKey = "FwVersion";  // 6 bytes
 

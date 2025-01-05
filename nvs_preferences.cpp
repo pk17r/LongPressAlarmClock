@@ -32,12 +32,17 @@ NvsPreferences::NvsPreferences() {
     preferences.putBool(kWeatherUnitsMetricNotImperialKey, kWeatherUnitsMetricNotImperial);
   if(!preferences.isKey(kAlarmLongPressSecondsKey))
     preferences.putUChar(kAlarmLongPressSecondsKey, kAlarmLongPressSeconds);
-  if(!preferences.isKey(kBuzzerFrequencyKey))
-    preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   if(!preferences.isKey(kFirmwareVersionKey)) {
     String kFirmwareVersionString = kFirmwareVersion.c_str();
     preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   }
+  else {
+    // older firmware present, means device has older buzzer 12085 with rated frequency 2048 Hz
+    if(!preferences.isKey(kBuzzerFrequencyKey))   // if key is not present then it is older buzzer
+      preferences.putUShort(kBuzzerFrequencyKey, 2048);
+  }
+  if(!preferences.isKey(kBuzzerFrequencyKey))
+    preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   if(!preferences.isKey(kCpuSpeedMhzKey))
     preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   if(!preferences.isKey(kScreensaverMotionTypeKey))
