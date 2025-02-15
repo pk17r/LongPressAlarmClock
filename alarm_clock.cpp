@@ -144,7 +144,7 @@ bool AlarmClock::PassiveBuzzerTimerISR(struct repeating_timer *t) {
   if(millis() - beep_start_time_ms_ > kBeepLengthMs) {
     beep_toggle_ = !beep_toggle_;
     beep_start_time_ms_ = millis();
-    digitalWrite(LED_PIN, beep_toggle_);
+    ResponseLed(beep_toggle_);
   }
   buzzer_square_wave_toggle_ = !buzzer_square_wave_toggle_;
   digitalWrite(BUZZER_PIN, buzzer_square_wave_toggle_ && beep_toggle_);
@@ -198,7 +198,7 @@ void AlarmClock::BuzzerDisable() {
     cancel_repeating_timer(passive_buzzer_timer_ptr_);
   #endif
   digitalWrite(BUZZER_PIN, LOW);
-  digitalWrite(LED_PIN, LOW);
+  ResponseLed(LOW);
   buzzer_square_wave_toggle_ = false;
   beep_toggle_ = false;
 

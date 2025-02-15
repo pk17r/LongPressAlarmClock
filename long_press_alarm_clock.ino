@@ -148,7 +148,7 @@ void setup() {
 
   // LED Pin
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);
+  ResponseLed(HIGH);
 
   // BUILTIN LED - we use for WiFi Connect Notification
   pinMode(WIFI_LED, OUTPUT);
@@ -284,10 +284,7 @@ void loop() {
   bool dec_button_pressed = dec_button->buttonActiveDebounced();
 
   // if user presses main LED Push button, show instant response by turning On LED
-  if(push_button_pressed)
-    digitalWrite(LED_PIN, HIGH);
-  else
-    digitalWrite(LED_PIN, LOW);
+  ResponseLed(push_button_pressed);
 
   // if a button or touchscreen is pressed then take action
   if((inactivity_millis >= kUserInputDelayMs) && (push_button_pressed || inc_button_pressed || dec_button_pressed || (ts != NULL && ts->IsTouched()))) {
@@ -491,7 +488,7 @@ void loop() {
 
   // accept user serial inputs
   if (Serial.available() != 0)
-    ProcessSerialInput();
+    SerialUserInput();
 
   #if defined(MCU_IS_ESP32_S2_MINI)
     // ESP32_S2_MINI is single core MCU
@@ -598,6 +595,13 @@ void loop1() {
       delay(1);   // a delay to avoid race condition in dual core MCUs
       second_core_task_added_flag_array[current_task] = false;
     // }
+  }
+
+  const int kTouchActiveThreshold = 50000;
+  int touchReadPin5 = touchRead(TOUCH_PIN_5);
+  if(touchReadPin5 > kTouchActiveThreshold) {
+    PrintLn("TOUCHED TOUCH_PIN_5");
+    LedOnOffResponse();
   }
 }
 
@@ -933,7 +937,7 @@ void ResetWatchdog() {
   }
 }
 
-void ProcessSerialInput() {
+void SerialUserInput() {
   // take user input
   char input = Serial.read();
   SerialInputFlush();
@@ -942,7 +946,7 @@ void ProcessSerialInput() {
   Serial.println(input);
 
   if(millis() < 2000) {
-    Serial.println("Serial Input Ignored..");
+    Serial.println("Serial User Input Ignored..");
     return;
   }
   // process user input
@@ -1558,9 +1562,13 @@ int DisplayPagesVecButtonIndex(ScreenPage button_page, Cursor button_cursor) {
 }
 
 void LedOnOffResponse() {
-  digitalWrite(LED_PIN, HIGH);
+  ResponseLed(HIGH);
   delay(kUserInputDelayMs);
-  digitalWrite(LED_PIN, LOW);
+  ResponseLed(LOW);
+}
+
+void ResponseLed(bool value) {
+  digitalWrite(LED_PIN, value);
 }
 
 /*  1: turn On Button & wait,

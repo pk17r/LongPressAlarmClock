@@ -147,7 +147,7 @@
   const int DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
   const int PHOTORESISTOR_PIN = 4;
   const int RGB_LED_STRIP_PIN = 15;
-
+  const int TOUCH_PIN_5 = 5;
 
 #endif
 

@@ -227,7 +227,7 @@ extern void SerialInputFlush();
 extern void SerialTimeStampPrefix();
 extern void PrepareTimeDayDateArrays();
 extern void SerialPrintRtcDateTime();
-extern void ProcessSerialInput();
+extern void SerialUserInput();
 extern void CycleCpuFrequency();
 extern void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool increment_page);
 extern void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button);
@@ -242,5 +242,6 @@ extern void PrintLn(std::string &someTextStr1, std::string &someTextStr2);
 extern void PrintLn(std::string &someTextStr1);
 extern void PrintLn();
 extern bool AnyButtonPressed();
+extern void ResponseLed(bool value);
 
 #endif // COMMON_H
