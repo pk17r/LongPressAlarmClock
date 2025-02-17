@@ -121,33 +121,36 @@
   #define MCU_IS_ESP32
   #define ESP32_DUAL_CORE
 
-  const int TFT_COPI = 11;
-  const int TFT_CLK = 12;
-  const int TFT_CS = 10;
-  const int TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
-  const int TFT_DC = 21;
-  const int TFT_BL = 47;  //  controls TFT Display backlight as output of PWM pin
+  const uint8_t TFT_COPI = 11;
+  const uint8_t TFT_CLK = 12;
+  const uint8_t TFT_CS = 10;
+  const uint8_t TFT_RST = 14;  // Or set to -1 and connect to Arduino RESET pin
+  const uint8_t TFT_DC = 21;
+  const uint8_t TFT_BL = 47;  //  controls TFT Display backlight as output of PWM pin
 
-  const int TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
-  const int TS_CS_PIN = 17;
-  const int TS_IRQ_PIN = 48;
+  const uint8_t TS_CIPO = 13;    // don't connect CIPO (MISO) to TFT
+  const uint8_t TS_CS_PIN = 17;
+  const uint8_t TS_IRQ_PIN = 48;
 
   // Sqw Alarm Interrupt Pin
-  const int SQW_INT_PIN = 18;
-  const int SDA_PIN = 8;
-  const int SCL_PIN = 9;
-  const int BUTTON_PIN = 1;
-  const int INC_BUTTON_PIN = 2;
-  const int DEC_BUTTON_PIN = 42;
+  const uint8_t SQW_INT_PIN = 18;
+  const uint8_t SDA_PIN = 8;
+  const uint8_t SCL_PIN = 9;
+  const uint8_t BUTTON_PIN = 1;
+  const uint8_t INC_BUTTON_PIN = 2;
+  const uint8_t DEC_BUTTON_PIN = 42;
   // #define BUTTON_PIN_BITMASK 0x800000000  // 2^35 in hex
-  const int LED_PIN = 41;
-  // const int LED_BUILTIN = 38;   // RGB LED
-  const int WIFI_LED = 39;
-  const int BUZZER_PIN = 16;
-  const int DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
-  const int PHOTORESISTOR_PIN = 4;
-  const int RGB_LED_STRIP_PIN = 15;
-  const int TOUCH_PIN_5 = 5;
+  const uint8_t LED_PIN = 41;
+  const uint8_t WIFI_LED = 39;
+  const uint8_t BUZZER_PIN = 16;
+  const uint8_t DEBUG_PIN = 40;    // manually pull down to enable debug mode, watchdog reboot will not be used in debug mode
+  const uint8_t PHOTORESISTOR_PIN = 4;    // ADC1 GPIO
+  const uint8_t RGB_LED_STRIP_PIN = 15;
+  const uint8_t TOUCH_PIN_5 = 5;
+  const uint8_t TOUCHSCREEN_XP = 19;
+  const uint8_t TOUCHSCREEN_XM = 7;   // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YP = 6;   // ADC1 GPIO
+  const uint8_t TOUCHSCREEN_YM = 20;
 
 #endif
 

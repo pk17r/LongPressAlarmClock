@@ -2,6 +2,7 @@
 #define TOUCHSCREEN_H
 #include "common.h"
 #include <XPT2046_Touchscreen.h>
+#include <TouchscreenResistive.h>
 
 // struct declerations
 struct TouchPixel {
@@ -37,9 +38,13 @@ private:
   // store touchscreen calibration
   TouchCalibration touchscreen_calibration_;
 
+  uint8_t touchscreen_type = 0;   // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
+
   // Param 2 - Touch IRQ Pin - interrupt enabled polling
   // XPT2046_Touchscreen touchscreen_object_{ TS_CS_PIN, TS_IRQ_PIN };
   XPT2046_Touchscreen* touchscreen_ptr_ = NULL;
+  // Direct touchscreen measurements using MCU ADC
+  TouchscreenResistive* touchscreen_r_ptr_ = NULL;
 
 // FUNCTIONS
 
@@ -47,6 +52,7 @@ public:
 
   // constructor
   Touchscreen();
+  ~Touchscreen();
 
   // to know if touchscreen is touched
   bool IsTouched();

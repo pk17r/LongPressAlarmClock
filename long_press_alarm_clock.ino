@@ -999,16 +999,19 @@ void SerialUserInput() {
       display->GoodMorningScreen();
       break;
     case 'h':   // enable / disable TOUCHSCREEN
-      if(ts != NULL) {
+      {
+        uint8_t touchscreen_type = nvs_preferences->RetrieveIsTouchscreen();
+        touchscreen_type++;
+        if(touchscreen_type > 2)
+          touchscreen_type = 0;
+        nvs_preferences->SaveIsTouchscreen(touchscreen_type);
         delete ts;
         ts = NULL;
-        nvs_preferences->SaveIsTouchscreen(false);
+        if(touchscreen_type) {
+          ts = new Touchscreen();
+        }
+        PrintLn("RetrieveIsTouchscreen() = ", nvs_preferences->RetrieveIsTouchscreen());
       }
-      else {
-        nvs_preferences->SaveIsTouchscreen(true);
-        ts = new Touchscreen();
-      }
-      PrintLn("RetrieveIsTouchscreen() = ", nvs_preferences->RetrieveIsTouchscreen());
       break;
     case 'i':   // set WiFi details
       {

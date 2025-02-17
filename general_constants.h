@@ -84,4 +84,7 @@ const char kManualOffStr[11] = "MANUAL-OFF", kManualOnStr[10] = "MANUAL-ON", kEv
 const uint16_t kDayTimeMinutes = 420;   // 7AM
 const uint16_t kEveningTimeMinutes = 1080;    // 6PM
 
+// adc resolution (for all ADCs on MCU)
+const int kAdcResolutionBits = 10;
+
 #endif  // GENERAL_CONSTANTS_H

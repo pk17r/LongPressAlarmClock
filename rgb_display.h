@@ -171,7 +171,6 @@ private:
   const int kBrightnessBackgroundColorThreshold = 40;
 
   // photoresistor pin's adc resolution (for all ADCs on MCU)
-  const int kAdcResolutionBits = 8;
   const int kPhotodiodeLightRawMax = pow(2, kAdcResolutionBits) - 1;
 
   // display brightness constants
