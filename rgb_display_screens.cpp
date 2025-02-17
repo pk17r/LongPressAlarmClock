@@ -706,7 +706,7 @@ void RGBDisplay::DisplayFirmwareVersionAndDate() {
 
 Cursor RGBDisplay::CheckButtonTouch() {
   int16_t ts_x = ts->GetTouchedPixel()->x, ts_y = ts->GetTouchedPixel()->y;
-  Serial.printf("ts_x=%d, ts_y=%d\n", ts_x, ts_y);
+  Serial.print("ts_x:"); Serial.print(ts_x); Serial.print(", ts_y:"); Serial.println(ts_y);
 
   for (int i = 0; i < display_pages_vec[current_page].size(); i++) {
     DisplayButton* button = display_pages_vec[current_page][i];
@@ -721,12 +721,12 @@ Cursor RGBDisplay::CheckButtonTouch() {
   if(current_page == kWiFiScanNetworksPage) {
     int16_t cursorY0 = kWiFiScanNetworksList_y0_ - 0.75 * kWiFiScanNetworksList_h_ + 1;
     int16_t cursorYMax = kWiFiScanNetworksList_y0_ - 0.75 * kWiFiScanNetworksList_h_ + 1 + (kWiFiScanNetworksList_h_ * kWifiScanNetworksPageItems);
-    Serial.printf("cursorY0=%d, cursorYMax=%d\n", cursorY0, cursorYMax);
+    // Serial.printf("cursorY0=%d, cursorYMax=%d\n", cursorY0, cursorYMax);
     if(ts_y >= cursorY0 && ts_y < cursorYMax) {
       // touch is inside the list
       // find touch box
       current_wifi_networks_scan_page_cursor = floor(float(ts_y - cursorY0) / kWiFiScanNetworksList_h_);
-      Serial.printf("current_wifi_networks_scan_page_cursor=%d\n", current_wifi_networks_scan_page_cursor);
+      // Serial.printf("current_wifi_networks_scan_page_cursor=%d\n", current_wifi_networks_scan_page_cursor);
       return kWiFiScanNetworksPageList;
     }
   }
@@ -1050,8 +1050,10 @@ void RGBDisplay::AlarmTriggeredScreen(bool firstTime, int8_t buttonPressSecondsC
 void RGBDisplay::Screensaver() {
   const int16_t GAP_BAND = 5;
   if(refresh_screensaver_canvas_) {
+    #ifdef MORE_LOGS
     // map time
     elapsedMillis timer1;
+    #endif
 
     // delete created canvas and null the pointer
     if(my_canvas_ != NULL) {
@@ -1136,11 +1138,13 @@ void RGBDisplay::Screensaver() {
     // stop refreshing canvas until time change or if it hits top or bottom screen edges
     refresh_screensaver_canvas_ = false;
 
+    #ifdef MORE_LOGS
     if(debug_mode) {
       unsigned long time1 = timer1;
       // Serial.printf("Screensave re-canvas time: %lums\n", time1);
       PrintLn("Screensave re-canvas time (ms): ", time1);
     }
+    #endif
   }
   else {
 
@@ -1198,7 +1202,9 @@ void RGBDisplay::PickNewRandomColor() {
   while(newIndex == current_random_color_index_)
     newIndex = random(0, kColorPickerWheelSize - 1);
   current_random_color_index_ = newIndex;
-  // PrintLn("current_random_color_index_ = ", current_random_color_index_);
+  #ifdef MORE_LOGS
+  PrintLn("current_random_color_index_ = ", current_random_color_index_);
+  #endif
 }
 
 void RGBDisplay::DisplayTimeUpdate() {
@@ -2166,77 +2172,3 @@ bool RGBDisplay::GetUserOnScreenTextInput(std::string label, char* return_text, 
   tft.setTextSize(1);
   return ret;
 }
-
-// void RGBDisplay::fastDrawBitmap(int16_t x, int16_t y, uint8_t* bitmap, int16_t w, int16_t h, uint16_t color, uint16_t bg) {
-//   toggler = false;
-//   elapsedMillis timer1;
-//   if(toggler) {
-//     SPI.beginTransaction( SPISettings(150000000, MSBFIRST, SPI_MODE0) );
-//     digitalWrite(TFT_CS, 0);  // indicate "transfer"
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2A);              // send column span command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     SPI.transfer16(x);//     >> 8;      // send Xmin
-//     SPI.transfer16(x+w-1);// >> 8;      // send Xmax
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2B);              // send row span command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     SPI.transfer16(y);//     >> 8;      // send Ymin
-//     SPI.transfer16(y+h-1);// >> 8;      // send Ymax
-//     digitalWrite(TFT_DC, 0);  // indicate "command"
-//     SPI.transfer(0x2C);              // send write command
-//     digitalWrite(TFT_DC, 1);  // indicate "data"
-//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-//     int8_t bits8 = 0;
-//     for (int16_t j = 0; j < h; j++) {
-//       for (int16_t i = 0; i < w; i++)
-//       {
-//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-//         uint16_t c = bits8 < 0 ? color : bg;   // select color
-//         tft.SPI_WRITE16(c);
-//       }
-//     }
-//     // pinMode(TFT_CS, INPUT); // Set CS_Pin to high impedance to allow pull-up to reset CS to inactive.
-//     // digitalWrite(TFT_CS, 1); // Enable internal pull-up
-//     digitalWrite(TFT_CS, 1);                   // indicate "idle"
-//     SPI.endTransaction();
-//   }
-//   else {
-//     Serial.println("***SEE_HERE***");
-//     // make a 16 bit rgbBitmap buffer to test send time of drawRGBBitmap
-//     // int bitmapSize = w*h/8 + (w*h%8 > 0 ? 1 : 0);
-//     // for (int r = 0; r<bitmapSize; r++) {
-//     //   Serial.print(bitmap[r]);Serial.print(charSpace);
-//     // }
-//     // Serial.println();
-//     int bufferSize = w;// * h;
-//     uint16_t buffer16Bit[bufferSize];
-//     tft.startWrite();
-//     tft.setAddrWindow(x, y, w, h);
-    
-//     int16_t byteWidth = (w + 7) >> 3;          // bitmap width in bytes
-//     int8_t bits8 = 0;
-//     for (int16_t j = 0; j < h; j++) {
-//       int bufi = 0;
-//       for (int16_t i = 0; i < w; i++)
-//       {
-//         bits8 = i & 7 ? bits8 << 1 : bitmap[j * byteWidth + (i >> 3)];  // fetch next pixel
-//         uint16_t c = bits8 < 0 ? color : bg;   // select color
-//         buffer16Bit[bufi] = c;
-//         bufi++;
-//         // tft.writePixels(&c, 1);
-//       }
-//       tft.writePixels(buffer16Bit, bufferSize);
-//     }
-    
-//     tft.endWrite();
-//     // alarmClock->serialTimeStampPrefix(); Serial.print(charSpace); Serial.print(timer1);
-//     // tft.drawRGBBitmap(x, y, buffer16Bit, w, h); // Copy to screen
-//     alarmClock->serialTimeStampPrefix();
-//     Serial.println("***DONE***");
-//   }
-  
-//   Serial.print(" w "); Serial.print(w);Serial.print(" h "); Serial.print(h); Serial.print(" fastDrawBitmapTime "); Serial.print(toggler); Serial.print(charSpace); Serial.println(timer1);
-
-//   toggler = !toggler;
-// }

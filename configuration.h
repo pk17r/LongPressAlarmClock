@@ -35,4 +35,6 @@ const std::string kFirmwareDate = "Jan 4, 2025";
 
 const std::string kChangeLog = "- Min 5 digit zip codes.";
 
+// #define MORE_LOGS
+
 #endif  // CONFIGURATION_H

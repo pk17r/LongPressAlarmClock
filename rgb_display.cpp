@@ -74,7 +74,10 @@ void RGBDisplay::Setup() {
 
   // fetch night time dim hour
   night_time_minutes = nvs_preferences->RetrieveNightTimeDimHour() * 60 + 720;
-  Serial.printf("night_time_minutes: %d minutes  use_photoresistor = %d\n", night_time_minutes, use_photoresistor);
+  #ifdef MORE_LOGS
+  PrintLn("night_time_minutes", night_time_minutes);
+  PrintLn("use_photoresistor", use_photoresistor);
+  #endif
 
   if(use_photoresistor) {
     // configure Photoresistor pin
@@ -104,8 +107,10 @@ void RGBDisplay::RotateScreen() {
 void RGBDisplay::SetBrightness(int brightness) {
   if(current_brightness_ != brightness) {
     analogWrite(TFT_BL, brightness);
+    #ifdef MORE_LOGS
     if(debug_mode)
       PrintLn("Display Brightness set to ", brightness);
+    #endif
   }
   // if(debug_mode)
   //   RealTimeOnScreenOutput(std::to_string(brightness), 50);
@@ -134,8 +139,10 @@ void RGBDisplay::CheckPhotoresistorAndSetBrightness() {
     lcd_brightness_val2 = max(lcd_brightness_val2, kRgbStripOnDispMinBrightness);
   else if(rtc->todays_minutes < night_time_minutes && rtc->todays_minutes >= kDayTimeMinutes)
     lcd_brightness_val2 = max(lcd_brightness_val2, kNonNightMinBrightness);
+  #ifdef MORE_LOGS
   if(debug_mode)
-    Serial.printf("photodiode_light_raw = %d, lcd_brightness_val2 = %d\n", photodiode_light_raw, lcd_brightness_val2);
+    Serial.print("photodiode_light_raw"); Serial.print(photodiode_light_raw); Serial.print("lcd_brightness_val2"); Serial.println(lcd_brightness_val2);
+  #endif
   SetBrightness(lcd_brightness_val2);
 }
 

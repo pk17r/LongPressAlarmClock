@@ -116,6 +116,9 @@ bool rgb_led_strip_on = false;
 uint16_t current_led_strip_color = 0x6D9D;    // RGB565_Argentinian_blue
 const uint32_t kDefaultLedStripColor = 0xFFFFFF;       // White
 uint8_t rgb_strip_led_brightness = 255;
+#ifdef MORE_LOGS
+uint8_t frames_per_second = 0;
+#endif
 
 // LOCAL FUNCTIONS
 // populate all pages in display_pages_vec
@@ -199,7 +202,6 @@ void setup() {
   nvs_preferences->RetrieveSavedFirmwareVersion(saved_firmware_version);
   if(strcmp(saved_firmware_version.c_str(), kFirmwareVersion.c_str()) != 0) {
     firmware_updated_flag_user_information = true;
-    Serial.print("Firmware updated from "); Serial.print(saved_firmware_version.c_str()); Serial.print(" to "); Serial.println(kFirmwareVersion.c_str());
     nvs_preferences->SaveCurrentFirmwareVersion();
   }
   // setup ds3231 rtc (needs to be before alarm clock)
@@ -234,20 +236,19 @@ void setup() {
 
   // pick random time between 10AM and 6PM for firmware OTA update
   ota_update_days_minutes = random(600, 1080);
-  uint8_t ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min;
-  rtc->DaysMinutesToClockTime(ota_update_days_minutes, ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min);
-  Serial.printf("OTA Update random 10AM-6PM time %02d:%02d %s\n", ota_update_hr, ota_update_min, (ota_update_hour_mode_and_am_pm == 1 ? kAmLabel : kPmLabel));
-  Serial.printf("Active Firmware Version %s\n", kFirmwareVersion.c_str());
-  Serial.printf("Active Firmware Date %s\n", kFirmwareDate.c_str());
+  PrintLn("OTA", ota_update_days_minutes);
+  // uint8_t ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min;
+  // rtc->DaysMinutesToClockTime(ota_update_days_minutes, ota_update_hour_mode_and_am_pm, ota_update_hr, ota_update_min);
+  // Serial.printf("OTA Update random 10AM-6PM time %02d:%02d %s\n", ota_update_hr, ota_update_min, (ota_update_hour_mode_and_am_pm == 1 ? kAmLabel : kPmLabel));
+  std::string temp_str = kFirmwareVersion;
+  PrintLn(temp_str);
+  temp_str = kFirmwareDate;
+  PrintLn(temp_str);
 
   // set CPU Speed
   #if defined(MCU_IS_ESP32)
-    uint32_t saved_cpu_speed_mhz = nvs_preferences->RetrieveSavedCpuSpeed();
-    if(saved_cpu_speed_mhz == 80 || saved_cpu_speed_mhz == 160 || saved_cpu_speed_mhz == 240)
-      cpu_speed_mhz = saved_cpu_speed_mhz;
-    setCpuFrequencyMhz(cpu_speed_mhz);
+    setCpuFrequencyMhz(nvs_preferences->RetrieveSavedCpuSpeed());
     cpu_speed_mhz = getCpuFrequencyMhz();
-    Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
     nvs_preferences->SaveCpuSpeed();
   #endif
 
@@ -273,8 +274,6 @@ void setup() {
 
   ResetWatchdog();
 }
-
-uint8_t frames_per_second = 0;
 
 // arduino loop function on core0 - High Priority one with time update tasks
 void loop() {
@@ -352,7 +351,6 @@ void loop() {
       rtc->rtc_hw_min_update_ = false;
 
       // PrintLn("New Minute!");
-      // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
 
       // Activate Buzzer if Alarm Time has arrived
       if((rtc->year() >= 2024) && alarm_clock->MinutesToAlarm() == 0) {
@@ -472,18 +470,21 @@ void loop() {
     // reset watchdog
     ResetWatchdog();
 
+    #ifdef MORE_LOGS
     // print fps
     if(debug_mode && current_page == kScreensaverPage) {
-      // Serial.printf("FPS: %d\n", frames_per_second);
       PrintLn("FPS: ", frames_per_second);
       frames_per_second = 0;
     }
+    #endif
   }
 
-  // make screensaver motion fast
+  // make screensaver motion
   if(current_page == kScreensaverPage) {
     display->Screensaver();
+    #ifdef MORE_LOGS
     if(debug_mode) frames_per_second++;
+    #endif
   }
 
   // accept user serial inputs
@@ -518,7 +519,7 @@ void loop1() {
   while (!second_core_tasks_queue.empty())
   {
     SecondCoreTask current_task = second_core_tasks_queue.front();
-    // Serial.print("CPU"); Serial.print(xPortGetCoreID()); Serial.print(" "); Serial.println(getCpuFrequencyMhz());
+    // PrintLn("CPU", xPortGetCoreID());
 
     bool success = false;
 
@@ -772,27 +773,10 @@ void SerialTimeStampPrefix() {
   // if(inactivity_millis < 100) Serial.print(kCharZero);
   // if(inactivity_millis < 10) Serial.print(kCharZero);
   Serial.print(inactivity_millis);
-  int freeRam = AvailableRam();
-  float freeRamf = freeRam;
-  char* freeRamUnit = "B";
-  if((freeRamf = (1.0 * freeRam) / (1024 * 1024)) > 0.1) {
-    freeRamUnit = "MB";
-  }
-  else if((freeRamf = (1.0 * freeRam) / 1024) > 1) {
-    freeRamUnit = "KB";
-  }
-  Serial.print(": Free RAM "); Serial.print(freeRamf); Serial.print(freeRamUnit);
-  int minFreeRam = MinFreeRam();
-  float minFreeRamf = minFreeRam;
-  char* minFreeRamUnit = "B";
-  if((minFreeRamf = (1.0 * minFreeRam) / (1024 * 1024)) > 0.1) {
-    minFreeRamUnit = "MB";
-  }
-  else if((minFreeRamf = (1.0 * minFreeRam) / 1024) > 1) {
-    minFreeRamUnit = "KB";
-  }
-  Serial.print(": Min Free RAM "); Serial.print(minFreeRamf); Serial.print(minFreeRamUnit);
-  Serial.print(')');
+  // int freeRam = AvailableRam();
+  // Serial.print(": FreeRAM "); Serial.print(freeRamf); Serial.print('B');
+  Serial.print(": MinRAM "); Serial.print(MinFreeRam());
+  Serial.print("B)");
   Serial.print(kCharSpace);
   Serial.flush();
 }
@@ -835,9 +819,21 @@ void PrintLn(std::string &someTextStr1, std::string &someTextStr2) {
   Serial.println(someTextStr2.c_str());
   Serial.flush();
 }
+void PrintLn(std::string &someTextStr1, int someInt) {
+  SerialTimeStampPrefix();
+  Serial.println(someTextStr1.c_str());
+  Serial.print(kCharSpace);
+  Serial.println(someInt);
+  Serial.flush();
+}
 void PrintLn(std::string &someTextStr1) {
   SerialTimeStampPrefix();
   Serial.println(someTextStr1.c_str());
+  Serial.flush();
+}
+void PrintLn(int someInt) {
+  SerialTimeStampPrefix();
+  Serial.println(someInt);
   Serial.flush();
 }
 void PrintLn() {
@@ -937,28 +933,40 @@ void ResetWatchdog() {
   }
 }
 
+/* Take user inputs and configure
+
+  Mostly made for debug purpose
+
+  To enable more logs, enable #define MORE_LOGS in configuration.h file
+*/
 void SerialUserInput() {
   // take user input
   char input = Serial.read();
   SerialInputFlush();
   // acceptable user input
-  Serial.print(F("User input: "));
+  PrintLn("User input: ");
   Serial.println(input);
 
   if(millis() < 2000) {
-    Serial.println("Serial User Input Ignored..");
+    #ifdef MORE_LOGS
+    PrintLn("Serial User Input Ignored..");
+    #endif
     return;
   }
   // process user input
   switch (input) {
     case 'a':   // toggle alarm On Off
-      Serial.println(F("**** Toggle Alarm ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Toggle Alarm ****");
+      #endif
       alarm_clock->alarm_ON_ = !alarm_clock->alarm_ON_;
-      Serial.print(F("alarmOn = ")); Serial.println(alarm_clock->alarm_ON_);
+      PrintLn(alarm_clock->alarm_ON_);
       break;
     case 'b':   // RGB LED brightness
       {
-        Serial.println(F("**** Set RGB Brightness [0-255] ****"));
+        #ifdef MORE_LOGS
+        PrintLn("**** Set RGB Brightness [0-255] ****");
+        #endif
         SerialInputWait();
         int brightnessVal = Serial.parseInt();
         SerialInputFlush();
@@ -969,11 +977,9 @@ void SerialUserInput() {
       break;
     case 'c':   // connect/disconnect WiFi
       if(wifi_stuff->wifi_connected_) {
-        Serial.println(F("**** Disconnect WiFi ****"));
         AddSecondCoreTaskIfNotThere(kDisconnectWiFi);
       }
       else {
-        Serial.println(F("**** Connect to WiFi ****"));
         AddSecondCoreTaskIfNotThere(kConnectWiFi);
         inactivity_millis = 0;
       }
@@ -983,17 +989,23 @@ void SerialUserInput() {
       ts->touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
       break;
     case 'e':   // setup ds3231 rtc
-      Serial.println(F("**** setup ds3231 rtc ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** setup ds3231 rtc ****");
+      #endif
       rtc->Ds3231RtcSetup();
       Serial.println(F("DS3231 setup."));
       break;
     case 'f':   // toggle 12 / 24 hour mode
-      Serial.println(F("**** toggle 12 / 24 hour mode ****"));
-      if(rtc->hourModeAndAmPm() == 0)
-        rtc->set_12hour_mode(true);
-      else
-        rtc->set_12hour_mode(false);
-      Serial.print(F("RTC hourModeAndAmPm() = ")); Serial.println(rtc->hourModeAndAmPm());
+      {
+        #ifdef MORE_LOGS
+        PrintLn("**** toggle 12 / 24 hour mode ****");
+        #endif
+        if(rtc->hourModeAndAmPm() == 0)
+          rtc->set_12hour_mode(true);
+        else
+          rtc->set_12hour_mode(false);
+        PrintLn(rtc->hourModeAndAmPm());
+      }
       break;
     case 'g':   // good morning
       display->GoodMorningScreen();
@@ -1010,17 +1022,20 @@ void SerialUserInput() {
         if(touchscreen_type) {
           ts = new Touchscreen();
         }
-        PrintLn("RetrieveTouchscreenType() = ", nvs_preferences->RetrieveTouchscreenType());
       }
       break;
     case 'i':   // set WiFi details
       {
         // increase watchdog timeout to 90s
-        if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
+        SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
 
-        Serial.println(F("**** Enter WiFi Details ****"));
+        #ifdef MORE_LOGS
+        PrintLn("**** Enter WiFi Details ****");
+        #endif
         String inputStr;
-        Serial.print("SSID: ");
+        #ifdef MORE_LOGS
+        PrintLn("SSID:");
+        #endif
         SerialInputWait();
         inputStr = Serial.readString();
         wifi_stuff->wifi_ssid_ = "";
@@ -1028,7 +1043,9 @@ void SerialUserInput() {
           if(inputStr[i] != '\0' && inputStr[i] != '\n')
             wifi_stuff->wifi_ssid_ = wifi_stuff->wifi_ssid_ + inputStr[i];
         Serial.println(wifi_stuff->wifi_ssid_.c_str());
-        Serial.print("PASSWORD: ");
+        #ifdef MORE_LOGS
+        PrintLn("Pwd:");
+        #endif
         SerialInputWait();
         inputStr = Serial.readString();
         wifi_stuff->wifi_password_ = "";
@@ -1039,15 +1056,19 @@ void SerialUserInput() {
         wifi_stuff->SaveWiFiDetails();
 
         // set back watchdog timeout
-        if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
+        SetWatchdogTime(kWatchdogTimeoutMs);
       }
       break;
     case 'j':   // cycle through CPU speeds
-      Serial.println(F("**** cycle through CPU speeds ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** cycle through CPU speeds ****");
+      #endif
       CycleCpuFrequency();
       break;
     case 'k':   // set firmware updated flag true
-      Serial.println(F("**** set firmware updated flag true ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** set firmware updated flag true ****");
+      #endif
       firmware_updated_flag_user_information = true;
       break;
     case 'l':   // nvs_preferences->RetrieveScreenOrientation()
@@ -1060,21 +1081,25 @@ void SerialUserInput() {
       display->redraw_display_ = true;
       break;
     case 'n':   // get time from NTP server and set on RTC HW
-      Serial.println(F("**** Update RTC HW Time from NTP Server ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Update RTC HW Time from NTP Server ****");
+      #endif
       // update time from NTP server
       wifi_stuff->auto_updated_time_today_ = false;
       AddSecondCoreTaskIfNotThere(kUpdateTimeFromNtpServer);
       break;
     case 'o':   // On Screen User Text Input
       {
-        Serial.println(F("**** On Screen User Text Input ****"));
+        #ifdef MORE_LOGS
+        PrintLn("**** On Screen User Text Input ****");
+        #endif
         SetPage(kSettingsPage);
         // user input string
         std::string label = "WiFi Password";
         char returnText[kWifiSsidPasswordLengthMax + 1] = "";
         // get user input from screen
         display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ false);
-        Serial.print("User Input :"); Serial.println(returnText);
+        PrintLn(returnText);
         SetPage(kSettingsPage);
       }
       break;
@@ -1086,7 +1111,9 @@ void SerialUserInput() {
       break;
     case 'r':   // Set RGB LED Count
       {
-        Serial.println(F("**** Set RGB LED Count [0-255] ****"));
+        #ifdef MORE_LOGS
+        PrintLn("**** Set RGB LED Count [0-255] ****");
+        #endif
         SerialInputWait();
         int rgb_strip_led_count_user = Serial.parseInt();
         SerialInputFlush();
@@ -1096,14 +1123,18 @@ void SerialUserInput() {
       }
       break;
     case 's':   // toggle screensaver
-      Serial.println(F("**** toggle Screensaver ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** toggle Screensaver ****");
+      #endif
       if(current_page != kScreensaverPage)
         SetPage(kScreensaverPage);
       else
         SetPage(kMainPage);
       break;
     case 't':   // go to buzzAlarm Function
-      Serial.println(F("**** buzzAlarm Function ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** buzzAlarm Function ****");
+      #endif
       // go to buzz alarm function
       alarm_clock->BuzzAlarmFn();
       // set main page back
@@ -1111,29 +1142,32 @@ void SerialUserInput() {
       inactivity_millis = 0;
       break;
     case 'u':   // Web OTA Update Available Check
-      Serial.println(F("**** Web OTA Update Available Check ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Web OTA Update Available Check ****");
+      #endif
       #if defined(MCU_IS_ESP32)
         wifi_stuff->FirmwareVersionCheck();
         wifi_stuff->firmware_update_available_ = false;
       #endif
       break;
     case 'v':   // Web OTA Update
-      Serial.println(F("**** Web OTA Update Check ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Web OTA Update Check ****");
+      #endif
       #if defined(MCU_IS_ESP32)
-        // if(wifi_stuff->firmware_update_available_) {
-          ResetWatchdog();
-          PrintLn("**** Web OTA Update Available ****");
-          // set Web OTA Update Pagte
-          SetPage(kFirmwareUpdatePage);
-          // Firmware Update
-          wifi_stuff->UpdateFirmware();
-          // set back main page if Web OTA Update unsuccessful
-          SetPage(kMainPage);
-        // }
+      ResetWatchdog();
+      // set Web OTA Update Pagte
+      SetPage(kFirmwareUpdatePage);
+      // Firmware Update
+      wifi_stuff->UpdateFirmware();
+      // set back main page if Web OTA Update unsuccessful
+      SetPage(kMainPage);
       #endif
       break;
     case 'w':   // get today's weather info
-      Serial.println(F("**** Get Weather Info ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Get Weather Info ****");
+      #endif
       // get today's weather info
       AddSecondCoreTaskIfNotThere(kGetWeatherInfo);
       break;
@@ -1143,10 +1177,12 @@ void SerialUserInput() {
       else
         autorun_rgb_led_strip_mode = 0;
       nvs_preferences->SaveAutorunRgbLedStripMode(autorun_rgb_led_strip_mode);
-      PrintLn("RGB LED Strip Mode = ", RgbLedSettingString());
+      PrintLn(RgbLedSettingString());
       break;
     case 'y':   // show alarm triggered screen
-      Serial.println(F("**** Show Alarm Triggered Screen ****"));
+      #ifdef MORE_LOGS
+      PrintLn("**** Show Alarm Triggered Screen ****");
+      #endif
       // start alarm triggered page
       SetPage(kAlarmTriggeredPage);
       delay(1000);
@@ -1162,38 +1198,38 @@ void SerialUserInput() {
       break;
     case 'z':   // screensaver settings
       {
-        Serial.println(F("**** Screensaver Settings ****"));
-        Serial.println(F("Fly Screensaver? (0/1):"));
+        #ifdef MORE_LOGS
+        PrintLn("**** Screensaver Settings ****");
+        PrintLn("Fly Screensaver? (0/1):");
+        #endif
         SerialInputWait();
         int userInput = Serial.parseInt();
         SerialInputFlush();
         display->screensaver_bounce_not_fly_horizontally_ = (userInput == 0 ? false : true);
-        Serial.printf("fly_screensaver_horizontally_ = %d\n", display->screensaver_bounce_not_fly_horizontally_);
-        Serial.println(F("Colored Border? (0/1):"));
+        #ifdef MORE_LOGS
+        PrintLn("Colored Border? (0/1):");
+        #endif
         SerialInputWait();
         userInput = Serial.parseInt();
         SerialInputFlush();
         display->show_colored_edge_screensaver_ = (userInput == 0 ? false : true);
-        Serial.printf("show_colored_edge_screensaver_ = %d\n", display->show_colored_edge_screensaver_);
         display->refresh_screensaver_canvas_ = true;
       }
       break;
     default:
-      Serial.println(F("Unrecognized user input"));
+      PrintLn("Unrecognized user input");
   }
 }
 
 void CycleCpuFrequency() {
   #if defined(MCU_IS_ESP32)
     cpu_speed_mhz = getCpuFrequencyMhz();
-    Serial.printf("Current CPU Speed %u MHz\n", cpu_speed_mhz);
     // cycle through 80, 160 and 240
     if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
     else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
     else setCpuFrequencyMhz(160);
     cpu_speed_mhz = getCpuFrequencyMhz();
     nvs_preferences->SaveCpuSpeed();
-    Serial.printf("Updated CPU Speed to %u MHz\n", cpu_speed_mhz);
   #endif
 }
 
@@ -1360,7 +1396,7 @@ void SetPage(ScreenPage set_this_page, bool move_cursor_to_first_button, bool in
       }
       break;
     default:
-      Serial.print("Unprogrammed Page "); Serial.print(set_this_page); Serial.println('!');
+      PrintLn("Unprogrammed Page ", set_this_page);
   }
   delay(kUserInputDelayMs);
   display->DisplayCursorHighlight(/*highlight_On = */ true);
@@ -1613,7 +1649,7 @@ void WiFiPasswordInputTouchAndNonTouch() {
     // }
     // get user input from screen
     bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ false);
-    Serial.print("User Input :"); Serial.println(returnText);
+    PrintLn(returnText);
     if(ret) {
       LedOnOffResponse();
       wifi_stuff->wifi_password_ = returnText;
@@ -1784,14 +1820,13 @@ void LedButtonClickAction() {
           }
           // get user input from screen
           bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ true, /* bool capitals_only = */ false);
-          Serial.print("User Input :"); Serial.println(returnText);
+          PrintLn(returnText);
           if(ret) {
             display->DisplayBlankScreen();
             LedOnOffResponse();
             std::string new_location_zip_str = returnText;
-            //Serial.print("new_location_zip_str :"); Serial.println(new_location_zip_str.c_str());
             uint32_t new_location_zip = std::stoi(new_location_zip_str);
-            Serial.print("new_location_zip :"); Serial.println(new_location_zip);
+            PrintLn(new_location_zip);
             wifi_stuff->location_zip_code_ = new_location_zip;
             wifi_stuff->SaveWeatherLocationDetails();
 
@@ -1802,7 +1837,7 @@ void LedButtonClickAction() {
             strcpy(returnText, wifi_stuff->location_country_code_.c_str());
             // get user input from screen
             bool ret = display->GetUserOnScreenTextInput(label, returnText, /* bool numbers_only = */ false, /* bool capitals_only = */ true);
-            Serial.print("User Input :"); Serial.println(returnText);
+            PrintLn(returnText);
             if(ret) {
               display->DisplayBlankScreen();
               LedOnOffResponse();

@@ -26,7 +26,7 @@ void AlarmClock::Setup() {
   // setup buzzer timer
   SetupBuzzerTimer();
 
-  PrintLn("Alarm Clock Initialized!");
+  PrintLn("AlarmClock Initialized!");
 }
 
 void AlarmClock::SaveAlarm() {
@@ -37,8 +37,6 @@ void AlarmClock::SaveAlarm() {
 
   // save alarm settings
   nvs_preferences->SaveAlarm(alarm_hr_, alarm_min_, alarm_is_AM_, alarm_ON_);
-
-  PrintLn("Alarm Settings Saved!");
 }
 
 int16_t AlarmClock::MinutesToAlarm() {
@@ -176,8 +174,9 @@ void AlarmClock::BuzzerEnable() {
     int64_t delay_us = 1000000 / (buzzer_frequency * 2);
     add_repeating_timer_us(delay_us, PassiveBuzzerTimerISR, NULL, passive_buzzer_timer_ptr_);
   #endif
-
-  PrintLn("BuzzerEnable!");
+  #ifdef MORE_LOGS
+  PrintLn(__func__);
+  #endif
 }
 
 void AlarmClock::BuzzerDisable() {
@@ -201,12 +200,12 @@ void AlarmClock::BuzzerDisable() {
   ResponseLed(LOW);
   buzzer_square_wave_toggle_ = false;
   beep_toggle_ = false;
-
-  PrintLn("BuzzerDisable!");
+  #ifdef MORE_LOGS
+  PrintLn(__func__);
+  #endif
 }
 
 void AlarmClock::SetupBuzzerTimer() {
-
   #if defined(MCU_IS_ESP32)
     #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
     // Code for version 3.x
@@ -219,16 +218,18 @@ void AlarmClock::SetupBuzzerTimer() {
   #elif defined(MCU_IS_RASPBERRY_PI_PICO_W)
     passive_buzzer_timer_ptr_ = new struct repeating_timer;
   #endif
-
-  PrintLn("Buzzer Timer setup successful!");
+  #ifdef MORE_LOGS
+  PrintLn(__func__);
+  #endif
 }
 
 void AlarmClock::DeallocateBuzzerTimer() {
   #if defined(MCU_IS_RASPBERRY_PI_PICO_W)
     delete passive_buzzer_timer_ptr_;
     passive_buzzer_timer_ptr_ = NULL;
-
-    PrintLn("Buzzer Timer deallocated.");
+    #ifdef MORE_LOGS
+    PrintLn(__func__);
+    #endif
   #endif
 }
 

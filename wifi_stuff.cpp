@@ -59,13 +59,15 @@ void WiFiStuff::SaveWeatherUnits() {
 
 bool WiFiStuff::TurnWiFiOn() {
 
-  PrintLn("WiFiStuff::TurnWiFiOn(): Connecting to WiFi");
+  PrintLn(__func__);
   WiFi.mode(WIFI_STA);
   delay(1);
   WiFi.persistent(true);
   delay(1);
+  #ifdef MORE_LOGS
   PrintLn(wifi_ssid_.c_str());
   PrintLn(wifi_password_.c_str());
+  #endif
   WiFi.begin(wifi_ssid_.c_str(), wifi_password_.c_str());
   int i = 0;
   while(WiFi.status() != WL_CONNECTED) {
@@ -75,13 +77,17 @@ bool WiFiStuff::TurnWiFiOn() {
     if(i >= 5) break;
   }
   if(WiFi.status() == WL_CONNECTED) {
+    #ifdef MORE_LOGS
     PrintLn("WiFiStuff::TurnWiFiOn(): WiFi Connected.");
+    #endif
     digitalWrite(WIFI_LED, HIGH);
     wifi_connected_ = true;
     incorrect_wifi_details_ = false;
   }
   else {
+    #ifdef MORE_LOGS
     PrintLn("WiFiStuff::TurnWiFiOn(): Could NOT connect to WiFi.");
+    #endif
     digitalWrite(WIFI_LED, LOW);
     wifi_connected_ = false;
     incorrect_wifi_details_ = true;
@@ -91,12 +97,12 @@ bool WiFiStuff::TurnWiFiOn() {
 }
 
 void WiFiStuff::TurnWiFiOff() {
+  PrintLn(__func__);
   WiFi.persistent(false);
   delay(1);
   WiFi.mode(WIFI_OFF);
   delay(1);
   WiFi.disconnect();
-  PrintLn("WiFiStuff::TurnWiFiOff(): WiFi Off.");
   digitalWrite(WIFI_LED, LOW);
   wifi_connected_ = false;
 }
@@ -104,16 +110,20 @@ void WiFiStuff::TurnWiFiOff() {
 void WiFiStuff::GetTodaysWeatherInfo() {
   got_weather_info_ = false;
 
+  std::string func_name = __func__;
+
   // no point fetching weather info if openWeatherMapApiKey is empty
   if(openWeatherMapApiKey.size() == 0) {
-    PrintLn("WiFiStuff::GetTodaysWeatherInfo(): openWeatherMapApiKey is empty! Returning...");
+    PrintLn(func_name, "No Key");
     return;
   }
 
   // don't fetch frequently otherwise can get banned
   if(last_fetch_weather_info_time_ms_ != 0 && millis() - last_fetch_weather_info_time_ms_ < kFetchWeatherInfoMinIntervalMs) {
     get_weather_info_wait_seconds_ = (kFetchWeatherInfoMinIntervalMs - (millis() - last_fetch_weather_info_time_ms_)) / 1000;
-    PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Fetch request too soon. Returning...");
+    #ifdef MORE_LOGS
+    PrintLn(func_name, "Wait more");
+    #endif
     return;
   }
   get_weather_info_wait_seconds_ = 0;
@@ -121,7 +131,9 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   // turn On Wifi
   if(!wifi_connected_) {
     if(!TurnWiFiOn()) {
-      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Could not turn WiFi On. Returning...");
+      #ifdef MORE_LOGS
+      PrintLn(func_name, "No WiFi");
+      #endif
       return;
     }
   }
@@ -139,16 +151,16 @@ void WiFiStuff::GetTodaysWeatherInfo() {
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
     std::string location_zip_code_str = std::to_string(location_zip_code_);
-    PrintLn("location_zip_code_str befgore = ", location_zip_code_str);
     while(location_zip_code_str.size() < 5) {
       location_zip_code_str = '0' + location_zip_code_str;
     }
-    PrintLn("location_zip_code_str after = ", location_zip_code_str);
+    // PrintLn(location_zip_code_str);
 
     // std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + city_copy + "," + countryCode + "&APPID=" + openWeatherMapApiKey + "&units=imperial";
     std::string serverPath = "http://api.openweathermap.org/data/2.5/weather?zip=" + location_zip_code_str + "," + location_country_code_ + "&appid=" + openWeatherMapApiKey + "&units=" + (weather_units_metric_not_imperial_ ? "metric" : "imperial" );
     WiFiClient client;
     HTTPClient http;
+    PrintLn(serverPath);
 
     // Your Domain name with URL path or IP address with path
     http.begin(client, serverPath.c_str());
@@ -159,18 +171,14 @@ void WiFiStuff::GetTodaysWeatherInfo() {
 
     String jsonBuffer = "{}"; 
 
+    PrintLn(func_name, httpResponseCode);
     if (httpResponseCode>0) {
-      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): HTTP Response code: ", httpResponseCode);
       jsonBuffer = http.getString();
-    }
-    else {
-      Serial.print("Error code: ");
-      Serial.println(httpResponseCode);
     }
     // Free resources
     http.end();
 
-    Serial.println(jsonBuffer);
+    PrintLn(jsonBuffer.c_str());
     JSONVar myObject = JSON.parse(jsonBuffer);
 
     // JSON.typeof(jsonVar) can be used to get the type of the var
@@ -182,9 +190,10 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       // got response
       wifi_stuff->got_weather_info_ = true;
 
-      Serial.print("JSON object = ");
-      Serial.println(myObject);
-      Serial.print("Weather: ");
+      #ifdef MORE_LOGS
+        Serial.print("JSON object = ");
+        Serial.println(myObject);
+      #endif
       weather_main_.assign(myObject["weather"][0]["main"]);
       weather_description_.assign(myObject["weather"][0]["description"]);
       double val = atof(JSONVar::stringify(myObject["main"]["temp"]).c_str());
@@ -206,28 +215,35 @@ void WiFiStuff::GetTodaysWeatherInfo() {
       weather_humidity_ = weather_humidity_ + '%';
       city_.assign(myObject["name"]);
       gmt_offset_sec_ = atoi(JSONVar::stringify(myObject["timezone"]).c_str());
-      Serial.print("weather_main "); Serial.println(weather_main_.c_str());
-      Serial.print("weather_description "); Serial.println(weather_description_.c_str());
-      Serial.print("weather_temp "); Serial.println(weather_temp_.c_str());
-      Serial.print("weather_temp_feels_like_ "); Serial.println(weather_temp_feels_like_.c_str());
-      Serial.print("weather_temp_max "); Serial.println(weather_temp_max_.c_str());
-      Serial.print("weather_temp_min "); Serial.println(weather_temp_min_.c_str());
-      Serial.print("weather_wind_speed "); Serial.println(weather_wind_speed_.c_str());
-      Serial.print("weather_humidity "); Serial.println(weather_humidity_.c_str());
-      Serial.print("city_ "); Serial.println(city_.c_str());
-      Serial.print("gmt_offset_sec_ "); Serial.println(gmt_offset_sec_);
-
+      #ifdef MORE_LOGS
+        PrintLn("weather_main ", weather_main_.c_str());
+        PrintLn("weather_description ", weather_description_.c_str());
+        PrintLn("weather_temp ", weather_temp_.c_str());
+        PrintLn("weather_temp_feels_like_ ", weather_temp_feels_like_.c_str());
+        PrintLn("weather_temp_max ", weather_temp_max_.c_str());
+        PrintLn("weather_temp_min ", weather_temp_min_.c_str());
+        PrintLn("weather_wind_speed ", weather_wind_speed_.c_str());
+        PrintLn("weather_humidity ", weather_humidity_.c_str());
+        PrintLn("city_ ", city_.c_str());
+        PrintLn("gmt_offset_sec_ ", gmt_offset_sec_);
+      #endif
     }
     else if(httpResponseCode >= 400) {
-      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Incorrect zip code!");
       incorrect_zip_code = true;
+      #ifdef MORE_LOGS
+      PrintLn(func_name, "Wrong ZIP.");
+      #endif
     }
     else {
-      PrintLn("WiFiStuff::GetTodaysWeatherInfo(): Parsing input failed!");
+      #ifdef MORE_LOGS
+      PrintLn(func_name, "Parse failed.");
+      #endif
     }
   }
   else {
-    PrintLn("WiFi not connected");
+    #ifdef MORE_LOGS
+    PrintLn(func_name, "No WiFi");
+    #endif
   }
 
   // turn off WiFi
@@ -238,11 +254,9 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   manual_time_update_successful_ = false;
 
   if(!got_weather_info_) { // we need gmt_offset_sec_ before getting time update!
-    PrintLn("WiFiStuff::GetTimeFromNtpServer(): Fetching gmt_offset_sec_ before getting time update.");
     GetTodaysWeatherInfo();
-    PrintLn("WiFiStuff::GetTimeFromNtpServer(): got_weather_info_ = ", got_weather_info_);
+    PrintLn(__func__, got_weather_info_);
     if(!got_weather_info_) {
-      PrintLn("WiFiStuff::GetTimeFromNtpServer(): Could not fetch gmt_offset_sec_. Returning...");
       return false;
     }
   }
@@ -250,7 +264,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
   // turn On Wifi
   if(!wifi_connected_) {
     if(!TurnWiFiOn()) {
-      PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi could not be turned on. Returning...");
       return false;
     }
   }
@@ -259,7 +272,6 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
   // Check WiFi connection status
   if(WiFi.status()== WL_CONNECTED) {
-    PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi Connected. Fetching time from NTP Server.");
 
     const char* NTP_SERVER = "pool.ntp.org";
     // const long  GMT_OFFSET_SEC = -8*60*60;
@@ -270,7 +282,7 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
     ntpClient.begin();
     returnVal = ntpClient.update();
-    PrintLn("WiFiStuff::GetTimeFromNtpServer(): ntpClient.update() = ", returnVal);
+    PrintLn(__func__, returnVal);
 
     if(returnVal) {
       unsigned long epoch_since_1970 = ntpClient.getEpochTime();
@@ -279,8 +291,10 @@ bool WiFiStuff::GetTimeFromNtpServer() {
       int seconds = ntpClient.getSeconds();
       int dayOfWeekSunday0 = ntpClient.getDay();
 
+      #ifdef MORE_LOGS
       Serial.printf("\t\tNTP Time: %2d:%2d:%2d   DoW=%s  epoch_since_1970=%lu   ", hours, minutes, seconds, kDaysTable_[dayOfWeekSunday0], epoch_since_1970);
       Serial.flush();
+      #endif
 
       int today, month, year;
       ConvertEpochIntoDate(epoch_since_1970, today, month, year);
@@ -296,7 +310,9 @@ bool WiFiStuff::GetTimeFromNtpServer() {
 
   }
   else {
-    PrintLn("WiFiStuff::GetTimeFromNtpServer(): WiFi not connected");
+    #ifdef MORE_LOGS
+    PrintLn(__func__, "No WiFi");
+    #endif
   }
 
   // // test
@@ -377,13 +393,14 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today,
     }
   }
   today = ceil(day);
+  #ifdef MORE_LOGS
   Serial.print(kMonthsTable[monthJan0]); Serial.print(" "); Serial.print(today); Serial.print(" "); Serial.println(year);
+  #endif
   month = monthJan0 + 1;
 }
 
 #if defined(MCU_IS_ESP32)
 void WiFiStuff::StartSetWiFiSoftAP() {
-  PrintLn("WiFiStuff::StartSetWiFiSoftAP()");
   extern void _SoftAPWiFiDetails();
 
   extern AsyncWebServer* server;
@@ -404,15 +421,13 @@ void WiFiStuff::StartSetWiFiSoftAP() {
   server = new AsyncWebServer(80);
 
   // Connect to Wi-Fi network with SSID and password
-  Serial.print("Setting AP (Access Point)…");
   // Remove the password parameter, if you want the AP (Access Point) to be open
   WiFi.softAP(softApSsid);
 
   IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
   soft_AP_IP = IP.toString().c_str();
-  
+  PrintLn(__func__, soft_AP_IP);
+
   server->begin();
   digitalWrite(WIFI_LED, HIGH);
 
@@ -420,16 +435,12 @@ void WiFiStuff::StartSetWiFiSoftAP() {
 }
 
 void WiFiStuff::StopSetWiFiSoftAP() {
-  PrintLn("WiFiStuff::StopSetWiFiSoftAP()");
   extern AsyncWebServer* server;
   extern String temp_ssid_str, temp_passwd_str;
 
   // To access your stored values on ssid_str, passwd_str
-  Serial.print("SSID: ");
-  Serial.println(temp_ssid_str);
-
-  Serial.print("PASSWD: ");
-  Serial.println(temp_passwd_str);
+  PrintLn(__func__, temp_ssid_str.c_str());
+  PrintLn(__func__, temp_passwd_str.c_str());
 
   TurnWiFiOff();
   delay(100);
@@ -452,7 +463,6 @@ void WiFiStuff::StopSetWiFiSoftAP() {
 }
 
 void WiFiStuff::StartSetLocationLocalServer() {
-  PrintLn("WiFiStuff::StartSetLocationLocalServer()");
   extern void _LocalServerLocationInputs();
 
   extern AsyncWebServer* server;
@@ -476,24 +486,19 @@ void WiFiStuff::StartSetLocationLocalServer() {
   server = new AsyncWebServer(80);
 
   IPAddress IP = WiFi.localIP();
-  Serial.print("Local IP address: ");
-  Serial.println(IP);
   soft_AP_IP = IP.toString().c_str();
+  PrintLn(__func__, soft_AP_IP);
   
   _LocalServerLocationInputs();
 }
 
 void WiFiStuff::StopSetLocationLocalServer() {
-  PrintLn("WiFiStuff::StopSetLocationLocalServer()");
   extern AsyncWebServer* server;
   extern String temp_zip_pin_str, temp_country_code_str;
 
   // To access your stored values on ssid_str, passwd_str
-  Serial.print("ZIP/PIN: ");
-  Serial.println(temp_zip_pin_str);
-
-  Serial.print("Country Code: ");
-  Serial.println(temp_country_code_str);
+  PrintLn(__func__, temp_zip_pin_str.c_str());
+  PrintLn(__func__, temp_country_code_str.c_str());
 
   TurnWiFiOff();
   delay(100);
@@ -607,7 +612,7 @@ void _SoftAPWiFiDetails() {
       inputMessage = request->getParam(kHtmlParamKeyPasswd)->value();
       temp_passwd_str = inputMessage;
     }
-    Serial.println(inputMessage);
+    PrintLn(__func__, inputMessage.c_str());
     request->send(200, "text/text", inputMessage);
     wifi_stuff->got_SAP_user_input_ = true;
   });
@@ -641,7 +646,7 @@ void _LocalServerLocationInputs() {
       inputMessage = request->getParam(kHtmlParamKeyCountryCode)->value();
       temp_country_code_str = inputMessage;
     }
-    Serial.println(inputMessage);
+    PrintLn(__func__, inputMessage.c_str());
     request->send(200, "text/text", inputMessage);
     wifi_stuff->got_SAP_user_input_ = true;
   });
@@ -667,10 +672,10 @@ bool WiFiStuff::FirmwareVersionCheck() {
   fwurl += (debug_mode ? URL_fw_Version_debug_mode.c_str() : URL_fw_Version_release.c_str());
   fwurl += "?";
   fwurl += String(rand());
-  Serial.println(fwurl);
+  PrintLn(__func__, fwurl.c_str());
   WiFiClientSecure * client = new WiFiClientSecure;
 
-  if (client) 
+  if(client)
   {
     if(use_secure_connection)
       client->setCACert(rootCACertificate);
@@ -682,47 +687,44 @@ bool WiFiStuff::FirmwareVersionCheck() {
 
     if (https.begin( * client, fwurl)) 
     { // HTTPS      
-      Serial.print("[HTTPS] GET...\n");
       // start connection and send HTTP header
       delay(100);
       httpCode = https.GET();
+      PrintLn(__func__, httpCode);
       delay(100);
       if (httpCode == HTTP_CODE_OK) // if version received
         payload = https.getString(); // save received version
-      else
-        Serial.printf("error in downloading version file: %d\n", httpCode);
+      // else
+      //   PrintLn("error in downloading version file:", httpCode);
       https.end();
     }
     delete client;
   }
 
   std::string payload_str = payload.c_str();
-  Serial.printf("payload_str: %s\n\n", payload_str.c_str());
-  Serial.printf("kFwSearchStr: %s\n", kFwSearchStr.c_str());
+  // PrintLn("payload_str: ", payload_str);
+  // PrintLn("kFwSearchStr: ", kFwSearchStr);
 
   int search_str_index = payload_str.find(kFwSearchStr);
-  // Serial.print("search_str_index = ");
-  // Serial.println(search_str_index);
+  // PrintLn("search_str_index = ", search_str_index);
 
   if(search_str_index >= 0) {
     int fw_start_index = payload_str.find('"', search_str_index) + 1;
     int fw_end_index = payload_str.find('"', fw_start_index);
-    // Serial.print("fw_start_index = ");
-    // Serial.println(fw_start_index);
-    // Serial.print("fw_end_index = ");
-    // Serial.println(fw_end_index);
+    // PrintLn("fw_start_index = ", fw_start_index);
+    // PrintLn("fw_end_index = ", fw_end_index);
     std::string fw_str = payload_str.substr(fw_start_index, fw_end_index - fw_start_index);
-    Serial.printf("Available kFirmwareVersion: %s\n", fw_str.c_str());
-    Serial.printf("Active kFirmwareVersion: %s\n", kFirmwareVersion.c_str());
+    PrintLn(__func__, fw_str);
+    // PrintLn("Active kFirmwareVersion:", kFirmwareVersion);
     firmware_update_available_str_ = fw_str;
 
     if(strcmp(fw_str.c_str(), kFirmwareVersion.c_str()) != 0) {
-      Serial.println("New firmware detected");
+      // PrintLn("New firmware detected");
       firmware_update_available_ = true;
       return true;
     }
     else {
-      Serial.printf("Device already on latest firmware version: %s\n", kFirmwareVersion.c_str());
+      // PrintLn("Device already on latest firmware version");
       return false;
     }
   }
@@ -750,28 +752,31 @@ void WiFiStuff::UpdateFirmware() {
   // increase watchdog timeout to 90s to accomodate OTA update
   if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutOtaUpdateMs);
 
-  Serial.println(debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str());
+  PrintLn(__func__, (debug_mode ? URL_fw_Bin_debug_mode : URL_fw_Bin_release));
   t_httpUpdate_return ret = httpUpdate.update(client, (debug_mode ? URL_fw_Bin_debug_mode.c_str() : URL_fw_Bin_release.c_str()));
 
+  PrintLn(__func__, ret);
   switch (ret) {
   case HTTP_UPDATE_FAILED:
-    Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", httpUpdate.getLastError(), httpUpdate.getLastErrorString().c_str());
+    PrintLn(__func__, httpUpdate.getLastError());
+    PrintLn(__func__, httpUpdate.getLastErrorString().c_str());
     break;
 
   case HTTP_UPDATE_NO_UPDATES:
-    Serial.println("HTTP_UPDATE_NO_UPDATES");
+    // PrintLn(__func__, "HTTP_UPDATE_NO_UPDATES");
     break;
 
   case HTTP_UPDATE_OK:
-    Serial.println("HTTP_UPDATE_OK");
+    // PrintLn(__func__, "HTTP_UPDATE_OK");
     break;
   }
-  PrintLn("UpdateFirmware() unsuccessful.");
+
+  PrintLn(__func__, -1);    // if code comes here then UpdateFirmware() was unsuccessful.
+
   if(!debug_mode) SetWatchdogTime(kWatchdogTimeoutMs);
 }
 
 bool WiFiStuff::WiFiScanNetworks() {
-  PrintLn("Scan Start");
   WiFiScanNetworksFreeMemory();
   // Set WiFi to station mode and disconnect from an AP if it was previously connected.
   WiFi.mode(WIFI_STA);
@@ -779,15 +784,11 @@ bool WiFiStuff::WiFiScanNetworks() {
   delay(100);
   // WiFi.scanNetworks will return the number of networks found.
   int n = WiFi.scanNetworks();
-  PrintLn("Scan done");
-  if (n == 0) {
-    PrintLn("no networks found");
+  PrintLn(__func__, n);
+  if (n == 0)
     return false;
-  } else {
-    Serial.print(n);
-    Serial.println(" networks found");
+  else
     return true;
-  }
   // Delete the scan result to free memory for code below.
   //WiFi.scanDelete();
   //return n;
@@ -844,14 +845,14 @@ std::string WiFiStuff::WiFiScanNetworkDetails(int wifi_net_ind) {
 
 std::string WiFiStuff::WiFiScanNetworkSsid(int wifi_net_ind) {
   std::string ssid = WiFi.SSID(wifi_net_ind).c_str();
-  PrintLn("Selected WiFi SSID = ", ssid);
+  PrintLn(__func__, ssid);
   return ssid;
 }
 
 void WiFiStuff::WiFiScanNetworksFreeMemory() {
   // Delete the scan result to free memory for code below.
   WiFi.scanDelete();
-  PrintLn("WiFi.scanDelete() called.");
+  // PrintLn("WiFi.scanDelete() called.");
 }
 
 #endif

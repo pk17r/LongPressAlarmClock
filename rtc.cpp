@@ -33,17 +33,25 @@ void RTC::Ds3231RtcSetup() {
 
   // Set Oscillator to use VBAT when VCC turns off if not set
   if(rtc_hw_.getEOSCFlag()) {
+
+    #ifdef MORE_LOGS
     if(rtc_hw_.enableBattery())
       PrintLn("Enable Battery Success");
     else
       PrintLn("Enable Battery UNSUCCESSFUL!");
+    #else
+    rtc_hw_.enableBattery();
+    #endif
+
     delay(100);
   }
 
   // disable 32K Pin Sq Wave out if on
   if(rtc_hw_.status32KOut()) {
     rtc_hw_.disable32KOut();
+    #ifdef MORE_LOGS
     PrintLn("disable32KOut() done");
+    #endif
     delay(100);
   }
 
@@ -54,24 +62,32 @@ void RTC::Ds3231RtcSetup() {
   // clear alarms flags if any
   if(rtc_hw_.alarmTriggered(URTCLIB_ALARM_1)) {
     rtc_hw_.alarmClearFlag(URTCLIB_ALARM_1);
+    #ifdef MORE_LOGS
     PrintLn("URTCLIB_ALARM_1 alarm flag cleared.");
+    #endif
     delay(100);
   }
   if(rtc_hw_.alarmTriggered(URTCLIB_ALARM_2)) {
     rtc_hw_.alarmClearFlag(URTCLIB_ALARM_2);
+    #ifdef MORE_LOGS
     PrintLn("URTCLIB_ALARM_2 alarm flag cleared.");
+    #endif
     delay(100);
   }
 
   // we won't use RTC for alarm, disable if enabled
   if(rtc_hw_.alarmMode(URTCLIB_ALARM_1) != URTCLIB_ALARM_TYPE_1_NONE) {
     rtc_hw_.alarmDisable(URTCLIB_ALARM_1);
+    #ifdef MORE_LOGS
     PrintLn("URTCLIB_ALARM_1 disabled.");
+    #endif
     delay(100);
   }
   if(rtc_hw_.alarmMode(URTCLIB_ALARM_2) != URTCLIB_ALARM_TYPE_2_NONE) {
     rtc_hw_.alarmDisable(URTCLIB_ALARM_2);
+    #ifdef MORE_LOGS
     PrintLn("URTCLIB_ALARM_2 disabled.");
+    #endif
     delay(100);
   }
 
@@ -85,18 +101,24 @@ void RTC::Ds3231RtcSetup() {
   // Check if time is up to date
   PrintLn("Lost power status: ");
   if (rtc_hw_.lostPower()) {
+    #ifdef MORE_LOGS
     PrintLn("POWER FAILED. Clearing flag...");
+    #endif
     rtc_hw_.lostPowerClear();
     delay(100);
   }
+  #ifdef MORE_LOGS
   else
     PrintLn("POWER OK");
+  #endif
 
+  #ifdef MORE_LOGS
   // Check whether OSC is set to use VBAT or not
   if (rtc_hw_.getEOSCFlag())
     PrintLn("Oscillator will NOT use VBAT when VCC cuts off. Time will not increment without VCC!");
   else
     PrintLn("Oscillator will use VBAT if VCC cuts off.");
+  #endif
 
   // // make RTC class object _second equal to rtcHw second; + 2 seconds to let time synchronization happen on first time 60 seconds hitting
   // second_ = rtc_hw_.second() + 2;
@@ -121,15 +143,14 @@ void RTC::Refresh() {
 
   SetTodaysMinutes();
 
+  #ifdef MORE_LOGS
   // Check whether RTC HW experienced a power loss and thereby know if time is up to date or not
-  if (rtc_hw_.lostPower()) {
-    PrintLn("RTC POWER FAILED. Time is not up to date!");
-  }
-
+  if (rtc_hw_.lostPower())
+    PrintLn(__func__, "lostPower");
   // Check whether RTC HW Oscillator is set to use VBAT or not
-  if (rtc_hw_.getEOSCFlag()) {
-    PrintLn("Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!");
-  }
+  if(rtc_hw_.getEOSCFlag())
+    PrintLn(__func__, "getEOSCFlag");   // Oscillator will not use VBAT when VCC cuts off. Time will not increment without VCC!
+  #endif
 
 }
 
@@ -172,14 +193,16 @@ uint8_t RTC::hour() {
  */
 void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_mode, uint8_t dayOfWeek_Sun_is_1, uint8_t day, uint8_t month_Jan_is_1, uint16_t year) {
   // set RTC HW into 24 hour mode
-  PrintLn("RTC::SetRtcTimeAndDate(): Time Update Values:");
-  PrintLn("RTC::SetRtcTimeAndDate(): hour_24_hr_mode: ", hour_24_hr_mode);
-  PrintLn("RTC::SetRtcTimeAndDate(): minute: ", minute);
-  PrintLn("RTC::SetRtcTimeAndDate(): second: ", second);
-  PrintLn("RTC::SetRtcTimeAndDate(): dayOfWeek_Sun_is_1: ", dayOfWeek_Sun_is_1);
-  PrintLn("RTC::SetRtcTimeAndDate(): day: ", day);
-  PrintLn("RTC::SetRtcTimeAndDate(): month_Jan_is_1: ", month_Jan_is_1);
-  PrintLn("RTC::SetRtcTimeAndDate(): year: ", year);
+  #ifdef MORE_LOGS
+  PrintLn("Time Update Values:");
+  PrintLn("hour_24_hr_mode: ", hour_24_hr_mode);
+  PrintLn("minute: ", minute);
+  PrintLn("second: ", second);
+  PrintLn("dayOfWeek_Sun_is_1: ", dayOfWeek_Sun_is_1);
+  PrintLn("day: ", day);
+  PrintLn("month_Jan_is_1: ", month_Jan_is_1);
+  PrintLn("year: ", year);
+  #endif
   // Set current time and date
   // RTCLib::set(byte second, byte minute, byte hour, byte dayOfWeek, byte dayOfMonth, byte month, byte year)
   rtc_hw_.set(second, minute, hour_24_hr_mode, dayOfWeek_Sun_is_1, day, month_Jan_is_1, year - 2000);
@@ -187,7 +210,7 @@ void RTC::SetRtcTimeAndDate(uint8_t second, uint8_t minute, uint8_t hour_24_hr_m
   Refresh();
   // set RTC HW back into 12 hour mode
   rtc_hw_.set_12hour_mode(true);
-  PrintLn("RTC::SetRtcTimeAndDate(): Time set");
+  PrintLn(__func__);
   Refresh();
 }
 
