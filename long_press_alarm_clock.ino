@@ -665,7 +665,7 @@ bool firmware_updated_flag_user_information = false;
 std::vector<std::vector<DisplayButton*>> display_pages_vec(kNoPageSelected);
 
 // CPU Speed for ESP32 CPU
-uint32_t cpu_speed_mhz = 80;
+uint8_t cpu_speed_mhz = 80;
 
 // counter to note user inactivity seconds
 elapsedMillis inactivity_millis = 0;

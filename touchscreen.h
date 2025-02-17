@@ -1,7 +1,10 @@
 #ifndef TOUCHSCREEN_H
 #define TOUCHSCREEN_H
 #include "common.h"
+#define XPT2046_OPTION
+#ifdef XPT2046_OPTION
 #include <XPT2046_Touchscreen.h>
+#endif
 #include <TouchscreenResistive.h>
 
 // struct declerations
@@ -40,9 +43,11 @@ private:
 
   uint8_t touchscreen_type = 0;   // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
 
+#ifdef XPT2046_OPTION
   // Param 2 - Touch IRQ Pin - interrupt enabled polling
   // XPT2046_Touchscreen touchscreen_object_{ TS_CS_PIN, TS_IRQ_PIN };
   XPT2046_Touchscreen* touchscreen_ptr_ = NULL;
+#endif
   // Direct touchscreen measurements using MCU ADC
   TouchscreenResistive* touchscreen_r_ptr_ = NULL;
 

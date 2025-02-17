@@ -7,17 +7,19 @@ Touchscreen::Touchscreen() {
   touchscreen_type = nvs_preferences->RetrieveTouchscreenType();
   // PrintLn("touchscreen_type = ", touchscreen_type);
 
-  if(touchscreen_type == 1) {   // XPT2046
-    touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
-    touchscreen_ptr_->begin(*spi_obj);
-    touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};
-  }
-  else if(touchscreen_type == 2) {       // MCU ADC
+  if(touchscreen_type == 2) {       // MCU ADC
     touchscreen_r_ptr_ = new TouchscreenResistive(TOUCHSCREEN_XP, TOUCHSCREEN_XM, TOUCHSCREEN_YP, TOUCHSCREEN_YM, 310);
     analogReadResolution(kAdcResolutionBits);
     touchscreen_r_ptr_->setAdcResolutionAndThreshold(kAdcResolutionBits);
     touchscreen_calibration_ = TouchCalibration{150, 930, 150, 870, kTftWidth, kTftHeight};
   }
+  #ifdef XPT2046_OPTION
+  else if(touchscreen_type == 1) {   // XPT2046
+    touchscreen_ptr_ = new XPT2046_Touchscreen(TS_CS_PIN, TS_IRQ_PIN);
+    touchscreen_ptr_->begin(*spi_obj);
+    touchscreen_calibration_ = TouchCalibration{220, 3800, 280, 3830, kTftWidth, kTftHeight};
+  }
+  #endif
 
   SetTouchscreenOrientation();
   touchscreen_flip = nvs_preferences->RetrieveTouchscreenFlip();
@@ -26,37 +28,43 @@ Touchscreen::Touchscreen() {
 }
 
 Touchscreen::~Touchscreen() {
-  if(touchscreen_ptr_ != NULL) {
-    delete touchscreen_ptr_;
-    // PrintLn("deleted touchscreen_ptr_");
-  }
-  if(touchscreen_r_ptr_ != NULL) {
+  if(touchscreen_r_ptr_ != NULL) {       // MCU ADC
     delete touchscreen_r_ptr_;
     // PrintLn("deleted touchscreen_r_ptr_");
   }
+  #ifdef XPT2046_OPTION
+  if(touchscreen_ptr_ != NULL) {        // XPT2046
+    delete touchscreen_ptr_;
+    // PrintLn("deleted touchscreen_ptr_");
+  }
+  #endif
 }
 
 void Touchscreen::SetTouchscreenOrientation() {
-  if(touchscreen_type == 1) {
-    if(display->screen_orientation_ == 1)
-      touchscreen_ptr_->setRotation(3);
-    else
-      touchscreen_ptr_->setRotation(1);
-  }
-  else if(touchscreen_type == 2) {
+  if(touchscreen_type == 2) {       // MCU ADC
     if(display->screen_orientation_ == 1)
       touchscreen_r_ptr_->setRotation(3);
     else
       touchscreen_r_ptr_->setRotation(1);
   }
+  #ifdef XPT2046_OPTION
+  else if(touchscreen_type == 1) {   // XPT2046
+    if(display->screen_orientation_ == 1)
+      touchscreen_ptr_->setRotation(3);
+    else
+      touchscreen_ptr_->setRotation(1);
+  }
+  #endif
 }
 
 bool Touchscreen::IsTouched() {
+  #ifdef XPT2046_OPTION
   if(touchscreen_type == 1) {   // XPT2046
     // irq touch is super fast
     if(!touchscreen_ptr_->tirqTouched())
       return false;
   }
+  #endif
 
   if(inactivity_millis < kUserInputDelayMs) {
     // always read touch point if user is already engaged
@@ -74,11 +82,13 @@ bool Touchscreen::IsTouched() {
       if(last_touch_Pixel_.is_touched)
         GetTouchedPixel();
     }
+    #ifdef XPT2046_OPTION
     else {    // if(touchscreen_type == 1)  // XPT2046
       // when irq touch is triggered, it takes a few hundred milliseconds to turn off
       // during this time we will poll touch screen pressure using SPI to know if touchscreen is pressed or not
       GetTouchedPixel();
     }
+    #endif
     return last_touch_Pixel_.is_touched;
   }
 }
@@ -99,6 +109,7 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
       y = touch.y;
       z = touch.z;
     }
+    #ifdef XPT2046_OPTION
     else {    //if(touchscreen_type == 1)
       // get touch point from XPT2046
       TS_Point touch = touchscreen_ptr_->getPoint();
@@ -106,6 +117,7 @@ TouchPixel* Touchscreen::GetTouchedPixel() {
       y = touch.y;
       z = touch.z;
     }
+    #endif
 
     if(z < (touchscreen_type == 1 ? 100 : 1)) {
       last_touch_Pixel_ = TouchPixel{-1, -1, false};

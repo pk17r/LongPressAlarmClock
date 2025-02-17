@@ -30,7 +30,7 @@ public:
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
   void SaveCurrentFirmwareVersion();
-  uint32_t RetrieveSavedCpuSpeed();
+  uint8_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
@@ -105,7 +105,7 @@ private:
 
   const char* kFirmwareVersionKey = "FwVersion";  // 6 bytes
 
-  const char* kCpuSpeedMhzKey = "CpuSpeedMhz";  // 4 bytes
+  const char* kCpuSpeedMhzKey = "CpuSpeedMhz";  // 1 byte
 
   const char* kScreensaverMotionTypeKey = "ScSvrMotionTy";
 

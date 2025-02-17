@@ -53,7 +53,7 @@ extern bool debug_mode;
 extern bool use_photoresistor;
 
 // CPU Speed for ESP32 CPU
-extern uint32_t cpu_speed_mhz;
+extern uint8_t cpu_speed_mhz;
 
 // firmware updated flag user information
 extern bool firmware_updated_flag_user_information;

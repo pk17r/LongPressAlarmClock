@@ -44,7 +44,7 @@ NvsPreferences::NvsPreferences() {
   if(!preferences.isKey(kBuzzerFrequencyKey))
     preferences.putUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   if(!preferences.isKey(kCpuSpeedMhzKey))
-    preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
+    preferences.putUChar(kCpuSpeedMhzKey, cpu_speed_mhz);
   if(!preferences.isKey(kScreensaverMotionTypeKey))
     preferences.putBool(kScreensaverMotionTypeKey, true);
   if(!preferences.isKey(kNightTimeDimHourKey))
@@ -211,9 +211,9 @@ void NvsPreferences::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
   PrintLn(__func__, weather_units_metric_not_imperial);
 }
 
-uint32_t NvsPreferences::RetrieveSavedCpuSpeed() {
+uint8_t NvsPreferences::RetrieveSavedCpuSpeed() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  uint32_t saved_cpu_speed_mhz = preferences.getUInt(kCpuSpeedMhzKey);
+  uint8_t saved_cpu_speed_mhz = preferences.getUChar(kCpuSpeedMhzKey);
   preferences.end();
   PrintLn(__func__, saved_cpu_speed_mhz);
   return saved_cpu_speed_mhz;
@@ -221,7 +221,7 @@ uint32_t NvsPreferences::RetrieveSavedCpuSpeed() {
 
 void NvsPreferences::SaveCpuSpeed() {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
-  preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
+  preferences.putUChar(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.end();
   PrintLn(__func__, cpu_speed_mhz);
 }

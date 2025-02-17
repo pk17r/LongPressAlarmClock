@@ -3,8 +3,6 @@
 
 #include "common.h"
 #include "uRTCLib.h"
-#define IRAM_ATTR
-#define DRAM_ATTR
 
 class RTC {
 
