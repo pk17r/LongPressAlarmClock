@@ -47,8 +47,8 @@ public:
   void RetrieveTestVal(uint8_t &test_val);
   uint8_t RetrieveTestValOrSaveDefault();
   void SaveTestVal(uint8_t test_val);
-  uint8_t RetrieveIsTouchscreen();
-  void SaveIsTouchscreen(uint8_t is_touchscreen);
+  uint8_t RetrieveTouchscreenType();
+  void SaveTouchscreenType(uint8_t touchscreen_type);
   bool RetrieveTouchscreenFlip();
   void SaveTouchscreenFlip(bool touchscreen_flip);
   uint8_t RetrieveRgbStripLedCount();
@@ -123,8 +123,8 @@ private:
   const char* kUseLDRKey = "UseLDR";
   const bool kUseLDR = true;
 
-  const char* kIsTouchscreenKey = "Touchscreen";
-  const uint8_t kIsTouchscreen = 1;       // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
+  const char* kTouchscreenTypeKey = "Touchscreen";
+  const uint8_t kTouchscreenType = 1;       // 0 = no touch, 1 = Resistive read using XPT2046, 2 = Resistive read using MCU ADC
 
   const char* kTouchscreenFlipKey = "TouchFlip";
   const bool kTouchscreenFlip = true;

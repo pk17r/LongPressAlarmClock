@@ -221,7 +221,7 @@ void setup() {
   display = new RGBDisplay();
   // setup and populate display
   display->Setup();
-  if(nvs_preferences->RetrieveIsTouchscreen())
+  if(nvs_preferences->RetrieveTouchscreenType())
     ts = new Touchscreen();
 
   // second core task added flag array
@@ -1000,17 +1000,17 @@ void SerialUserInput() {
       break;
     case 'h':   // enable / disable TOUCHSCREEN
       {
-        uint8_t touchscreen_type = nvs_preferences->RetrieveIsTouchscreen();
+        uint8_t touchscreen_type = nvs_preferences->RetrieveTouchscreenType();
         touchscreen_type++;
         if(touchscreen_type > 2)
           touchscreen_type = 0;
-        nvs_preferences->SaveIsTouchscreen(touchscreen_type);
+        nvs_preferences->SaveTouchscreenType(touchscreen_type);
         delete ts;
         ts = NULL;
         if(touchscreen_type) {
           ts = new Touchscreen();
         }
-        PrintLn("RetrieveIsTouchscreen() = ", nvs_preferences->RetrieveIsTouchscreen());
+        PrintLn("RetrieveTouchscreenType() = ", nvs_preferences->RetrieveTouchscreenType());
       }
       break;
     case 'i':   // set WiFi details

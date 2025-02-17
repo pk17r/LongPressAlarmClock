@@ -4,7 +4,7 @@
 #include "nvs_preferences.h"
 
 Touchscreen::Touchscreen() {
-  touchscreen_type = nvs_preferences->RetrieveIsTouchscreen();
+  touchscreen_type = nvs_preferences->RetrieveTouchscreenType();
   // PrintLn("touchscreen_type = ", touchscreen_type);
 
   if(touchscreen_type == 1) {   // XPT2046
