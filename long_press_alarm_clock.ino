@@ -29,7 +29,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 
 
 - Hardware:
-  - Microcontroller: ESP32 S2 Mini (Default) or ESP32 WROOM or Raspberry Pi Pico W
+  - Microcontroller: ESP32 S3 (Default) or ESP32 S2 Mini or ESP32 WROOM
   - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
   - Touchscreen XPT2046 (not enabled by default)
   - DS3231 RTC Clock IC
@@ -179,13 +179,8 @@ void setup() {
   Serial.flush();
 
   // initialize hardware spi
-  #if defined(MCU_IS_RP2040)
-    spi_obj = &SPI;
-    spi_obj->begin();   // Hardware SPI
-  #elif defined(MCU_IS_ESP32)
-    spi_obj = new SPIClass(HSPI);
-    spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
-  #endif
+  spi_obj = new SPIClass(HSPI);
+  spi_obj->begin(TFT_CLK, TS_CIPO, TFT_COPI, TFT_CS); //SCLK, MISO, MOSI, SS
 
   // initialize push button
   push_button = new PushButtonTaps(BUTTON_PIN);
@@ -495,16 +490,6 @@ void loop() {
   #endif
 }
 
-#if defined(MCU_IS_RP2040)
-// setup core0
-void setup1() {
-  delay(2000);
-}
-#endif
-
-// bool blink = false;
-// unsigned long last_inactivity_millis = 0;
-
 // arduino loop function on core1 - low priority one with wifi weather update task
 void loop1() {
   ResetWatchdog();
@@ -615,7 +600,7 @@ void WaitForExecutionOfSecondCoreTask() {
   #if defined(ESP32_SINGLE_CORE)
     // ESP32_S2_MINI is single core MCU
     loop1();
-  #elif defined(MCU_IS_RP2040) || defined(ESP32_DUAL_CORE)
+  #elif defined(ESP32_DUAL_CORE)
     unsigned long time_start = millis();
     while (!second_core_tasks_queue.empty() && millis() - time_start <  kWatchdogTimeoutMs - 2000) {
       delay(10);
@@ -719,13 +704,8 @@ void AddSecondCoreTaskIfNotThere(SecondCoreTask task) {
 }
 
 int AvailableRam() {
-  #if defined(MCU_IS_RP2040)
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#int-rp2040-getfreeheap
-    return rp2040.getFreeHeap();
-  #elif defined(MCU_IS_ESP32)
-    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
-    return esp_get_free_heap_size();
-  #endif
+  // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/misc_system_api.html
+  return esp_get_free_heap_size();
 }
 
 int MinFreeRam() {
@@ -888,31 +868,25 @@ void SerialPrintRtcDateTime() {
 
 // set watchdog time
 void SetWatchdogTime(unsigned long ms) {
-  PrintLn("SetWatchdogTime ms = ", ms);
-  #if defined(MCU_IS_RP2040)
-    // watchdog to reboot system if it gets stuck for whatever reason for over 8.3 seconds
-    // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#void-rp2040-wdt-begin-uint32-t-delay-ms
-    rp2040.wdt_begin(ms);
-  #elif defined(MCU_IS_ESP32)
-    #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
-    // Code for version 3.x
-      // esp32 watchdog example https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
-      esp_task_wdt_config_t twdt_config = {
-          .timeout_ms = ms,
-          .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
-          .trigger_panic = true,
-      };
-      esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
-      esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
-      esp_task_wdt_add(NULL); //add current thread to WDT watch
-    #else
-    // Code for version 2.x
-      // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
-      esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
-      esp_task_wdt_add(NULL); //add current thread to WDT watch
-    #endif
+  PrintLn(__func__, ms);
+  #if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 0, 0)
+  // Code for version 3.x
+    // esp32 watchdog example https://iotassistant.io/esp32/fixing-error-hardware-wdt-arduino-esp32/
+    esp_task_wdt_config_t twdt_config = {
+        .timeout_ms = ms,
+        .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1,    // Bitmask of all cores
+        .trigger_panic = true,
+    };
+    esp_task_wdt_deinit(); //wdt is enabled by default, so we need to deinit it first
+    esp_task_wdt_init(&twdt_config); //enable panic so ESP32 restarts
+    esp_task_wdt_add(NULL); //add current thread to WDT watch
+  #else
+  // Code for version 2.x
+    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/wdts.html
+    esp_task_wdt_init(ms / 1000, true); //enable panic so ESP32 restarts
+    esp_task_wdt_add(NULL); //add current thread to WDT watch
   #endif
 }
 
@@ -920,14 +894,9 @@ void SetWatchdogTime(unsigned long ms) {
 void ResetWatchdog() {
   // reset MCU if not in debug mode
   if(!debug_mode) {
-    #if defined(MCU_IS_RP2040)
-      // https://arduino-pico.readthedocs.io/en/latest/rp2040.html#hardware-watchdog
-      rp2040.wdt_reset();
-    #elif defined(MCU_IS_ESP32)
-      // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
-      // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
-      esp_task_wdt_reset();
-    #endif
+    // https://iotassistant.io/esp32/enable-hardware-watchdog-timer-esp32-arduino-ide/
+    // https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/system/wdts.html
+    esp_task_wdt_reset();
   }
 }
 

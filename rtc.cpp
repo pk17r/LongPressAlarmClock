@@ -8,14 +8,8 @@ RTC::RTC() {
   /* INITIALIZE RTC */
 
   // initialize Wire lib
-  #if defined(MCU_IS_RP2040)
-    URTCLIB_WIRE.setSDA(SDA_PIN);
-    URTCLIB_WIRE.setSCL(SCL_PIN);
-    URTCLIB_WIRE.begin();
-  #elif defined (MCU_IS_ESP32)
-    URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
-  #endif
-
+  URTCLIB_WIRE.begin(SDA_PIN, SCL_PIN);
+  
   // setup DS3231 rtc
   Ds3231RtcSetup();
 

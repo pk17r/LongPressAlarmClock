@@ -7,7 +7,7 @@ const uint32_t kInactivityMillisLimit = 60000;
 // user input delay
 const uint32_t kUserInputDelayMs = 200;
 
-// watchdog timeout time (RP2040 has a max watchdog timeout time of 8.3 seconds)
+// watchdog timeout time
 const unsigned long kWatchdogTimeoutMs = 20000;
 const unsigned long kWatchdogTimeoutOtaUpdateMs = 90000;
 

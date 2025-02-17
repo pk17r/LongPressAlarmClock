@@ -37,7 +37,7 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
 
 
 - Hardware:
-  - Microcontroller: ESP32 S2 Mini (Default) or ESP32 WROOM or Raspberry Pi Pico W
+  - Microcontroller: ESP32 S3 (Default) or ESP32 S2 Mini or ESP32 WROOM
   - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
   - Touchscreen XPT2046 (not enabled by default)
   - DS3231 RTC Clock IC
