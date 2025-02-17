@@ -70,7 +70,7 @@ NvsPreferences::NvsPreferences() {
 
   // nvs_preferences->PrintSavedData();
 
-  Serial.println(F("ESP32 NVS Memory setup successful!"));
+  PrintLn(__func__);
 }
 
 void NvsPreferences::PrintSavedData() {
@@ -99,20 +99,21 @@ void NvsPreferences::SaveLongPressSeconds(uint8_t long_press_seconds) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kAlarmLongPressSecondsKey, long_press_seconds);
   preferences.end();
-  Serial.printf("NVS Memory long_press_seconds: %d sec\n", long_press_seconds);
+  PrintLn(__func__, long_press_seconds);
 }
 
 void NvsPreferences::RetrieveBuzzerFrequency(uint16_t &buzzer_freq) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   buzzer_freq = preferences.getUShort(kBuzzerFrequencyKey, kBuzzerFrequency);
   preferences.end();
+  PrintLn(__func__, buzzer_freq);
 }
 
 void NvsPreferences::SaveBuzzerFrequency(uint16_t buzzer_freq) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUShort(kBuzzerFrequencyKey, buzzer_freq);
   preferences.end();
-  Serial.printf("NVS Memory buzzer_freq: %d Hz\n", buzzer_freq);
+  PrintLn(__func__, buzzer_freq);
 }
 
 void NvsPreferences::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, bool &alarmIsAm, bool &alarmOn) {
@@ -122,6 +123,7 @@ void NvsPreferences::RetrieveAlarmSettings(uint8_t &alarmHr, uint8_t &alarmMin, 
   alarmIsAm = preferences.getBool(kAlarmIsAmKey);
   alarmOn = preferences.getBool(kAlarmOnKey);
   preferences.end();
+  PrintLn(__func__, alarmOn);
 }
 
 void NvsPreferences::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm, bool alarmOn) {
@@ -131,7 +133,8 @@ void NvsPreferences::SaveAlarm(uint8_t alarmHr, uint8_t alarmMin, bool alarmIsAm
   preferences.putBool(kAlarmIsAmKey, alarmIsAm);
   preferences.putBool(kAlarmOnKey, alarmOn);
   preferences.end();
-  Serial.printf("NVS Memory SaveAlarm %2d:%02d alarmIsAm=%d alarmOn=%d\n", alarmHr, alarmMin, alarmIsAm, alarmOn);
+  // Serial.printf("NVS Memory SaveAlarm %2d:%02d alarmIsAm=%d alarmOn=%d\n", alarmHr, alarmMin, alarmIsAm, alarmOn);
+  PrintLn(__func__, alarmOn);
 }
 
 void NvsPreferences::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wifi_password) {
@@ -141,9 +144,9 @@ void NvsPreferences::RetrieveWiFiDetails(std::string &wifi_ssid, std::string &wi
   preferences.end();
   wifi_ssid = kWiFiSsidString.c_str();
   wifi_password = kWiFiPasswdString.c_str();
-  PrintLn("NVS Memory wifi_ssid: ", wifi_ssid.c_str());
-  if(debug_mode) PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
-  PrintLn("WiFi details retrieved from NVS Memory.");
+  // if(debug_mode) PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
+  // PrintLn("WiFi details retrieved from NVS Memory.");
+  PrintLn(__func__, wifi_ssid);
 }
 
 void NvsPreferences::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_password) {
@@ -153,19 +156,19 @@ void NvsPreferences::SaveWiFiDetails(std::string wifi_ssid, std::string wifi_pas
   String kWiFiPasswdString = wifi_password.c_str();
   preferences.putString(kWiFiPasswdKey, kWiFiPasswdString);
   preferences.end();
-  if(debug_mode) {
-    PrintLn("NVS Memory wifi_ssid: ", wifi_ssid.c_str());
-    PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
-  }
-  PrintLn("WiFi ssid and password written to NVS Memory");
+  // if(debug_mode) {
+  //   PrintLn("NVS Memory wifi_ssid: ", wifi_ssid.c_str());
+  //   PrintLn("NVS Memory wifi_password: ", wifi_password.c_str());
+  // }
+  PrintLn(__func__, wifi_ssid);
 }
 
 void NvsPreferences::RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
-  String kFirmwareVersionString = preferences.getString(kFirmwareVersionKey);
+  String savedFirmwareVersionString = preferences.getString(kFirmwareVersionKey);
   preferences.end();
-  savedFirmwareVersion = kFirmwareVersionString.c_str();
-  PrintLn("Saved Firmware Version: ", savedFirmwareVersion.c_str());
+  savedFirmwareVersion = savedFirmwareVersionString.c_str();
+  PrintLn(__func__, savedFirmwareVersion);
 }
 
 void NvsPreferences::SaveCurrentFirmwareVersion() {
@@ -173,7 +176,8 @@ void NvsPreferences::SaveCurrentFirmwareVersion() {
   String kFirmwareVersionString = kFirmwareVersion.c_str();
   preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   preferences.end();
-  PrintLn("Current Firmware Version written to NVS Memory");
+  // PrintLn("Current Firmware Version written to NVS Memory");
+  PrintLn(__func__, kFirmwareVersion);
 }
 
 void NvsPreferences::CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion) {
@@ -181,7 +185,7 @@ void NvsPreferences::CopyFirmwareVersionFromEepromToNvs(std::string firmwareVers
   String kFirmwareVersionString = firmwareVersion.c_str();
   preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
   preferences.end();
-  PrintLn("Firmware Version from Eeprom written to NVS Memory");
+  PrintLn(__func__, firmwareVersion);
 }
 
 void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
@@ -191,10 +195,9 @@ void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code,
   location_country_code = kWeatherCountryCodeString.c_str();
   weather_units_metric_not_imperial = preferences.getBool(kWeatherUnitsMetricNotImperialKey);
   preferences.end();
-  PrintLn("NVS Memory location_zip_code: ", location_zip_code);
-  PrintLn("NVS Memory location_country_code: ", location_country_code);
-  PrintLn("NVS Memory weather_units_metric_not_imperial: ", weather_units_metric_not_imperial);
-  PrintLn("Weather Location details retrieved from NVS Memory.");
+  PrintLn(__func__, location_zip_code);
+  PrintLn(__func__, location_country_code);
+  PrintLn(__func__, weather_units_metric_not_imperial);
 }
 
 void NvsPreferences::SaveWeatherLocationDetails(uint32_t location_zip_code, std::string location_country_code, bool weather_units_metric_not_imperial) {
@@ -204,21 +207,23 @@ void NvsPreferences::SaveWeatherLocationDetails(uint32_t location_zip_code, std:
   preferences.putString(kWeatherCountryCodeKey, kWeatherCountryCodeString);
   preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
   preferences.end();
-  PrintLn("Weather Location details written to NVS Memory");
+  PrintLn(__func__, location_zip_code);
+  PrintLn(__func__, location_country_code);
+  PrintLn(__func__, weather_units_metric_not_imperial);
 }
 
 void NvsPreferences::SaveWeatherUnits(bool weather_units_metric_not_imperial) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putBool(kWeatherUnitsMetricNotImperialKey, weather_units_metric_not_imperial);
   preferences.end();
-  PrintLn("Weather Location details written to NVS Memory");
+  PrintLn(__func__, weather_units_metric_not_imperial);
 }
 
 uint32_t NvsPreferences::RetrieveSavedCpuSpeed() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint32_t saved_cpu_speed_mhz = preferences.getUInt(kCpuSpeedMhzKey);
   preferences.end();
-  Serial.printf("NVS Memory saved_cpu_speed_mhz: %u MHz\n", saved_cpu_speed_mhz);
+  PrintLn(__func__, saved_cpu_speed_mhz);
   return saved_cpu_speed_mhz;
 }
 
@@ -226,21 +231,21 @@ void NvsPreferences::SaveCpuSpeed() {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.end();
-  Serial.printf("NVS Memory cpu_speed_mhz: %u MHz saved.\n", cpu_speed_mhz);
+  PrintLn(__func__, cpu_speed_mhz);
 }
 
 void NvsPreferences::CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_from_eeprom) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz_from_eeprom);
   preferences.end();
-  Serial.printf("NVS Memory cpu_speed_mhz_from_eeprom: %u MHz saved.\n", cpu_speed_mhz_from_eeprom);
+  PrintLn(__func__, cpu_speed_mhz_from_eeprom);
 }
 
 bool NvsPreferences::RetrieveScreensaverBounceNotFlyHorizontally() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   bool screensaver_bounce_not_fly_horiontally = preferences.getBool(kScreensaverMotionTypeKey);
   preferences.end();
-  Serial.printf("NVS Memory screensaver_bounce_not_fly_horiontally: %d retrieved.\n", screensaver_bounce_not_fly_horiontally);
+  PrintLn(__func__, screensaver_bounce_not_fly_horiontally);
   return screensaver_bounce_not_fly_horiontally;
 }
 
@@ -248,14 +253,14 @@ void NvsPreferences::SaveScreensaverBounceNotFlyHorizontally(bool screensaver_bo
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putBool(kScreensaverMotionTypeKey, screensaver_bounce_not_fly_horiontally);
   preferences.end();
-  Serial.printf("NVS Memory screensaver_bounce_not_fly_horiontally: %d saved.\n", screensaver_bounce_not_fly_horiontally);
+  PrintLn(__func__, screensaver_bounce_not_fly_horiontally);
 }
 
 uint8_t NvsPreferences::RetrieveNightTimeDimHour() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t night_time_dim_hour = preferences.getUChar(kNightTimeDimHourKey);
   preferences.end();
-  Serial.printf("Retrieved NVS Memory night_time_dim_hour: %d PM\n", night_time_dim_hour);
+  PrintLn(__func__, night_time_dim_hour);
   return night_time_dim_hour;
 }
 
@@ -263,14 +268,14 @@ void NvsPreferences::SaveNightTimeDimHour(uint8_t night_time_dim_hour) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kNightTimeDimHourKey, night_time_dim_hour);
   preferences.end();
-  Serial.printf("Saved NVS Memory night_time_dim_hour: %d PM\n", night_time_dim_hour);
+  PrintLn(__func__, night_time_dim_hour);
 }
 
 uint8_t NvsPreferences::RetrieveScreenOrientation() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t screen_orientation = preferences.getUChar(kScreenOrientationKey);
   preferences.end();
-  Serial.printf("Retrieved NVS Memory screen_orientation: %d\n", screen_orientation);
+  PrintLn(__func__, screen_orientation);
   return screen_orientation;
 }
 
@@ -278,14 +283,14 @@ void NvsPreferences::SaveScreenOrientation(uint8_t screen_orientation) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kScreenOrientationKey, screen_orientation);
   preferences.end();
-  Serial.printf("Saved NVS Memory screen_orientation: %d\n", screen_orientation);
+  PrintLn(__func__, screen_orientation);
 }
 
 uint8_t NvsPreferences::RetrieveAutorunRgbLedStripMode() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t autorun_rgb_led_strip_mode_retrieved = preferences.getUChar(kAutorunRgbLedStripModeKey, 0);
   preferences.end();
-  Serial.printf("Retrieved NVS Memory autorun_rgb_led_strip_mode_retrieved: %d\n", autorun_rgb_led_strip_mode_retrieved);
+  PrintLn(__func__, autorun_rgb_led_strip_mode_retrieved);
   return autorun_rgb_led_strip_mode_retrieved;
 }
 
@@ -293,14 +298,14 @@ void NvsPreferences::SaveAutorunRgbLedStripMode(uint8_t autorun_rgb_led_strip_mo
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kAutorunRgbLedStripModeKey, autorun_rgb_led_strip_mode_to_save);
   preferences.end();
-  Serial.printf("Saved NVS Memory autorun_rgb_led_strip_mode_to_save: %d\n", autorun_rgb_led_strip_mode_to_save);
+  PrintLn(__func__, autorun_rgb_led_strip_mode_to_save);
 }
 
 bool NvsPreferences::RetrieveUseLdr() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   bool use_ldr = preferences.getBool(kUseLDRKey);
   preferences.end();
-  Serial.printf("NVS Memory use_ldr: %d retrieved.\n", use_ldr);
+  PrintLn(__func__, use_ldr);
   return use_ldr;
 }
 
@@ -308,14 +313,14 @@ void NvsPreferences::SaveUseLdr(bool use_ldr) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putBool(kUseLDRKey, use_ldr);
   preferences.end();
-  Serial.printf("NVS Memory use_ldr: %d saved.\n", use_ldr);
+  PrintLn(__func__, use_ldr);
 }
 
 uint8_t NvsPreferences::RetrieveTouchscreenType() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t touchscreen_type = preferences.getUChar(kTouchscreenTypeKey);
   preferences.end();
-  Serial.printf("NVS Memory touchscreen_type: %d retrieved.\n", touchscreen_type);
+  PrintLn(__func__, touchscreen_type);
   return touchscreen_type;
 }
 
@@ -323,14 +328,14 @@ void NvsPreferences::SaveTouchscreenType(uint8_t touchscreen_type) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kTouchscreenTypeKey, touchscreen_type);
   preferences.end();
-  Serial.printf("NVS Memory touchscreen_type: %d saved.\n", touchscreen_type);
+  PrintLn(__func__, touchscreen_type);
 }
 
 bool NvsPreferences::RetrieveTouchscreenFlip() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   bool touchscreen_flip = preferences.getBool(kTouchscreenFlipKey);
   preferences.end();
-  Serial.printf("NVS Memory touchscreen_flip: %d retrieved.\n", touchscreen_flip);
+  PrintLn(__func__, touchscreen_flip);
   return touchscreen_flip;
 }
 
@@ -338,14 +343,14 @@ void NvsPreferences::SaveTouchscreenFlip(bool touchscreen_flip) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putBool(kTouchscreenFlipKey, touchscreen_flip);
   preferences.end();
-  Serial.printf("NVS Memory touchscreen_flip: %d saved.\n", touchscreen_flip);
+  PrintLn(__func__, touchscreen_flip);
 }
 
 uint8_t NvsPreferences::RetrieveRgbStripLedCount() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t rgb_strip_led_count = preferences.getUChar(kRgbStripLedCountKey, 0);
   preferences.end();
-  Serial.printf("Retrieved rgb_strip_led_count: %d\n", rgb_strip_led_count);
+  PrintLn(__func__, rgb_strip_led_count);
   return rgb_strip_led_count;
 }
 
@@ -353,14 +358,14 @@ void NvsPreferences::SaveRgbStripLedCount(uint8_t rgb_strip_led_count) {
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kRgbStripLedCountKey, rgb_strip_led_count);
   preferences.end();
-  Serial.printf("Saved NVS Memory rgb_strip_led_count: %d\n", rgb_strip_led_count);
+  PrintLn(__func__, rgb_strip_led_count);
 }
 
 uint8_t NvsPreferences::RetrieveRgbStripLedBrightness() {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   uint8_t rgb_strip_led_brightness = preferences.getUChar(kRgbStripLedBrightnessKey, 0);
   preferences.end();
-  Serial.printf("Retrieved rgb_strip_led_brightness: %d\n", rgb_strip_led_brightness);
+  PrintLn(__func__, rgb_strip_led_brightness);
   return rgb_strip_led_brightness;
 }
 
@@ -368,5 +373,5 @@ void NvsPreferences::SaveRgbStripLedBrightness(uint8_t rgb_strip_led_brightness)
   preferences.begin(kNvsDataKey, /*readOnly = */ false);
   preferences.putUChar(kRgbStripLedBrightnessKey, rgb_strip_led_brightness);
   preferences.end();
-  Serial.printf("Saved NVS Memory rgb_strip_led_brightness: %d\n", rgb_strip_led_brightness);
+  PrintLn(__func__, rgb_strip_led_brightness);
 }
