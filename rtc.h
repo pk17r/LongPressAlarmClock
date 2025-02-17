@@ -3,10 +3,8 @@
 
 #include "common.h"
 #include "uRTCLib.h"
-#if !defined (MCU_IS_ESP32)
- #define IRAM_ATTR
- #define DRAM_ATTR
-#endif
+#define IRAM_ATTR
+#define DRAM_ATTR
 
 class RTC {
 

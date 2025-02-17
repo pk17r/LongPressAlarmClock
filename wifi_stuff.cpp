@@ -9,13 +9,12 @@
 #include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "rtc.h"
-#if defined(MCU_IS_ESP32)
-  #include <AsyncTCP.h>
-  #include <ESPAsyncWebServer.h>
-  // Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
-  #include <HTTPUpdate.h>
-  #include <WiFiClientSecure.h>
-#endif
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+// Web OTA Update https://github.com/programmer131/ESP8266_ESP32_SelfUpdate/tree/master
+#include <HTTPUpdate.h>
+#include <WiFiClientSecure.h>
+
 
 WiFiStuff::WiFiStuff() {
 
@@ -399,7 +398,6 @@ void WiFiStuff::ConvertEpochIntoDate(unsigned long epoch_since_1970, int &today,
   month = monthJan0 + 1;
 }
 
-#if defined(MCU_IS_ESP32)
 void WiFiStuff::StartSetWiFiSoftAP() {
   extern void _SoftAPWiFiDetails();
 
@@ -854,5 +852,3 @@ void WiFiStuff::WiFiScanNetworksFreeMemory() {
   WiFi.scanDelete();
   // PrintLn("WiFi.scanDelete() called.");
 }
-
-#endif

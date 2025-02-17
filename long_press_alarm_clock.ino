@@ -75,14 +75,9 @@ Prashant Kumar
 #include "alarm_clock.h"
 #include "rgb_display.h"
 #include "touchscreen.h"
-#if defined(MCU_IS_ESP32)
-  #include <esp_task_wdt.h>   // ESP32 Watchdog header
-#endif
+#include <esp_task_wdt.h>   // ESP32 Watchdog header
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_NeoPixel.h>
-#ifdef __AVR__
-  #include <avr/power.h>
-#endif
 
 // modules - hardware or software
 PushButtonTaps* push_button = NULL;   // Push Button object
@@ -239,11 +234,9 @@ void setup() {
   PrintLn(temp_str);
 
   // set CPU Speed
-  #if defined(MCU_IS_ESP32)
-    setCpuFrequencyMhz(nvs_preferences->RetrieveSavedCpuSpeed());
-    cpu_speed_mhz = getCpuFrequencyMhz();
-    nvs_preferences->SaveCpuSpeed();
-  #endif
+  setCpuFrequencyMhz(nvs_preferences->RetrieveSavedCpuSpeed());
+  cpu_speed_mhz = getCpuFrequencyMhz();
+  nvs_preferences->SaveCpuSpeed();
 
   // set screensaver motion
   display->screensaver_bounce_not_fly_horizontally_ = nvs_preferences->RetrieveScreensaverBounceNotFlyHorizontally();
@@ -449,14 +442,12 @@ void loop() {
       // update firmware if available
       if(wifi_stuff->firmware_update_available_) {
         PrintLn("**** Web OTA Firmware Update ****");
-        #if defined(MCU_IS_ESP32)
-          // set Web OTA Update Pagte
-          SetPage(kFirmwareUpdatePage);
-          // Firmware Update
-          wifi_stuff->UpdateFirmware();
-          // set back main page if Web OTA Update unsuccessful
-          SetPage(kMainPage);
-        #endif
+        // set Web OTA Update Pagte
+        SetPage(kFirmwareUpdatePage);
+        // Firmware Update
+        wifi_stuff->UpdateFirmware();
+        // set back main page if Web OTA Update unsuccessful
+        SetPage(kMainPage);
       }
     #endif
 
@@ -484,7 +475,7 @@ void loop() {
   if (Serial.available() != 0)
     SerialUserInput();
 
-  #if defined(MCU_IS_ESP32_S2_MINI)
+  #if defined(ESP32_SINGLE_CORE)
     // ESP32_S2_MINI is single core MCU
     loop1();
   #endif
@@ -542,7 +533,6 @@ void loop1() {
       wifi_stuff->TurnWiFiOff();
       success = !(wifi_stuff->wifi_connected_);
     }
-  #if defined(MCU_IS_ESP32)
     else if(current_task == kScanNetworks) {
       success = wifi_stuff->WiFiScanNetworks();
     }
@@ -571,7 +561,6 @@ void loop1() {
       wifi_stuff->FirmwareVersionCheck();
       success = true;
     }
-  #endif
 
     // done processing the task
     // if(success) {
@@ -1112,16 +1101,13 @@ void SerialUserInput() {
       #ifdef MORE_LOGS
       PrintLn("**** Web OTA Update Available Check ****");
       #endif
-      #if defined(MCU_IS_ESP32)
-        wifi_stuff->FirmwareVersionCheck();
-        wifi_stuff->firmware_update_available_ = false;
-      #endif
+      wifi_stuff->FirmwareVersionCheck();
+      wifi_stuff->firmware_update_available_ = false;
       break;
     case 'v':   // Web OTA Update
       #ifdef MORE_LOGS
       PrintLn("**** Web OTA Update Check ****");
       #endif
-      #if defined(MCU_IS_ESP32)
       ResetWatchdog();
       // set Web OTA Update Pagte
       SetPage(kFirmwareUpdatePage);
@@ -1129,7 +1115,6 @@ void SerialUserInput() {
       wifi_stuff->UpdateFirmware();
       // set back main page if Web OTA Update unsuccessful
       SetPage(kMainPage);
-      #endif
       break;
     case 'w':   // get today's weather info
       #ifdef MORE_LOGS
@@ -1189,15 +1174,13 @@ void SerialUserInput() {
 }
 
 void CycleCpuFrequency() {
-  #if defined(MCU_IS_ESP32)
-    cpu_speed_mhz = getCpuFrequencyMhz();
-    // cycle through 80, 160 and 240
-    if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
-    else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
-    else setCpuFrequencyMhz(160);
-    cpu_speed_mhz = getCpuFrequencyMhz();
-    nvs_preferences->SaveCpuSpeed();
-  #endif
+  cpu_speed_mhz = getCpuFrequencyMhz();
+  // cycle through 80, 160 and 240
+  if(cpu_speed_mhz == 160) setCpuFrequencyMhz(240);
+  else if(cpu_speed_mhz == 240) setCpuFrequencyMhz(80);
+  else setCpuFrequencyMhz(160);
+  cpu_speed_mhz = getCpuFrequencyMhz();
+  nvs_preferences->SaveCpuSpeed();
 }
 
 void SetRgbStripColor(uint16_t rgb565_color, bool set_color_sequentially) {

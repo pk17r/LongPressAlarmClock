@@ -18,7 +18,6 @@ public:
   void TurnWiFiOff();
   void GetTodaysWeatherInfo();
   bool GetTimeFromNtpServer();
-#if defined(MCU_IS_ESP32)
   void StartSetWiFiSoftAP();
   void StopSetWiFiSoftAP();
   void StartSetLocationLocalServer();
@@ -30,7 +29,6 @@ public:
   std::string WiFiScanNetworkDetails(int wifi_net_ind);
   std::string WiFiScanNetworkSsid(int wifi_net_ind);
   void WiFiScanNetworksFreeMemory();
-#endif
 
   #if defined(MY_WIFI_SSID)   // create a secrets.h file with #define for MY_WIFI_SSID
     std::string wifi_ssid_ = MY_WIFI_SSID;
@@ -128,15 +126,15 @@ public:
   // ESP32 WiFiClientSecure examples: WiFiClientInsecure.ino WiFiClientSecure.ino
   const std::string URL_fw_Version_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/configuration.h";
   const std::string URL_fw_Version_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/configuration.h";
-  #if defined(MCU_IS_ESP32_WROOM_DA_MODULE)
-    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
-    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
+  #if defined(MCU_IS_ESP32_S3)
+    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
   #elif defined(MCU_IS_ESP32_S2_MINI)
     const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
     const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.lolin_s2_mini/long_press_alarm_clock.ino.bin";
-  #elif defined(MCU_IS_ESP32_S3)
-    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
-    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32s3/long_press_alarm_clock.ino.bin";
+  #elif defined(MCU_IS_ESP32_WROOM_DA_MODULE)
+    const std::string URL_fw_Bin_debug_mode = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/main/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
+    const std::string URL_fw_Bin_release    = "https://raw.githubusercontent.com/pk17r/Long_Press_Alarm_Clock/release/build/esp32.esp32.esp32da/long_press_alarm_clock.ino.bin";
   #endif
 
 // PRIVATE VARIABLES
