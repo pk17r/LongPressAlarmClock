@@ -1148,23 +1148,12 @@ void SerialUserInput() {
       SetPage(kMainPage);
       inactivity_millis = 0;
       break;
-    case 'z':   // screensaver settings
+    case 'z':   // screensaver toggle show_colored_edge_screensaver_
       {
         #ifdef MORE_LOGS
-        PrintLn("**** Screensaver Settings ****");
-        PrintLn("Fly Screensaver? (0/1):");
+        PrintLn("**** Screensaver toggle show_colored_edge_screensaver_ ****");
         #endif
-        SerialInputWait();
-        int userInput = Serial.parseInt();
-        SerialInputFlush();
-        display->screensaver_bounce_not_fly_horizontally_ = (userInput == 0 ? false : true);
-        #ifdef MORE_LOGS
-        PrintLn("Colored Border? (0/1):");
-        #endif
-        SerialInputWait();
-        userInput = Serial.parseInt();
-        SerialInputFlush();
-        display->show_colored_edge_screensaver_ = (userInput == 0 ? false : true);
+        display->show_colored_edge_screensaver_ = !display->show_colored_edge_screensaver_;
         display->refresh_screensaver_canvas_ = true;
       }
       break;
