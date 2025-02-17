@@ -41,7 +41,6 @@ Github: https://github.com/pk17r/Long_Press_Alarm_Clock/tree/release
   - Display: 2.8" ST7789V display (Default), other selectable options: ST7735, ILI9341 and ILI9488
   - Touchscreen XPT2046 (not enabled by default)
   - DS3231 RTC Clock IC
-  - AT24C32 EEPROM on DS3231 RTC Clock Module
   - A push button with LED
   - 2 push buttons for increase and decrease functions
   - An 85dB passive buzzer for alarm and different frequency tones

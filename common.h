@@ -32,7 +32,6 @@ class RTC;
 class RGBDisplay;
 class AlarmClock;
 class WiFiStuff;
-class EEPROM;
 class NvsPreferences;
 class PushButtonTaps;
 class Touchscreen;

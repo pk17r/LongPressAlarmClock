@@ -30,10 +30,8 @@ public:
   void SaveWeatherUnits(bool weather_units_metric_not_imperial);
   void RetrieveSavedFirmwareVersion(std::string &savedFirmwareVersion);
   void SaveCurrentFirmwareVersion();
-  void CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion);
   uint32_t RetrieveSavedCpuSpeed();
   void SaveCpuSpeed();
-  void CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_eeprom);
   bool RetrieveScreensaverBounceNotFlyHorizontally();
   void SaveScreensaverBounceNotFlyHorizontally(bool screensaverBounceNotFlyHorizontally);
   uint8_t RetrieveNightTimeDimHour();

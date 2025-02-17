@@ -180,14 +180,6 @@ void NvsPreferences::SaveCurrentFirmwareVersion() {
   PrintLn(__func__, kFirmwareVersion);
 }
 
-void NvsPreferences::CopyFirmwareVersionFromEepromToNvs(std::string firmwareVersion) {
-  preferences.begin(kNvsDataKey, /*readOnly = */ false);
-  String kFirmwareVersionString = firmwareVersion.c_str();
-  preferences.putString(kFirmwareVersionKey, kFirmwareVersionString);
-  preferences.end();
-  PrintLn(__func__, firmwareVersion);
-}
-
 void NvsPreferences::RetrieveWeatherLocationDetails(uint32_t &location_zip_code, std::string &location_country_code, bool &weather_units_metric_not_imperial) {
   preferences.begin(kNvsDataKey, /*readOnly = */ true);
   location_zip_code = preferences.getUInt(kWeatherZipCodeKey);
@@ -232,13 +224,6 @@ void NvsPreferences::SaveCpuSpeed() {
   preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz);
   preferences.end();
   PrintLn(__func__, cpu_speed_mhz);
-}
-
-void NvsPreferences::CopyCpuSpeedFromEepromToNvsMemory(uint32_t cpu_speed_mhz_from_eeprom) {
-  preferences.begin(kNvsDataKey, /*readOnly = */ false);
-  preferences.putUInt(kCpuSpeedMhzKey, cpu_speed_mhz_from_eeprom);
-  preferences.end();
-  PrintLn(__func__, cpu_speed_mhz_from_eeprom);
 }
 
 bool NvsPreferences::RetrieveScreensaverBounceNotFlyHorizontally() {
